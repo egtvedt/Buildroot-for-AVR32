@@ -1,0 +1,95 @@
+From 1a6f1436d5fdecd4b395815c130df3c834892ab6 Mon Sep 17 00:00:00 2001
+From: Haavard Skinnemoen <hskinnemoen@atmel.com>
+Date: Thu, 15 Feb 2007 10:01:11 +0100
+Subject: [PATCH] [AVR32] Wire up the SysV IPC calls properly
+
+Wire up the individual sysvipc system calls and remove sys_ipc.
+Strictly speaking, this breaks the ABI, but since sys_ipc never
+worked anyway due to a silly bug, it isn't actually a regression.
+
+Signed-off-by: Haavard Skinnemoen <hskinnemoen@atmel.com>
+---
+ arch/avr32/kernel/syscall_table.S |   18 +++++++++++++-----
+ include/asm-avr32/unistd.h        |   17 +++++++++++++++--
+ 2 files changed, 28 insertions(+), 7 deletions(-)
+
+diff --git a/arch/avr32/kernel/syscall_table.S b/arch/avr32/kernel/syscall_table.S
+index db8f8b5..52919c0 100644
+--- a/arch/avr32/kernel/syscall_table.S
++++ b/arch/avr32/kernel/syscall_table.S
+@@ -12,10 +12,6 @@
+ #define sys_nfsservctl sys_ni_syscall
+ #endif
+ 
+-#if !defined(CONFIG_SYSV_IPC)
+-# define sys_ipc	sys_ni_syscall
+-#endif
+-
+ 	.section .rodata,"a",@progbits
+ 	.type	sys_call_table,@object
+ 	.global	sys_call_table
+@@ -129,7 +125,7 @@ sys_call_table:
+ 	.long	sys_getitimer		/* 105 */
+ 	.long	sys_swapoff
+ 	.long	sys_sysinfo
+-	.long	sys_ipc
++	.long	sys_ni_syscall		/* was sys_ipc briefly */
+ 	.long	sys_sendfile
+ 	.long	sys_setdomainname	/* 110 */
+ 	.long	sys_newuname
+@@ -287,4 +283,16 @@ sys_call_table:
+ 	.long	sys_tee
+ 	.long	sys_vmsplice
+ 	.long	__sys_epoll_pwait	/* 265 */
++	.long	sys_msgget
++	.long	sys_msgsnd
++	.long	sys_msgrcv
++	.long	sys_msgctl
++	.long	sys_semget		/* 270 */
++	.long	sys_semop
++	.long	sys_semctl
++	.long	sys_semtimedop
++	.long	sys_shmat
++	.long	sys_shmget		/* 275 */
++	.long	sys_shmdt
++	.long	sys_shmctl
+ 	.long	sys_ni_syscall		/* r8 is saturated at nr_syscalls */
+diff --git a/include/asm-avr32/unistd.h b/include/asm-avr32/unistd.h
+index 56ed1f9..8f51204 100644
+--- a/include/asm-avr32/unistd.h
++++ b/include/asm-avr32/unistd.h
+@@ -120,7 +120,7 @@
+ #define __NR_getitimer		105
+ #define __NR_swapoff		106
+ #define __NR_sysinfo		107
+-#define __NR_ipc		108
++/* 108 was __NR_ipc for a little while */
+ #define __NR_sendfile		109
+ #define __NR_setdomainname	110
+ #define __NR_uname		111
+@@ -282,8 +282,21 @@
+ #define __NR_vmsplice		264
+ #define __NR_epoll_pwait	265
+ 
++#define __NR_msgget		266
++#define __NR_msgsnd		267
++#define __NR_msgrcv		268
++#define __NR_msgctl		269
++#define __NR_semget		270
++#define __NR_semop		271
++#define __NR_semctl		272
++#define __NR_semtimedop		273
++#define __NR_shmat		274
++#define __NR_shmget		275
++#define __NR_shmdt		276
++#define __NR_shmctl		277
++
+ #ifdef __KERNEL__
+-#define NR_syscalls		266
++#define NR_syscalls		278
+ 
+ 
+ #define __ARCH_WANT_IPC_PARSE_VERSION
+-- 
+1.4.4.4
+
