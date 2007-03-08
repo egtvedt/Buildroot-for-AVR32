@@ -40,6 +40,8 @@
 /sys		d	755	0	0	-	-	-	-	-
 /config		d	755	0	0	-	-	-	-	-
 /proc		d	755	0	0	-	-	-	-	-
+/var/tmp	d	1777	0	0	-	-	-	-	-
+/var/lock	d	1777	0	0	-	-	-	-	-
 /home/default	d	2755	1000	1000	-	-	-	-	-
 #<name>					<type>	<mode>	<uid>	<gid>	<major>	<minor>	<start>	<inc>	<count>
 /bin/busybox				f	4755	0	0	-	-	-	-	-
