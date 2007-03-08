@@ -1,0 +1,25 @@
+#!/bin/sh
+
+HOSTNAME=`which hostname`
+
+echo -n " * setting hostname ...          "
+if [ ! -x "${HOSTNAME}" ]; then
+	echo "[ MISSING ]"
+	exit 1
+fi
+
+if [ -f /etc/hostname ]; then
+	HOST="$(cat /etc/hostname)"
+else
+	HOST="localhost.localdomain"
+fi
+
+if ${HOSTNAME} "${HOST}" > /dev/null 2> /dev/null; then
+	echo "'${HOST}'"
+else
+	echo "[ FAILED ]"
+	exit 1
+fi
+
+exit 0
+

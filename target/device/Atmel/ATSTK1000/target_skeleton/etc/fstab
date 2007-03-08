@@ -1,0 +1,7 @@
+# /etc/fstab: static file system information.
+#
+# <file system>	<mount pt>	<type>	<options>	<dump>	<pass>
+/dev/root	/		jffs2	defaults	0	0
+tmpfs		/tmp		tmpfs	defaults	0	0
+tmpfs		/var/run	tmpfs	defaults	0	0
+config		/config		configs	defaults	0	0

@@ -1,0 +1,5 @@
+ifeq ($(strip $(BR2_TARGET_ATMEL_STK1000)),y)
+
+include target/device/Atmel/ATSTK1000/Makefile.in
+
+endif

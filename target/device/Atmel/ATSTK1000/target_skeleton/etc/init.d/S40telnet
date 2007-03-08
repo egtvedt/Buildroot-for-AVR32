@@ -1,0 +1,18 @@
+#!/bin/sh
+
+TELNETD=`which telnetd`
+
+echo -n " * starting telnetd ...          "
+if [ ! -x "${TELNETD}" ]; then
+	echo "[ MISSING ]"
+	exit 1
+fi
+
+if ${TELNETD} -l /bin/ash > /dev/null 2> /dev/null; then
+	echo "[ OK ]"
+else
+	echo "[ FAILED ]"
+	exit 1
+fi
+
+exit 0

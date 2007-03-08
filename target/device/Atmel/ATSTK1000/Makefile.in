@@ -1,0 +1,7 @@
+ATSTK1000_PATH=target/device/Atmel/ATSTK1000
+
+BR2_PACKAGE_BUSYBOX_CONFIG=$(ATSTK1000_PATH)/busybox.config
+UCLIBC_CONFIG_FILE=target/device/Atmel/uClibc.config.$(ARCH)
+
+TARGET_SKELETON=$(ATSTK1000_PATH)/target_skeleton
+TARGET_DEVICE_TABLE=$(ATSTK1000_PATH)/device_table.txt

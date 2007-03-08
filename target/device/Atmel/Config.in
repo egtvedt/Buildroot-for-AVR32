@@ -1,5 +1,10 @@
 menu "Atmel Target"
 
-comment "Add Atmel Target here"
+config BR2_TARGET_ATMEL_STK1000
+	bool "Board support for the ATSTK1000 development board"
+	depends BR2_avr32
+	default n
+	help
+	  Support for the ATSTK1000 development board for Atmel AVR32
 
 endmenu

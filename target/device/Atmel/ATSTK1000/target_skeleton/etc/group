@@ -1,0 +1,6 @@
+root::0:
+ftp::50:
+www-data::51:
+users::100:
+audio::101:
+nogroup::65534

@@ -1,0 +1,6 @@
+#! /bin/sh
+
+echo "Shutting down ..."
+for s in /etc/init.d/K*; do
+	$s stop
+done

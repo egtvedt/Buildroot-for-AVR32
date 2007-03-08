@@ -1,0 +1,16 @@
+#!/bin/sh
+
+PROGRAM=`which fbv`
+SPLASHFILE="/etc/stk1000splash.jpg"
+
+echo -n " * starting fbv ...              "
+if [ ! -x "${PROGRAM}" -o ! -f "${SPLASHFILE}" ]; then
+	echo "[ MISSING ]"
+	exit 1
+fi
+
+echo "[ OK ]"
+
+${PROGRAM} ${SPLASHFILE} < /dev/null > /dev/null 2>/dev/null &
+
+exit 0
