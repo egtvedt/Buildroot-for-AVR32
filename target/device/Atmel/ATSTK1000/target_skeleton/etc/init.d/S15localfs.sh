@@ -1,7 +1,7 @@
 #! /bin/sh
 
 echo -n " * local filesystems ...         "
-if /bin/mount -t nonfs -a; then
+if /bin/mount -a; then
 	echo "[ OK ]"
 else
 	echo "[ FAILED ]"
