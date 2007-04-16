@@ -34,6 +34,7 @@ libsysfs-source: $(DL_DIR)/$(LIBSYSFS_SOURCE)
 
 $(LIBSYSFS_DIR)/.unpacked: $(DL_DIR)/$(LIBSYSFS_SOURCE)
 	$(LIBSYSFS_CAT) $(DL_DIR)/$(LIBSYSFS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(CONFIG_UPDATE) $(LIBSYSFS_DIR)
 	touch $(LIBSYSFS_DIR)/.unpacked
 
 $(LIBSYSFS_DIR)/.configured: $(LIBSYSFS_DIR)/.unpacked
