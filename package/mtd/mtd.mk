@@ -15,9 +15,9 @@ MTD_DIR:=$(BUILD_DIR)/mtd_snapshot
 else
 MTD_SOURCE:=$(strip $(subst ",, $(BR2_PACKAGE_MTD_ORIG_STRING)))
 #"))
-MTD_SITE:=http://ftp.debian.org/debian/pool/main/m/mtd
-MTD_HOST_DIR := $(TOOL_BUILD_DIR)/mtd_orig
-MTD_DIR:=$(BUILD_DIR)/mtd_orig
+MTD_SITE:=ftp://ftp.infradead.org/pub/mtd-utils
+MTD_HOST_DIR := $(TOOL_BUILD_DIR)/mtd-utils
+MTD_DIR:=$(BUILD_DIR)/mtd-utils
 MTD_CAT:=$(ZCAT)
 endif
 
@@ -29,7 +29,7 @@ endif
 # needed by target/jffs2root.
 #
 #############################################################
-MKFS_JFFS2 := $(MTD_HOST_DIR)/util/mkfs.jffs2
+MKFS_JFFS2 := $(MTD_HOST_DIR)/mkfs.jffs2
 
 ifeq ($(strip $(BR2_PACKAGE_MTD_SNAPSHOT)),y)
 $(DL_DIR)/$(MTD_SOURCE):
@@ -55,9 +55,9 @@ $(MTD_HOST_DIR)/.unpacked: $(DL_DIR)/$(MTD_SOURCE)
 	touch $@
 endif
 
-$(MTD_HOST_DIR)/util/mkfs.jffs2: $(MTD_HOST_DIR)/.unpacked
-	CFLAGS=-I$(LINUX_HEADERS_DIR)/include $(MAKE) CC="$(HOSTCC)" CROSS= \
-		LINUXDIR=$(LINUX_DIR) -C $(MTD_HOST_DIR)/util mkfs.jffs2
+$(MTD_HOST_DIR)/mkfs.jffs2: $(MTD_HOST_DIR)/.unpacked
+	CFLAGS=-I$(LINUX_HEADERS_DIR)/include $(MAKE) CC="$(HOSTCC)" \
+		LINUXDIR=$(LINUX_DIR) -C $(MTD_HOST_DIR) mkfs.jffs2
 
 mtd-host: $(MKFS_JFFS2)
 
@@ -112,14 +112,14 @@ MTD_TARGETS_$(BR2_PACKAGE_MTD_MTD_DEBUG)		+= mtd_debug
 MTD_TARGETS_$(BR2_PACKAGE_MTD_DOCFDISK)			+= docfdisk
 MTD_TARGETS_$(BR2_PACKAGE_MTD_DOC_LOADBIOS)		+= doc_loadbios
 
-MTD_BUILD_TARGETS := $(addprefix $(MTD_DIR)/util/, $(MTD_TARGETS_y))
+MTD_BUILD_TARGETS := $(addprefix $(MTD_DIR)/, $(MTD_TARGETS_y))
 
 $(MTD_BUILD_TARGETS): $(MTD_DIR)/.unpacked
-	$(MAKE)	CC=$(TARGET_CC) CFLAGS="-I$(MTD_DIR)/include -I$(LINUX_HEADERS_DIR)/include $(TARGET_CFLAGS)" LDFLAGS="$(TARGET_LDFLAGS)" LINUXDIR=$(LINUX_DIR) -C $(MTD_DIR)/util
+	$(MAKE)	CC=$(TARGET_CC) CFLAGS="-I$(MTD_DIR)/include -I$(LINUX_HEADERS_DIR)/include $(TARGET_CFLAGS) -DWITHOUT_XATTR" LDFLAGS="$(TARGET_LDFLAGS)" LINUXDIR=$(LINUX_DIR) WITHOUT_XATTR=1 -C $(MTD_DIR)
 
 MTD_TARGETS := $(addprefix $(TARGET_DIR)/usr/sbin/, $(MTD_TARGETS_y))
 
-$(MTD_TARGETS): $(TARGET_DIR)/usr/sbin/% : $(MTD_DIR)/util/%
+$(MTD_TARGETS): $(TARGET_DIR)/usr/sbin/% : $(MTD_DIR)/%
 	mkdir -p $(TARGET_DIR)/usr/sbin
 	cp -f $< $@
 	$(STRIP) $@
