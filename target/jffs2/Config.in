@@ -1,6 +1,7 @@
 config BR2_TARGET_ROOTFS_JFFS2
 	bool "jffs2 root filesystem"
 	default n
+	select BR2_HOST_FAKEROOT
 	select BR2_PACKAGE_MTD
 	help
 	  Build a jffs2 root filesystem
@@ -31,6 +32,11 @@ config BR2_TARGET_ROOTFS_JFFS2_EBSIZE
 	hex "Erase block size"
 	depends on BR2_TARGET_ROOTFS_JFFS2
 	default 0x20000
+
+config BR2_JFFS2_TARGET_SREC
+	bool "RootFS in SREC file formet"
+	depends on BR2_TARGET_ROOTFS_JFFS2
+	default n
 
 config BR2_TARGET_ROOTFS_JFFS2_PAD
 	bool "Pad output"

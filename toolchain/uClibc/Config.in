@@ -13,8 +13,8 @@ choice
 		depends BR2_DEPRECATED
 		bool "uClibc 0.9.28"
 
-	config BR2_UCLIBC_VERSION_0_9_28_1
-		bool "uClibc 0.9.28.1"
+	config BR2_UCLIBC_VERSION_0_9_28_3
+		bool "uClibc 0.9.28.3"
 
 	config BR2_UCLIBC_VERSION_SNAPSHOT
 		bool "daily snapshot"
@@ -40,6 +40,9 @@ choice
 	default BR2_PTHREADS_OLD
 	help
 	  Select the version of libpthreads you want to use.
+	  Not all thread variants work with all versions of uClibc,
+	  the "linuxthreads (stable/old)" may be a working fallback
+	  if you need threading at all.
 
 	config BR2_PTHREADS_NONE
 		bool "none"
@@ -60,4 +63,3 @@ config BR2_PTHREAD_DEBUG
 	default n
 	help
 	  Build the thread library with debugging enabled.
-

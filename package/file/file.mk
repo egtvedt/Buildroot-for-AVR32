@@ -54,6 +54,7 @@ file-unpacked: $(FILE_SOURCE_DIR)/.unpacked
 $(FILE_SOURCE_DIR)/.unpacked: $(DL_DIR)/$(FILE_SOURCE)
 	$(FILE_CAT) $(DL_DIR)/$(FILE_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(FILE_SOURCE_DIR) package/file/ file\*.patch
+	$(CONFIG_UPDATE) $(FILE_SOURCE_DIR)
 	touch $(FILE_SOURCE_DIR)/.unpacked
 
 $(FILE_DIR2)/.configured: $(FILE_SOURCE_DIR)/.unpacked
@@ -61,6 +62,7 @@ $(FILE_DIR2)/.configured: $(FILE_SOURCE_DIR)/.unpacked
 	(cd $(FILE_DIR2); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		$(FILE_SOURCE_DIR)/configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -84,10 +86,10 @@ $(FILE_DIR2)/.configured: $(FILE_SOURCE_DIR)/.unpacked
 	touch $(FILE_DIR2)/.configured
 
 $(FILE_DIR2)/$(FILE_BINARY): $(FILE_DIR2)/.configured $(TOOL_BUILD_DIR)/bin/file
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) LDFLAGS="-static" -C $(FILE_DIR2)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) LDFLAGS="$(TARGET_LDFLAGS) -static" -C $(FILE_DIR2)
 
 $(TARGET_DIR)/$(FILE_TARGET_BINARY): $(FILE_DIR2)/$(FILE_BINARY)
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) DESTDIR=$(TARGET_DIR) -C $(FILE_DIR2) install
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) LDFLAGS="$(TARGET_LDFLAGS)" DESTDIR=$(TARGET_DIR) -C $(FILE_DIR2) install
 	-($(STRIP) $(TARGET_DIR)/usr/lib/libmagic.so.*.* > /dev/null 2>&1)
 	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
 		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc

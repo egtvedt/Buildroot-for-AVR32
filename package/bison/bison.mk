@@ -18,12 +18,14 @@ bison-source: $(DL_DIR)/$(BISON_SOURCE)
 
 $(BISON_DIR)/.unpacked: $(DL_DIR)/$(BISON_SOURCE)
 	$(BISON_CAT) $(DL_DIR)/$(BISON_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(CONFIG_UPDATE) $(BISON_DIR)/build-aux
 	touch $(BISON_DIR)/.unpacked
 
 $(BISON_DIR)/.configured: $(BISON_DIR)/.unpacked
 	(cd $(BISON_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		gt_cv_func_gnugettext2_libintl=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \

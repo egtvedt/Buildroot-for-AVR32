@@ -4,7 +4,8 @@
 #
 #############################################################
 MPFR_VERSION:=2.2.1
-#MPFR_PATCH:=patches
+MPFR_PATCH:=patches
+MPFR_PATCH_FILE:=mpfr-$(MPFR_VERSION).patch
 MPFR_SOURCE:=mpfr-$(MPFR_VERSION).tar.bz2
 MPFR_CAT:=$(BZCAT)
 MPFR_SITE:=http://www.mpfr.org/mpfr-current/
@@ -19,19 +20,34 @@ else
 MPFR_BE:=no
 endif
 
+# No patch
+ifeq ($(MPFR_PATCH),)
 $(DL_DIR)/$(MPFR_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(MPFR_SITE)/$(MPFR_SOURCE)
 
-
 libmpfr-source: $(DL_DIR)/$(MPFR_SOURCE)
+endif
+# need patch
+ifneq ($(MPFR_PATCH),)
+$(DL_DIR)/$(MPFR_SOURCE):
+	 $(WGET) -P $(DL_DIR) $(MPFR_SITE)/$(MPFR_SOURCE)
 
+$(DL_DIR)/$(MPFR_PATCH_FILE):
+	$(WGET) -O $@ $(MPFR_SITE)/$(MPFR_PATCH)
+
+libmpfr-source: $(DL_DIR)/$(MPFR_SOURCE) $(DL_DIR)/$(MPFR_PATCH_FILE)
+endif
+
+ifeq ($(MPFR_PATCH),)
 $(MPFR_DIR)/.unpacked: $(DL_DIR)/$(MPFR_SOURCE)
+else
+$(MPFR_DIR)/.unpacked: $(DL_DIR)/$(MPFR_SOURCE) $(DL_DIR)/$(MPFR_PATCH_FILE)
+endif
 	$(MPFR_CAT) $(DL_DIR)/$(MPFR_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(MPFR_DIR) package/mpfr/ \*.patch
 	$(CONFIG_UPDATE) $(MPFR_DIR)
 ifneq ($(MPFR_PATCH),)
-	$(WGET) -P $(MPFR_DIR) $(MPFR_SITE)/$(MPFR_PATCH)
-	( cd $(MPFR_DIR) ; patch -p1 < $(MPFR_PATCH) ; )
+	( cd $(MPFR_DIR) ; patch -p1 < $(DL_DIR)/$(MPFR_PATCH_FILE) ; )
 endif
 	touch $@
 
@@ -40,6 +56,7 @@ $(MPFR_TARGET_DIR)/.configured: $(MPFR_DIR)/.unpacked $(STAGING_DIR)/lib/$(GMP_B
 	(cd $(MPFR_TARGET_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		ac_cv_c_bigendian=$(MPFR_BE) \
 		$(MPFR_DIR)/configure \
 		--target=$(GNU_TARGET_NAME) \

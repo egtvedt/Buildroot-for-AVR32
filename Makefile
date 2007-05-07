@@ -103,10 +103,12 @@ $(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR):
 	@mkdir -p $@
 
 $(STAGING_DIR):
+	@mkdir -p $(STAGING_DIR)/bin
 	@mkdir -p $(STAGING_DIR)/lib
 	@mkdir -p $(STAGING_DIR)/include
 	@mkdir -p $(STAGING_DIR)/usr
 	@mkdir -p $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)
+	@ln -snf ../include $(STAGING_DIR)/usr/include
 	@ln -snf ../lib $(STAGING_DIR)/usr/lib
 	@ln -snf ../lib $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/lib
 
@@ -119,7 +121,7 @@ $(TARGET_DIR):
 	-find $(TARGET_DIR) -type d -name CVS | xargs rm -rf
 	-find $(TARGET_DIR) -type d -name .svn | xargs rm -rf
 
-source: $(TARGETS_SOURCE)
+source: $(TARGETS_SOURCE) $(HOST_SOURCE)
 
 #############################################################
 #

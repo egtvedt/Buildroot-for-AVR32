@@ -23,7 +23,9 @@ $(BASH_DIR)/.unpacked: $(DL_DIR)/$(BASH_SOURCE)
 	# This is broken when -lintl is added to LIBS
 	$(SED) 's,LIBS_FOR_BUILD =.*,LIBS_FOR_BUILD =,g' \
 		$(BASH_DIR)/builtins/Makefile.in
-	$(CONFIG_UPDATE) $(BASH_DIR)
+	# using target's LDFLAGS as LDFLAGS_FOR_BUILD is b0rked
+	-$(SED) '/^LDFLAGS_FOR_BUILD/d' $(BASH_DIR)/{,*/{,*/}}Makefile.in
+	$(CONFIG_UPDATE) $(BASH_DIR)/support
 	touch $@
 
 $(BASH_DIR)/.configured: $(BASH_DIR)/.unpacked
@@ -31,6 +33,8 @@ $(BASH_DIR)/.configured: $(BASH_DIR)/.unpacked
 	(cd $(BASH_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
+		CCFLAGS_FOR_BUILD="$(HOST_CFLAGS)" \
 		ac_cv_func_setvbuf_reversed=no \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
@@ -61,6 +65,7 @@ $(BASH_DIR)/$(BASH_BINARY): $(BASH_DIR)/.configured
 $(TARGET_DIR)/$(BASH_TARGET_BINARY): $(BASH_DIR)/$(BASH_BINARY)
 	$(MAKE1) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(BASH_DIR) install
 	rm -f $(TARGET_DIR)/bin/bash*
+	-mkdir $(TARGET_DIR)/bin
 	mv $(TARGET_DIR)/usr/bin/bash* $(TARGET_DIR)/bin/
 	(cd $(TARGET_DIR)/bin; /bin/ln -fs bash sh)
 	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \

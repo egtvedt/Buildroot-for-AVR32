@@ -1,6 +1,7 @@
 config BR2_TARGET_ROOTFS_EXT2
 	bool "ext2 root filesystem"
 	default y
+	select BR2_HOST_FAKEROOT
 	help
 	  Build an ext2 root filesystem
 
@@ -15,7 +16,7 @@ config BR2_TARGET_ROOTFS_EXT2_INODES
 	default	0
 
 config BR2_TARGET_ROOTFS_EXT2_RESBLKS
-	int "reserved blocks"
+	int "reserved blocks percentage"
 	depends on BR2_TARGET_ROOTFS_EXT2
 	default 0
 
