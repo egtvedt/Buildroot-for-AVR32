@@ -3,7 +3,7 @@
 # fakeroot
 #
 #############################################################
-FAKEROOT_VERSION:=1.5.12
+FAKEROOT_VERSION:=1.6.5
 FAKEROOT_SOURCE:=fakeroot_$(FAKEROOT_VERSION).tar.gz
 FAKEROOT_SITE:=http://ftp.debian.org/debian/pool/main/f/fakeroot
 FAKEROOT_CAT:=$(ZCAT)
@@ -72,6 +72,8 @@ $(FAKEROOT_DIR2)/.configured: $(FAKEROOT_SOURCE_DIR)/.unpacked
 	mkdir -p $(FAKEROOT_DIR2)
 	(cd $(FAKEROOT_DIR2); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		$(FAKEROOT_SOURCE_DIR)/configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -119,4 +121,8 @@ fakeroot-dirclean:
 #############################################################
 ifeq ($(strip $(BR2_PACKAGE_FAKEROOT)),y)
 TARGETS+=fakeroot
+endif
+
+ifeq ($(strip $(BR2_HOST_FAKEROOT)),y)
+HOST_SOURCE+=fakeroot-source
 endif

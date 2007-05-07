@@ -17,8 +17,8 @@ ifndef UCLIBC_CONFIG_FILE
 UCLIBC_CONFIG_FILE=toolchain/uClibc/uClibc-0.9.29.config
 endif
 else
-ifeq ($(BR2_UCLIBC_VERSION_0_9_28_1),y)
-UCLIBC_VER:=0.9.28.1
+ifeq ($(BR2_UCLIBC_VERSION_0_9_28_3),y)
+UCLIBC_VER:=0.9.28.3
 endif
 ifeq ($(BR2_UCLIBC_VERSION_0_9_28),y)
 UCLIBC_VER:=0.9.28
@@ -142,7 +142,7 @@ endif
 	$(SED) 's,.*UCLIBC_HAS_WCHAR.*,UCLIBC_HAS_WCHAR=y,g' $(UCLIBC_DIR)/.config
 ifeq ($(BR2_SOFT_FLOAT),y)
 	$(SED) 's,.*UCLIBC_HAS_FPU.*,UCLIBC_HAS_FPU=n,g' \
-		-e 's,.*[^_]HAS_FPU.*,HAS_FPU=n,g' \
+		-e 's,^[^_]*HAS_FPU.*,HAS_FPU=n,g' \
 		-e 's,.*UCLIBC_HAS_FLOATS.*,UCLIBC_HAS_FLOATS=y,g' \
 		-e 's,.*DO_C99_MATH.*,DO_C99_MATH=y,g' \
 		$(UCLIBC_DIR)/.config
@@ -254,7 +254,7 @@ $(UCLIBC_DIR)/lib/libc.a: $(UCLIBC_DIR)/.configured $(LIBFLOAT_TARGET)
 		all
 	touch -c $(UCLIBC_DIR)/lib/libc.a
 
-uclibc-menuconfig: $(UCLIBC_DIR)/.config host-sed
+uclibc-menuconfig: host-sed $(UCLIBC_DIR)/.config
 	$(MAKE1) -C $(UCLIBC_DIR) \
 		PREFIX=$(TOOL_BUILD_DIR)/uClibc_dev/ \
 		DEVEL_PREFIX=/usr/ \
@@ -285,6 +285,12 @@ $(STAGING_DIR)/lib/libc.a: $(UCLIBC_DIR)/lib/libc.a
 		PREFIX=$(STAGING_DIR) \
 		HOSTCC="$(HOSTCC)" \
 		hostutils
+	install -c $(UCLIBC_DIR)/utils/ldd.host $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/bin/ldd
+	(cd $(STAGING_DIR)/bin; ln -s ../$(REAL_GNU_TARGET_NAME)/bin/ldd $(GNU_TARGET_NAME)-ldd)
+	(cd $(STAGING_DIR)/bin; ln -s ../$(REAL_GNU_TARGET_NAME)/bin/ldd $(REAL_GNU_TARGET_NAME)-ldd)
+	install -c $(UCLIBC_DIR)/utils/ldconfig.host $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/bin/ldconfig
+	(cd $(STAGING_DIR)/bin; ln -s ../$(REAL_GNU_TARGET_NAME)/bin/ldconfig $(GNU_TARGET_NAME)-ldconfig)
+	(cd $(STAGING_DIR)/bin; ln -s ../$(REAL_GNU_TARGET_NAME)/bin/ldconfig $(REAL_GNU_TARGET_NAME)-ldconfig)
 	touch -c $(STAGING_DIR)/lib/libc.a
 
 ifneq ($(TARGET_DIR),)

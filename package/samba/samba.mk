@@ -5,7 +5,7 @@
 #############################################################
 SAMBA_VER:=3.0.23d
 SAMBA_SOURCE:=samba-$(SAMBA_VER).tar.gz
-SAMBA_SITE:=ftp://us1.samba.org/pub/samba/
+SAMBA_SITE:=ftp://us4.samba.org/pub/samba/old-versions/
 SAMBA_DIR:=$(BUILD_DIR)/samba-$(SAMBA_VER)/source
 SAMBA_CAT:=$(ZCAT)
 SAMBA_BINARY:=bin/smbd
@@ -26,6 +26,7 @@ $(SAMBA_DIR)/.configured: $(SAMBA_DIR)/.unpacked
 		./autogen.sh; \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		samba_cv_HAVE_GETTIMEOFDAY_TZ=yes \
 		samba_cv_USE_SETREUID=yes \
 		./configure \

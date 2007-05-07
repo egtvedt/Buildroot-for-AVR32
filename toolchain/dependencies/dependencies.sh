@@ -4,7 +4,7 @@
 
 echo ""
 echo "Checking build system dependencies:"
-
+export LC_ALL=C
 
 #############################################################
 #
@@ -88,30 +88,6 @@ fi;
 
 #############################################################
 #
-# check build system 'sed'
-#
-#############################################################
-if test -x /usr/bin/sed ; then
-	SED="/usr/bin/sed"
-else
-	if test -x /bin/sed ; then
-		SED="/bin/sed"
-	else
-		SED="sed"
-	fi
-fi
-echo "HELLO" > .sedtest
-$SED -i -e "s/HELLO/GOODBYE/" .sedtest >/dev/null 2>&1
-if test $? != 0 ; then
-	echo "sed works:				No, using buildroot version instead"
-else
-	echo "sed works:					Ok"
-fi
-rm -f .sedtest
-XSED=$HOST_SED_DIR/bin/sed
-
-#############################################################
-#
 # check build system 'which'
 #
 #############################################################
@@ -121,6 +97,25 @@ if ! which which > /dev/null ; then
 	exit 1;
 fi;
 echo "which installed:				Ok"
+
+
+
+#############################################################
+#
+# check build system 'sed'
+#
+#############################################################
+SED=$(toolchain/dependencies/check-host-sed.sh)
+
+if [ -z "$SED" ] ; then
+	XSED=$HOST_SED_DIR/bin/sed
+	echo "sed works:					No, using buildroot version instead"
+else
+	XSED=$SED
+	echo "sed works:					Ok ($SED)"
+fi
+
+
 
 
 #############################################################
@@ -134,7 +129,7 @@ if [ -z "$MAKE" ] ; then
 	/bin/echo -e "\n\nYou must install 'make' on your build machine\n";
 	exit 1;
 fi;
-MAKE_VERSION=$($MAKE --version 2>&1 | head -n1 | $XSED -e 's/^.* \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g')
+MAKE_VERSION=$($MAKE --version 2>&1 | $XSED -e 's/^.* \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q')
 if [ -z "$MAKE_VERSION" ] ; then
 	echo "make installed:		    FALSE"
 	/bin/echo -e "\n\nYou must install 'make' on your build machine\n";
@@ -155,7 +150,7 @@ echo "GNU make version '$MAKE_VERSION':			Ok"
 # check build system 'gcc'
 #
 #############################################################
-COMPILER=$(which $HOSTCC)
+COMPILER=$(which $HOSTCC 2> /dev/null)
 if [ -z "$COMPILER" ] ; then
 	COMPILER=$(which cc)
 fi;
@@ -165,7 +160,7 @@ if [ -z "$COMPILER" ] ; then
 	exit 1;
 fi;
 
-COMPILER_VERSION=$($COMPILER --version 2>&1 | head -n1 | $XSED -e 's/^.*(.CC) \([0-9\.]\)/\1/g' -e "s/[-\ ].*//g")
+COMPILER_VERSION=$($COMPILER --version 2>&1 | $XSED -e 's/^.*(.CC) \([0-9\.]\)/\1/g' -e "s/[-\ ].*//g" -e '1q')
 if [ -z "$COMPILER_VERSION" ] ; then
 	echo "gcc installed:		    FALSE"
 	/bin/echo -e "\n\nYou must install 'gcc' on your build machine\n";
@@ -182,7 +177,7 @@ echo "C compiler version '$COMPILER_VERSION':			Ok"
 
 
 # check for host CXX
-CXXCOMPILER=$(which $HOSTCXX)
+CXXCOMPILER=$(which $HOSTCXX 2> /dev/null)
 if [ -z "$CXXCOMPILER" ] ; then
 	CXXCOMPILER=$(which c++)
 fi
@@ -192,7 +187,7 @@ if [ -z "$CXXCOMPILER" ] ; then
 	#exit 1
 fi
 if [ ! -z "$CXXCOMPILER" ] ; then
-	CXXCOMPILER_VERSION=$($CXXCOMPILER --version 2>&1 | head -n1 | $XSED -e 's/^.*(.CC) \([0-9\.]\)/\1/g' -e "s/[-\ ].*//g")
+	CXXCOMPILER_VERSION=$($CXXCOMPILER --version 2>&1 | $XSED -e 's/^.*(.CC) \([0-9\.]\)/\1/g' -e "s/[-\ ].*//g" -e '1q')
 	if [ -z "$CXXCOMPILER_VERSION" ] ; then
 		echo "c++ installed:		    FALSE"
 		/bin/echo -e "\nYou may have to install 'g++' on your build machine\n"

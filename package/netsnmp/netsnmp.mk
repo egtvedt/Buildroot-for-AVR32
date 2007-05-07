@@ -22,6 +22,12 @@ $(NETSNMP_DIR)/.unpacked: $(DL_DIR)/$(NETSNMP_SOURCE) $(DL_DIR)/$(NETSNMP_PATCH1
 	toolchain/patch-kernel.sh $(NETSNMP_DIR) package/netsnmp/ netsnmp\*.patch
 	touch $(NETSNMP_DIR)/.unpacked
 
+ifeq ($(BR2_ENDIAN),"BIG")
+NETSNMP_ENDIAN=big
+else
+NETSNMP_ENDIAN=little
+endif
+
 # We set CAN_USE_SYSCTL to no and use /proc since the
 # sysctl code in this thing is apparently intended for
 # freebsd or some such thing...
@@ -29,13 +35,15 @@ $(NETSNMP_DIR)/.configured: $(NETSNMP_DIR)/.unpacked
 	(cd $(NETSNMP_DIR); autoconf; \
 		ac_cv_CAN_USE_SYSCTL=no \
 		PATH=$(TARGET_PATH) \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		./configure \
 		--with-cc=$(TARGET_CROSS)gcc \
 		--with-ar=$(TARGET_CROSS)ar \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
-		--with-endianness=little \
+		--with-endianness=$(NETSNMP_ENDIAN) \
 		--with-persistent-directory=/var/lib/snmp \
 		--enable-ucd-snmp-compatibility \
 		--enable-shared \

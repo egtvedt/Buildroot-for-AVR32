@@ -3,7 +3,7 @@
 # dropbear
 #
 #############################################################
-DROPBEAR_VER:=0.48.1
+DROPBEAR_VER:=0.49
 DROPBEAR_SOURCE:=dropbear-$(DROPBEAR_VER).tar.gz
 DROPBEAR_SITE:=http://matt.ucc.asn.au/dropbear/releases/
 DROPBEAR_DIR:=$(BUILD_DIR)/dropbear-$(DROPBEAR_VER)
@@ -28,6 +28,7 @@ $(DROPBEAR_DIR)/.configured: $(DROPBEAR_DIR)/.unpacked
 		autoconf; \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

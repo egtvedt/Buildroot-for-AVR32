@@ -4,25 +4,6 @@
 #
 #############################################################
 
-ifeq ($(strip $(BR2_BUSYBOX_VERSION_1_0_1)),y)
-BUSYBOX_VER:=1.01
-endif
-
-ifeq ($(strip $(BR2_BUSYBOX_VERSION_1_1_3)),y)
-BUSYBOX_VER:=1.1.3
-endif
-
-ifeq ($(strip $(BR2_BUSYBOX_VERSION_1_2_2_1)),y)
-BUSYBOX_VER:=1.2.2.1
-endif
-
-ifeq ($(strip $(BR2_BUSYBOX_VERSION_1_4_0)),y)
-BUSYBOX_VER:=1.4.0
-endif
-
-ifeq ($(strip $(BR2_BUSYBOX_VERSION_1_4_1)),y)
-BUSYBOX_VER:=1.4.1
-endif
 
 ifeq ($(strip $(BR2_PACKAGE_BUSYBOX_SNAPSHOT)),y)
 # Be aware that this changes daily....
@@ -30,8 +11,10 @@ BUSYBOX_DIR:=$(BUILD_DIR)/busybox
 BUSYBOX_SOURCE:=busybox-snapshot.tar.bz2
 BUSYBOX_SITE:=http://www.busybox.net/downloads/snapshots
 else
-BUSYBOX_DIR:=$(BUILD_DIR)/busybox-$(BUSYBOX_VER)
-BUSYBOX_SOURCE:=busybox-$(BUSYBOX_VER).tar.bz2
+BUSYBOX_VERSION=$(strip $(subst ",, $(BR2_BUSYBOX_VERSION)))
+#"))
+BUSYBOX_DIR:=$(BUILD_DIR)/busybox-$(BUSYBOX_VERSION)
+BUSYBOX_SOURCE:=busybox-$(BUSYBOX_VERSION).tar.bz2
 BUSYBOX_SITE:=http://www.busybox.net/downloads
 endif
 
@@ -57,7 +40,7 @@ endif
 ifeq ($(strip $(BR2_PACKAGE_BUSYBOX_SNAPSHOT)),y)
 	toolchain/patch-kernel.sh $(BUSYBOX_DIR) package/busybox busybox.\*.patch
 else
-	toolchain/patch-kernel.sh $(BUSYBOX_DIR) package/busybox busybox-$(BUSYBOX_VER)-\*.patch
+	toolchain/patch-kernel.sh $(BUSYBOX_DIR) package/busybox busybox-$(BUSYBOX_VERSION)-\*.patch
 endif
 	touch $@
 
@@ -95,6 +78,16 @@ ifeq ($(BR2_PACKAGE_BUSYBOX_SKELETON),y)
 	# force mdev on
 	$(SED) "s/^.*CONFIG_MDEV.*/CONFIG_MDEV=y/" $(BUSYBOX_DIR)/.config
 endif
+ifeq ($(BR2_PACKAGE_NETKITBASE),y)
+	# disable usage of inetd if netkit-base package is selected
+	$(SED) "s/^.*CONFIG_INETD.*/CONFIG_INETD=n/;" $(BUSYBOX_DIR)/.config
+	@echo "WARNING!! CONFIG_INETD option disabled!"
+endif
+ifeq ($(BR2_PACKAGE_NETKITTELNET),y)
+	# disable usage of telnetd if netkit-telnetd package is selected
+	$(SED) "s/^.*CONFIG_TELNETD.*/CONFIG_TELNETD=n/;" $(BUSYBOX_DIR)/.config
+	@echo "WARNING!! CONFIG_TELNETD option disabled!"
+endif
 	yes "" | $(MAKE) CC=$(TARGET_CC) CROSS_COMPILE="$(TARGET_CROSS)" \
 		CROSS="$(TARGET_CROSS)" -C $(BUSYBOX_DIR) oldconfig
 	touch $@
@@ -128,7 +121,7 @@ endif
 
 busybox: uclibc $(TARGET_DIR)/bin/busybox
 
-busybox-menuconfig: busybox-source $(BUSYBOX_DIR)/.configured
+busybox-menuconfig: host-sed $(BUILD_DIR) busybox-source $(BUSYBOX_DIR)/.configured
 	$(MAKE) __TARGET_ARCH=$(ARCH) -C $(BUSYBOX_DIR) menuconfig
 	cp -f $(BUSYBOX_DIR)/.config $(BUSYBOX_CONFIG_FILE)
 

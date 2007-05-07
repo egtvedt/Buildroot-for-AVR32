@@ -73,6 +73,10 @@ config BR2_arm926t
 	bool "arm926t"
 config BR2_arm1136jf_s
 	bool "arm1136jf_s"
+config BR2_arm1176jz_s
+	bool "arm1176jz-s"
+config BR2_arm1176jzf_s
+	bool "arm1176jzf-s"
 config BR2_sa110
 	bool "sa110"
 config BR2_sa1100
@@ -92,6 +96,8 @@ config BR2_ARM_TYPE
 	default ARM922T		if BR2_arm922t
 	default ARM926T		if BR2_arm926t
 	default ARM1136JF_S 	if BR2_arm1136jf_s
+	default ARM1176JZ_S	if BR2_arm1176jz_s
+	default ARM1176JZF_S	if BR2_arm1176jzf_s
 	default ARM_SA110	if BR2_sa110
 	default ARM_SA1100	if BR2_sa1100
 	default ARM_XSCALE	if BR2_xscale
@@ -212,13 +218,13 @@ config BR2_SVN
 
 config BR2_ZCAT
 	string "zcat command"
-	default "zcat"
+	default "gzip -d -c"
 	help
 	  Command to be used to extract a gzip'ed file to stdout.
 	  zcat is identical to gunzip -c except that the former may
 	  not be available on your system.
-	  Default is "zcat"
-	  Other possible values include "gunzip -c" or "gzip -d -c".
+	  Default is "gzip -d -c"
+	  Other possible values include "gunzip -c" or "zcat".
 
 config BR2_BZCAT
 	string "bzcat command"

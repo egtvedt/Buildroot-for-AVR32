@@ -4,7 +4,7 @@
 #
 #############################################################
 
-VALGRIND_VERSION=3.2.1
+VALGRIND_VERSION=3.2.3
 VALGRIND_SITE:=http://valgrind.org/downloads/
 VALGRIND_DIR:=$(BUILD_DIR)/valgrind-$(VALGRIND_VERSION)
 VALGRIND_SOURCE:=valgrind-$(VALGRIND_VERSION).tar.bz2
@@ -24,6 +24,8 @@ $(VALGRIND_DIR)/.patched: $(VALGRIND_DIR)/.unpacked
 $(VALGRIND_DIR)/.configured: $(VALGRIND_DIR)/.patched
 	(cd $(VALGRIND_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

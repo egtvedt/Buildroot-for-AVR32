@@ -17,7 +17,8 @@ endif
 #HOST_SED_DIR:=$(STAGING_DIR)
 HOST_SED_DIR:=$(TOOL_BUILD_DIR)
 SED:=$(HOST_SED_DIR)/bin/sed -i -e
-HOST_SED_TARGET=$(shell package/sed/sedcheck.sh)
+HOST_SED_BINARY=$(shell package/sed/sedcheck.sh)
+HOST_SED_IF_ANY=$(shell toolchain/dependencies/check-host-sed.sh)
 
 $(DL_DIR)/$(SED_SOURCE):
 	mkdir -p $(DL_DIR)
@@ -35,12 +36,12 @@ $(SED_DIR1)/.unpacked: $(DL_DIR)/$(SED_SOURCE)
 	mkdir -p $(TOOL_BUILD_DIR)
 	mkdir -p $(HOST_SED_DIR)/bin;
 	$(SED_CAT) $(DL_DIR)/$(SED_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
+	toolchain/patch-kernel.sh $(SED_DIR1) package/sed/ configure.patch
 	touch $(SED_DIR1)/.unpacked
 
 $(SED_DIR1)/.configured: $(SED_DIR1)/.unpacked
 	(cd $(SED_DIR1); rm -rf config.cache; \
 		./configure \
-		--prefix=$(HOST_SED_DIR) \
 		--prefix=/usr \
 	);
 	touch $(SED_DIR1)/.configured
@@ -62,22 +63,15 @@ build-sed-host-binary: $(SED_DIR1)/$(SED_BINARY)
 		    $(HOST_SED_DIR)/usr/man $(HOST_SED_DIR)/usr/share/doc; fi
 
 use-sed-host-binary:
-	@if [ -x /usr/bin/sed ] ; then \
-		SED="/usr/bin/sed" ; \
-	else \
-		if [ -x /bin/sed ] ; then \
-			SED="/bin/sed" ; \
-		fi \
-	fi ; \
 	if [ ! -e "$(HOST_SED_DIR)/$(SED_TARGET_BINARY)" ] ; then \
 		mkdir -p "$(HOST_SED_DIR)/bin"; \
 		rm -f "$(HOST_SED_DIR)/$(SED_TARGET_BINARY)"; \
-		ln -sf "$$SED" "$(HOST_SED_DIR)/$(SED_TARGET_BINARY)"; \
+		ln -sf "$(HOST_SED_IF_ANY)" "$(HOST_SED_DIR)/$(SED_TARGET_BINARY)"; \
 	fi
 
-host-sed: $(HOST_SED_TARGET)
+host-sed: $(HOST_SED_BINARY)
 
-ifeq ($(HOST_SED_TARGET),build-sed-host-binary)
+ifeq ($(HOST_SED_BINARY),build-sed-host-binary)
 host-sed-clean:
 	$(MAKE) DESTDIR=$(HOST_SED_DIR) -C $(SED_DIR1) uninstall
 	-$(MAKE) -C $(SED_DIR1) clean
@@ -103,6 +97,7 @@ $(SED_DIR2)/.configured: $(SED_DIR2)/.unpacked
 	(cd $(SED_DIR2); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
 		CPPFLAGS="$(SED_CFLAGS)" \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
