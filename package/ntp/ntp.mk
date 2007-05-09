@@ -21,6 +21,7 @@ $(NTP_DIR)/.unpacked: $(DL_DIR)/$(NTP_SOURCE)
 	toolchain/patch-kernel.sh $(NTP_DIR) package/ntp/ ntp\*.patch
 	$(SED) "s,^#if.*__GLIBC__.*_BSD_SOURCE.*$$,#if 0," \
 		$(NTP_DIR)/ntpd/refclock_pcf.c;
+	$(CONFIG_UPDATE) $(NTP_DIR)
 	touch $(NTP_DIR)/.unpacked
 
 $(NTP_DIR)/.configured: $(NTP_DIR)/.unpacked
