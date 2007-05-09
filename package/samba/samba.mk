@@ -19,6 +19,7 @@ samba-source: $(DL_DIR)/$(SAMBA_SOURCE)
 $(SAMBA_DIR)/.unpacked: $(DL_DIR)/$(SAMBA_SOURCE)
 	$(SAMBA_CAT) $(DL_DIR)/$(SAMBA_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh `dirname $(SAMBA_DIR)` package/samba/ samba\*.patch
+	$(CONFIG_UPDATE) $(SAMBA_DIR)/source
 	touch $(SAMBA_DIR)/.unpacked
 
 $(SAMBA_DIR)/.configured: $(SAMBA_DIR)/.unpacked
