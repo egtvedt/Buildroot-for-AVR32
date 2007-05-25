@@ -3,7 +3,7 @@
 # ntp
 #
 #############################################################
-NTP_VERSION:=4.2.0
+NTP_VERSION:=4.2.4p0
 NTP_SOURCE:=ntp-$(NTP_VERSION).tar.gz
 NTP_SITE:=http://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2
 NTP_DIR:=$(BUILD_DIR)/ntp-$(NTP_VERSION)
@@ -22,6 +22,7 @@ $(NTP_DIR)/.unpacked: $(DL_DIR)/$(NTP_SOURCE)
 	$(SED) "s,^#if.*__GLIBC__.*_BSD_SOURCE.*$$,#if 0," \
 		$(NTP_DIR)/ntpd/refclock_pcf.c;
 	$(CONFIG_UPDATE) $(NTP_DIR)
+	$(CONFIG_UPDATE) $(NTP_DIR)/sntp
 	touch $(NTP_DIR)/.unpacked
 
 $(NTP_DIR)/.configured: $(NTP_DIR)/.unpacked
