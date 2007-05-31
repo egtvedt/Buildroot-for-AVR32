@@ -29,7 +29,12 @@ LINUX26_SITE=http://ftp.kernel.org/pub/linux/kernel/v2.6
 ifndef LINUX26_FORMAT
 LINUX26_FORMAT=zImage
 endif
+
+ifeq ($(BR2_avr32),y)
+LINUX26_BINLOC=arch/$(KERNEL_ARCH)/boot/images/$(LINUX26_FORMAT)
+else
 LINUX26_BINLOC=arch/$(KERNEL_ARCH)/boot/$(LINUX26_FORMAT)
+endif
 
 # Linux kernel configuration file
 # Has to be set by the target/device
