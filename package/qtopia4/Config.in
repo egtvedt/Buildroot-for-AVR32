@@ -12,7 +12,7 @@ config BR2_PACKAGE_QTOPIA4
 
 config BR2_PACKAGE_QTOPIA4_DEBUG
         bool "Compile with debug support"
-        default y 
+        default y
 	depends BR2_PACKAGE_QTOPIA4
         help
 
@@ -33,10 +33,18 @@ config BR2_PACKAGE_QTOPIA4_COMMERCIAL_PASSWORD
 
 config BR2_PACKAGE_QTOPIA4_QT3SUPPORT
         bool "Compatibility with Qt3"
-        default y 
+        default y
 	depends BR2_PACKAGE_QTOPIA4
         help
 	    Turns on support for older Qt3.
+
+config BR2_PACKAGE_QTOPIA4_DEPTHS
+        string "color depths to support"
+        default "-depths 8"
+	depends BR2_PACKAGE_QTOPIA4
+        help
+	    Which color depths to support for the library. Default is "-depths
+	    8". Is specified by a comma separated list, i.e. -depths 24,16,8.
 
 config BR2_PACKAGE_QTOPIA4_EMB_PLATFORM
         string "The embedded platform we are making Qtopia4 for"
