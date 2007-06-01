@@ -16,6 +16,7 @@ $(DL_DIR)/$(LIBMAD_SOURCE):
 
 $(LIBMAD_DIR)/.unpacked: $(DL_DIR)/$(LIBMAD_SOURCE)
 	$(LIBMAD_CAT) $(DL_DIR)/$(LIBMAD_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(CONFIG_UPDATE) $(LIBMAD_DIR)
 	touch $(LIBMAD_DIR)/.unpacked
 
 $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
