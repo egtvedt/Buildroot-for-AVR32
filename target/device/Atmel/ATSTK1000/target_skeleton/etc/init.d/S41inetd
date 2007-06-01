@@ -1,18 +1,16 @@
 #!/bin/sh
 
-INETD=`which inetd`
+INETD=/usr/sbin/inetd
 
-echo -n " * starting inted ...            "
+echo -n "Starting inted:"
 if [ ! -x "${INETD}" ]; then
-	echo "[ MISSING ]"
+	echo " missing"
 	exit 1
 fi
 
 if ${INETD} > /dev/null 2> /dev/null; then
-	echo "[ OK ]"
+	echo " done"
 else
-	echo "[ FAILED ]"
+	echo " failed"
 	exit 1
 fi
-
-exit 0

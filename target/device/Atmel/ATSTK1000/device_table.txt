@@ -40,9 +40,13 @@
 /sys		d	755	0	0	-	-	-	-	-
 /config		d	755	0	0	-	-	-	-	-
 /proc		d	755	0	0	-	-	-	-	-
+/lost+found	d	700	0	0	-	-	-	-	-
 /var/tmp	d	1777	0	0	-	-	-	-	-
 /var/lock	d	1777	0	0	-	-	-	-	-
+/var/run	d	1777	0	0	-	-	-	-	-
+/home/avr32	d	2755	500	500	-	-	-	-	-
 /home/default	d	2755	1000	1000	-	-	-	-	-
+/www		d	755	0	0	-	-	-	-	-
 #<name>					<type>	<mode>	<uid>	<gid>	<major>	<minor>	<start>	<inc>	<count>
 /bin/busybox				f	4755	0	0	-	-	-	-	-
 #/etc/shadow				f	600	0	0	-	-	-	-	-

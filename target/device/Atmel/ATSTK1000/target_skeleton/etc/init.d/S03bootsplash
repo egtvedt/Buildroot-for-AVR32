@@ -1,9 +1,9 @@
 #!/bin/sh
 
 PROGRAM=/usr/bin/fbv
-SPLASHFILE="/etc/stk1000splash.jpg"
+SPLASHFILE="/etc/stk1000bootsplash.jpg"
 
-echo -n "Splash image:"
+echo -n "Bootsplash image:"
 if [ ! -x "${PROGRAM}" -o ! -f "${SPLASHFILE}" ]; then
 	echo " missing"
 	exit 1

@@ -5,10 +5,10 @@ PROGRAM=/usr/sbin/alsactl
 # Exit silently if alsa-utils isn't installed
 [ -x ${PROGRAM} ] || exit 0
 
-echo -n " * saving mixer state ...     "
-if ${PROGRAM} save > /dev/null 2> /dev/null; then
-	echo "[   OK   ]"
+echo -n "Saving mixer state:"
+if ${PROGRAM} store > /dev/null 2> /dev/null; then
+	echo " done"
 else
-	echo "[ FAILED ]"
+	echo " failed"
 	exit 1
 fi

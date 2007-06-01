@@ -1,36 +1,37 @@
 #!/bin/sh
 
-NTPDATE=`which ntpdate`
-NTPD=`which ntpd`
+NTPDATE=/usr/bin/ntpdate
+NTPD=/usr/sbin/ntpd
 
 if [ -f /etc/default/ntpdate ]; then
     . /etc/default/ntpdate
+else
+	echo " missing /etc/default/ntpdate"
+	exit 1
 fi
 
-echo -n " * running ntpdate ...           "
-if [ ! -x "${NTPDATE}" ]; then
-	echo "[ MISSING ]"
+echo -n "Starting ntpdate:"
+if [ ! -x ${NTPDATE} ]; then
+	echo " missing"
 	exit 1
 fi
 
 if ${NTPDATE} $NTPOPTIONS $NTPSERVERS > /dev/null 2> /dev/null; then
-	echo "[ OK ]"
+	echo " done"
 else
-	echo "[ FAILED ]"
+	echo " failed"
 	exit 1
 fi
 
-echo -n " * starting ntpd ...             "
-if [ ! -x "${NTPD}" ]; then
-	echo "[ MISSING ]"
+echo -n "Starting ntpd:"
+if [ ! -x ${NTPD} ]; then
+	echo " missing"
 	exit 1
 fi
 
 if ${NTPD} > /dev/null 2> /dev/null; then
-	echo "[ OK ]"
+	echo " done"
 else
-	echo "[ FAILED ]"
+	echo " failed"
 	exit 1
 fi
-
-exit 0

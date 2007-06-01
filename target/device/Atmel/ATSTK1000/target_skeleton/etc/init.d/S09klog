@@ -1,18 +1,16 @@
 #!/bin/sh
 
-KLOGD=`which klogd`
+KLOGD=/sbin/klogd
 
-echo -n " * starting klogd ...            "
+echo -n "Starting klogd:"
 if [ ! -x "${KLOGD}" ]; then
-	echo "[ MISSING ]"
+	echo " missing"
 	exit 1
 fi
 
 if ${KLOGD} > /dev/null 2> /dev/null; then
-	echo "[ OK ]"
+	echo " done"
 else
-	echo "[ FAILED ]"
+	echo " failed"
 	exit 1
 fi
-
-exit 0

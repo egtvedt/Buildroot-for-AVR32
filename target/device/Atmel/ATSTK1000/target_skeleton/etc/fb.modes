@@ -1,0 +1,7 @@
+mode "320x240-69"
+    # D: 6.891 MHz, H: 17.853 kHz, V: 68.931 Hz
+    geometry 320 240 320 240 32
+    timings 145111 17 33 8 10 16 1
+    pclk rising
+    rgba 8/16,8/8,8/0,0/0
+endmode

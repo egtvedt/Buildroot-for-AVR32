@@ -1,18 +1,16 @@
 #!/bin/sh
 
-HTTPD=`which httpd`
+HTTPD=/usr/sbin/httpd
 
-echo -n " * starting httpd ...            "
+echo -n "Starting httpd:"
 if [ ! -x "${HTTPD}" ]; then
-	echo "[ MISSING ]"
+	echo " missing"
 	exit 1
 fi
 
 if ${HTTPD} -h /www > /dev/null 2> /dev/null; then
-	echo "[ OK ]"
+	echo " done"
 else
-	echo "[ FAILED ]"
+	echo " failed"
 	exit 1
 fi
-
-exit 0

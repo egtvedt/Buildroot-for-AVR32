@@ -1,10 +1,10 @@
 #!/bin/sh
 
-MODPROBE=`which modprobe`
+MODPROBE=/sbin/modprobe
 
-echo -n " * probing modules ...           "
+echo -n "Probing modules:"
 if [ ! -x "${MODPROBE}" -o ! -f "/etc/modules" ]; then
-	echo "[ MISSING ]"
+	echo " missing"
 	exit 1
 else
 	echo
@@ -14,10 +14,8 @@ grep '^[^#]' "/etc/modules" | \
 while read module args; do
 	[ "$module" ] || continue
 	if ${MODPROBE} $module $args > /dev/null 2> /dev/null; then
-		echo "    * $module loaded"
+		echo "  $module loaded"
 	else
-		echo "    * $module failed"
+		echo "  $module failed"
 	fi
 done
-
-exit 0
