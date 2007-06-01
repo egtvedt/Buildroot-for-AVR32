@@ -1,5 +1,7 @@
-ifeq ($(strip $(BR2_TARGET_ATMEL_STK1000)),y)
-
+ifeq ($(strip $(BR2_TARGET_ATMEL_ATSTK1000)),y)
 include target/device/Atmel/ATSTK1000/Makefile.in
+endif
 
+ifeq ($(strip $(BR2_TARGET_ATMEL_ATNGW100)),y)
+include target/device/Atmel/ATNGW100/Makefile.in
 endif
