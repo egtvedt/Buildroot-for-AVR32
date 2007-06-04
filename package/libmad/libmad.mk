@@ -7,8 +7,7 @@
 LIBMAD_VERSION=0.15.1b
 LIBMAD_SOURCE=libmad-$(LIBMAD_VERSION).tar.gz
 LIBMAD_SITE=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/mad/
-LIBMAD_DIR=$(BUILD_DIR)/${shell basename $(LIBMAD_SOURCE) .tar.gz}
-LIBMAD_WORKDIR=$(BUILD_DIR)/libmad-$(LIBMAD_VERSION)
+LIBMAD_DIR=$(BUILD_DIR)/libmad-$(LIBMAD_VERSION)
 LIBMAD_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(LIBMAD_SOURCE):
@@ -17,7 +16,7 @@ $(DL_DIR)/$(LIBMAD_SOURCE):
 $(LIBMAD_DIR)/.unpacked: $(DL_DIR)/$(LIBMAD_SOURCE)
 	$(LIBMAD_CAT) $(DL_DIR)/$(LIBMAD_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(CONFIG_UPDATE) $(LIBMAD_DIR)
-	touch $(LIBMAD_DIR)/.unpacked
+	@touch $@
 
 $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
 	(cd $(LIBMAD_DIR); rm -rf config.cache; \
@@ -32,27 +31,33 @@ $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
 		--sysconfdir=/etc \
 		$(DISABLE_NLS) \
 	);
-	touch $(LIBMAD_DIR)/.configured
+	@touch $@
 
-$(LIBMAD_WORKDIR)/libmad.la: $(LIBMAD_DIR)/.configured
+$(LIBMAD_DIR)/libmad.a: $(LIBMAD_DIR)/.configured
 	rm -f $@
-	$(MAKE) CC=$(TARGET_CC) -C $(LIBMAD_WORKDIR)
+	$(MAKE) CC=$(TARGET_CC) -C $(LIBMAD_DIR)
+	@touch -c $@
 
-$(LIBMAD_WORKDIR)/.installed: $(LIBMAD_WORKDIR)/libmad.la
-	$(MAKE) prefix=$(TARGET_DIR)/usr -C $(LIBMAD_WORKDIR) install
-	touch $(LIBMAD_WORKDIR)/.installed
+$(STAGING_DIR)/lib/libmad.a: $(LIBMAD_DIR)/libmad.a
+	$(MAKE) prefix=$(STAGING_DIR)/usr -C $(LIBMAD_DIR) install
+	@touch -c $(STAGING_DIR)/lib/libmad.a
 
-libmad:	uclibc $(LIBMAD_WORKDIR)/.installed
+$(TARGET_DIR)/usr/lib/libmad.so: $(STAGING_DIR)/lib/libmad.a
+	mkdir -p $(TARGET_DIR)/usr/lib
+	cp -dpf $(STAGING_DIR)/lib/libmad.so* $(TARGET_DIR)/usr/lib/
+	@touch -c $@
+
+libmad:	uclibc $(TARGET_DIR)/usr/lib/libmad.so
 
 libmad-source: $(DL_DIR)/$(LIBMAD_SOURCE)
 
 libmad-clean:
-	@if [ -d $(LIBMAD_WORKDIR)/Makefile ] ; then \
-		$(MAKE) -C $(LIBMAD_WORKDIR) clean ; \
+	@if [ -d $(LIBMAD_DIR)/Makefile ] ; then \
+		$(MAKE) -C $(LIBMAD_DIR) clean ; \
 	fi;
 
 libmad-dirclean:
-	rm -rf $(LIBMAD_DIR) $(LIBMAD_WORKDIR)
+	rm -rf $(LIBMAD_DIR) $(LIBMAD_DIR)
 #############################################################
 #
 # Toplevel Makefile options
