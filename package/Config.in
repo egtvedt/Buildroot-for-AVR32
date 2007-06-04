@@ -274,6 +274,7 @@ comment "console applications"
 source "package/fbset/Config.in"
 source "package/fbv/Config.in"
 source "package/imagemagick/Config.in"
+source "package/mplayer/Config.in"
 
 comment "other GUIs"
 source "package/qte/Config.in"
