@@ -267,6 +267,9 @@ source "package/libpng/Config.in"
 source "package/sdl/Config.in"
 source "package/tiff/Config.in"
 
+comment "console applications"
+source "package/fbv/Config.in"
+
 comment "other GUIs"
 source "package/qte/Config.in"
 source "package/qtopia4/Config.in"
