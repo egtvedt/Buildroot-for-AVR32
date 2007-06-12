@@ -3,7 +3,7 @@
 # alsa-lib
 #
 #############################################################
-ALSA_LIB_VER:=1.0.14rc4
+ALSA_LIB_VER:=1.0.14a
 ALSA_LIB_SOURCE:=alsa-lib-$(ALSA_LIB_VER).tar.bz2
 ALSA_LIB_SITE:=ftp://ftp.alsa-project.org/pub/lib
 ALSA_LIB_DIR:=$(BUILD_DIR)/alsa-lib-$(ALSA_LIB_VER)
