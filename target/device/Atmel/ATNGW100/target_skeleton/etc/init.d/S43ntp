@@ -1,0 +1,39 @@
+#!/bin/sh
+
+NTPDATE=/usr/bin/ntpdate
+NTPD=/usr/sbin/ntpd
+
+if [ -f /etc/default/ntpdate ]; then
+    . /etc/default/ntpdate
+else
+	echo " missing /etc/default/ntpdate"
+	exit 1
+fi
+
+echo -n "Starting ntpdate:"
+if [ ! -x ${NTPDATE} ]; then
+	echo " missing"
+	echo -n "  WARNING: could not syncronize clock, "
+	echo "edit NTPSERVERS in /etc/default/ntpdate."
+fi
+
+if ${NTPDATE} $NTPOPTIONS $NTPSERVERS > /dev/null 2> /dev/null; then
+	echo " done"
+else
+	echo " failed"
+	echo -n "  WARNING: could not syncronize clock, "
+	echo "edit NTPSERVERS in /etc/default/ntpdate."
+fi
+
+echo -n "Starting ntpd:"
+if [ ! -x ${NTPD} ]; then
+	echo " missing"
+	exit 1
+fi
+
+if ${NTPD} > /dev/null 2> /dev/null; then
+	echo " done"
+else
+	echo " failed"
+	exit 1
+fi
