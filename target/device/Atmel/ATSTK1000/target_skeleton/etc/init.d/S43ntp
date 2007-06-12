@@ -13,14 +13,16 @@ fi
 echo -n "Starting ntpdate:"
 if [ ! -x ${NTPDATE} ]; then
 	echo " missing"
-	exit 1
+	echo -n "  WARNING: could not syncronize clock, "
+	echo "edit NTPSERVERS in /etc/default/ntpdate."
 fi
 
 if ${NTPDATE} $NTPOPTIONS $NTPSERVERS > /dev/null 2> /dev/null; then
 	echo " done"
 else
 	echo " failed"
-	exit 1
+	echo -n "  WARNING: could not syncronize clock, "
+	echo "edit NTPSERVERS in /etc/default/ntpdate."
 fi
 
 echo -n "Starting ntpd:"
