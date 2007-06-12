@@ -1,0 +1,11 @@
+--- uClibc-0.9.28.3/libc/sysdeps/linux/common/prctl.c	2005-01-06 00:11:28.000000000 +0100
++++ uClibc-0.9.28.3-mod/libc/sysdeps/linux/common/prctl.c	2007-06-12 11:12:55.000000000 +0200
+@@ -9,5 +9,6 @@
+ 
+ #include "syscalls.h"
+ #include <stdarg.h>
+-//#include <sys/prctl.h>
+-_syscall5(int, prctl, int, a, int, b, int, c, int, d, int, e);
++/* psm: including sys/prctl.h would depend on kernel headers */
++extern int prctl (int, long, long, long, long);
++_syscall5(int, prctl, int, option, long, arg2, long, arg3, long, arg4, long, arg5);
