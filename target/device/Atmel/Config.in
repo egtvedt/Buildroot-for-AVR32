@@ -7,14 +7,12 @@ choice
 config BR2_TARGET_ATMEL_ATSTK1000
 	bool "ATSTK1000 development board"
 	depends BR2_avr32
-	default n
 	help
 	  Support for the ATSTK1000 development board for Atmel AVR32.
 
 config BR2_TARGET_ATMEL_ATNGW100
 	bool "ATNGW100 reference board"
 	depends BR2_avr32
-	default n
 	help
 	  Support for the ATNGW100 reference board for Atmel AVR32.
 
