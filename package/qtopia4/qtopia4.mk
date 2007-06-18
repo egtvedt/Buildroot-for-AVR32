@@ -40,6 +40,10 @@ QTOPIA4_SOURCE:=qtopia-core-opensource-src-$(QTOPIA4_VER).tar.gz
 QTOPIA4_TARGET_DIR:=$(BUILD_DIR)/qtopia-core-opensource-src-$(QTOPIA4_VER)
 QTOPIA4_HOST_DIR:=$(TOOL_BUILD_DIR)/qtopia-core-opensource-src-$(QTOPIA4_VER)
 
+ifeq ($(BR2_PACKAGE_QTOPIA4_GPL_LICENSE_APPROVED),y)
+QTOPIA4_APPROVE_GPL_LICENSE:=-confirm-license
+endif
+
 endif
 
 # If you want extra tweaking you can copy
@@ -162,6 +166,7 @@ $(QTOPIA4_TARGET_DIR)/.configured: $(QTOPIA4_TARGET_DIR)/.unpacked
 		$(QTOPIA4_TSLIB) \
 		$(QTOPIA4_LARGEFILE) \
 		$(QTOPIA4_ENDIAN) \
+		$(QTOPIA4_APPROVE_GPL_LICENSE) \
 	);
 	touch $(QTOPIA4_TARGET_DIR)/.configured
 
@@ -245,6 +250,7 @@ $(QTOPIA4_HOST_DIR)/.configured: $(QTOPIA4_HOST_DIR)/.unpacked
 		$(QTOPIA4_TSLIB) \
 		$(QTOPIA4_LARGEFILE) \
 		$(QTOPIA4_ENDIAN) \
+		$(QTOPIA4_APPROVE_GPL_LICENSE) \
 	);
 	touch $(QTOPIA4_HOST_DIR)/.configured
 
