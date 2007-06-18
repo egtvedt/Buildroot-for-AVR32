@@ -117,6 +117,16 @@ config BR2_GCC_USE_SJLJ_EXCEPTIONS
 	  proper stack unwinding during exception handling.  Most people
 	  can leave this set to n.
 
+config BR2_GCC_AVR32_CONFIGURATION
+	bool "Enable default AVR32 GCC configuration"
+	default y
+	depends BR2_avr32
+	help
+	  For the AVR32 platform there is some configuration which are not
+	  supported.
+
+	  Currently this will add "--disable-libmudflap" to configure.
+
 config BR2_EXTRA_GCC_CONFIG_OPTIONS
 	string "Additional gcc options"
 	default ""
@@ -134,19 +144,21 @@ config BR2_INSTALL_LIBSTDCPP
 config BR2_INSTALL_LIBGCJ
 	bool "Build/install java compiler and libgcj?"
 	default n
-	depends on BR2_INSTALL_LIBSTDCPP
+	depends on BR2_INSTALL_LIBSTDCPP && !BR2_avr32
 	help
 	  Build/install java compiler and libgcj?
 
 config BR2_INSTALL_OBJC
 	bool "Build/install Objective-C compiler and runtime?"
 	default n
+	depends on !BR2_avr32
 	help
 	  Build/install Objective-C compiler and runtime?
 
 config BR2_INSTALL_FORTRAN
 	bool "Build/install Fortran compiler and runtime?"
 	default n
+	depends on !BR2_avr32
 	select BR2_PACKAGE_LIBMPFR
 	help
 	  Build/install Fortran compiler and runtime?
