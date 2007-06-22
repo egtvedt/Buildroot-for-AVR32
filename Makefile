@@ -191,10 +191,6 @@ allnoconfig: $(CONFIG)/conf
 defconfig: $(CONFIG)/conf
 	@$(CONFIG)/conf -d $(CONFIG_CONFIG_IN)
 
-%_defconfig: $(CONFIG)/conf
-	cp $(shell find . -name $@) .config
-	@$(CONFIG)/conf -o $(CONFIG_CONFIG_IN)
-
 #############################################################
 #
 # Cleanup and misc junk
@@ -208,6 +204,10 @@ distclean: clean
 	rm -rf sources/*
 
 endif # ifeq ($(strip $(BR2_HAVE_DOT_CONFIG)),y)
+
+%_defconfig: $(CONFIG)/conf
+	cp $(shell find target/ -name $@) .config
+	@$(CONFIG)/conf -o $(CONFIG_CONFIG_IN)
 
 .PHONY: dummy subdirs release distclean clean config oldconfig \
 	menuconfig tags check test depend defconfig
