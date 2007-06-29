@@ -23,7 +23,7 @@ $(FBSET_DIR)/$(FBSET_BINARY): $(FBSET_DIR)/.unpacked
 	($(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
 		LDFLAGS="$(TARGET_LDFLAGS)" \
-		$(MAKE) -C $(FBSET_DIR) CC=$(TARGET_CC) \
+		$(MAKE1) -C $(FBSET_DIR) CC=$(TARGET_CC) \
 	);
 	@touch -c $@
 
