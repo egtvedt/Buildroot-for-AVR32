@@ -44,7 +44,7 @@ $(ALSA_LIB_DIR)/src/.libs/$(ALSA_LIB_BINARY): $(ALSA_LIB_DIR)/.configured
 
 $(STAGING_DIR)/$(ALSA_LIB_TARGET_BINARY): $(ALSA_LIB_DIR)/src/.libs/$(ALSA_LIB_BINARY)
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(ALSA_LIB_DIR) install
-	@touch -c $@
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libasound.la
 
 $(TARGET_DIR)/$(ALSA_LIB_TARGET_BINARY): $(STAGING_DIR)/$(ALSA_LIB_TARGET_BINARY)
 	@mkdir -p $(TARGET_DIR)/usr/share/alsa
@@ -54,7 +54,6 @@ $(TARGET_DIR)/$(ALSA_LIB_TARGET_BINARY): $(STAGING_DIR)/$(ALSA_LIB_TARGET_BINARY
 	cp -rdpf $(STAGING_DIR)/usr/lib/alsa-lib/* $(TARGET_DIR)/usr/lib/alsa-lib/
 	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libasound.so*
 	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/alsa-lib/*.so
-	@touch -c $@
 
 alsa-lib: linux26 uclibc $(TARGET_DIR)/$(ALSA_LIB_TARGET_BINARY)
 
