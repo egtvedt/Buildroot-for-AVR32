@@ -5,12 +5,12 @@
 #############################################################
 
 # Seems to be broken -- topbar icons and such are misplaced etc
-#METACITY_VER:=2.17.5
+#METACITY_VERSION:=2.17.5
 
-METACITY_VER:=2.16.3
-METACITY_SOURCE:=metacity-$(METACITY_VER).tar.bz2
+METACITY_VERSION:=2.16.3
+METACITY_SOURCE:=metacity-$(METACITY_VERSION).tar.bz2
 METACITY_SITE:=http://ftp.gnome.org/pub/gnome/sources/metacity/2.16
-METACITY_DIR:=$(BUILD_DIR)/metacity-$(METACITY_VER)
+METACITY_DIR:=$(BUILD_DIR)/metacity-$(METACITY_VERSION)
 METACITY_CAT:=$(BZCAT)
 
 METACITY_SOURCE2:=MCity-Clearlooks2.tar.gz
@@ -36,12 +36,10 @@ $(METACITY_DIR)/.unpacked: $(DL_DIR)/$(METACITY_SOURCE) $(DL_DIR)/$(METACITY_SOU
 $(METACITY_DIR)/.configured: $(METACITY_DIR)/.unpacked
 	(cd $(METACITY_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		PKG_CONFIG=$(STAGING_DIR)/usr/bin/pkg-config \
 		GLIB_CONFIG=$(STAGING_DIR)/bin/glib-config \
-		ac_cv_func_mmap_fixed_mapped=yes \
 		ac_cv_func_posix_getpwuid_r=yes \
 		glib_cv_stack_grows=no \
 		glib_cv_uscore=no \

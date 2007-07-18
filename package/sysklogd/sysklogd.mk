@@ -3,10 +3,10 @@
 # sysklogd
 #
 #############################################################
-SYSKLOGD_VER:=1.4.1
-SYSKLOGD_SOURCE:=sysklogd-$(SYSKLOGD_VER).tar.gz
+SYSKLOGD_VERSION:=1.4.1
+SYSKLOGD_SOURCE:=sysklogd-$(SYSKLOGD_VERSION).tar.gz
 SYSKLOGD_SITE:=http://www.infodrom.org/projects/sysklogd/download
-SYSKLOGD_DIR:=$(BUILD_DIR)/sysklogd-$(SYSKLOGD_VER)
+SYSKLOGD_DIR:=$(BUILD_DIR)/sysklogd-$(SYSKLOGD_VERSION)
 SYSKLOGD_SYSLOGD_BINARY:=syslogd
 SYSKLOGD_KLOGD_BINARY:=klogd
 SYSKLOGD_BINARY:=$(SYSKLOGD_KLOGD_BINARY)
@@ -32,7 +32,7 @@ $(SYSKLOGD_DIR)/$(SYSKLOGD_BINARY): $(SYSKLOGD_DIR)/.unpacked
 $(TARGET_DIR)/$(SYSKLOGD_TARGET_BINARY): $(SYSKLOGD_DIR)/$(SYSKLOGD_BINARY)
 	$(INSTALL) -m 0755 -D $(SYSKLOGD_DIR)/$(SYSKLOGD_SYSLOGD_BINARY) $(TARGET_DIR)/$(SYSKLOGD_SYSLOGD_TARGET_BINARY)
 	$(INSTALL) -m 0755 -D $(SYSKLOGD_DIR)/$(SYSKLOGD_KLOGD_BINARY) $(TARGET_DIR)/$(SYSKLOGD_KLOGD_TARGET_BINARY)
-	$(INSTALL) -m 0755 -D package/sysklogd/init-syslog $(TARGET_DIR)/etc/init.d/S25syslog
+	$(INSTALL) -m 0755 -D package/sysklogd/S25syslog $(TARGET_DIR)/etc/init.d
 	$(INSTALL) -m 0644 -D package/sysklogd/syslog.conf $(TARGET_DIR)/etc/syslog.conf
 
 sysklogd: uclibc $(TARGET_DIR)/$(SYSKLOGD_TARGET_BINARY)

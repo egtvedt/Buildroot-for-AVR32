@@ -21,10 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-LIBPNG_VER:=1.2.16
-LIBPNG_DIR:=$(BUILD_DIR)/libpng-$(LIBPNG_VER)
+LIBPNG_VERSION:=1.2.16
+LIBPNG_DIR:=$(BUILD_DIR)/libpng-$(LIBPNG_VERSION)
 LIBPNG_SITE:=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/libpng
-LIBPNG_SOURCE:=libpng-$(LIBPNG_VER).tar.bz2
+LIBPNG_SOURCE:=libpng-$(LIBPNG_VERSION).tar.bz2
 LIBPNG_CAT:=$(BZCAT)
 
 $(DL_DIR)/$(LIBPNG_SOURCE):
@@ -40,9 +40,7 @@ $(LIBPNG_DIR)/.unpacked: $(DL_DIR)/$(LIBPNG_SOURCE)
 $(LIBPNG_DIR)/.configured: $(LIBPNG_DIR)/.unpacked
 	(cd $(LIBPNG_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
-		ac_cv_func_memcmp_working=yes \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_have_decl_malloc=yes \
 		gl_cv_func_malloc_0_nonnull=yes \
 		ac_cv_func_malloc_0_nonnull=yes \

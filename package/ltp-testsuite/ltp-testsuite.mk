@@ -3,7 +3,7 @@
 # ltp-testsuite
 #
 #############################################################
-LTP_TESTSUITE_VERSION:=20061121
+LTP_TESTSUITE_VERSION:=20070228
 LTP_TESTSUITE_SOURCE:=ltp-full-$(LTP_TESTSUITE_VERSION).tgz
 LTP_TESTSUITE_SITE:=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/ltp
 LTP_TESTSUITE_CAT:=$(ZCAT)
@@ -11,16 +11,21 @@ LTP_TESTSUITE_ROOT:=$(TARGET_DIR)/root
 LTP_TESTSUITE_DIR:=$(LTP_TESTSUITE_ROOT)/ltp-full-$(LTP_TESTSUITE_VERSION)
 
 #
-# We enable Open POSIX Testsuite if Native POSIX Threads Library (NPTL)
-# is selected. Otherwise, we filter out the patch for it.
+# Enable patches based upon different toolchain configuration options.
 #
-LTP_PATCHES:=$(subst package/ltp-testsuite/,,				 \
-	     $(wildcard package/ltp-testsuite/*.patch))
-ifneq ($(BR2_PTHREADS_NATIVE),y)
-LTP_PATCHES:=$(filter-out ltp-testsuite-enable-openposix-for-nptl.patch, \
-	     $(LTP_PATCHES))
-endif
+LTP_PATCHES:=ltp-testsuite-generate-needs-bash.patch	\
+	     ltp-testsuite-sh-is-not-C-code.patch	\
+	     ltp-testsuite.patch
 
+ifeq ($(BR2_PTHREADS_NATIVE),y)
+LTP_PATCHES+=ltp-testsuite-enable-openposix-for-nptl.patch
+endif
+ifeq ($(BR2_EXT_PTHREADS_NATIVE),y)
+LTP_PATCHES+=ltp-testsuite-enable-openposix-for-nptl.patch
+endif
+ifneq ($(BR2_INET_IPV6),y)
+LTP_PATCHES+=ltp-testsuite-disable-ipv6-tests.patch
+endif
 
 $(DL_DIR)/$(LTP_TESTSUITE_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(LTP_TESTSUITE_SITE)/$(LTP_TESTSUITE_SOURCE)
@@ -28,21 +33,22 @@ $(DL_DIR)/$(LTP_TESTSUITE_SOURCE):
 ltp-testsuite-source: $(DL_DIR)/$(LTP_TESTSUITE_SOURCE)
 
 $(LTP_TESTSUITE_DIR)/Makefile: $(DL_DIR)/$(LTP_TESTSUITE_SOURCE)
+	-mkdir -p $(LTP_TESTSUITE_ROOT)
 	$(LTP_TESTSUITE_CAT) $(DL_DIR)/$(LTP_TESTSUITE_SOURCE) | tar -C $(LTP_TESTSUITE_ROOT) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(LTP_TESTSUITE_DIR) package/ltp-testsuite/ $(LTP_PATCHES)
-	touch -c $(LTP_TESTSUITE_DIR)/Makefile
+	touch -c $@
 
 $(LTP_TESTSUITE_DIR)/.compiled: $(LTP_TESTSUITE_DIR)/Makefile
 	$(MAKE1) $(TARGET_CONFIGURE_OPTS) CROSS_COMPILER=$(TARGET_CROSS) \
 		-C $(LTP_TESTSUITE_DIR) all
-	touch $(LTP_TESTSUITE_DIR)/.compiled
+	touch $@
 
 $(LTP_TESTSUITE_DIR)/.installed: $(LTP_TESTSUITE_DIR)/.compiled
 	# Use fakeroot to pretend to do 'make install' as root
-	echo "$(MAKE1) $(TARGET_CONFIGURE_OPTS) CROSS_COMPILER=$(TARGET_CROSS) " \
-			"-C $(LTP_TESTSUITE_DIR) install" \
+	echo '$(MAKE1) $(TARGET_CONFIGURE_OPTS) CROSS_COMPILER=$(TARGET_CROSS) ' \
+			'-C $(LTP_TESTSUITE_DIR) install' \
 			> $(STAGING_DIR)/.fakeroot.ltp
-	touch $(LTP_TESTSUITE_DIR)/.installed
+	touch $@
 
 ltp-testsuite: uclibc host-fakeroot $(LTP_TESTSUITE_DIR)/.installed
 

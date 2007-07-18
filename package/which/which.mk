@@ -3,10 +3,10 @@
 # which
 #
 #############################################################
-WHICH_VER:=2.16
-WHICH_SOURCE:=which-$(WHICH_VER).tar.gz
+WHICH_VERSION:=2.16
+WHICH_SOURCE:=which-$(WHICH_VERSION).tar.gz
 WHICH_SITE:=http://www.xs4all.nl/~carlo17/which/
-WHICH_DIR:=$(BUILD_DIR)/which-$(WHICH_VER)
+WHICH_DIR:=$(BUILD_DIR)/which-$(WHICH_VERSION)
 WHICH_CAT:=$(ZCAT)
 WHICH_BINARY:=which
 WHICH_TARGET_BINARY:=bin/which
@@ -23,8 +23,7 @@ $(WHICH_DIR)/.unpacked: $(DL_DIR)/$(WHICH_SOURCE)
 $(WHICH_DIR)/.configured: $(WHICH_DIR)/.unpacked
 	(cd $(WHICH_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

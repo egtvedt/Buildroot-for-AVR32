@@ -3,9 +3,10 @@
 # raidtools2
 #
 #############################################################
-RAIDTOOLS2_SOURCE:=raidtools2-1.00.3.tar.gz
+RAIDTOOLS2_VERSION:=1.00.3
+RAIDTOOLS2_SOURCE:=raidtools2-$(RAIDTOOLS2_VERSION).tar.gz
 RAIDTOOLS2_SITE:=
-RAIDTOOLS2_DIR:=$(BUILD_DIR)/raidtools2-1.00.3
+RAIDTOOLS2_DIR:=$(BUILD_DIR)/raidtools2-$(RAIDTOOLS2_VERSION)
 RAIDTOOLS2_CAT:=$(ZCAT)
 RAIDTOOLS2_BINARY:=mkraid
 RAIDTOOLS2_TARGET_BINARY:=sbin/mkraid
@@ -21,9 +22,8 @@ $(RAIDTOOLS2_DIR)/.unpacked: $(DL_DIR)/$(RAIDTOOLS2_SOURCE)
 
 $(RAIDTOOLS2_DIR)/.configured: $(RAIDTOOLS2_DIR)/.unpacked
 	(cd $(RAIDTOOLS2_DIR); rm -rf config.cache; \
-                $(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
                 ./configure \
                 --target=$(GNU_TARGET_NAME) \
                 --host=$(GNU_TARGET_NAME) \

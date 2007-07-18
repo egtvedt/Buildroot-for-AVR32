@@ -3,10 +3,10 @@
 # thttpd
 #
 #############################################################
-THTTPD_VER:=2.25b
-THTTPD_SOURCE:=thttpd-$(THTTPD_VER).tar.gz
+THTTPD_VERSION:=2.25b
+THTTPD_SOURCE:=thttpd-$(THTTPD_VERSION).tar.gz
 THTTPD_SITE:=http://www.acme.com/software/thttpd/
-THTTPD_DIR:=$(BUILD_DIR)/thttpd-$(THTTPD_VER)
+THTTPD_DIR:=$(BUILD_DIR)/thttpd-$(THTTPD_VERSION)
 THTTPD_CAT:=$(ZCAT)
 THTTPD_BINARY:=thttpd
 THTTPD_TARGET_BINARY:=sbin/thttpd
@@ -25,8 +25,7 @@ $(THTTPD_DIR)/.unpacked: $(DL_DIR)/$(THTTPD_SOURCE)
 $(THTTPD_DIR)/.configured: $(THTTPD_DIR)/.unpacked
 	(cd $(THTTPD_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -36,7 +35,7 @@ $(THTTPD_DIR)/.configured: $(THTTPD_DIR)/.unpacked
 	touch $(THTTPD_DIR)/.configured
 
 $(THTTPD_DIR)/$(THTTPD_BINARY): $(THTTPD_DIR)/.configured
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CC=$(TARGET_CC) -C $(THTTPD_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(THTTPD_DIR)
 
 $(TARGET_DIR)/$(THTTPD_TARGET_BINARY): $(THTTPD_DIR)/$(THTTPD_BINARY)
 	install -D $(THTTPD_DIR)/$(THTTPD_BINARY) $(TARGET_DIR)/$(THTTPD_TARGET_BINARY)
@@ -62,6 +61,13 @@ thttpd: uclibc $(TARGET_DIR)/$(THTTPD_TARGET_BINARY)
 
 thttpd-clean:
 	rm -f $(TARGET_DIR)/$(THTTPD_TARGET_BINARY)
+	rm -f $(TARGET_DIR)/sbin/httpd_wrapper
+	rm -f $(TARGET_DIR)/sbin/thttpd_wrapper
+	rm -rf $(TARGET_DIR)/var/www
+	rm -f $(TARGET_DIR)/etc/init.d/S90thttpd
+	rm -f $(TARGET_DIR)/bin/htpasswd
+	rm -f $(TARGET_DIR)/bin/makeweb
+	rm -f $(TARGET_DIR)/bin/syslogtocern
 	-$(MAKE) -C $(THTTPD_DIR) clean
 
 thttpd-dirclean:

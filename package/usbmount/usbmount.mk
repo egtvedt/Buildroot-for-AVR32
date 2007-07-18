@@ -26,6 +26,7 @@ $(TARGET_DIR)/$(USBMOUNT_TARGET_BINARY): $(USBMOUNT_DIR)/.unpacked
 	@if [ ! -f $(TARGET_DIR)/etc/usbmount/usbmount.conf ] ; then \
                 $(INSTALL) -m 0644 -D $(USBMOUNT_DIR)/usbmount.conf $(TARGET_DIR)/etc/usbmount/usbmount.conf; \
         fi;
+	touch -c $@
 
 usbmount: uclibc $(TARGET_DIR)/$(USBMOUNT_TARGET_BINARY)
 

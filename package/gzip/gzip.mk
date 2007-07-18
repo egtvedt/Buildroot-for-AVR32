@@ -3,11 +3,11 @@
 # gzip
 #
 #############################################################
-GZIP_VER:=1.3.5
-GZIP_SOURCE:=gzip-$(GZIP_VER).tar.gz
+GZIP_VERSION:=1.3.5
+GZIP_SOURCE:=gzip-$(GZIP_VERSION).tar.gz
 #GZIP_SITE:=ftp://alpha.gnu.org/gnu/gzip
 GZIP_SITE:=http://mirrors.ircam.fr/pub/gnu/alpha/gnu/gzip
-GZIP_DIR:=$(BUILD_DIR)/gzip-$(GZIP_VER)
+GZIP_DIR:=$(BUILD_DIR)/gzip-$(GZIP_VERSION)
 GZIP_CAT:=$(ZCAT)
 GZIP_BINARY:=$(GZIP_DIR)/gzip
 GZIP_TARGET_BINARY:=$(TARGET_DIR)/bin/zmore
@@ -24,8 +24,7 @@ $(GZIP_DIR)/.unpacked: $(DL_DIR)/$(GZIP_SOURCE)
 $(GZIP_DIR)/.configured: $(GZIP_DIR)/.unpacked
 	(cd $(GZIP_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -54,11 +53,11 @@ $(GZIP_TARGET_BINARY): $(GZIP_BINARY)
 	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
 		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
 	(cd $(TARGET_DIR)/bin; \
-	ln -snf gzip gunzip; \
-	ln -snf gzip zcat; \
-	ln -snf zdiff zcmp; \
-	ln -snf zgrep zegrep; \
-	ln -snf zgrep zfgrep;)
+	$(HOSTLN) -snf gzip gunzip; \
+	$(HOSTLN) -snf gzip zcat; \
+	$(HOSTLN) -snf zdiff zcmp; \
+	$(HOSTLN) -snf zgrep zegrep; \
+	$(HOSTLN) -snf zgrep zfgrep;)
 
 gzip: uclibc $(GZIP_TARGET_BINARY)
 

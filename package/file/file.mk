@@ -3,12 +3,12 @@
 # file
 #
 #############################################################
-FILE_VER:=4.19
-FILE_SOURCE:=file-$(FILE_VER).tar.gz
+FILE_VERSION:=4.21
+FILE_SOURCE:=file-$(FILE_VERSION).tar.gz
 FILE_SITE:=ftp://ftp.astron.com/pub/file
-FILE_SOURCE_DIR:=$(BUILD_DIR)/file-$(FILE_VER)
-FILE_DIR1:=$(TOOL_BUILD_DIR)/file-$(FILE_VER)-host
-FILE_DIR2:=$(BUILD_DIR)/file-$(FILE_VER)-target
+FILE_SOURCE_DIR:=$(BUILD_DIR)/file-$(FILE_VERSION)
+FILE_DIR1:=$(TOOL_BUILD_DIR)/file-$(FILE_VERSION)-host
+FILE_DIR2:=$(BUILD_DIR)/file-$(FILE_VERSION)-target
 FILE_CAT:=$(ZCAT)
 FILE_BINARY:=src/file
 FILE_TARGET_BINARY:=usr/bin/file
@@ -61,8 +61,7 @@ $(FILE_DIR2)/.configured: $(FILE_SOURCE_DIR)/.unpacked
 	mkdir -p $(FILE_DIR2)
 	(cd $(FILE_DIR2); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		$(FILE_SOURCE_DIR)/configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -86,16 +85,16 @@ $(FILE_DIR2)/.configured: $(FILE_SOURCE_DIR)/.unpacked
 	touch $(FILE_DIR2)/.configured
 
 $(FILE_DIR2)/$(FILE_BINARY): $(FILE_DIR2)/.configured $(TOOL_BUILD_DIR)/bin/file
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) LDFLAGS="$(TARGET_LDFLAGS) -static" -C $(FILE_DIR2)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) LDFLAGS="-static" -C $(FILE_DIR2)
 
 $(TARGET_DIR)/$(FILE_TARGET_BINARY): $(FILE_DIR2)/$(FILE_BINARY)
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) LDFLAGS="$(TARGET_LDFLAGS)" DESTDIR=$(TARGET_DIR) -C $(FILE_DIR2) install
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) DESTDIR=$(TARGET_DIR) -C $(FILE_DIR2) install
 	-($(STRIP) $(TARGET_DIR)/usr/lib/libmagic.so.*.* > /dev/null 2>&1)
 	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
 		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
 	mv $(TARGET_DIR)/lib/libmagic.a $(STAGING_DIR)/lib
 	rm -f $(TARGET_DIR)/lib/libmagic.la
-	mv $(TARGET_DIR)/usr/include/magic.h $(STAGING_DIR)/include
+	mv $(TARGET_DIR)/usr/include/magic.h $(STAGING_DIR)/usr/include
 
 file: zlib uclibc $(TARGET_DIR)/$(FILE_TARGET_BINARY)
 

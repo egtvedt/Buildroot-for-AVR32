@@ -11,10 +11,10 @@
 # either version 2.1 of the License, or (at your option) any 
 # later version.
 
-LIBDAEMON_VER:=0.10
-LIBDAEMON_DIR:=$(BUILD_DIR)/libdaemon-$(LIBDAEMON_VER)
+LIBDAEMON_VERSION:=0.10
+LIBDAEMON_DIR:=$(BUILD_DIR)/libdaemon-$(LIBDAEMON_VERSION)
 LIBDAEMON_SITE:=http://0pointer.de/lennart/projects/libdaemon/
-LIBDAEMON_SOURCE:=libdaemon-$(LIBDAEMON_VER).tar.gz
+LIBDAEMON_SOURCE:=libdaemon-$(LIBDAEMON_VERSION).tar.gz
 LIBDAEMON_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(LIBDAEMON_SOURCE):
@@ -25,15 +25,14 @@ libdaemon-source: $(DL_DIR)/$(LIBDAEMON_SOURCE)
 $(LIBDAEMON_DIR)/.unpacked: $(DL_DIR)/$(LIBDAEMON_SOURCE)
 	$(LIBDAEMON_CAT) $(DL_DIR)/$(LIBDAEMON_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(LIBDAEMON_DIR) package/libdaemon/ \*.patch
+	$(CONFIG_UPDATE) $(LIBDAEMON_DIR)
 	touch $(LIBDAEMON_DIR)/.unpacked
 
 $(LIBDAEMON_DIR)/.configured: $(LIBDAEMON_DIR)/.unpacked
 	(cd $(LIBDAEMON_DIR) && rm -rf config.cache && autoconf)
-	( \
-		cd $(LIBDAEMON_DIR) && \
+	( cd $(LIBDAEMON_DIR) && \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

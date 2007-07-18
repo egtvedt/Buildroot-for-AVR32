@@ -3,10 +3,10 @@
 # dmalloc
 #
 #############################################################
-DMALLOC_VER:=5.4.2
-DMALLOC_SOURCE:=dmalloc-$(DMALLOC_VER).tgz
+DMALLOC_VERSION:=5.4.3
+DMALLOC_SOURCE:=dmalloc-$(DMALLOC_VERSION).tgz
 DMALLOC_SITE:=http://dmalloc.com/releases
-DMALLOC_DIR:=$(BUILD_DIR)/dmalloc-$(DMALLOC_VER)
+DMALLOC_DIR:=$(BUILD_DIR)/dmalloc-$(DMALLOC_VERSION)
 DMALLOC_CAT:=$(ZCAT)
 DMALLOC_BINARY:=dmalloc
 DMALLOC_TARGET_BINARY:=usr/bin/dmalloc
@@ -42,8 +42,9 @@ endif
 $(DMALLOC_DIR)/.configured: $(DMALLOC_DIR)/.unpacked
 	(cd $(DMALLOC_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="-g $(TARGET_CFLAGS)" \
-		LDFLAGS="-g $(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
+		CFLAGS="-g" \
+		LDFLAGS="-g" \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

@@ -6,10 +6,10 @@
 # Copyright (C) 2001-2003 by Erik Andersen <andersen@codepoet.org>
 # Copyright (C) 2002 by Tim Riker <Tim@Rikers.org>
 
-DHCPDUMP_VER:=1.7
-DHCPDUMP_DIR:=$(BUILD_DIR)/dhcpdump-$(DHCPDUMP_VER)
+DHCPDUMP_VERSION:=1.7
+DHCPDUMP_DIR:=$(BUILD_DIR)/dhcpdump-$(DHCPDUMP_VERSION)
 DHCPDUMP_SITE:=http://www.mavetju.org/download/
-DHCPDUMP_SOURCE:=dhcpdump-$(DHCPDUMP_VER).tar.gz
+DHCPDUMP_SOURCE:=dhcpdump-$(DHCPDUMP_VERSION).tar.gz
 DHCPDUMP_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(DHCPDUMP_SOURCE):
@@ -26,8 +26,7 @@ $(DHCPDUMP_DIR)/.configured: $(DHCPDUMP_DIR)/.unpacked
 		cd $(DHCPDUMP_DIR) ; \
 		BUILD_CC=$(TARGET_CC) HOSTCC="$(HOSTCC)" \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

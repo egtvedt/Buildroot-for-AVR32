@@ -25,9 +25,10 @@
 
 # TARGETS
 # http://microcom.port5.com/m102.tar.gz
+MICROCOM_VERSION:=1.02
 MICROCOM_SITE:=http://microcom.port5.com/
 MICROCOM_SOURCE:=m102.tar.gz
-MICROCOM_DIR:=$(BUILD_DIR)/microcom-1.02
+MICROCOM_DIR:=$(BUILD_DIR)/microcom-$(MICROCOM_VERSION)
 
 $(DL_DIR)/$(MICROCOM_SOURCE):
 	$(WGET) -P $(DL_DIR) $(MICROCOM_SITE)/$(MICROCOM_SOURCE)
@@ -51,7 +52,7 @@ ifeq ($(BR2_PREFER_IMA),y)
 	 	$(CFLAGS_WHOLE_PROGRAM) -o $@ $(wildcard $(MICROCOM_DIR)/*.c); \
 	)
 else
-	$(TARGET_CONFIGURE_OPTS) CFLAGS="$(TARGET_CFLAGS)" $(MAKE) -C $(MICROCOM_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(MICROCOM_DIR)
 endif
 	$(STRIP) -s $@
 

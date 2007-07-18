@@ -3,12 +3,12 @@
 # sed
 #
 #############################################################
-SED_VER:=4.1.5
-SED_SOURCE:=sed-$(SED_VER).tar.gz
+SED_VERSION:=4.1.5
+SED_SOURCE:=sed-$(SED_VERSION).tar.gz
 SED_SITE:=http://ftp.gnu.org/pub/gnu/sed
 SED_CAT:=$(ZCAT)
-SED_DIR1:=$(TOOL_BUILD_DIR)/sed-$(SED_VER)
-SED_DIR2:=$(BUILD_DIR)/sed-$(SED_VER)
+SED_DIR1:=$(TOOL_BUILD_DIR)/sed-$(SED_VERSION)
+SED_DIR2:=$(BUILD_DIR)/sed-$(SED_VERSION)
 SED_BINARY:=sed/sed
 SED_TARGET_BINARY:=bin/sed
 ifeq ($(strip $(BR2_LARGEFILE)),y)
@@ -62,12 +62,15 @@ build-sed-host-binary: $(SED_DIR1)/$(SED_BINARY)
 	    rm -rf $(HOST_SED_DIR)/share/locale $(HOST_SED_DIR)/usr/info \
 		    $(HOST_SED_DIR)/usr/man $(HOST_SED_DIR)/usr/share/doc; fi
 
-use-sed-host-binary:
+$(HOST_SED_DIR)/$(SED_TARGET_BINARY):
 	if [ ! -e "$(HOST_SED_DIR)/$(SED_TARGET_BINARY)" ] ; then \
 		mkdir -p "$(HOST_SED_DIR)/bin"; \
 		rm -f "$(HOST_SED_DIR)/$(SED_TARGET_BINARY)"; \
 		ln -sf "$(HOST_SED_IF_ANY)" "$(HOST_SED_DIR)/$(SED_TARGET_BINARY)"; \
 	fi
+
+
+use-sed-host-binary:	$(HOST_SED_DIR)/$(SED_TARGET_BINARY)
 
 host-sed: $(HOST_SED_BINARY)
 
@@ -96,8 +99,7 @@ $(SED_DIR2)/.unpacked: $(DL_DIR)/$(SED_SOURCE)
 $(SED_DIR2)/.configured: $(SED_DIR2)/.unpacked
 	(cd $(SED_DIR2); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		CPPFLAGS="$(SED_CFLAGS)" \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
@@ -114,6 +116,8 @@ $(SED_DIR2)/.configured: $(SED_DIR2)/.unpacked
 		--localstatedir=/var \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
+		--include=$(STAGING_DIR)/include \
+		--include=$(STAGING_DIR)/usr/include \
 		$(DISABLE_NLS) \
 	);
 	touch $(SED_DIR2)/.configured
@@ -152,4 +156,4 @@ sed-dirclean:
 ifeq ($(strip $(BR2_PACKAGE_SED)),y)
 TARGETS+=sed
 endif
-.PHONY: sed host-sed
+.PHONY: sed host-sed use-sed-host-binary

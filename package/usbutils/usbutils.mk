@@ -3,10 +3,10 @@
 # usbutils
 #
 #############################################################
-USBUTILS_VER:=0.72
-USBUTILS_SOURCE:=usbutils-$(USBUTILS_VER).tar.gz
+USBUTILS_VERSION:=0.72
+USBUTILS_SOURCE:=usbutils-$(USBUTILS_VERSION).tar.gz
 USBUTILS_SITE:=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/linux-usb/
-USBUTILS_DIR:=$(BUILD_DIR)/usbutils-$(USBUTILS_VER)
+USBUTILS_DIR:=$(BUILD_DIR)/usbutils-$(USBUTILS_VERSION)
 USBUTILS_CAT:=$(ZCAT)
 USBUTILS_BINARY:=lsusb
 USBUTILS_TARGET_BINARY:=usr/sbin/lsusb
@@ -24,8 +24,7 @@ $(USBUTILS_DIR)/.unpacked: $(DL_DIR)/$(USBUTILS_SOURCE)
 $(USBUTILS_DIR)/.configured: $(USBUTILS_DIR)/.unpacked
 	(cd $(USBUTILS_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS) -I$(TARGET_DIR)/usr/include" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_func_malloc_0_nonnull=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
@@ -36,7 +35,7 @@ $(USBUTILS_DIR)/.configured: $(USBUTILS_DIR)/.unpacked
 	touch $(USBUTILS_DIR)/.configured
 
 $(USBUTILS_DIR)/$(USBUTILS_BINARY): $(USBUTILS_DIR)/.configured
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CC=$(TARGET_CC) -C $(USBUTILS_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(USBUTILS_DIR)
 
 $(TARGET_DIR)/$(USBUTILS_TARGET_BINARY): $(USBUTILS_DIR)/$(USBUTILS_BINARY)
 	$(MAKE) -C $(USBUTILS_DIR) DESTDIR=$(TARGET_DIR) install

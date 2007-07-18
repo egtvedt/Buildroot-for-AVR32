@@ -6,10 +6,10 @@
 # Copyright (C) 2001-2003 by Erik Andersen <andersen@codepoet.org>
 # Copyright (C) 2002 by Tim Riker <Tim@Rikers.org>
 
-TCPDUMP_VER:=3.9.4
-TCPDUMP_DIR:=$(BUILD_DIR)/tcpdump-$(TCPDUMP_VER)
+TCPDUMP_VERSION:=3.9.5
+TCPDUMP_DIR:=$(BUILD_DIR)/tcpdump-$(TCPDUMP_VERSION)
 TCPDUMP_SITE:=http://www.tcpdump.org/release
-TCPDUMP_SOURCE:=tcpdump-$(TCPDUMP_VER).tar.gz
+TCPDUMP_SOURCE:=tcpdump-$(TCPDUMP_VERSION).tar.gz
 TCPDUMP_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(TCPDUMP_SOURCE):
@@ -19,7 +19,8 @@ tcpdump-source: $(DL_DIR)/$(TCPDUMP_SOURCE)
 
 $(TCPDUMP_DIR)/.unpacked: $(DL_DIR)/$(TCPDUMP_SOURCE)
 	$(TCPDUMP_CAT) $(DL_DIR)/$(TCPDUMP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	touch $(TCPDUMP_DIR)/.unpacked
+	toolchain/patch-kernel.sh $(TCPDUMP_DIR) package/tcpdump tcpdump*\.patch
+	touch $@
 
 $(TCPDUMP_DIR)/.configured: $(TCPDUMP_DIR)/.unpacked
 	( \
@@ -27,8 +28,7 @@ $(TCPDUMP_DIR)/.configured: $(TCPDUMP_DIR)/.unpacked
 		ac_cv_linux_vers=$(BR2_DEFAULT_KERNEL_HEADERS) \
 		BUILD_CC=$(TARGET_CC) HOSTCC="$(HOSTCC)" \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -47,9 +47,10 @@ $(TCPDUMP_DIR)/.configured: $(TCPDUMP_DIR)/.unpacked
 		--infodir=/usr/info \
 		--with-build-cc="$(HOSTCC)" \
 		--without-crypto \
+		--disable-smb \
 	)
 	$(SED) '/HAVE_PCAP_DEBUG/d' $(TCPDUMP_DIR)/config.h
-	touch $(TCPDUMP_DIR)/.configured
+	touch $@
 
 $(TCPDUMP_DIR)/tcpdump: $(TCPDUMP_DIR)/.configured
 	$(MAKE) CC="$(TARGET_CC)" \
@@ -59,7 +60,8 @@ $(TCPDUMP_DIR)/tcpdump: $(TCPDUMP_DIR)/.configured
 		-C $(TCPDUMP_DIR)
 
 $(TARGET_DIR)/sbin/tcpdump: $(TCPDUMP_DIR)/tcpdump
-	cp -af $< $@
+	cp -f $< $@
+	$(STRIP) -s $@
 
 tcpdump: uclibc zlib libpcap $(TARGET_DIR)/sbin/tcpdump
 

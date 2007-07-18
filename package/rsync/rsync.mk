@@ -3,10 +3,10 @@
 # rsync
 #
 #############################################################
-RSYNC_VER:=2.6.9
-RSYNC_SOURCE:=rsync-$(RSYNC_VER).tar.gz
+RSYNC_VERSION:=2.6.9
+RSYNC_SOURCE:=rsync-$(RSYNC_VERSION).tar.gz
 RSYNC_SITE:=http://rsync.samba.org/ftp/rsync/
-RSYNC_DIR:=$(BUILD_DIR)/rsync-$(RSYNC_VER)
+RSYNC_DIR:=$(BUILD_DIR)/rsync-$(RSYNC_VERSION)
 RSYNC_CAT:=$(ZCAT)
 RSYNC_BINARY:=rsync
 RSYNC_TARGET_BINARY:=usr/bin/rsync
@@ -24,8 +24,7 @@ $(RSYNC_DIR)/.unpacked: $(DL_DIR)/$(RSYNC_SOURCE)
 $(RSYNC_DIR)/.configured: $(RSYNC_DIR)/.unpacked
 	(cd $(RSYNC_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -36,7 +35,7 @@ $(RSYNC_DIR)/.configured: $(RSYNC_DIR)/.unpacked
 	touch $(RSYNC_DIR)/.configured
 
 $(RSYNC_DIR)/$(RSYNC_BINARY): $(RSYNC_DIR)/.configured
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CC=$(TARGET_CC) -C $(RSYNC_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(RSYNC_DIR)
 
 $(TARGET_DIR)/$(RSYNC_TARGET_BINARY): $(RSYNC_DIR)/$(RSYNC_BINARY)
 	install -D $(RSYNC_DIR)/$(RSYNC_BINARY) $(TARGET_DIR)/$(RSYNC_TARGET_BINARY)

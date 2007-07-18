@@ -3,12 +3,12 @@
 # diffutils
 #
 #############################################################
-DIFFUTILS_VER=2.8.7
-DIFFUTILS_SOURCE:=diffutils-$(DIFFUTILS_VER).tar.gz
+DIFFUTILS_VERSION=2.8.7
+DIFFUTILS_SOURCE:=diffutils-$(DIFFUTILS_VERSION).tar.gz
 #DIFFUTILS_SITE:=ftp://alpha.gnu.org/gnu/diffutils/
 DIFFUTILS_SITE:=http://mirrors.ircam.fr/pub/gnu/alpha/gnu/diffutils
 DIFFUTILS_CAT:=$(ZCAT)
-DIFFUTILS_DIR:=$(BUILD_DIR)/diffutils-$(DIFFUTILS_VER)
+DIFFUTILS_DIR:=$(BUILD_DIR)/diffutils-$(DIFFUTILS_VERSION)
 DIFFUTILS_BINARY:=src/diff
 DIFFUTILS_TARGET_BINARY:=usr/bin/diff
 
@@ -24,8 +24,7 @@ $(DIFFUTILS_DIR)/.unpacked: $(DL_DIR)/$(DIFFUTILS_SOURCE)
 $(DIFFUTILS_DIR)/.configured: $(DIFFUTILS_DIR)/.unpacked
 	(cd $(DIFFUTILS_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_func_strtod=yes \
 		ac_fsusage_space=yes \
 		fu_cv_sys_stat_statfs2_bsize=yes \

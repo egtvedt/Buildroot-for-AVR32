@@ -20,7 +20,7 @@ config BR2_ENABLE_MULTILIB
 	bool "Enable multilib support?"
 	default n
 	help
-	    If you want multilib enabled, enable this...
+	    Build libraries to support different ABIs.
 
 config BR2_LARGEFILE
 	bool "Enable large file (files > 2 GB) support?"
@@ -28,6 +28,18 @@ config BR2_LARGEFILE
 	default y
 	help
 	    Enable large file (files > 2 GB) support
+
+config BR2_INET_IPV6
+	bool "Enable IPv6"
+	default n
+	help
+	    Enable IPv6.
+
+config BR2_INET_RPC
+	bool "Enable RPC"
+	default n
+	help
+	    Enable RPC. RPC support is needed for nfs.
 
 config BR2_SOFT_FLOAT
 	bool "Use software floating point by default"

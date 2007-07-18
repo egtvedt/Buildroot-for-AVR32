@@ -25,8 +25,7 @@ $(MODULE_INIT_TOOLS_DIR)/.unpacked: $(DL_DIR)/$(MODULE_INIT_TOOLS_SOURCE)
 $(MODULE_INIT_TOOLS_DIR)/.configured: $(MODULE_INIT_TOOLS_DIR)/.unpacked
 	(cd $(MODULE_INIT_TOOLS_DIR); \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		INSTALL=$(MODULE_INIT_TOOLS_DIR)/install-sh \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
@@ -101,7 +100,7 @@ $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26: $(MODULE_INIT_TOOLS_DIR2)/$(MODU
 
 cross-depmod26: $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26
 
-cross-depmod26-source: $(DL_DIR)/$(MODULE_INIT_TOOLS_SOURCE)
+module-init-tools-source cross-depmod26-source: $(DL_DIR)/$(MODULE_INIT_TOOLS_SOURCE)
 
 cross-depmod26-clean:
 	rm -f $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26

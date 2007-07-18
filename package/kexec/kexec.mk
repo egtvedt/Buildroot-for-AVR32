@@ -3,11 +3,11 @@
 # kexec
 #
 #############################################################
-KEXEC_VER:=1.101
-KEXEC_SOURCE:=kexec-tools_$(KEXEC_VER)-kdump10.orig.tar.gz
-KEXEC_PATCH:=kexec-tools_$(KEXEC_VER)-kdump10-2.diff.gz
+KEXEC_VERSION:=1.101
+KEXEC_SOURCE:=kexec-tools_$(KEXEC_VERSION)-kdump10.orig.tar.gz
+KEXEC_PATCH:=kexec-tools_$(KEXEC_VERSION)-kdump10-2.diff.gz
 KEXEC_SITE:=ftp://ftp.debian.org/debian/pool/main/k/kexec-tools/
-KEXEC_DIR:=$(BUILD_DIR)/kexec-tools-$(KEXEC_VER)
+KEXEC_DIR:=$(BUILD_DIR)/kexec-tools-$(KEXEC_VERSION)
 KEXEC_CAT:=$(ZCAT)
 KEXEC_BINARY:=kexec
 KEXEC_TARGET_BINARY:=sbin/kexec
@@ -43,8 +43,7 @@ endif
 $(KEXEC_DIR)/.configured: $(KEXEC_DIR)/.unpacked
 	(cd $(KEXEC_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
@@ -54,7 +53,7 @@ $(KEXEC_DIR)/.configured: $(KEXEC_DIR)/.unpacked
 	touch $@
 
 $(KEXEC_DIR)/objdir-$(GNU_TARGET_NAME)/build/sbin/$(KEXEC_BINARY): $(KEXEC_DIR)/.configured
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CC=$(TARGET_CC) -C $(KEXEC_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(KEXEC_DIR)
 	touch -c $@
 
 $(TARGET_DIR)/$(KEXEC_TARGET_BINARY): $(KEXEC_DIR)/objdir-$(GNU_TARGET_NAME)/build/sbin/$(KEXEC_BINARY)

@@ -20,9 +20,10 @@
 # License along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
-JPEG_DIR=$(BUILD_DIR)/jpeg-6b
+JPEG_VERSION:=6b
+JPEG_DIR=$(BUILD_DIR)/jpeg-$(JPEG_VERSION)
 JPEG_SITE:=ftp://ftp.uu.net/graphics/jpeg/
-JPEG_SOURCE=jpegsrc.v6b.tar.gz
+JPEG_SOURCE=jpegsrc.v$(JPEG_VERSION).tar.gz
 JPEG_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(JPEG_SOURCE):
@@ -39,8 +40,7 @@ $(JPEG_DIR)/.unpacked: $(DL_DIR)/$(JPEG_SOURCE)
 $(JPEG_DIR)/.configured: $(JPEG_DIR)/.unpacked
 	(cd $(JPEG_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

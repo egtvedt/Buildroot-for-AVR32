@@ -3,10 +3,11 @@
 # libgtk1.2
 #
 #############################################################
-LIBGTK12_SOURCE:=gtk+-1.2.10.tar.gz
+LIBGTK12_VERSION:=1.2.10
+LIBGTK12_SOURCE:=gtk+-$(LIBGTK12_VERSION).tar.gz
 LIBGTK12_SITE:=http://ftp.gnome.org/pub/gnome/sources/gtk+/1.2
 LIBGTK12_CAT:=$(ZCAT)
-LIBGTK12_DIR:=$(BUILD_DIR)/gtk+-1.2.10
+LIBGTK12_DIR:=$(BUILD_DIR)/gtk+-$(LIBGTK12_VERSION)
 LIBGTK12_BINARY:=libgtk.a
 
 
@@ -24,10 +25,8 @@ $(LIBGTK12_DIR)/.unpacked: $(DL_DIR)/$(LIBGTK12_SOURCE)
 $(LIBGTK12_DIR)/.configured: $(LIBGTK12_DIR)/.unpacked
 	(cd $(LIBGTK12_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		GLIB_CONFIG=$(STAGING_DIR)/bin/glib-config \
-		ac_cv_func_mmap_fixed_mapped=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

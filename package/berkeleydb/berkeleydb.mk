@@ -3,12 +3,12 @@
 # berkeley db
 #
 #############################################################
-DB_VER:=4.3.29
-DB_SO_VER:=4.3
+DB_VERSION:=4.3.29
+DB_SO_VERSION:=4.3
 DB_SITE:=ftp://ftp.sleepycat.com/releases
-DB_SOURCE:=db-$(DB_VER).NC.tar.gz
-DB_DIR:=$(BUILD_DIR)/db-$(DB_VER).NC
-DB_SHARLIB:=libdb-$(DB_SO_VER).so
+DB_SOURCE:=db-$(DB_VERSION).NC.tar.gz
+DB_DIR:=$(BUILD_DIR)/db-$(DB_VERSION).NC
+DB_SHARLIB:=libdb-$(DB_SO_VERSION).so
 
 $(DL_DIR)/$(DB_SOURCE):
 	$(WGET) -P $(DL_DIR) $(DB_SITE)/$(DB_SOURCE)
@@ -22,8 +22,7 @@ $(DB_DIR)/.dist: $(DL_DIR)/$(DB_SOURCE)
 $(DB_DIR)/.configured: $(DB_DIR)/.dist
 	(cd $(DB_DIR)/build_unix; rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		../dist/configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -70,7 +69,7 @@ $(TARGET_DIR)/lib/$(DB_SHARLIB): $(STAGING_DIR)/lib/$(DB_SHARLIB)
 	(cd $(TARGET_DIR)/usr/lib; ln -fs /lib/$(DB_SHARLIB) libdb.so)
 	-$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libdb*so*
 
-$(TARGET_DIR)/usr/lib/libdb.a: $(STAGING_DIR)/lib/libdb-$(DB_SO_VER).a
+$(TARGET_DIR)/usr/lib/libdb.a: $(STAGING_DIR)/lib/libdb-$(DB_SO_VERSION).a
 	cp -dpf $(STAGING_DIR)/include/db.h $(TARGET_DIR)/usr/include/
 	cp -dpf $(STAGING_DIR)/lib/libdb*.a $(TARGET_DIR)/usr/lib/
 	cp -dpf $(STAGING_DIR)/lib/libdb*.la $(TARGET_DIR)/usr/lib/

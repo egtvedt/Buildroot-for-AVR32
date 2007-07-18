@@ -4,7 +4,7 @@
 #
 #############################################################
 
-DMRAID_VERSION=1.0.0.rc13
+DMRAID_VERSION=1.0.0.rc14
 DMRAID_SOURCE:=dmraid-$(DMRAID_VERSION).tar.bz2
 DMRAID_SITE:=http://people.redhat.com/~heinzm/sw/dmraid/src
 DMRAID_DIR:=$(BUILD_DIR)/dmraid/$(DMRAID_VERSION)
@@ -26,8 +26,7 @@ $(DMRAID_DIR)/.unpacked: $(DL_DIR)/$(DMRAID_SOURCE)
 $(DMRAID_DIR)/.configured: $(DMRAID_DIR)/.unpacked
 	(cd $(DMRAID_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -52,7 +51,7 @@ $(DMRAID_TARGET_BINARY): $(DMRAID_DIR)/tools/$(DMRAID_BINARY)
 dmraid: uclibc dm zlib $(DMRAID_TARGET_BINARY)
 
 dmraid-clean:
-	rm $(DMRAID_TARGET_BINARY)
+	rm -f $(DMRAID_TARGET_BINARY) $(TARGET_DIR)/etc/init.d/dmraid
 	$(MAKE) -C $(DMRAID_DIR) clean
 
 dmraid-dirclean:
