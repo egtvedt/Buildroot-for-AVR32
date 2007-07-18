@@ -4,25 +4,26 @@
  configure                        |   13 +-
  libaf/af_format.c                |    7 +
  libavcodec/Makefile              |    7 +
- libavcodec/avr32/dsputil_avr32.c | 2664 ++++++++++++++++++++++++++++++++++++++
- libavcodec/avr32/fdct.S          |  509 ++++++++
- libavcodec/avr32/h264idct.S      |  418 ++++++
- libavcodec/avr32/idct.S          |  797 ++++++++++++
- libavcodec/avr32/mc.S            |  402 ++++++
- libavcodec/avr32/pico.h          |  228 ++++
- libavcodec/bitstream.h           |   77 ++-
+ libavcodec/avr32/dsputil_avr32.c | 2678 ++++++++++++++++++++++++++++++++++++++
+ libavcodec/avr32/fdct.S          |  541 ++++++++
+ libavcodec/avr32/h264idct.S      |  451 +++++++
+ libavcodec/avr32/idct.S          |  829 ++++++++++++
+ libavcodec/avr32/mc.S            |  434 ++++++
+ libavcodec/avr32/pico.h          |  260 ++++
+ libavcodec/bitstream.h           |   77 +-
  libavcodec/dsputil.c             |    3 +
  libavcodec/h264.c                |   15 +
  libavutil/common.h               |   16 +
  libavutil/internal.h             |    9 +
  libfaad2/common.h                |    2 +-
  libmpcodecs/ad_libmad.c          |    5 +
- libswscale/pico-avr32.h          |  105 ++
+ libswscale/pico-avr32.h          |  137 ++
  libswscale/swscale_internal.h    |    2 +-
  libswscale/yuv2rgb.c             |   14 +
- libswscale/yuv2rgb_avr32.c       |  384 ++++++
+ libswscale/yuv2rgb_avr32.c       |  416 ++++++
  libvo/vo_fbdev2.c                |  101 ++-
- 24 files changed, 5771 insertions(+), 19 deletions(-)
+ version.sh                       |    2 +-
+ 25 files changed, 6011 insertions(+), 20 deletions(-)
  create mode 100644 libavcodec/avr32/dsputil_avr32.c
  create mode 100644 libavcodec/avr32/fdct.S
  create mode 100644 libavcodec/avr32/h264idct.S
@@ -161,27 +162,41 @@ index 17b6c45..8e1dc96 100644
  	   alpha/*.o alpha/*~ \
 diff --git a/libavcodec/avr32/dsputil_avr32.c b/libavcodec/avr32/dsputil_avr32.c
 new file mode 100644
-index 0000000..1dd69ce
+index 0000000..200284d
 --- /dev/null
 +++ b/libavcodec/avr32/dsputil_avr32.c
-@@ -0,0 +1,2664 @@
+@@ -0,0 +1,2678 @@
 +/*
-+ * AVR32 optimized DSP utils
-+ * Copyright (c) 2004 Atmel.
++ * Copyright (c) 2007 Atmel Corporation. All rights reserved.
 + *
-+ * This library is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU Lesser General Public
-+ * License as published by the Free Software Foundation; either
-+ * version 2 of the License, or (at your option) any later version.
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
 + *
-+ * This library is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-+ * Lesser General Public License for more details.
++ * 1. Redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer.
 + *
-+ * You should have received a copy of the GNU Lesser General Public
-+ * License along with this library; if not, write to the Free Software
-+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ * 2. Redistributions in binary form must reproduce the above
++ * copyright notice, this list of conditions and the following
++ * disclaimer in the documentation and/or other materials provided
++ * with the distribution.
++ *
++ * 3. The name of ATMEL may not be used to endorse or promote products
++ * derived from this software without specific prior written
++ * permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
++ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
++ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
++ * DAMAGE.
 + */
 +
 +#include "../dsputil.h"
@@ -2831,10 +2846,42 @@ index 0000000..1dd69ce
 +
 diff --git a/libavcodec/avr32/fdct.S b/libavcodec/avr32/fdct.S
 new file mode 100644
-index 0000000..050e984
+index 0000000..be45b86
 --- /dev/null
 +++ b/libavcodec/avr32/fdct.S
-@@ -0,0 +1,509 @@
+@@ -0,0 +1,541 @@
++/*
++ * Copyright (c) 2007 Atmel Corporation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above
++ * copyright notice, this list of conditions and the following
++ * disclaimer in the documentation and/or other materials provided
++ * with the distribution.
++ *
++ * 3. The name of ATMEL may not be used to endorse or promote products
++ * derived from this software without specific prior written
++ * permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
++ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
++ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
++ * DAMAGE.
++ */
 +
 +//********************************************************** 
 +//* 2-D fDCT, Based on: 		          		  *
@@ -3346,10 +3393,43 @@ index 0000000..050e984
 +
 diff --git a/libavcodec/avr32/h264idct.S b/libavcodec/avr32/h264idct.S
 new file mode 100644
-index 0000000..52e8558
+index 0000000..4b23e2d
 --- /dev/null
 +++ b/libavcodec/avr32/h264idct.S
-@@ -0,0 +1,418 @@
+@@ -0,0 +1,451 @@
++/*
++ * Copyright (c) 2007 Atmel Corporation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above
++ * copyright notice, this list of conditions and the following
++ * disclaimer in the documentation and/or other materials provided
++ * with the distribution.
++ *
++ * 3. The name of ATMEL may not be used to endorse or promote products
++ * derived from this software without specific prior written
++ * permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
++ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
++ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
++ * DAMAGE.
++ */
++
 +	.global	h264_idct_add_avr32
 +
 +	/* Macro for performing the 1-D transform on one row line. 
@@ -3770,10 +3850,42 @@ index 0000000..52e8558
 +//}
 diff --git a/libavcodec/avr32/idct.S b/libavcodec/avr32/idct.S
 new file mode 100644
-index 0000000..4530b12
+index 0000000..e7551ec
 --- /dev/null
 +++ b/libavcodec/avr32/idct.S
-@@ -0,0 +1,797 @@
+@@ -0,0 +1,829 @@
++/*
++ * Copyright (c) 2007 Atmel Corporation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above
++ * copyright notice, this list of conditions and the following
++ * disclaimer in the documentation and/or other materials provided
++ * with the distribution.
++ *
++ * 3. The name of ATMEL may not be used to endorse or promote products
++ * derived from this software without specific prior written
++ * permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
++ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
++ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
++ * DAMAGE.
++ */
 +
 +	.global idct_add_avr32
 +	.global idct_put_avr32
@@ -4573,10 +4685,42 @@ index 0000000..4530b12
 +	
 diff --git a/libavcodec/avr32/mc.S b/libavcodec/avr32/mc.S
 new file mode 100644
-index 0000000..6803ab7
+index 0000000..07a002d
 --- /dev/null
 +++ b/libavcodec/avr32/mc.S
-@@ -0,0 +1,402 @@
+@@ -0,0 +1,434 @@
++/*
++ * Copyright (c) 2007 Atmel Corporation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above
++ * copyright notice, this list of conditions and the following
++ * disclaimer in the documentation and/or other materials provided
++ * with the distribution.
++ *
++ * 3. The name of ATMEL may not be used to endorse or promote products
++ * derived from this software without specific prior written
++ * permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
++ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
++ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
++ * DAMAGE.
++ */
 +		
 +	
 +	/* Macro for masking the lowest bit of each byte in a
@@ -4981,10 +5125,42 @@ index 0000000..6803ab7
 +	pixels8	0	
 diff --git a/libavcodec/avr32/pico.h b/libavcodec/avr32/pico.h
 new file mode 100644
-index 0000000..8799f37
+index 0000000..32201ba
 --- /dev/null
 +++ b/libavcodec/avr32/pico.h
-@@ -0,0 +1,228 @@
+@@ -0,0 +1,260 @@
++/*
++ * Copyright (c) 2007 Atmel Corporation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above
++ * copyright notice, this list of conditions and the following
++ * disclaimer in the documentation and/or other materials provided
++ * with the distribution.
++ *
++ * 3. The name of ATMEL may not be used to endorse or promote products
++ * derived from this software without specific prior written
++ * permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
++ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
++ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
++ * DAMAGE.
++ */
 +#ifndef __PICO_H__
 +#define __PICO_H__
 +
@@ -5489,10 +5665,42 @@ index 076359a..51b77fe 100644
    return 1;
 diff --git a/libswscale/pico-avr32.h b/libswscale/pico-avr32.h
 new file mode 100644
-index 0000000..a4ef5ad
+index 0000000..7ac6200
 --- /dev/null
 +++ b/libswscale/pico-avr32.h
-@@ -0,0 +1,105 @@
+@@ -0,0 +1,137 @@
++/*
++ * Copyright (c) 2007 Atmel Corporation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above
++ * copyright notice, this list of conditions and the following
++ * disclaimer in the documentation and/or other materials provided
++ * with the distribution.
++ *
++ * 3. The name of ATMEL may not be used to endorse or promote products
++ * derived from this software without specific prior written
++ * permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
++ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
++ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
++ * DAMAGE.
++ */
 +#ifndef __PICO_H__
 +#define __PICO_H__
 +
@@ -5652,10 +5860,42 @@ index 71759bc..fa83985 100644
  
 diff --git a/libswscale/yuv2rgb_avr32.c b/libswscale/yuv2rgb_avr32.c
 new file mode 100644
-index 0000000..f972655
+index 0000000..4a8341e
 --- /dev/null
 +++ b/libswscale/yuv2rgb_avr32.c
-@@ -0,0 +1,384 @@
+@@ -0,0 +1,416 @@
++/*
++ * Copyright (c) 2007 Atmel Corporation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above
++ * copyright notice, this list of conditions and the following
++ * disclaimer in the documentation and/or other materials provided
++ * with the distribution.
++ *
++ * 3. The name of ATMEL may not be used to endorse or promote products
++ * derived from this software without specific prior written
++ * permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
++ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
++ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
++ * DAMAGE.
++ */
 +#include "pico-avr32.h"
 +
 +
@@ -6194,3 +6434,11 @@ index 053c193..7017770 100644
    }
    return VO_NOTIMPL;
  }
+diff --git a/version.sh b/version.sh
+index 44b5c5d..cf22a68 100755
+--- a/version.sh
++++ b/version.sh
+@@ -1,2 +1,2 @@
+ #!/bin/sh
+-echo "#define VERSION \"1.0rc1-$1\"" > version.h
++echo "#define VERSION \"1.0rc1.atmel.2-$1\"" > version.h
