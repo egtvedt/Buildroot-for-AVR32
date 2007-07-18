@@ -16,6 +16,7 @@ $(DL_DIR)/$(LIBMAD_SOURCE):
 $(LIBMAD_DIR)/.unpacked: $(DL_DIR)/$(LIBMAD_SOURCE)
 	$(LIBMAD_CAT) $(DL_DIR)/$(LIBMAD_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(CONFIG_UPDATE) $(LIBMAD_DIR)
+	toolchain/patch-kernel.sh $(LIBMAD_DIR) package/libmad/ libmad-$(LIBMAD_VERSION)\*.patch\*
 	@touch $@
 
 $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
@@ -29,6 +30,8 @@ $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--sysconfdir=/etc \
+		--disable-debugging \
+		--enable-speed \
 		$(DISABLE_NLS) \
 	);
 	@touch $@
@@ -36,16 +39,13 @@ $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
 $(LIBMAD_DIR)/libmad.a: $(LIBMAD_DIR)/.configured
 	rm -f $@
 	$(MAKE) CC=$(TARGET_CC) -C $(LIBMAD_DIR)
-	@touch -c $@
 
 $(STAGING_DIR)/lib/libmad.a: $(LIBMAD_DIR)/libmad.a
 	$(MAKE) prefix=$(STAGING_DIR)/usr -C $(LIBMAD_DIR) install
-	@touch -c $(STAGING_DIR)/lib/libmad.a
 
 $(TARGET_DIR)/usr/lib/libmad.so: $(STAGING_DIR)/lib/libmad.a
 	mkdir -p $(TARGET_DIR)/usr/lib
 	cp -dpf $(STAGING_DIR)/lib/libmad.so* $(TARGET_DIR)/usr/lib/
-	@touch -c $@
 
 libmad:	uclibc $(TARGET_DIR)/usr/lib/libmad.so
 
