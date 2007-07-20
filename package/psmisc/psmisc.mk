@@ -3,10 +3,10 @@
 # psmisc
 #
 #############################################################
-PSMISC_VER:=22.2
-PSMISC_SOURCE:=psmisc-$(PSMISC_VER).tar.gz
+PSMISC_VERSION:=22.2
+PSMISC_SOURCE:=psmisc-$(PSMISC_VERSION).tar.gz
 PSMISC_SITE:=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/psmisc
-PSMISC_DIR:=$(BUILD_DIR)/psmisc-$(PSMISC_VER)
+PSMISC_DIR:=$(BUILD_DIR)/psmisc-$(PSMISC_VERSION)
 PSMISC_BINARY:=src/killall
 PSMISC_TARGET_BINARY:=bin/killall
 
@@ -20,14 +20,14 @@ $(PSMISC_DIR)/.unpacked: $(DL_DIR)/$(PSMISC_SOURCE)
 $(PSMISC_DIR)/.configured: $(PSMISC_DIR)/.unpacked
 	(cd $(PSMISC_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/ \
 		$(DISABLE_NLS) \
+		$(DISABLE_IPV6) \
 	);
 	touch $(PSMISC_DIR)/.configured
 

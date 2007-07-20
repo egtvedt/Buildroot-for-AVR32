@@ -25,9 +25,11 @@ TOPDIR=./
 CONFIG_CONFIG_IN = Config.in
 CONFIG_DEFCONFIG = .defconfig
 CONFIG = package/config
+DATE:=$(shell date -u +%Y%m%d)
 
 noconfig_targets := menuconfig config oldconfig randconfig \
 	defconfig allyesconfig allnoconfig release tags    \
+	source-check help
 
 #	$(shell find . -name *_defconfig |sed 's/.*\///')
 
@@ -35,6 +37,62 @@ noconfig_targets := menuconfig config oldconfig randconfig \
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
 -include $(TOPDIR).config
 endif
+
+# To put more focus on warnings, be less verbose as default
+# Use 'make V=1' to see the full commands
+ifdef V
+  ifeq ("$(origin V)", "command line")
+    KBUILD_VERBOSE = $(V)
+  endif
+endif
+ifndef KBUILD_VERBOSE
+  KBUILD_VERBOSE = 0
+endif
+
+ifeq ($(KBUILD_VERBOSE),1)
+  quiet=
+  Q =
+else
+  quiet=quiet_
+  Q = @
+endif
+
+CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+	else if [ -x /bin/bash ]; then echo /bin/bash; \
+	else echo sh; fi ; fi)
+
+export CONFIG_SHELL quiet Q KBUILD_VERBOSE
+
+ifndef HOSTAR
+HOSTAR:=ar
+endif
+ifndef HOSTAS
+HOSTAS:=as
+endif
+ifndef HOSTCC
+HOSTCC:=gcc
+else
+endif
+ifndef HOSTCXX
+HOSTCXX:=g++
+endif
+ifndef HOSTLD
+HOSTLD:=ld
+endif
+ifndef HOSTLN
+HOSTLN:=ln
+endif
+HOSTAR :=$(shell $(CONFIG_SHELL) -c "which $(HOSTAR)"  || type -p $(HOSTAR)  || echo ar)
+HOSTAS :=$(shell $(CONFIG_SHELL) -c "which $(HOSTAS)"  || type -p $(HOSTAS)  || echo as)
+HOSTCC :=$(shell $(CONFIG_SHELL) -c "which $(HOSTCC)"  || type -p $(HOSTCC)  || echo gcc)
+HOSTCXX:=$(shell $(CONFIG_SHELL) -c "which $(HOSTCXX)" || type -p $(HOSTCXX) || echo g++)
+HOSTLD :=$(shell $(CONFIG_SHELL) -c "which $(HOSTLD)"  || type -p $(HOSTLD)  || echo ld)
+HOSTLN :=$(shell $(CONFIG_SHELL) -c "which $(HOSTLN)"  || type -p $(HOSTLN)  || echo ln)
+ifndef CFLAGS_FOR_BUILD
+CFLAGS_FOR_BUILD:=-g -O2
+endif
+export HOSTAR HOSTAS HOSTCC HOSTCXX HOSTLD
+
 
 ifeq ($(strip $(BR2_HAVE_DOT_CONFIG)),y)
 
@@ -47,6 +105,51 @@ cc-option = $(shell if $(TARGET_CC) $(TARGET_CFLAGS) $(1) -S -o /dev/null -xc /d
 
 #############################################################
 #
+# Hide troublesome environment variables from sub processes
+#
+#############################################################
+unexport CROSS_COMPILE
+unexport ARCH
+
+#############################################################
+#
+# Setup the proper filename extensions for the host
+#
+##############################################################
+ifneq ($(findstring linux,$(BR2_GNU_BUILD_SUFFIX)),)
+HOST_EXEEXT:=
+HOST_LIBEXT:=.a
+HOST_SHREXT:=.so
+endif
+ifneq ($(findstring apple,$(BR2_GNU_BUILD_SUFFIX)),)
+HOST_EXEEXT:=
+HOST_LIBEXT:=.a
+HOST_SHREXT:=.dylib
+endif
+ifneq ($(findstring cygwin,$(BR2_GNU_BUILD_SUFFIX)),)
+HOST_EXEEXT:=.exe
+HOST_LIBEXT:=.lib
+HOST_SHREXT:=.dll
+endif
+ifneq ($(findstring mingw,$(BR2_GNU_BUILD_SUFFIX)),)
+HOST_EXEEXT:=.exe
+HOST_LIBEXT:=.lib
+HOST_SHREXT:=.dll
+endif
+
+# The preferred type of libs we build for the target
+ifeq ($(BR2_PREFER_STATIC_LIB),y)
+LIBTGTEXT=.a
+#PREFERRED_LIB_FLAGS:=--disable-shared --enable-static
+else
+LIBTGTEXT=.so
+#PREFERRED_LIB_FLAGS:=--disable-static --enable-shared
+endif
+PREFERRED_LIB_FLAGS:=--enable-static --enable-shared
+
+
+#############################################################
+#
 # The list of stuff to build for the target toolchain
 # along with the packages to build for the target.
 #
@@ -56,6 +159,15 @@ TARGETS:=uclibc-configured binutils gcc uclibc-target-utils
 else
 TARGETS:=uclibc
 endif
+
+PROJECT:=$(strip $(subst ",,$(BR2_PROJECT)))
+#"))
+TARGET_HOSTNAME:=$(strip $(subst ",,$(BR2_HOSTNAME)))
+#"))
+BANNER:=$(strip $(subst ",,$(BR2_BANNER)))
+#"))
+
+
 include toolchain/Makefile.in
 include package/Makefile.in
 
@@ -65,8 +177,6 @@ include package/Makefile.in
 # what you are doing.
 #
 #############################################################
-
-
 
 all:   world
 
@@ -86,12 +196,14 @@ TARGETS_CLEAN:=$(patsubst %,%-clean,$(TARGETS))
 TARGETS_SOURCE:=$(patsubst %,%-source,$(TARGETS))
 TARGETS_DIRCLEAN:=$(patsubst %,%-dirclean,$(TARGETS))
 
-world: $(DL_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) $(TARGETS)
-dirs: $(DL_DIR) $(BUILD_DIR) $(STAGING_DIR)
+world: $(DL_DIR) $(BUILD_DIR) $(PROJECT_BUILD_DIR) \
+	$(BINARIES_DIR) $(STAGING_DIR) $(TARGET_DIR) bsp $(TARGETS)
+dirs: $(DL_DIR) $(BUILD_DIR) $(PROJECT_BUILD_DIR) $(STAGING_DIR)
 
-.PHONY: all world dirs clean dirclean distclean source $(TARGETS) \
+.PHONY: all world dirs clean dirclean distclean source bsp $(TARGETS) \
 	$(TARGETS_CLEAN) $(TARGETS_DIRCLEAN) $(TARGETS_SOURCE) \
-	$(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR) $(STAGING_DIR)
+	$(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR) $(STAGING_DIR) \
+	$(PROJECT_BUILD_DIR) $(BINARIES_DIR)
 
 #############################################################
 #
@@ -99,18 +211,22 @@ dirs: $(DL_DIR) $(BUILD_DIR) $(STAGING_DIR)
 # dependencies anywhere else
 #
 #############################################################
-$(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR):
+$(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR) \
+	$(PROJECT_BUILD_DIR) $(BINARIES_DIR) :
 	@mkdir -p $@
 
 $(STAGING_DIR):
 	@mkdir -p $(STAGING_DIR)/bin
 	@mkdir -p $(STAGING_DIR)/lib
-	@mkdir -p $(STAGING_DIR)/include
-	@mkdir -p $(STAGING_DIR)/usr
-	@mkdir -p $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)
-	@ln -snf ../include $(STAGING_DIR)/usr/include
+ifeq ($(BR2_TOOLCHAIN_SYSROOT),y)
+	@mkdir -p $(STAGING_DIR)/usr/lib
+else
+	@ln -snf . $(STAGING_DIR)/usr
+	@mkdir -p $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)
 	@ln -snf ../lib $(STAGING_DIR)/usr/lib
-	@ln -snf ../lib $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/lib
+	@ln -snf ../lib $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib
+endif
+	@mkdir -p $(STAGING_DIR)/usr/include
 
 $(TARGET_DIR):
 	mkdir -p $(TARGET_DIR)
@@ -121,7 +237,24 @@ $(TARGET_DIR):
 	-find $(TARGET_DIR) -type d -name CVS | xargs rm -rf
 	-find $(TARGET_DIR) -type d -name .svn | xargs rm -rf
 
+bsp:	$(TARGET_DIR)/etc/issue	$(TARGET_DIR)/etc/hostname
+
+$(TARGET_DIR)/etc/issue:	$(TARGET_DIR) .config
+	echo ""			>  $(TARGET_DIR)/etc/issue
+	echo "" 		>> $(TARGET_DIR)/etc/issue
+	echo "$(BANNER)"	>> $(TARGET_DIR)/etc/issue
+
+$(TARGET_DIR)/etc/hostname:	$(TARGET_DIR) .config
+	echo "$(TARGET_HOSTNAME)" > $(TARGET_DIR)/etc/hostname
+
 source: $(TARGETS_SOURCE) $(HOST_SOURCE)
+
+.config.check: dependencies
+	$(SED) '/BR2_WGET/s/\"$$/ --spider\"/g' .config
+	touch $@
+
+_source-check: .config.check
+	$(MAKE) source
 
 #############################################################
 #
@@ -138,11 +271,13 @@ distclean:
 ifeq ($(DL_DIR),$(BASE_DIR)/dl)
 	rm -rf $(DL_DIR)
 endif
-	rm -rf $(BUILD_DIR) $(LINUX_KERNEL) $(IMAGE)
+	rm -rf $(BUILD_DIR) $(PROJECT_BUILD_DIR)  $(BINARIES_DIR) \
+	$(LINUX_KERNEL) $(IMAGE) $(BASE_DIR)/include \
+		.config.cmd
 	$(MAKE) -C $(CONFIG) clean
 
 sourceball:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) $(PROJECT_BUILD_DIR)  $(BINARIES_DIR)
 	set -e; \
 	cd ..; \
 	rm -f buildroot.tar.bz2; \
@@ -157,39 +292,69 @@ all: menuconfig
 # configuration
 # ---------------------------------------------------------------------------
 
+HOSTCFLAGS=$(CFLAGS_FOR_BUILD)
+export HOSTCFLAGS
+
 $(CONFIG)/conf:
-	$(MAKE) -C $(CONFIG) conf
+	$(MAKE) CC="$(HOSTCC)" MAKECMDGOALS="$(MAKECMDGOALS)" \
+		-C $(CONFIG) conf
 	-@if [ ! -f .config ] ; then \
 		cp $(CONFIG_DEFCONFIG) .config; \
 	fi
 $(CONFIG)/mconf:
-	$(MAKE) -C $(CONFIG) ncurses conf mconf
+	$(MAKE) CC="$(HOSTCC)" MAKECMDGOALS="$(MAKECMDGOALS)" \
+		-C $(CONFIG) conf mconf
 	-@if [ ! -f .config ] ; then \
 		cp $(CONFIG_DEFCONFIG) .config; \
 	fi
 
 menuconfig: $(CONFIG)/mconf
-	@$(CONFIG)/mconf $(CONFIG_CONFIG_IN)
+	@-mkdir -p include/config
+	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
+		KCONFIG_AUTOHEADER=include/autoconf.h \
+		$(CONFIG)/mconf $(CONFIG_CONFIG_IN)
 
 config: $(CONFIG)/conf
-	@$(CONFIG)/conf $(CONFIG_CONFIG_IN)
+	@-mkdir -p include/config
+	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
+		KCONFIG_AUTOHEADER=include/autoconf.h \
+		$(CONFIG)/conf $(CONFIG_CONFIG_IN)
 
 oldconfig: $(CONFIG)/conf
-	@$(CONFIG)/conf -o $(CONFIG_CONFIG_IN)
+	@-mkdir -p include/config
+	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
+		KCONFIG_AUTOHEADER=include/autoconf.h \
+		$(CONFIG)/conf -o $(CONFIG_CONFIG_IN)
 
 randconfig: $(CONFIG)/conf
-	@$(CONFIG)/conf -r $(CONFIG_CONFIG_IN)
+	@-mkdir -p include/config
+	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
+		KCONFIG_AUTOHEADER=include/autoconf.h \
+		$(CONFIG)/conf -r $(CONFIG_CONFIG_IN)
 
 allyesconfig: $(CONFIG)/conf
-	#@$(CONFIG)/conf -y $(CONFIG_CONFIG_IN)
+	cat $(CONFIG_DEFCONFIG) > .config
+	@-mkdir -p include/config
+	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
+		KCONFIG_AUTOHEADER=include/autoconf.h \
+		$(CONFIG)/conf -y $(CONFIG_CONFIG_IN)
 	#sed -i -e "s/^CONFIG_DEBUG.*/# CONFIG_DEBUG is not set/" .config
-	@$(CONFIG)/conf -o $(CONFIG_CONFIG_IN)
 
 allnoconfig: $(CONFIG)/conf
-	@$(CONFIG)/conf -n $(CONFIG_CONFIG_IN)
+	@-mkdir -p include/config
+	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
+		KCONFIG_AUTOHEADER=include/autoconf.h \
+		$(CONFIG)/conf -n $(CONFIG_CONFIG_IN)
 
 defconfig: $(CONFIG)/conf
-	@$(CONFIG)/conf -d $(CONFIG_CONFIG_IN)
+	@-mkdir -p include/config
+	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
+		KCONFIG_AUTOHEADER=include/autoconf.h \
+		$(CONFIG)/conf -d $(CONFIG_CONFIG_IN)
+
+# check if download URLs are outdated 
+source-check: allyesconfig
+	$(MAKE) _source-check
 
 #############################################################
 #
@@ -206,10 +371,27 @@ distclean: clean
 endif # ifeq ($(strip $(BR2_HAVE_DOT_CONFIG)),y)
 
 %_defconfig: $(CONFIG)/conf
-	cp $(shell find target/ -name $@) .config
+	cp $(shell find ./target/ -name $@) .config
 	@$(CONFIG)/conf -o $(CONFIG_CONFIG_IN)
 
+help:
+	@echo 'Cleaning:'
+	@echo '  clean                  - delete temporary files created by build'
+	@echo '  distclean              - delete all non-source files (including .config)'
+	@echo
+	@echo 'Build:'
+	@echo '  all                    - make world'
+	@echo
+	@echo 'Configuration:'
+	@echo '  menuconfig             - interactive curses-based configurator'
+	@echo '  oldconfig              - resolve any unresolved symbols in .config'
+	@echo
+	@echo 'Miscellaneous:'
+	@echo '  source                 - download all sources needed for offline-build'
+	@echo '  source-check           - check all packages for valid download URLS'
+	@echo
+
 .PHONY: dummy subdirs release distclean clean config oldconfig \
-	menuconfig tags check test depend defconfig
+	menuconfig tags check test depend defconfig help
 
 

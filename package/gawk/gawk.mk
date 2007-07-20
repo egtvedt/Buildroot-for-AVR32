@@ -3,11 +3,11 @@
 # gawk
 #
 #############################################################
-GAWK_VER:=3.1.5
-GAWK_SOURCE:=gawk-$(GAWK_VER).tar.bz2
+GAWK_VERSION:=3.1.5
+GAWK_SOURCE:=gawk-$(GAWK_VERSION).tar.bz2
 GAWK_SITE:=http://ftp.gnu.org/pub/gnu/gawk
 GAWK_CAT:=$(BZCAT)
-GAWK_DIR:=$(BUILD_DIR)/gawk-$(GAWK_VER)
+GAWK_DIR:=$(BUILD_DIR)/gawk-$(GAWK_VERSION)
 GAWK_BINARY:=gawk
 GAWK_TARGET_BINARY:=usr/bin/gawk
 
@@ -25,8 +25,7 @@ $(GAWK_DIR)/.unpacked: $(DL_DIR)/$(GAWK_SOURCE)
 $(GAWK_DIR)/.configured: $(GAWK_DIR)/.unpacked
 	(cd $(GAWK_DIR); rm -rf config.cache; autoconf; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_func_getpgrp_void=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \

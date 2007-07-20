@@ -4,7 +4,7 @@ comment "Gcc Options"
 
 choice
 	prompt "GCC compiler Version"
-	default BR2_GCC_VERSION_4_1_2
+	default BR2_GCC_VERSION_4_2_0
 	help
 	  Select the version of gcc you wish to use.
 
@@ -53,7 +53,7 @@ choice
 		bool "gcc 4.0.3"
 
 	config BR2_GCC_VERSION_4_0_4
-		depends !BR2_nios2 && !BR2_avr32
+		depends !BR2_nios2 && !BR2_avr32 && BR2_DEPRECATED
 		bool "gcc 4.0.4"
 
 	config BR2_GCC_VERSION_4_1_0
@@ -68,10 +68,14 @@ choice
 		depends !BR2_nios2
 		bool "gcc 4.1.2"
 
-	config BR2_GCC_VERSION_4_2
+	config BR2_GCC_VERSION_4_2_0
 		depends !BR2_nios2 && !BR2_avr32
-		select BR2_GCC_IS_SNAP
-		bool "gcc 4.2"
+		bool "gcc 4.2.0"
+
+#	config BR2_GCC_VERSION_4_3
+#		depends !BR2_nios2
+#		select BR2_GCC_IS_SNAP
+#		bool "gcc 4.3"
 
 endchoice
 
@@ -82,7 +86,7 @@ config BR2_GCC_IS_SNAP
 
 config BR2_GCC_SNAP_DATE
 	string "GCC snapshot date"
-	default "20061121"
+	default "20070622"
 	depends BR2_GCC_IS_SNAP
 	help
 	  Enter snapshot date to use for gcc.  Format is:
@@ -105,8 +109,22 @@ config BR2_GCC_VERSION
 	default "4.1.0"     if BR2_GCC_VERSION_4_1_0
 	default "4.1.1"     if BR2_GCC_VERSION_4_1_1
 	default "4.1.2"     if BR2_GCC_VERSION_4_1_2
-	default "4.2"       if BR2_GCC_VERSION_4_2
+	default "4.2.0"     if BR2_GCC_VERSION_4_2_0
+	default "4.3"       if BR2_GCC_VERSION_4_3
 
+config BR2_TOOLCHAIN_SYSROOT
+	bool "Enable toolchain with --sysroot support"
+	depends on !BR2_GCC_VERSION_3_3_5 && !BR2_GCC_VERSION_3_3_6 && !BR2_GCC_VERSION_3_4_2 && !BR2_GCC_VERSION_3_4_3 && !BR2_GCC_VERSION_3_4_4 && !BR2_GCC_VERSION_3_4_5 && !BR2_GCC_VERSION_3_4_6
+	default y
+	help
+	  Enables --sysroot=dir for binutils and gcc.
+	  Use dir as the logical root directory for headers and libraries.
+	  For example, if the compiler would normally search for headers in
+	  /usr/include and libraries in /usr/lib, it will instead search
+	  dir/usr/include and dir/usr/lib.
+
+	  This does not work with gcc < 4.2.0 (4.1.2 gets
+	  ORIGINAL_AS_FOR_TARGET wrong)
 
 config BR2_GCC_USE_SJLJ_EXCEPTIONS
 	bool "Enable setjmp/longjmp exceptions?"
@@ -137,7 +155,7 @@ config BR2_INSTALL_LIBSTDCPP
 	bool "Build/install c++ compiler and libstdc++?"
 	default n
 	# huh? why so? select BR2_LARGEFILE
-	select BR2_LARGEFILE if !BR2_GCC_VERSION_4_2
+	select BR2_LARGEFILE if !BR2_GCC_VERSION_4_2_0 && !BR2_GCC_VERSION_4_3
 	help
 	  Build/install c++ compiler and libstdc++?
 

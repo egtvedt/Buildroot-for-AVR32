@@ -3,12 +3,12 @@
 # dash
 #
 #############################################################
-DASH_VER:=0.5.3
-DASH_SOURCE:=dash_$(DASH_VER).orig.tar.gz
+DASH_VERSION:=0.5.3
+DASH_SOURCE:=dash_$(DASH_VERSION).orig.tar.gz
 DASH_SITE:=http://ftp.debian.org/debian/pool/main/d/dash
 DASH_CAT:=$(ZCAT)
-DASH_DIR:=$(BUILD_DIR)/dash-$(DASH_VER)
-DASH_PATCH1:=dash_$(DASH_VER)-6.diff.gz
+DASH_DIR:=$(BUILD_DIR)/dash-$(DASH_VERSION)
+DASH_PATCH1:=dash_$(DASH_VERSION)-7.diff.gz
 DASH_BINARY:=src/dash
 DASH_TARGET_BINARY:=bin/dash
 
@@ -28,8 +28,7 @@ $(DASH_DIR)/.unpacked: $(DL_DIR)/$(DASH_SOURCE) $(DL_DIR)/$(DASH_PATCH1)
 $(DASH_DIR)/.configured: $(DASH_DIR)/.unpacked
 	(cd $(DASH_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

@@ -3,10 +3,10 @@
 # openssh
 #
 #############################################################
-
+OPENSSH_VERSION:=3.9p1
 OPENSSH_SITE:=ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable
-OPENSSH_DIR:=$(BUILD_DIR)/openssh-3.9p1
-OPENSSH_SOURCE:=openssh-3.9p1.tar.gz
+OPENSSH_DIR:=$(BUILD_DIR)/openssh-$(OPENSSH_VERSION)
+OPENSSH_SOURCE:=openssh-$(OPENSSH_VERSION).tar.gz
 
 $(DL_DIR)/$(OPENSSH_SOURCE):
 	$(WGET) -P $(DL_DIR) $(OPENSSH_SITE)/$(OPENSSH_SOURCE)
@@ -20,9 +20,7 @@ $(OPENSSH_DIR)/.unpacked: $(DL_DIR)/$(OPENSSH_SOURCE)
 $(OPENSSH_DIR)/.configured: $(OPENSSH_DIR)/.unpacked
 	(cd $(OPENSSH_DIR); rm -rf config.cache; autoconf ; \
 		$(TARGET_CONFIGURE_OPTS) \
-		LD=$(TARGET_CROSS)gcc \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

@@ -3,10 +3,10 @@
 # dbus-glib
 #
 #############################################################
-DBUS_GLIB_VER:=0.72
-DBUS_GLIB_SOURCE:=dbus-glib-$(DBUS_GLIB_VER).tar.gz
+DBUS_GLIB_VERSION:=0.72
+DBUS_GLIB_SOURCE:=dbus-glib-$(DBUS_GLIB_VERSION).tar.gz
 DBUS_GLIB_SITE:=http://dbus.freedesktop.org/releases/dbus-glib/
-DBUS_GLIB_DIR:=$(BUILD_DIR)/dbus-glib-$(DBUS_GLIB_VER)
+DBUS_GLIB_DIR:=$(BUILD_DIR)/dbus-glib-$(DBUS_GLIB_VERSION)
 DBUS_GLIB_CAT:=$(ZCAT)
 DBUS_GLIB_BINARY:=dbus/.libs/dbus-binding-tool
 DBUS_GLIB_TARGET_BINARY:=usr/bin/dbus-binding-tool
@@ -24,11 +24,10 @@ $(DBUS_GLIB_DIR)/.unpacked: $(DL_DIR)/$(DBUS_GLIB_SOURCE)
 $(DBUS_GLIB_DIR)/.configured: $(DBUS_GLIB_DIR)/.unpacked /usr/bin/pkg-config
 	(cd $(DBUS_GLIB_DIR); rm -rf config.cache; autoconf ; \
 		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_have_abstract_sockets=yes \
 		ac_cv_func_posix_getpwnam_r=yes \
 		have_abstract_sockets=yes \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
 		DBUS_CFLAGS="-I$(STAGING_DIR)/usr/include/dbus-1.0 -I$(STAGING_DIR)/usr/lib/dbus-1.0/include" \
 		DBUS_LIBS="$(STAGING_DIR)/usr/lib/libdbus-1.so" \
 		DBUS_GLIB_CFLAGS="-I$(STAGING_DIR)/include/glib-2.0 -I$(STAGING_DIR)/lib/glib-2.0/include" \

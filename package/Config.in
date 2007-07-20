@@ -66,8 +66,11 @@ endif
 source "package/libelf/Config.in"
 source "package/libevent/Config.in"
 source "package/libfloat/Config.in"
+source "package/libgcrypt/Config.in"
+source "package/libgpg-error/Config.in"
 source "package/liblockfile/Config.in"
 source "package/libsysfs/Config.in"
+source "package/libxml2/Config.in"
 source "package/lockfile-progs/Config.in"
 source "package/lsof/Config.in"
 source "package/ltp-testsuite/Config.in"
@@ -140,11 +143,11 @@ source "package/l2tp/Config.in"
 source "package/libcgi/Config.in"
 source "package/libcgicc/Config.in"
 source "package/libpcap/Config.in"
-source "package/lighttpd/Config.in"
 source "package/links/Config.in"
 source "package/lrzsz/Config.in"
 source "package/mrouted/Config.in"
 source "package/nbd/Config.in"
+source "package/ncftp/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/netcat/Config.in"
 endif
@@ -162,6 +165,7 @@ source "package/openswan/Config.in"
 source "package/portmap/Config.in"
 source "package/pppd/Config.in"
 source "package/proftpd/Config.in"
+source "package/quagga/Config.in"
 source "package/rsync/Config.in"
 source "package/samba/Config.in"
 source "package/socat/Config.in"
@@ -169,13 +173,17 @@ source "package/stunnel/Config.in"
 source "package/tcpdump/Config.in"
 source "package/tftpd/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
+source "package/lighttpd/Config.in"
 source "package/thttpd/Config.in"
+source "package/tinyhttpd/Config.in"
 endif
 source "package/tn5250/Config.in"
 source "package/ttcp/Config.in"
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
-source "package/udhcp/Config.in"
-endif
+#if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
+# ATTENTION! This was merged into busybox!
+#source "package/udhcp/Config.in"
+#endif
+source "package/vpnc/Config.in"
 source "package/vtun/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/wget/Config.in"
@@ -241,8 +249,11 @@ if BR2_AUDIO_SUPPORT
 source "package/alsa-lib/Config.in"
 source "package/alsa-utils/Config.in"
 source "package/asterisk/Config.in"
+source "package/aumix/Config.in"
+source "package/libid3tag/Config.in"
 source "package/libmad/Config.in"
 source "package/libsndfile/Config.in"
+source "package/madplay/Config.in"
 source "package/mpg123/Config.in"
 endif
 

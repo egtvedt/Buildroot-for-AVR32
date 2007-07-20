@@ -3,11 +3,11 @@
 # distcc
 #
 #############################################################
-DISTCC_VER:=2.18.3
-DISTCC_SOURCE:=distcc-$(DISTCC_VER).tar.bz2
+DISTCC_VERSION:=2.18.3
+DISTCC_SOURCE:=distcc-$(DISTCC_VERSION).tar.bz2
 DISTCC_CAT:=$(BZCAT)
 DISTCC_SITE:=http://distcc.samba.org/ftp/distcc/
-DISTCC_DIR:=$(BUILD_DIR)/distcc-$(DISTCC_VER)
+DISTCC_DIR:=$(BUILD_DIR)/distcc-$(DISTCC_VERSION)
 DISTCC_BINARY:=distcc
 DISTCC_TARGET_BINARY:=usr/bin/distcc
 
@@ -23,8 +23,7 @@ $(DISTCC_DIR)/.unpacked: $(DL_DIR)/$(DISTCC_SOURCE)
 $(DISTCC_DIR)/.configured: $(DISTCC_DIR)/.unpacked
 	(cd $(DISTCC_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -46,7 +45,7 @@ $(DISTCC_DIR)/.configured: $(DISTCC_DIR)/.unpacked
 	touch $(DISTCC_DIR)/.configured
 
 $(DISTCC_DIR)/$(DISTCC_BINARY): $(DISTCC_DIR)/.configured
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CC=$(TARGET_CC) -C $(DISTCC_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(DISTCC_DIR)
 
 $(TARGET_DIR)/$(DISTCC_TARGET_BINARY): $(DISTCC_DIR)/$(DISTCC_BINARY)
 	install -D $(DISTCC_DIR)/$(DISTCC_BINARY)d $(TARGET_DIR)/$(DISTCC_TARGET_BINARY)d

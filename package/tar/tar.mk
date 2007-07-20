@@ -3,10 +3,10 @@
 # tar
 #
 #############################################################
-GNUTAR_VER:=1.15.1
-GNUTAR_SOURCE:=tar-$(GNUTAR_VER).tar.bz2
+GNUTAR_VERSION:=1.18
+GNUTAR_SOURCE:=tar-$(GNUTAR_VERSION).tar.bz2
 GNUTAR_SITE:=http://ftp.gnu.org/gnu/tar/
-GNUTAR_DIR:=$(BUILD_DIR)/tar-$(GNUTAR_VER)
+GNUTAR_DIR:=$(BUILD_DIR)/tar-$(GNUTAR_VERSION)
 GNUTAR_CAT:=$(BZCAT)
 GNUTAR_BINARY:=src/tar
 GNUTAR_TARGET_BINARY:=bin/tar
@@ -24,8 +24,7 @@ $(GNUTAR_DIR)/.unpacked: $(DL_DIR)/$(GNUTAR_SOURCE)
 $(GNUTAR_DIR)/.configured: $(GNUTAR_DIR)/.unpacked
 	(cd $(GNUTAR_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_func_chown_works=yes \
 		gl_cv_func_chown_follows_symlink=yes \
 		./configure \

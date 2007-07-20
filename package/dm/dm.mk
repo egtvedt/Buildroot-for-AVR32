@@ -31,7 +31,7 @@ DM_SITE:=ftp://sources.redhat.com/pub/dm
 DM_SITE_OLD:=ftp://sources.redhat.com/pub/dm/old
 DM_CAT:=$(ZCAT)
 DM_DIR:=$(BUILD_DIR)/device-mapper.$(DM_VERSION)
-DM_STAGING_BINARY:=$(STAGING_DIR)/sbin/dmsetup
+DM_STAGING_BINARY:=$(STAGING_DIR)/usr/sbin/dmsetup
 DM_TARGET_BINARY:=$(TARGET_DIR)/usr/sbin/dmsetup
 DM_STAGING_LIBRARY:=$(STAGING_DIR)/lib/libdevmapper.so
 DM_TARGET_LIBRARY:=$(TARGET_DIR)/usr/lib/libdevmapper.so
@@ -50,8 +50,7 @@ $(DM_DIR)/.unpacked: $(DL_DIR)/$(DM_SOURCE)
 $(DM_DIR)/.configured: $(DM_DIR)/.unpacked
 	(cd $(DM_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_have_decl_malloc=yes \
 		gl_cv_func_malloc_0_nonnull=yes \
 		ac_cv_func_malloc_0_nonnull=yes \

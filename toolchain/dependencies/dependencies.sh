@@ -61,6 +61,28 @@ if test -n "$CXXFLAGS" ; then
 fi;
 echo "CXXFLAGS clean:					Ok"
 
+if test -n "$GREP_OPTIONS" ; then
+        echo "GREP_OPTIONS clean:                               FALSE"
+        /bin/echo -e "\n\nYou must run 'unset GREP_OPTIONS' so buildroot can run with";
+        /bin/echo -e "a clean environment on your build machine\n";
+        exit 1;
+fi;
+
+if test -n "$CROSS_COMPILE" ; then
+        echo "CROSS_COMPILE clean:                               FALSE"
+        /bin/echo -e "\n\nYou must run 'unset CROSS_COMPILE' so buildroot can run with";
+        /bin/echo -e "a clean environment on your build machine\n";
+        exit 1;
+fi;
+
+if test -n "$ARCH" ; then
+        echo "ARCH clean:                               FALSE"
+        /bin/echo -e "\n\nYou must run 'unset ARCH' so buildroot can run with";
+        /bin/echo -e "a clean environment on your build machine\n";
+        exit 1;
+fi;
+
+
 echo "WORKS" | grep "WORKS" >/dev/null 2>&1
 if test $? != 0 ; then
 	echo "grep works:				FALSE"
@@ -123,7 +145,7 @@ fi
 # check build system 'make'
 #
 #############################################################
-MAKE=$(which make)
+MAKE=$(which make 2> /dev/null)
 if [ -z "$MAKE" ] ; then
 	echo "make installed:		    FALSE"
 	/bin/echo -e "\n\nYou must install 'make' on your build machine\n";
@@ -137,7 +159,7 @@ if [ -z "$MAKE_VERSION" ] ; then
 fi;
 MAKE_MAJOR=$(echo $MAKE_VERSION | $XSED -e "s/\..*//g")
 MAKE_MINOR=$(echo $MAKE_VERSION | $XSED -e "s/^$MAKE_MAJOR\.//g" -e "s/\..*//g" -e "s/[a-zA-Z].*//g")
-if [ $MAKE_MAJOR -lt 3 -o $MAKE_MAJOR -eq 3 -a $MAKE_MINOR -lt 8 ] ; then
+if [ $MAKE_MAJOR -lt 3 ] || [ $MAKE_MAJOR -eq 3 -a $MAKE_MINOR -lt 80 ] ; then
 	echo "You have make '$MAKE_VERSION' installed.  GNU make >=3.80 is required"
 	exit 1;
 fi;
@@ -152,7 +174,7 @@ echo "GNU make version '$MAKE_VERSION':			Ok"
 #############################################################
 COMPILER=$(which $HOSTCC 2> /dev/null)
 if [ -z "$COMPILER" ] ; then
-	COMPILER=$(which cc)
+	COMPILER=$(which cc 2> /dev/null)
 fi;
 if [ -z "$COMPILER" ] ; then
 	echo "C Compiler installed:		    FALSE"
@@ -179,7 +201,7 @@ echo "C compiler version '$COMPILER_VERSION':			Ok"
 # check for host CXX
 CXXCOMPILER=$(which $HOSTCXX 2> /dev/null)
 if [ -z "$CXXCOMPILER" ] ; then
-	CXXCOMPILER=$(which c++)
+	CXXCOMPILER=$(which c++ 2> /dev/null)
 fi
 if [ -z "$CXXCOMPILER" ] ; then
 	echo "C++ Compiler installed:		    FALSE"

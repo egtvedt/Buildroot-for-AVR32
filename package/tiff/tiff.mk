@@ -3,10 +3,10 @@
 # tiff
 #
 #############################################################
-TIFF_VER:=3.8.2
-TIFF_DIR:=$(BUILD_DIR)/tiff-$(TIFF_VER)
+TIFF_VERSION:=3.8.2
+TIFF_DIR:=$(BUILD_DIR)/tiff-$(TIFF_VERSION)
 TIFF_SITE:=ftp://ftp.remotesensing.org/libtiff
-TIFF_SOURCE:=tiff-$(TIFF_VER).tar.gz
+TIFF_SOURCE:=tiff-$(TIFF_VERSION).tar.gz
 TIFF_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(TIFF_SOURCE):
@@ -23,8 +23,7 @@ $(TIFF_DIR)/.unpacked: $(DL_DIR)/$(TIFF_SOURCE)
 $(TIFF_DIR)/.configured: $(TIFF_DIR)/.unpacked
 	(cd $(TIFF_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -56,16 +55,16 @@ $(TIFF_DIR)/libtiff/.libs/libtiff.a: $(TIFF_DIR)/.configured
 	$(MAKE) -C $(TIFF_DIR)
 	touch -c $(TIFF_DIR)/libtiff/.libs/libtiff.a
 
-$(STAGING_DIR)/lib/libtiff.so.$(TIFF_VER): $(TIFF_DIR)/libtiff/.libs/libtiff.a
+$(STAGING_DIR)/lib/libtiff.so.$(TIFF_VERSION): $(TIFF_DIR)/libtiff/.libs/libtiff.a
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(TIFF_DIR) install
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" $(STAGING_DIR)/lib/libtiff.la
-	touch -c $(STAGING_DIR)/lib/libtiff.so.$(TIFF_VER)
+	touch -c $(STAGING_DIR)/lib/libtiff.so.$(TIFF_VERSION)
 
-$(TARGET_DIR)/lib/libtiff.so.$(TIFF_VER): $(STAGING_DIR)/lib/libtiff.so.$(TIFF_VER)
+$(TARGET_DIR)/lib/libtiff.so.$(TIFF_VERSION): $(STAGING_DIR)/lib/libtiff.so.$(TIFF_VERSION)
 	cp -dpf $(STAGING_DIR)/lib/libtiff.so* $(TARGET_DIR)/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libtiff.so.$(TIFF_VER)
+	-$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libtiff.so.$(TIFF_VERSION)
 
-tiff: uclibc zlib jpeg $(TARGET_DIR)/lib/libtiff.so.$(TIFF_VER)
+tiff: uclibc zlib jpeg $(TARGET_DIR)/lib/libtiff.so.$(TIFF_VERSION)
 
 tiff-clean:
 	-$(MAKE) -C $(TIFF_DIR) clean

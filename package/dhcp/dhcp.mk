@@ -3,11 +3,11 @@
 # dhcp
 #
 #############################################################
-DHCP_VER:=3.0.5
-DHCP_SOURCE:=dhcp-$(DHCP_VER).tar.gz
+DHCP_VERSION:=3.0.5
+DHCP_SOURCE:=dhcp-$(DHCP_VERSION).tar.gz
 DHCP_SITE:=ftp://ftp.isc.org/isc/dhcp
 DHCP_CAT:=$(ZCAT)
-DHCP_DIR:=$(BUILD_DIR)/dhcp-$(DHCP_VER)
+DHCP_DIR:=$(BUILD_DIR)/dhcp-$(DHCP_VERSION)
 DHCP_SERVER_BINARY:=work.linux-2.2/server/dhcpd
 DHCP_RELAY_BINARY:=work.linux-2.2/relay/dhcrelay
 DHCP_CLIENT_BINARY:=work.linux-2.2/client/dhclient
@@ -33,7 +33,10 @@ $(DHCP_DIR)/.unpacked: $(DL_DIR)/$(DHCP_SOURCE)
 	touch $(DHCP_DIR)/.unpacked
 
 $(DHCP_DIR)/.configured: $(DHCP_DIR)/.unpacked
-	(cd $(DHCP_DIR); $(TARGET_CONFIGURE_OPTS) ./configure );
+	(cd $(DHCP_DIR); \
+		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
+		./configure );
 	touch $(DHCP_DIR)/.configured
 
 $(DHCP_DIR)/$(DHCP_RELAY_BINARY): $(DHCP_DIR)/.configured
@@ -43,7 +46,7 @@ $(DHCP_DIR)/$(DHCP_RELAY_BINARY): $(DHCP_DIR)/.configured
 $(TARGET_DIR)/$(DHCP_SERVER_TARGET_BINARY): $(DHCP_DIR)/$(DHCP_RELAY_BINARY)
 	(cd $(TARGET_DIR)/var/lib; ln -snf /tmp dhcp)
 	$(INSTALL) -m 0755 -D $(DHCP_DIR)/$(DHCP_SERVER_BINARY) $(TARGET_DIR)/$(DHCP_SERVER_TARGET_BINARY)
-	$(INSTALL) -m 0755 -D package/dhcp/init-server $(TARGET_DIR)/etc/init.d/S80dhcp-server
+	$(INSTALL) -m 0755 -D package/dhcp/S80dhcp-server $(TARGET_DIR)/etc/init.d
 	$(INSTALL) -m 0644 -D package/dhcp/dhcpd.conf $(TARGET_DIR)/etc/dhcp/dhcpd.conf
 	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
 		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
@@ -51,7 +54,7 @@ $(TARGET_DIR)/$(DHCP_SERVER_TARGET_BINARY): $(DHCP_DIR)/$(DHCP_RELAY_BINARY)
 $(TARGET_DIR)/$(DHCP_RELAY_TARGET_BINARY): $(DHCP_DIR)/$(DHCP_RELAY_BINARY)
 	(cd $(TARGET_DIR)/var/lib; ln -snf /tmp dhcp)
 	$(INSTALL) -m 0755 -D $(DHCP_DIR)/$(DHCP_RELAY_BINARY) $(TARGET_DIR)/$(DHCP_RELAY_TARGET_BINARY)
-	$(INSTALL) -m 0755 -D package/dhcp/init-relay $(TARGET_DIR)/etc/init.d/S80dhcp-relay
+	$(INSTALL) -m 0755 -D package/dhcp/S80dhcp-relay $(TARGET_DIR)/etc/init.d
 	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
 		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
 

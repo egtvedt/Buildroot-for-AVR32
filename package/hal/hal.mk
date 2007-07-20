@@ -3,10 +3,10 @@
 # hal
 #
 #############################################################
-HAL_VER:=0.5.8
-HAL_SOURCE:=hal-$(HAL_VER).tar.gz
+HAL_VERSION:=0.5.8
+HAL_SOURCE:=hal-$(HAL_VERSION).tar.gz
 HAL_SITE:=http://people.freedesktop.org/~david/dist/
-HAL_DIR:=$(BUILD_DIR)/hal-$(HAL_VER)
+HAL_DIR:=$(BUILD_DIR)/hal-$(HAL_VERSION)
 HAL_CAT:=$(ZCAT)
 HAL_BINARY:=hald/hald
 HAL_TARGET_BINARY:=usr/sbin/hald
@@ -32,8 +32,8 @@ $(HAL_DIR)/.unpacked: $(DL_DIR)/$(HAL_SOURCE)
 $(HAL_DIR)/.configured: $(HAL_DIR)/.unpacked /usr/bin/pkg-config
 	(cd $(HAL_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
 		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/lib/glib-2.0/include" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
 		GLIB_CFLAGS="$(GLIB_CFLAGS)" \
 		GLIB_LIBS="$(GLIB_LIBS)" \
 		DBUS_CFLAGS="-I$(STAGING_DIR)/usr/include/dbus-1.0 -I$(STAGING_DIR)/usr/lib/dbus-1.0/include" \
@@ -74,7 +74,7 @@ $(TARGET_DIR)/$(HAL_TARGET_BINARY): $(HAL_DIR)/hald/hald
 	rm -rf $(TARGET_DIR)/usr/lib/libhal*.la
 	rm -rf $(TARGET_DIR)/usr/lib/hal
 	rm -rf $(TARGET_DIR)/etc/PolicyKit
-	$(INSTALL) -m 0755 -D package/hal/init-hal $(TARGET_DIR)/etc/init.d/S98haldaemon
+	$(INSTALL) -m 0755 -D package/hal/S98haldaemon $(TARGET_DIR)/etc/init.d
 	rm -rf $(TARGET_DIR)/etc/rc.d
 	for file in hald-addon-acpi* hald-addon-cpufreq		\
 		    hald-addon-keyboard hald-addon-pmu		\

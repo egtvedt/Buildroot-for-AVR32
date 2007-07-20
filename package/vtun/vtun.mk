@@ -6,9 +6,10 @@
 # to enable that within busybox
 #
 #############################################################
-VTUN_SOURCE:=vtun-2.6.tar.gz
+VTUN_VERSION:=2.6
+VTUN_SOURCE:=vtun-$(VTUN_VERSION).tar.gz
 VTUN_SITE:=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/vtun/
-VTUN_DIR:=$(BUILD_DIR)/vtun-2.6
+VTUN_DIR:=$(BUILD_DIR)/vtun-$(VTUN_VERSION)
 VTUN_CAT:=$(ZCAT)
 VTUN_BINARY:=vtund
 VTUN_TARGET_BINARY:=usr/sbin/vtund
@@ -27,8 +28,7 @@ $(VTUN_DIR)/.unpacked: $(DL_DIR)/$(VTUN_SOURCE)
 $(VTUN_DIR)/.configured: $(VTUN_DIR)/.unpacked
 	(cd $(VTUN_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -44,9 +44,9 @@ $(VTUN_DIR)/.configured: $(VTUN_DIR)/.unpacked
 		--localstatedir=/var \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-		--with-ssl-headers=$(STAGING_DIR)/include/openssl \
-		--with-lzo-headers=$(STAGING_DIR)/include \
-		--with-lzo-lib=$(STAGING_DIR)/lib \
+		--with-ssl-headers=$(STAGING_DIR)/usr/include/openssl \
+		--with-lzo-headers=$(STAGING_DIR)/usr/include \
+		--with-lzo-lib=$(STAGING_DIR)/usr/lib \
 	);
 	touch $(VTUN_DIR)/.configured
 

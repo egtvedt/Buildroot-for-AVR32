@@ -3,10 +3,10 @@
 # tftpd
 #
 #############################################################
-TFTP_HPA_VER:=0.40
-TFTP_HPA_SOURCE:=tftp-hpa-$(TFTP_HPA_VER).tar.bz2
+TFTP_HPA_VERSION:=0.40
+TFTP_HPA_SOURCE:=tftp-hpa-$(TFTP_HPA_VERSION).tar.bz2
 TFTP_HPA_SITE:=http://www.kernel.org/pub/software/network/tftp/
-TFTP_HPA_DIR:=$(BUILD_DIR)/tftp-hpa-$(TFTP_HPA_VER)
+TFTP_HPA_DIR:=$(BUILD_DIR)/tftp-hpa-$(TFTP_HPA_VERSION)
 TFTP_HPA_CAT:=$(BZCAT)
 TFTP_HPA_BINARY:=tftpd/tftpd
 TFTP_HPA_TARGET_BINARY:=usr/sbin/in.tftpd
@@ -24,8 +24,7 @@ $(TFTP_HPA_DIR)/.unpacked: $(DL_DIR)/$(TFTP_HPA_SOURCE)
 $(TFTP_HPA_DIR)/.configured: $(TFTP_HPA_DIR)/.unpacked
 	(cd $(TFTP_HPA_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -59,7 +58,7 @@ $(TARGET_DIR)/$(TFTP_HPA_TARGET_BINARY): $(TFTP_HPA_DIR)/$(TFTP_HPA_BINARY)
 	    rm -f $(TARGET_DIR)/$(TFTP_HPA_TARGET_BINARY); \
 	    cp -a $(TFTP_HPA_DIR)/$(TFTP_HPA_BINARY) $(TARGET_DIR)/$(TFTP_HPA_TARGET_BINARY); fi ;
 	@if [ ! -f $(TARGET_DIR)/etc/init.d/S80tftpd-hpa ] ; then \
-		$(INSTALL) -m 0755 -D package/tftpd/init-tftpd $(TARGET_DIR)/etc/init.d/S80tftpd-hpa; \
+		$(INSTALL) -m 0755 package/tftpd/S80tftpd-hpa $(TARGET_DIR)/etc/init.d; \
 	fi;
 
 tftpd: uclibc $(TARGET_DIR)/$(TFTP_HPA_TARGET_BINARY)

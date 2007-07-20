@@ -3,11 +3,11 @@
 # stunnel
 #
 #############################################################
-STUNNEL_VER:=4.16
-STUNNEL_SOURCE:=stunnel-$(STUNNEL_VER).tar.gz
+STUNNEL_VERSION:=4.16
+STUNNEL_SOURCE:=stunnel-$(STUNNEL_VERSION).tar.gz
 STUNNEL_SITE:=http://www.stunnel.org/download/stunnel/src
 STUNNEL_CAT:=$(ZCAT)
-STUNNEL_DIR:=$(BUILD_DIR)/stunnel-$(STUNNEL_VER)
+STUNNEL_DIR:=$(BUILD_DIR)/stunnel-$(STUNNEL_VERSION)
 
 $(DL_DIR)/$(STUNNEL_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(STUNNEL_SITE)/$(STUNNEL_SOURCE)
@@ -24,8 +24,7 @@ $(STUNNEL_DIR)/.unpacked: $(DL_DIR)/$(STUNNEL_SOURCE)
 $(STUNNEL_DIR)/.configured: $(STUNNEL_DIR)/.unpacked
 	(cd $(STUNNEL_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_file___dev_ptmx_=yes \
 		ac_cv_file___dev_ptc_=no \
 		./configure \

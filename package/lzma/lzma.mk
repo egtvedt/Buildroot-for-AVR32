@@ -3,12 +3,12 @@
 # lzma
 #
 #############################################################
-LZMA_VER:=4.32.0beta3
-LZMA_SOURCE:=lzma-$(LZMA_VER).tar.gz
+LZMA_VERSION:=4.32.0beta3
+LZMA_SOURCE:=lzma-$(LZMA_VERSION).tar.gz
 LZMA_CAT:=$(ZCAT)
 LZMA_SITE:=http://tukaani.org/lzma/
-LZMA_HOST_DIR:=$(TOOL_BUILD_DIR)/lzma-$(LZMA_VER)
-LZMA_TARGET_DIR:=$(BUILD_DIR)/lzma-$(LZMA_VER)
+LZMA_HOST_DIR:=$(TOOL_BUILD_DIR)/lzma-$(LZMA_VERSION)
+LZMA_TARGET_DIR:=$(BUILD_DIR)/lzma-$(LZMA_VERSION)
 LZMA_CFLAGS:=$(TARGET_CFLAGS)
 ifeq ($(BR2_LARGEFILE),y)
 LZMA_CFLAGS+=-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
@@ -61,8 +61,8 @@ $(LZMA_TARGET_DIR)/.source: $(DL_DIR)/$(LZMA_SOURCE)
 $(LZMA_TARGET_DIR)/.configured: $(LZMA_TARGET_DIR)/.source
 	(cd $(LZMA_TARGET_DIR); rm -f config.cache ;\
 		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
 		CFLAGS="$(TARGET_CFLAGS) $(LZMA_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
 		ac_cv_func_malloc_0_nonnull=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \

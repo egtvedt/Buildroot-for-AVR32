@@ -3,10 +3,10 @@
 # procps
 #
 #############################################################
-PROCPS_VER:=3.2.5
-PROCPS_SOURCE:=procps-$(PROCPS_VER).tar.gz
+PROCPS_VERSION:=3.2.5
+PROCPS_SOURCE:=procps-$(PROCPS_VERSION).tar.gz
 PROCPS_SITE:=http://procps.sourceforge.net/
-PROCPS_DIR:=$(BUILD_DIR)/procps-$(PROCPS_VER)
+PROCPS_DIR:=$(BUILD_DIR)/procps-$(PROCPS_VERSION)
 PROCPS_BINARY:=ps/ps
 PROCPS_TARGET_BINARY:=usr/bin/vmstat
 
@@ -16,16 +16,13 @@ $(DL_DIR)/$(PROCPS_SOURCE):
 $(PROCPS_DIR)/.source: $(DL_DIR)/$(PROCPS_SOURCE)
 	$(ZCAT) $(DL_DIR)/$(PROCPS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(PROCPS_DIR) package/procps/ procps\*.patch
-	$(SED) '/^CFLAGS/s:-O2:$(TARGET_CFLAGS):' $(PROCPS_DIR)/Makefile
-	$(SED) '/^LDFLAGS/s:$$:$(TARGET_LDFLAGS):' $(PROCPS_DIR)/Makefile
 	touch $(PROCPS_DIR)/.source
 
 $(PROCPS_DIR)/$(PROCPS_BINARY): $(PROCPS_DIR)/.source
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CPPFLAGS=-I$(STAGING_DIR)/include \
-		CC=$(TARGET_CC) -C $(PROCPS_DIR)
+	$(TARGET_CONFIGURE_OPTS) $(MAKE) -C $(PROCPS_DIR)
 
 $(TARGET_DIR)/$(PROCPS_TARGET_BINARY): $(PROCPS_DIR)/$(PROCPS_BINARY)
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) DESTDIR=$(TARGET_DIR) \
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) DESTDIR=$(TARGET_DIR) \
 		install='install -D' -C $(PROCPS_DIR) lib64=/lib \
 		ldconfig='/bin/true' install
 	rm -Rf $(TARGET_DIR)/usr/share/man

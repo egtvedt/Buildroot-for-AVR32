@@ -3,12 +3,12 @@
 # coreutils
 #
 #############################################################
-COREUTILS_VER:=5.96
-COREUTILS_SOURCE:=coreutils-$(COREUTILS_VER).tar.bz2
+COREUTILS_VERSION:=6.9
+COREUTILS_SOURCE:=coreutils-$(COREUTILS_VERSION).tar.bz2
 #COREUTILS_SITE:=ftp://alpha.gnu.org/gnu/coreutils/
 COREUTILS_SITE:=http://ftp.gnu.org/pub/gnu/coreutils
 COREUTILS_CAT:=$(BZCAT)
-COREUTILS_DIR:=$(BUILD_DIR)/coreutils-$(COREUTILS_VER)
+COREUTILS_DIR:=$(BUILD_DIR)/coreutils-$(COREUTILS_VERSION)
 COREUTILS_BINARY:=src/vdir
 COREUTILS_TARGET_BINARY:=bin/vdir
 BIN_PROGS:=cat chgrp chmod chown cp date dd df dir echo false hostname \
@@ -21,14 +21,13 @@ coreutils-source: $(DL_DIR)/$(COREUTILS_SOURCE)
 
 $(COREUTILS_DIR)/.unpacked: $(DL_DIR)/$(COREUTILS_SOURCE)
 	$(COREUTILS_CAT) $(DL_DIR)/$(COREUTILS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	toolchain/patch-kernel.sh $(COREUTILS_DIR) package/coreutils/ coreutils*.patch
-	touch $(COREUTILS_DIR)/.unpacked
+	toolchain/patch-kernel.sh $(COREUTILS_DIR) package/coreutils/ coreutils\*.patch
+	touch $@
 
 $(COREUTILS_DIR)/.configured: $(COREUTILS_DIR)/.unpacked
 	(cd $(COREUTILS_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_func_strtod=yes \
 		ac_fsusage_space=yes \
 		fu_cv_sys_stat_statfs2_bsize=yes \
@@ -103,14 +102,7 @@ $(COREUTILS_DIR)/.configured: $(COREUTILS_DIR)/.unpacked
 		--disable-rpath \
 		--disable-dependency-tracking \
 	);
-	#Fix up the max number of open files per process, which apparently 
-	# is not set when cross compiling
-	$(SED) 's,.*UTILS_OPEN_MAX.*,#define UTILS_OPEN_MAX 1019,g' \
-		$(COREUTILS_DIR)/config.h
-	# This is undefined when crosscompiling...
-	$(SED) 's,.*HAVE_PROC_UPTIME.*,#define HAVE_PROC_UPTIME 1,g' \
-		$(COREUTILS_DIR)/config.h
-	touch $(COREUTILS_DIR)/.configured
+	touch $@
 
 $(COREUTILS_DIR)/$(COREUTILS_BINARY): $(COREUTILS_DIR)/.configured
 	$(MAKE) -C $(COREUTILS_DIR)

@@ -20,10 +20,10 @@
 # License along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
-
+LRZSZ_VERSION:=0.12.20
 LRZSZ_SITE:=http://www.ohse.de/uwe/releases
-LRZSZ_SOURCE:=lrzsz-0.12.20.tar.gz
-LRZSZ_DIR:=$(BUILD_DIR)/lrzsz-0.12.20
+LRZSZ_SOURCE:=lrzsz-$(LRZSZ_VERSION).tar.gz
+LRZSZ_DIR:=$(BUILD_DIR)/lrzsz-$(LRZSZ_VERSION)
 
 $(DL_DIR)/$(LRZSZ_SOURCE):
 	$(WGET) -P $(DL_DIR) $(LRZSZ_SITE)/$(LRZSZ_SOURCE)
@@ -37,8 +37,7 @@ $(LRZSZ_DIR)/.unpacked: $(DL_DIR)/$(LRZSZ_SOURCE)
 $(LRZSZ_DIR)/.configured: $(LRZSZ_DIR)/.unpacked
 	(cd $(LRZSZ_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

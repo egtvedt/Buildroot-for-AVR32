@@ -4,10 +4,10 @@
 #
 #############################################################
 
-IPSEC_TOOLS_VER:=0.6.6
-IPSEC_TOOLS_SOURCE:=ipsec-tools-$(IPSEC_TOOLS_VER).tar.bz2
+IPSEC_TOOLS_VERSION:=0.6.7
+IPSEC_TOOLS_SOURCE:=ipsec-tools-$(IPSEC_TOOLS_VERSION).tar.bz2
 IPSEC_TOOLS_CAT:=$(BZCAT)
-IPSEC_TOOLS_DIR:=$(BUILD_DIR)/ipsec-tools-$(IPSEC_TOOLS_VER)
+IPSEC_TOOLS_DIR:=$(BUILD_DIR)/ipsec-tools-$(IPSEC_TOOLS_VERSION)
 
 IPSEC_TOOLS_BINARY_SETKEY:=src/setkey/setkey
 IPSEC_TOOLS_BINARY_RACOON:=src/racoon/racoon
@@ -42,18 +42,16 @@ else
 IPSEC_TOOLS_CONFIG_FLAGS+=	--disable-stats
 endif
 
-# At first check, if uClibc supports IPv6
-ifeq ($(shell grep -qs '__UCLIBC_HAS_IPV6__ 1' \
-	$(STAGING_DIR)/include/bits/uClibc_config.h && echo IPV6), IPV6)
+ifeq ($(BR2_INET_IPV6),y)
 
 ifeq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS_IPV6)), y)
 IPSEC_TOOLS_CONFIG_FLAGS+=	--enable-ipv6
 else
-IPSEC_TOOLS_CONFIG_FLAGS+=	--disable-ipv6
+IPSEC_TOOLS_CONFIG_FLAGS+=	$(DISABLE_IPV6)
 endif
 
 else # ignore user's choice if it doesn't
-IPSEC_TOOLS_CONFIG_FLAGS+=	--disable-ipv6
+IPSEC_TOOLS_CONFIG_FLAGS+=	$(DISABLE_IPV6)
 endif
 
 ifneq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS_READLINE)), y)
@@ -63,17 +61,16 @@ endif
 $(DL_DIR)/$(IPSEC_TOOLS_SOURCE):
 	$(WGET) -P $(DL_DIR) $(IPSEC_TOOLS_SITE)/$(IPSEC_TOOLS_SOURCE)
 
-
-$(IPSEC_TOOLS_DIR)/.source: $(DL_DIR)/$(IPSEC_TOOLS_SOURCE)
+$(IPSEC_TOOLS_DIR)/.patched: $(DL_DIR)/$(IPSEC_TOOLS_SOURCE)
 	$(IPSEC_TOOLS_CAT) $(DL_DIR)/$(IPSEC_TOOLS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	toolchain/patch-kernel.sh $(IPSEC_TOOLS_DIR) package/ipsec-tools ipsec-tools-$(IPSEC_TOOLS_VER)\*.patch
-	touch $(IPSEC_TOOLS_DIR)/.source
+	toolchain/patch-kernel.sh $(IPSEC_TOOLS_DIR) package/ipsec-tools ipsec-tools-$(IPSEC_TOOLS_VERSION)\*.patch
+	$(CONFIG_UPDATE) $(IPSEC_TOOLS_DIR)
+	touch $@
 
-$(IPSEC_TOOLS_DIR)/.configured: $(IPSEC_TOOLS_DIR)/.source
-	( cd $(IPSEC_TOOLS_DIR); \
-	  $(TARGET_CONFIGURE_OPTS) \
-	  CFLAGS="$(TARGET_CFLAGS)" \
-	  LDFLAGS="$(TARGET_LDFLAGS)" \
+$(IPSEC_TOOLS_DIR)/.configured: $(IPSEC_TOOLS_DIR)/.patched
+	( cd $(IPSEC_TOOLS_DIR); rm -rf config.cache ; \
+		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
 	  ./configure \
 	  --target=$(GNU_TARGET_NAME) \
 	  --host=$(GNU_TARGET_NAME) \
@@ -83,10 +80,18 @@ $(IPSEC_TOOLS_DIR)/.configured: $(IPSEC_TOOLS_DIR)/.source
 	  --disable-hybrid \
 	  --without-libpam \
 	  --disable-gssapi \
-	  --with-kernel-headers=$(STAGING_DIR)/include \
+	  --with-kernel-headers=$(STAGING_DIR)/usr/include \
 	  $(IPSEC_TOOLS_CONFIG_FLAGS) \
 	); 
-	touch $(IPSEC_TOOLS_DIR)/.configured
+	# simpler than patching that cruft..
+	(echo '#undef bzero' ; \
+	 echo '#define bzero(a, b) memset((a), 0, (b))' ; \
+	 echo '#undef bcopy' ; \
+	 echo '#define bcopy(src, dest, len) memmove(dest, src, len)' ; \
+	 echo '#undef index' ; \
+	 echo '#define index(a, b) strchr(a, b)' ; \
+	) >> $(IPSEC_TOOLS_DIR)/config.h
+	touch $@
 
 $(IPSEC_TOOLS_DIR)/$(IPSEC_TOOLS_BINARY_SETKEY) \
 $(IPSEC_TOOLS_DIR)/$(IPSEC_TOOLS_BINARY_RACOON) \

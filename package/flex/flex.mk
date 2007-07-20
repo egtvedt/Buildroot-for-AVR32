@@ -35,8 +35,7 @@ endif
 $(FLEX_DIR)/.configured: $(FLEX_DIR)/.unpacked
 	(cd $(FLEX_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -59,7 +58,7 @@ $(FLEX_DIR)/.configured: $(FLEX_DIR)/.unpacked
 	touch $@
 
 $(FLEX_DIR)/$(FLEX_BINARY): $(FLEX_DIR)/.configured
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) -C $(FLEX_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(FLEX_DIR)
 
 $(TARGET_DIR)/$(FLEX_TARGET_BINARY): $(FLEX_DIR)/$(FLEX_BINARY)
 	$(MAKE1) \

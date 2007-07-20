@@ -3,10 +3,10 @@
 # nano
 #
 #############################################################
-NANO_VER:=1.3.12
-NANO_SOURCE:=nano-$(NANO_VER).tar.gz
+NANO_VERSION:=1.3.12
+NANO_SOURCE:=nano-$(NANO_VERSION).tar.gz
 NANO_SITE:=http://www.nano-editor.org/dist/v1.3/
-NANO_DIR:=$(BUILD_DIR)/nano-$(NANO_VER)
+NANO_DIR:=$(BUILD_DIR)/nano-$(NANO_VERSION)
 NANO_CAT:=$(ZCAT)
 NANO_BINARY:=src/nano
 NANO_TARGET_BINARY:=bin/nano
@@ -23,8 +23,7 @@ $(NANO_DIR)/.unpacked: $(DL_DIR)/$(NANO_SOURCE)
 $(NANO_DIR)/.configured: $(NANO_DIR)/.unpacked
 	(cd $(NANO_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_header_regex_h=no \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
@@ -36,7 +35,7 @@ $(NANO_DIR)/.configured: $(NANO_DIR)/.unpacked
 	touch $(NANO_DIR)/.configured
 
 $(NANO_DIR)/$(NANO_BINARY): $(NANO_DIR)/.configured
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CC=$(TARGET_CC) -C $(NANO_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(NANO_DIR)
 
 $(TARGET_DIR)/$(NANO_TARGET_BINARY): $(NANO_DIR)/$(NANO_BINARY)
 	install -D $(NANO_DIR)/$(NANO_BINARY) $(TARGET_DIR)/$(NANO_TARGET_BINARY)

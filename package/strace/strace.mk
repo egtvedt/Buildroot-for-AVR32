@@ -3,11 +3,11 @@
 # strace
 #
 #############################################################
-STRACE_VER:=4.5.15
-STRACE_SOURCE:=strace-$(STRACE_VER).tar.bz2
+STRACE_VERSION:=4.5.15
+STRACE_SOURCE:=strace-$(STRACE_VERSION).tar.bz2
 STRACE_SITE:=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/strace
 STRACE_CAT:=$(BZCAT)
-STRACE_DIR:=$(BUILD_DIR)/strace-$(STRACE_VER)
+STRACE_DIR:=$(BUILD_DIR)/strace-$(STRACE_VERSION)
 
 BR2_STRACE_CFLAGS:=
 ifeq ($(BR2_LARGEFILE),)
@@ -29,8 +29,8 @@ $(STRACE_DIR)/.configured: $(STRACE_DIR)/.unpacked
 	(cd $(STRACE_DIR); rm -rf config.cache; \
 		$(if $(BR_LARGEFILE),ac_cv_type_stat64=yes,ac_cv_type_stat64=no) \
 		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
 		CFLAGS="$(TARGET_CFLAGS) $(BR2_STRACE_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
 		aaa_ac_cv_header_linux_if_packet_h=yes \
 		./configure \
 		--target=$(REAL_GNU_TARGET_NAME) \

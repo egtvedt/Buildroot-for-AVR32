@@ -3,17 +3,12 @@
 # libglib1.2
 #
 #############################################################
-LIBGLIB12_SOURCE:=glib-1.2.10.tar.gz
+LIBGLIB12_VERSION:=1.2.10
+LIBGLIB12_SOURCE:=glib-$(LIBGLIB12_VERSION).tar.gz
 LIBGLIB12_SITE:=http://ftp.gtk.org/pub/gtk/v1.2
 LIBGLIB12_CAT:=$(ZCAT)
-LIBGLIB12_DIR:=$(BUILD_DIR)/glib-1.2.10
+LIBGLIB12_DIR:=$(BUILD_DIR)/glib-$(LIBGLIB12_VERSION)
 LIBGLIB12_BINARY:=libglib.a
-
-ifeq ($(BR2_ENDIAN),"BIG")
-LIBGLIB12_BE:=yes
-else
-LIBGLIB12_BE:=no
-endif
 
 $(DL_DIR)/$(LIBGLIB12_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(LIBGLIB12_SITE)/$(LIBGLIB12_SOURCE)
@@ -29,9 +24,7 @@ $(LIBGLIB12_DIR)/.unpacked: $(DL_DIR)/$(LIBGLIB12_SOURCE)
 $(LIBGLIB12_DIR)/.configured: $(LIBGLIB12_DIR)/.unpacked
 	(cd $(LIBGLIB12_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
-		ac_cv_c_bigendian=$(LIBGLIB12_BE) \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

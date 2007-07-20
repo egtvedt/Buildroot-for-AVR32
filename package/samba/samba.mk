@@ -3,10 +3,10 @@
 # samba
 #
 #############################################################
-SAMBA_VER:=3.0.24
-SAMBA_SOURCE:=samba-$(SAMBA_VER).tar.gz
-SAMBA_SITE:=ftp://us4.samba.org/pub/samba/old-versions/
-SAMBA_DIR:=$(BUILD_DIR)/samba-$(SAMBA_VER)/source
+SAMBA_VERSION:=3.0.25b
+SAMBA_SOURCE:=samba-$(SAMBA_VERSION).tar.gz
+SAMBA_SITE:=ftp://us4.samba.org/pub/samba/
+SAMBA_DIR:=$(BUILD_DIR)/samba-$(SAMBA_VERSION)/source
 SAMBA_CAT:=$(ZCAT)
 SAMBA_BINARY:=bin/smbd
 SAMBA_TARGET_BINARY:=usr/sbin/smbd
@@ -26,10 +26,10 @@ $(SAMBA_DIR)/.configured: $(SAMBA_DIR)/.unpacked
 	(cd $(SAMBA_DIR); rm -rf config.cache; \
 		./autogen.sh; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		samba_cv_HAVE_GETTIMEOFDAY_TZ=yes \
 		samba_cv_USE_SETREUID=yes \
+		samba_cv_HAVE_KERNEL_OPLOCKS_LINUX=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -40,6 +40,7 @@ $(SAMBA_DIR)/.configured: $(SAMBA_DIR)/.unpacked
 		--with-logfilebase=/var/log/samba \
 		--with-configdir=/etc/samba \
 		--without-ldap \
+		--without-libaddns \
 		--with-included-popt \
 		--with-included-iniparser \
 		--disable-cups \
@@ -48,7 +49,7 @@ $(SAMBA_DIR)/.configured: $(SAMBA_DIR)/.unpacked
 	touch $(SAMBA_DIR)/.configured
 
 $(SAMBA_DIR)/$(SAMBA_BINARY): $(SAMBA_DIR)/.configured
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CC=$(TARGET_CC) -C $(SAMBA_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(SAMBA_DIR)
 
 SAMBA_TARGETS_ :=
 SAMBA_TARGETS_y :=
@@ -81,7 +82,7 @@ SAMBA_TARGETS_$(BR2_PACKAGE_SAMBA_WINBINDD)	+= usr/sbin/winbindd
 SAMBA_TARGETS_$(BR2_PACKAGE_SAMBA_WBINFO)	+= usr/bin/wbinfo
 
 $(TARGET_DIR)/$(SAMBA_TARGET_BINARY): $(SAMBA_DIR)/$(SAMBA_BINARY)
-	$(TARGET_CONFIGURE_OPTS) $(MAKE) CC=$(TARGET_CC)	\
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) 	\
 		prefix="${TARGET_DIR}/usr" \
 		BASEDIR="${TARGET_DIR}/usr" \
 		SBINDIR="${TARGET_DIR}/usr/sbin" \
@@ -93,7 +94,11 @@ $(TARGET_DIR)/$(SAMBA_TARGET_BINARY): $(SAMBA_DIR)/$(SAMBA_BINARY)
 	for file in $(SAMBA_TARGETS_) ; do \
 		rm -f $(TARGET_DIR)/$$file; \
 	done
-	$(INSTALL) -m 0755 -D package/samba/init-samba $(TARGET_DIR)/etc/init.d/S91smb
+	$(STRIP) --strip-unneeded $(TARGET_DIR)/$(SAMBA_TARGET_BINARY)
+	for file in $(SAMBA_TARGETS_y) ; do \
+		$(STRIP) --strip-unneeded $(TARGET_DIR)/$$file; \
+	done
+	$(INSTALL) -m 0755 package/samba/S91smb $(TARGET_DIR)/etc/init.d
 	@if [ ! -f $(TARGET_DIR)/etc/samba/smb.conf ] ; then \
 		$(INSTALL) -m 0755 -D package/samba/simple.conf $(TARGET_DIR)/etc/samba/smb.conf; \
 	fi;

@@ -3,13 +3,17 @@
 # proftpd
 #
 #############################################################
-PROFTPD_VER:=1.3.0a
-PROFTPD_SOURCE:=proftpd-$(PROFTPD_VER).tar.bz2
+PROFTPD_VERSION:=1.3.0a
+PROFTPD_SOURCE:=proftpd-$(PROFTPD_VERSION).tar.bz2
 PROFTPD_SITE:=ftp://ftp.proftpd.org/distrib/source/
-PROFTPD_DIR:=$(BUILD_DIR)/proftpd-$(PROFTPD_VER)
+PROFTPD_DIR:=$(BUILD_DIR)/proftpd-$(PROFTPD_VERSION)
 PROFTPD_CAT:=bzcat
 PROFTPD_BINARY:=proftpd
 PROFTPD_TARGET_BINARY:=usr/sbin/proftpd
+
+ifeq ($(BR2_INET_IPV6),y)
+ENABLE_IPV6:=--enable-ipv6
+endif
 
 $(DL_DIR)/$(PROFTPD_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(PROFTPD_SITE)/$(PROFTPD_SOURCE)
@@ -23,8 +27,7 @@ $(PROFTPD_DIR)/.unpacked: $(DL_DIR)/$(PROFTPD_SOURCE)
 $(PROFTPD_DIR)/.configured: $(PROFTPD_DIR)/.unpacked
 	(cd $(PROFTPD_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_func_setpgrp_void=yes \
 		ac_cv_func_setgrent_void=yes \
 		./configure \
@@ -41,6 +44,7 @@ $(PROFTPD_DIR)/.configured: $(PROFTPD_DIR)/.unpacked
 		--disable-dso \
 		--enable-shadow \
 		$(DISABLE_LARGEFILE) \
+		$(ENABLE_IPV6) \
 		--with-gnu-ld \
 	);
 	touch $(PROFTPD_DIR)/.configured
@@ -56,7 +60,7 @@ $(TARGET_DIR)/$(PROFTPD_TARGET_BINARY): $(PROFTPD_DIR)/$(PROFTPD_BINARY)
 	@if [ ! -f $(TARGET_DIR)/etc/proftpd.conf ] ; then \
 		$(INSTALL) -m 0644 -D $(PROFTPD_DIR)/sample-configurations/basic.conf $(TARGET_DIR)/etc/proftpd.conf; \
 	fi;
-	$(INSTALL) -m 0755 -D package/proftpd/init-proftpd $(TARGET_DIR)/etc/init.d/S50proftpd
+	$(INSTALL) -m 0755 package/proftpd/S50proftpd $(TARGET_DIR)/etc/init.d
 
 proftpd: uclibc $(TARGET_DIR)/$(PROFTPD_TARGET_BINARY)
 

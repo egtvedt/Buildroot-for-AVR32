@@ -3,12 +3,12 @@
 # ltt
 #
 #############################################################
-LTT_VER:=0.9.5a
-LTT_SOURCE:=TraceToolkit-$(LTT_VER).tgz
+LTT_VERSION:=0.9.5a
+LTT_SOURCE:=TraceToolkit-$(LTT_VERSION).tgz
 LTT_SITE:=http://www.opersys.com/ftp/pub/LTT
 LTT_CAT:=$(ZCAT)
-LTT_DIR1:=$(TOOL_BUILD_DIR)/TraceToolkit-$(LTT_VER:a=)
-LTT_DIR2:=$(BUILD_DIR)/TraceToolkit-$(LTT_VER:a=)
+LTT_DIR1:=$(TOOL_BUILD_DIR)/TraceToolkit-$(LTT_VERSION:a=)
+LTT_DIR2:=$(BUILD_DIR)/TraceToolkit-$(LTT_VERSION:a=)
 LTT_BINARY:=Visualizer/tracevisualizer
 LTT_TARGET_BINARY:=Daemon/tracedaemon
 
@@ -69,8 +69,7 @@ $(LTT_DIR2)/.unpacked: $(DL_DIR)/$(LTT_SOURCE)
 $(LTT_DIR2)/.configured: $(LTT_DIR2)/.unpacked
 	(cd $(LTT_DIR2); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
@@ -98,7 +97,7 @@ $(TARGET_DIR)/usr/bin/tracedaemon: $(LTT_DIR2)/$(LTT_TARGET_BINARY)
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) DESTDIR=$(TARGET_DIR) \
 		-C $(LTT_DIR2)/Daemon install
 	$(STRIP) $(TARGET_DIR)/usr/bin/tracedaemon > /dev/null 2>&1
-	$(INSTALL) -D -m 0755 package/ltt/init-tracer $(TARGET_DIR)/etc/init.d/S27tracer
+	$(INSTALL) -D -m 0755 package/ltt/S27tracer $(TARGET_DIR)/etc/init.d
 
 ltt-tracedaemon: uclibc $(TARGET_DIR)/usr/bin/tracedaemon
 

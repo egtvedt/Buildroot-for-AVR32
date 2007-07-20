@@ -29,8 +29,7 @@ $(SOCAT_WORKDIR)/Makefile: $(SOCAT_DIR)/.unpacked
 	mkdir -p $(SOCAT_WORKDIR)
 	(cd $(SOCAT_WORKDIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		$(SOCAT_DIR)/configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -58,6 +57,7 @@ $(SOCAT_WORKDIR)/socat:	$(SOCAT_WORKDIR)/Makefile
 $(SOCAT_WORKDIR)/.installed: $(SOCAT_WORKDIR)/socat
 	mkdir -p $(TARGET_DIR)/usr/man/man1
 	$(MAKE) -C $(SOCAT_WORKDIR) install prefix=$(TARGET_DIR)/usr DESTDIR=$(TARGET_DIR)
+	touch $@
 
 socat:	uclibc $(SOCAT_WORKDIR)/.installed
 

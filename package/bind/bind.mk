@@ -3,11 +3,11 @@
 # bind
 #
 #############################################################
-BIND_VER:=9.3.2
-BIND_SOURCE:=bind-$(BIND_VER).tar.gz
-BIND_SITE:=ftp://ftp.isc.org/isc/bind9/$(BIND_VER)
-BIND_DIR1:=$(TOOL_BUILD_DIR)/bind-$(BIND_VER)
-BIND_DIR2:=$(BUILD_DIR)/bind-$(BIND_VER)
+BIND_VERSION:=9.3.2
+BIND_SOURCE:=bind-$(BIND_VERSION).tar.gz
+BIND_SITE:=ftp://ftp.isc.org/isc/bind9/$(BIND_VERSION)
+BIND_DIR1:=$(TOOL_BUILD_DIR)/bind-$(BIND_VERSION)
+BIND_DIR2:=$(BUILD_DIR)/bind-$(BIND_VERSION)
 BIND_CAT:=$(ZCAT)
 BIND_BINARY:=bin/named/named
 BIND_TARGET_BINARY:=usr/sbin/named
@@ -30,8 +30,7 @@ $(BIND_DIR2)/.unpacked: $(DL_DIR)/$(BIND_SOURCE)
 $(BIND_DIR2)/Makefile: $(BIND_DIR2)/.unpacked
 	(cd $(BIND_DIR2); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -45,7 +44,7 @@ $(BIND_DIR2)/Makefile: $(BIND_DIR2)/.unpacked
 		--localstatedir=/var \
 		--without-openssl \
 		--with-randomdev=/dev/random \
-		--enable-ipv6 \
+		$(DISABLE_IPV6) \
 		--with-libtool \
 		--with-pic \
 	);

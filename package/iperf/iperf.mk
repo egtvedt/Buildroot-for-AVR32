@@ -19,17 +19,16 @@ $(IPERF_DIR)/.unpacked: $(DL_DIR)/$(IPERF_SOURCE)
 	touch $(IPERF_DIR)/.unpacked
 
 $(IPERF_DIR)/.configured: $(IPERF_DIR)/.unpacked
-	(	cd $(IPERF_DIR); rm -rf config.cache;  \
+	(cd $(IPERF_DIR); rm -rf config.cache;  \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		ac_cv_func_malloc_0_nonnull=yes \
 		./configure \
 		--with-gnu-ld \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
-		--disable-ipv6 \
+		$(DISABLE_IPV6) \
 		--disable-dependency-tracking \
 		--disable-web100 \
 		--prefix=/usr \

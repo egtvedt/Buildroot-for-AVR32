@@ -47,7 +47,7 @@ ifeq ($(GDB_VERSION),snapshot)
 endif
 	toolchain/patch-kernel.sh $(GDB_DIR) toolchain/gdb/$(GDB_VERSION) \*.patch
 	$(CONFIG_UPDATE) $(GDB_DIR)
-	touch $(GDB_DIR)/.unpacked
+	touch $@
 
 gdb-dirclean:
 	rm -rf $(GDB_DIR)
@@ -72,11 +72,11 @@ GDB_TARGET_CONFIGURE_VARS:= \
 
 $(GDB_TARGET_DIR)/.configured: $(GDB_DIR)/.unpacked
 	mkdir -p $(GDB_TARGET_DIR)
-	(cd $(GDB_TARGET_DIR); \
+	(cd $(GDB_TARGET_DIR); rm -rf config.cache ; \
 		gdb_cv_func_sigsetjmp=yes \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS_FOR_TARGET="$(TARGET_CFLAGS) $(TARGET_LDFLAGS)" \
-		CFLAGS="$(TARGET_CFLAGS) $(TARGET_LDFLAGS)" \
+		CFLAGS_FOR_TARGET="$(TARGET_CFLAGS) $(TARGET_LDFLAGS) -Wno-error" \
+		CFLAGS="$(TARGET_CFLAGS) $(TARGET_LDFLAGS) -Wno-error" \
 		$(GDB_TARGET_CONFIGURE_VARS) \
 		$(GDB_DIR)/configure \
 		--build=$(GNU_HOST_NAME) \
@@ -88,11 +88,12 @@ $(GDB_TARGET_DIR)/.configured: $(GDB_DIR)/.unpacked
 		--disable-tui --disable-gdbtk --without-x \
 		--disable-sim --enable-gdbserver \
 		--without-included-gettext \
+		--disable-werror \
 	);
 ifeq ($(BR2_ENABLE_LOCALE),y)
 	-$(SED) "s,^INTL *=.*,INTL = -lintl,g;" $(GDB_DIR)/gdb/Makefile
 endif
-	touch  $(GDB_TARGET_DIR)/.configured
+	touch $@
 
 $(GDB_TARGET_DIR)/gdb/gdb: $(GDB_TARGET_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) MT_CFLAGS="$(TARGET_CFLAGS)" \
@@ -107,9 +108,7 @@ gdb_target: ncurses $(TARGET_DIR)/usr/bin/gdb
 gdb_target-source: $(DL_DIR)/$(GDB_SOURCE)
 
 gdb_target-clean:
-	@if [ -d $(GDB_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(GDB_DIR) clean ; \
-	fi;
+	-$(MAKE) -C $(GDB_DIR) clean
 
 gdb_target-dirclean:
 	rm -rf $(GDB_DIR)
@@ -124,9 +123,10 @@ GDB_SERVER_DIR:=$(BUILD_DIR)/gdbserver-$(GDB_VERSION)
 
 $(GDB_SERVER_DIR)/.configured: $(GDB_DIR)/.unpacked
 	mkdir -p $(GDB_SERVER_DIR)
-	(cd $(GDB_SERVER_DIR); \
+	(cd $(GDB_SERVER_DIR); rm -rf config.cache ; \
 		$(TARGET_CONFIGURE_OPTS) \
 		gdb_cv_func_sigsetjmp=yes \
+		bash_cv_have_mbstate_t=yes \
 		$(GDB_DIR)/gdb/gdbserver/configure \
 		--build=$(GNU_HOST_NAME) \
 		--host=$(REAL_GNU_TARGET_NAME) \
@@ -147,7 +147,7 @@ $(GDB_SERVER_DIR)/.configured: $(GDB_DIR)/.unpacked
 		--disable-tui --disable-gdbtk --without-x \
 		--without-included-gettext \
 	);
-	touch  $(GDB_SERVER_DIR)/.configured
+	touch $@
 
 $(GDB_SERVER_DIR)/gdbserver: $(GDB_SERVER_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) MT_CFLAGS="$(TARGET_CFLAGS)" \
@@ -164,9 +164,7 @@ endif
 gdbserver: $(TARGET_DIR)/usr/bin/gdbserver
 
 gdbserver-clean:
-	@if [ -d $(GDB_SERVER_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(GDB_SERVER_DIR) clean ; \
-	fi;
+	-$(MAKE) -C $(GDB_SERVER_DIR) clean
 
 gdbserver-dirclean:
 	rm -rf $(GDB_SERVER_DIR)
@@ -181,8 +179,9 @@ GDB_HOST_DIR:=$(TOOL_BUILD_DIR)/gdbhost-$(GDB_VERSION)
 
 $(GDB_HOST_DIR)/.configured: $(GDB_DIR)/.unpacked
 	mkdir -p $(GDB_HOST_DIR)
-	(cd $(GDB_HOST_DIR); \
+	(cd $(GDB_HOST_DIR); rm -rf config.cache ; \
 		gdb_cv_func_sigsetjmp=yes \
+		bash_cv_have_mbstate_t=yes \
 		$(GDB_DIR)/configure \
 		--prefix=$(STAGING_DIR) \
 		--build=$(GNU_HOST_NAME) \
@@ -194,7 +193,7 @@ $(GDB_HOST_DIR)/.configured: $(GDB_DIR)/.unpacked
 		--without-included-gettext \
 		--enable-threads \
 	);
-	touch  $(GDB_HOST_DIR)/.configured
+	touch $@
 
 $(GDB_HOST_DIR)/gdb/gdb: $(GDB_HOST_DIR)/.configured
 	$(MAKE) -C $(GDB_HOST_DIR)
@@ -203,16 +202,14 @@ $(GDB_HOST_DIR)/gdb/gdb: $(GDB_HOST_DIR)/.configured
 $(TARGET_CROSS)gdb: $(GDB_HOST_DIR)/gdb/gdb
 	install -c $(GDB_HOST_DIR)/gdb/gdb $(TARGET_CROSS)gdb
 	ln -snf ../../bin/$(REAL_GNU_TARGET_NAME)-gdb \
-		$(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/bin/gdb
+		$(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/bin/gdb
 	ln -snf $(REAL_GNU_TARGET_NAME)-gdb \
-		$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-gdb
+		$(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-gdb
 
 gdbhost: $(TARGET_CROSS)gdb
 
 gdbhost-clean:
-	@if [ -d $(GDB_HOST_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(GDB_HOST_DIR) clean ; \
-	fi;
+	-$(MAKE) -C $(GDB_HOST_DIR) clean
 
 gdbhost-dirclean:
 	rm -rf $(GDB_HOST_DIR)

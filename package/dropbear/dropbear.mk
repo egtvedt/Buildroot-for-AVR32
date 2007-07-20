@@ -3,10 +3,10 @@
 # dropbear
 #
 #############################################################
-DROPBEAR_VER:=0.49
-DROPBEAR_SOURCE:=dropbear-$(DROPBEAR_VER).tar.gz
+DROPBEAR_VERSION:=0.49
+DROPBEAR_SOURCE:=dropbear-$(DROPBEAR_VERSION).tar.gz
 DROPBEAR_SITE:=http://matt.ucc.asn.au/dropbear/releases/
-DROPBEAR_DIR:=$(BUILD_DIR)/dropbear-$(DROPBEAR_VER)
+DROPBEAR_DIR:=$(BUILD_DIR)/dropbear-$(DROPBEAR_VERSION)
 DROPBEAR_CAT:=$(ZCAT)
 DROPBEAR_BINARY:=dropbearmulti
 DROPBEAR_TARGET_BINARY:=usr/sbin/dropbear
@@ -27,8 +27,7 @@ $(DROPBEAR_DIR)/.configured: $(DROPBEAR_DIR)/.unpacked
 	(cd $(DROPBEAR_DIR); rm -rf config.cache; \
 		autoconf; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

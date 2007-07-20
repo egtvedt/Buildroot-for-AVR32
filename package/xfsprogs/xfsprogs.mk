@@ -3,11 +3,11 @@
 # xfsprogs
 #
 #############################################################
-XFSPROGS_VER:=2.7.11
-XFSPROGS_SOURCE=xfsprogs-$(XFSPROGS_VER).src.tar.gz
+XFSPROGS_VERSION:=2.7.11
+XFSPROGS_SOURCE=xfsprogs-$(XFSPROGS_VERSION).src.tar.gz
 #XFSPROGS_SITE=ftp://oss.sgi.com/projects/xfs/cmd_tars
 XFSPROGS_SITE=ftp://oss.sgi.com/projects/xfs/previous/cmd_tars/
-XFSPROGS_DIR=$(BUILD_DIR)/xfsprogs-$(XFSPROGS_VER)
+XFSPROGS_DIR=$(BUILD_DIR)/xfsprogs-$(XFSPROGS_VERSION)
 XFSPROGS_CAT:=$(ZCAT)
 XFSPROGS_BINARY:=mkfs/mkfs.xfs
 XFSPROGS_TARGET_BINARY:=sbin/mkfs.xfs
@@ -34,9 +34,9 @@ XFSPROGS_CONFIG_SHARED:=--enable-shared
 $(XFSPROGS_DIR)/.configured: $(XFSPROGS_DIR)/.unpacked
 	(cd $(XFSPROGS_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		CPPFLAGS=-I$(E2FSPROGS_DIR)/lib \
-		LDFLAGS="$(TARGET_LDFLAGS) -L$(E2FSPROGS_DIR)/lib" \
+		$(TARGET_CONFIGURE_ARGS) \
+		CPPFLAGS="-I$(E2FSPROGS_DIR)/lib" \
+		LDFLAGS="-L$(E2FSPROGS_DIR)/lib" \
 		LIBTOOL=$(LIBTOOL_DIR)/libtool \
 		INSTALL_USER=$(shell whoami) \
 		INSTALL_GROUP=$(shell groups | cut -d" " -f1) \
@@ -52,8 +52,8 @@ $(XFSPROGS_DIR)/.configured: $(XFSPROGS_DIR)/.unpacked
 	touch $(XFSPROGS_DIR)/.configured
 
 $(XFSPROGS_DIR)/$(XFSPROGS_BINARY): $(XFSPROGS_DIR)/.configured
-	$(MAKE1) PATH=$(TARGET_PATH) CPPFLAGS=-I$(E2FSPROGS_DIR)/lib \
-		LDFLAGS="$(TARGET_LDFLAGS) -L$(E2FSPROGS_DIR)/lib" -C $(XFSPROGS_DIR)
+	$(MAKE1) PATH=$(TARGET_PATH) CPPFLAGS="-I$(E2FSPROGS_DIR)/lib" \
+		LDFLAGS="-L$(E2FSPROGS_DIR)/lib" -C $(XFSPROGS_DIR)
 ifeq ($(XFSPROGS_CONFIG_SHARED),--enable-shared)
 	( \
 		cd $(XFSPROGS_DIR) ; \

@@ -3,11 +3,11 @@
 # bash
 #
 #############################################################
-BASH_VER:=3.2
-BASH_SOURCE:=bash-$(BASH_VER).tar.gz
+BASH_VERSION:=3.2
+BASH_SOURCE:=bash-$(BASH_VERSION).tar.gz
 BASH_SITE:=http://ftp.gnu.org/pub/gnu/bash
 BASH_CAT:=$(ZCAT)
-BASH_DIR:=$(BUILD_DIR)/bash-$(BASH_VER)
+BASH_DIR:=$(BUILD_DIR)/bash-$(BASH_VERSION)
 BASH_BINARY:=bash
 BASH_TARGET_BINARY:=bin/bash
 
@@ -32,8 +32,7 @@ $(BASH_DIR)/.configured: $(BASH_DIR)/.unpacked
 	#		bash_cv_have_mbstate_t=yes
 	(cd $(BASH_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		CCFLAGS_FOR_BUILD="$(HOST_CFLAGS)" \
 		ac_cv_func_setvbuf_reversed=no \
 		./configure \
@@ -60,7 +59,7 @@ $(BASH_DIR)/.configured: $(BASH_DIR)/.unpacked
 	touch $@
 
 $(BASH_DIR)/$(BASH_BINARY): $(BASH_DIR)/.configured
-	$(MAKE) CC=$(TARGET_CC) CC_FOR_BUILD="$(HOSTCC)" -C $(BASH_DIR)
+	$(MAKE1) CC=$(TARGET_CC) CC_FOR_BUILD="$(HOSTCC)" -C $(BASH_DIR)
 
 $(TARGET_DIR)/$(BASH_TARGET_BINARY): $(BASH_DIR)/$(BASH_BINARY)
 	$(MAKE1) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(BASH_DIR) install
@@ -80,7 +79,8 @@ bash: ncurses uclibc $(TARGET_DIR)/$(BASH_TARGET_BINARY)
 endif
 
 bash-clean:
-	$(MAKE1) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(BASH_DIR) uninstall
+	-$(MAKE1) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(BASH_DIR) uninstall
+	rm -f $(TARGET_DIR)/$(BASH_TARGET_BINARY)
 	-$(MAKE1) -C $(BASH_DIR) clean
 
 bash-dirclean:

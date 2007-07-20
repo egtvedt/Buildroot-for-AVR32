@@ -3,10 +3,10 @@
 # bison
 #
 #############################################################
-BISON_VER:=2.3
-BISON_SOURCE:=bison-$(BISON_VER).tar.bz2
+BISON_VERSION:=2.3
+BISON_SOURCE:=bison-$(BISON_VERSION).tar.bz2
 BISON_SITE:=http://ftp.gnu.org/pub/gnu/bison
-BISON_DIR:=$(BUILD_DIR)/bison-$(BISON_VER)
+BISON_DIR:=$(BUILD_DIR)/bison-$(BISON_VERSION)
 BISON_CAT:=$(BZCAT)
 BISON_BINARY:=src/bison
 BISON_TARGET_BINARY:=usr/bin/bison
@@ -24,8 +24,7 @@ $(BISON_DIR)/.unpacked: $(DL_DIR)/$(BISON_SOURCE)
 $(BISON_DIR)/.configured: $(BISON_DIR)/.unpacked
 	(cd $(BISON_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		gt_cv_func_gnugettext2_libintl=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
@@ -59,7 +58,8 @@ $(TARGET_DIR)/$(BISON_TARGET_BINARY): $(BISON_DIR)/$(BISON_BINARY)
 bison: uclibc $(TARGET_DIR)/$(BISON_TARGET_BINARY)
 
 bison-clean:
-	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(BISON_DIR) uninstall
+	-$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(BISON_DIR) uninstall
+	rm -f $(TARGET_DIR)/$(BISON_TARGET_BINARY)
 	-$(MAKE) -C $(BISON_DIR) clean
 
 bison-dirclean:

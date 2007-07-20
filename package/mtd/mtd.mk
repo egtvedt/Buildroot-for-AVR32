@@ -5,8 +5,8 @@
 #############################################################
 ifeq ($(strip $(BR2_PACKAGE_MTD_SNAPSHOT)),y)
 # Be aware that this changes daily....
-TODAY:=$(shell date -u +%Y%m%d)
-MTD_DL_SOURCE:=mtd-snapshot-$(TODAY).tar.bz2
+
+MTD_DL_SOURCE:=mtd-snapshot-$(DATE).tar.bz2
 MTD_CAT:=$(BZCAT)
 MTD_SOURCE:=mtd-snapshot.tar.bz2
 MTD_SITE:=ftp://ftp.uk.linux.org/pub/people/dwmw2/mtd/cvs
@@ -115,7 +115,11 @@ MTD_TARGETS_$(BR2_PACKAGE_MTD_DOC_LOADBIOS)		+= doc_loadbios
 MTD_BUILD_TARGETS := $(addprefix $(MTD_DIR)/, $(MTD_TARGETS_y))
 
 $(MTD_BUILD_TARGETS): $(MTD_DIR)/.unpacked
-	$(MAKE)	CC=$(TARGET_CC) CFLAGS="-I$(MTD_DIR)/include -I$(LINUX_HEADERS_DIR)/include $(TARGET_CFLAGS) -DWITHOUT_XATTR" LDFLAGS="$(TARGET_LDFLAGS)" LINUXDIR=$(LINUX_DIR) WITHOUT_XATTR=1 -C $(MTD_DIR)
+	$(MAKE)	$(TARGET_CONFIGURE_OPTS) \
+		CFLAGS+="-I$(MTD_DIR)/include" \
+		CFLAGS+="-I$(LINUX_HEADERS_DIR)/include" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
+		LINUXDIR=$(LINUX_DIR) -C $(MTD_DIR)/util
 
 MTD_TARGETS := $(addprefix $(TARGET_DIR)/usr/sbin/, $(MTD_TARGETS_y))
 

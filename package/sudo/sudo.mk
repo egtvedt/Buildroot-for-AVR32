@@ -4,10 +4,10 @@
 #
 #############################################################
 
-SUDO_VER:=1.6.8p12
-SUDO_SOURCE:=sudo-$(SUDO_VER).tar.gz
+SUDO_VERSION:=1.6.8p12
+SUDO_SOURCE:=sudo-$(SUDO_VERSION).tar.gz
 SUDO_SITE:=http://www.courtesan.com/sudo/dist
-SUDO_DIR:=$(BUILD_DIR)/sudo-$(SUDO_VER)
+SUDO_DIR:=$(BUILD_DIR)/sudo-$(SUDO_VERSION)
 SUDO_UNZIP:=$(ZCAT)
 
 $(DL_DIR)/$(SUDO_SOURCE):
@@ -23,9 +23,8 @@ $(SUDO_DIR)/.unpacked: $(DL_DIR)/$(SUDO_SOURCE)
 $(SUDO_DIR)/.configured: $(SUDO_DIR)/.unpacked $(SUDO_CONFIG_FILE)
 	(cd $(SUDO_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \

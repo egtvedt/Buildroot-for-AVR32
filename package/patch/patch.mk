@@ -3,10 +3,11 @@
 # patch
 #
 #############################################################
-GNUPATCH_SOURCE:=patch_2.5.9.orig.tar.gz
+GNUPATCH_VERSION:=2.5.9
+GNUPATCH_SOURCE:=patch_$(GNUPATCH_VERSION).orig.tar.gz
 GNUPATCH_SITE:=http://ftp.debian.org/debian/pool/main/p/patch
 GNUPATCH_CAT:=$(ZCAT)
-GNUPATCH_DIR:=$(BUILD_DIR)/patch-2.5.9
+GNUPATCH_DIR:=$(BUILD_DIR)/patch-$(GNUPATCH_VERSION)
 GNUPATCH_BINARY:=patch
 GNUPATCH_TARGET_BINARY:=usr/bin/patch
 
@@ -22,7 +23,7 @@ $(GNUPATCH_DIR)/.unpacked: $(DL_DIR)/$(GNUPATCH_SOURCE)
 $(GNUPATCH_DIR)/.configured: $(GNUPATCH_DIR)/.unpacked
 	(cd $(GNUPATCH_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

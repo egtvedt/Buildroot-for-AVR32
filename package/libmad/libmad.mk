@@ -22,8 +22,7 @@ $(LIBMAD_DIR)/.unpacked: $(DL_DIR)/$(LIBMAD_SOURCE)
 $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
 	(cd $(LIBMAD_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -36,18 +35,25 @@ $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
 	);
 	@touch $@
 
-$(LIBMAD_DIR)/libmad.a: $(LIBMAD_DIR)/.configured
+$(LIBMAD_DIR)/libmad.la: $(LIBMAD_DIR)/.configured
 	rm -f $@
 	$(MAKE) CC=$(TARGET_CC) -C $(LIBMAD_DIR)
 
-$(STAGING_DIR)/lib/libmad.a: $(LIBMAD_DIR)/libmad.a
-	$(MAKE) prefix=$(STAGING_DIR)/usr -C $(LIBMAD_DIR) install
+$(STAGING_DIR)/usr/lib/libmad.so: $(LIBMAD_DIR)/libmad.la
+	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBMAD_DIR) install
 
-$(TARGET_DIR)/usr/lib/libmad.so: $(STAGING_DIR)/lib/libmad.a
-	mkdir -p $(TARGET_DIR)/usr/lib
-	cp -dpf $(STAGING_DIR)/lib/libmad.so* $(TARGET_DIR)/usr/lib/
+$(TARGET_DIR)/usr/lib/libmad.so: $(STAGING_DIR)/usr/lib/libmad.so
+	cp -dpf $(STAGING_DIR)/usr/lib/libmad.so* $(TARGET_DIR)/usr/lib/
+	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libmad.so*
+
+$(TARGET_DIR)/usr/lib/libmad.a: $(STAGING_DIR)/usr/lib/libmad.so
+	mkdir -p $(TARGET_DIR)/usr/include
+	cp -dpf $(STAGING_DIR)/usr/include/mad.h $(TARGET_DIR)/usr/include/
+	cp -dpf $(STAGING_DIR)/usr/lib/libmad.*a $(TARGET_DIR)/usr/lib/
 
 libmad:	uclibc $(TARGET_DIR)/usr/lib/libmad.so
+
+libmad-headers: $(TARGET_DIR)/usr/lib/libmad.a
 
 libmad-source: $(DL_DIR)/$(LIBMAD_SOURCE)
 
@@ -55,9 +61,14 @@ libmad-clean:
 	@if [ -d $(LIBMAD_DIR)/Makefile ] ; then \
 		$(MAKE) -C $(LIBMAD_DIR) clean ; \
 	fi;
+	rm -f $(STAGING_DIR)/usr/lib/libmad.*
+	rm -f $(STAGING_DIR)/usr/include/mad.h
+	rm -f $(TARGET_DIR)/usr/lib/libmad.*
+	rm -f $(TARGET_DIR)/usr/include/mad.h
+
 
 libmad-dirclean:
-	rm -rf $(LIBMAD_DIR) $(LIBMAD_DIR)
+	rm -rf $(LIBMAD_DIR)
 #############################################################
 #
 # Toplevel Makefile options
@@ -65,4 +76,7 @@ libmad-dirclean:
 #############################################################
 ifeq ($(strip $(BR2_PACKAGE_LIBMAD)),y)
 TARGETS+=libmad
+endif
+ifeq ($(strip $(BR2_PACKAGE_LIBMAD_TARGET_HEADERS)),y)
+TARGETS+=libmad-headers
 endif
