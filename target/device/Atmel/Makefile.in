@@ -1,9 +1,12 @@
 # *******************************************************************
+
 ifeq ($(strip $(BR2_TARGET_ATMEL)),y)
 ATMEL_PATH:=target/device/Atmel
 
 BOARD_NAME:=$(strip  $(subst ",, $(BR2_BOARD_NAME)))
+#"))
 BOARD_PATH:=$(strip  $(subst ",, $(BR2_BOARD_PATH)))
+#"))
 
 ATMEL_TARGET:=$(ATMEL_PATH)/root
 TARGET_SKELETON:=$(ATMEL_TARGET)/target_skeleton
@@ -14,17 +17,29 @@ TARGET_ATMEL_COPYTO:=$(strip  $(subst ",, $(BR2_TARGET_ATMEL_COPYTO)))
 
 # These are set by Config.in
 DOWNLOAD_LINUX26_VERSION:=$(strip  $(subst ",, $(BR2_DOWNLOAD_LINUX26_VERSION)))
+#"))
+ifeq ($(DOWNLOAD_LINUX26_VERSION),)
+DOWNLOAD_LINUX26_VERSION=$(LINUX_HEADERS_VERSION)
+endif
+
 LINUX26_VERSION:=$(strip  $(subst ",, $(BR2_LINUX26_VERSION)))
+#"))
+ifeq ($(LINUX26_VERSION),)
+LINUX26_VERSION=$(LINUX_HEADERS_VERSION)
+endif
+
 LINUX26_RC_PATCH:=$(strip  $(subst ",, $(BR2_LINUX26_RC_PATCH)))
+#"))
 LINUX_BSP_PATCH:=$(strip  $(subst ",, $(BR2_LINUX_BSP_ATMEL_PATCH)))
+#"))
 
 # These are set by "new" Config.in
-LINUX26_KCONFIG:=$(strip  $(subst ",, $(BR2_BOARD_PATH)/$(BOARD_NAME)-linux-$(DOWNLOAD_LINUX26_VERSION).config))
+LINUX26_KCONFIG:=$(BOARD_PATH)/$(BOARD_NAME)-linux-$(LINUX26_VERSION).config
 
 # This should be part of target/linux/Makefile.in
 LINUX26_BUILD_DIR:=$(PROJECT_BUILD_DIR)
 
-LINUX26_BINLOC=$(LINUX26_FORMAT)
+#LINUX26_BINLOC=$(LINUX26_FORMAT)
 #LINUX26_BINLOC:=$(BINARIES_DIR)/$(LINUX26_KERNEL)
 
 LINUX26_COPYTO:=/tftpboot
@@ -36,7 +51,7 @@ LINUX_BOARD_NAME:=$(BOARD_NAME)
 UBOOT_BOARD_NAME:=$(BOARD_NAME)
 DFB_BOARD_NAME:=$(BOARD_NAME)
 
-BR2_PACKAGE_BUSYBOX_CONFIG:=$(BR2_BOARD_PATH)/busybox-1.6.0.config
+BR2_PACKAGE_BUSYBOX_CONFIG:=$(BR2_BOARD_PATH)/busybox-$(BR2_BUSYBOX_VERSION).config
 
 
 # Update things in board specific makefiles
@@ -64,13 +79,14 @@ include $(ATMEL_PATH)/at91bootstrap/at91bootstrap.mk
 endif
 
 atmel_status:
-	echo	boardname=$(BOARD_NAME)
-	echo 	boardpath=$(BR2_BOARD_PATH)
-	echo 	BR2_MAJOR_MINOR=$(BR2_LINUX_MAJOR_VERSION)$(BR2_LINUX_MINOR_VERSION)
-	echo 	MAJOR_MINOR=$(LINUX_MAJOR_VER)$(LINUX_MINOR_VER)
-	echo	DOWNLOAD_LINUX_VERSION=$(DOWNLOAD_LINUX26_VERSION)
-	echo	LINUX_SOURCE=$(LINUX_SOURCE)
-	echo	$(TARGETS)
+	@echo PROJECT_BUILD_DIR=$(PROJECT_BUILD_DIR)
+	@echo BOARD_NAME=$(BOARD_NAME)
+	@echo BR2_BOARD_PATH=$(BR2_BOARD_PATH)
+	@echo BR2_MAJOR_MINOR=$(BR2_LINUX_MAJOR_VERSION)$(BR2_LINUX_MINOR_VERSION)
+	@echo MAJOR_MINOR=$(LINUX_MAJOR_VER)$(LINUX_MINOR_VER)
+	@echo DOWNLOAD_LINUX26_VERSION=$(DOWNLOAD_LINUX26_VERSION)
+	@echo LINUX_SOURCE=$(LINUX_SOURCE)
+	@echo TARGETS=$(TARGETS)
 
 #TARGETS+=atmel_status
 endif
