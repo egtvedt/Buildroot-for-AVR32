@@ -49,7 +49,7 @@ $(SAMBA_DIR)/.configured: $(SAMBA_DIR)/.unpacked
 	touch $(SAMBA_DIR)/.configured
 
 $(SAMBA_DIR)/$(SAMBA_BINARY): $(SAMBA_DIR)/.configured
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(SAMBA_DIR)
+	$(MAKE1) $(TARGET_CONFIGURE_OPTS) -C $(SAMBA_DIR)
 
 SAMBA_TARGETS_ :=
 SAMBA_TARGETS_y :=
@@ -82,14 +82,14 @@ SAMBA_TARGETS_$(BR2_PACKAGE_SAMBA_WINBINDD)	+= usr/sbin/winbindd
 SAMBA_TARGETS_$(BR2_PACKAGE_SAMBA_WBINFO)	+= usr/bin/wbinfo
 
 $(TARGET_DIR)/$(SAMBA_TARGET_BINARY): $(SAMBA_DIR)/$(SAMBA_BINARY)
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) 	\
-		prefix="${TARGET_DIR}/usr" \
-		BASEDIR="${TARGET_DIR}/usr" \
-		SBINDIR="${TARGET_DIR}/usr/sbin" \
-		LOCKDIR="${TARGET_DIR}/var/cache/samba" \
-		PRIVATEDIR="${TARGET_DIR}/etc/samba" \
-		CONFIGDIR="${TARGET_DIR}/etc/samba" \
-		VARDIR="${TARGET_DIR}/var/log/samba" \
+	$(MAKE) $(TARGET_CONFIGURE_OPTS)	\
+		prefix="${TARGET_DIR}/usr"	\
+		BASEDIR="${TARGET_DIR}/usr"	\
+		SBINDIR="${TARGET_DIR}/usr/sbin"	\
+		LOCKDIR="${TARGET_DIR}/var/cache/samba"	\
+		PRIVATEDIR="${TARGET_DIR}/etc/samba"	\
+		CONFIGDIR="${TARGET_DIR}/etc/samba"	\
+		VARDIR="${TARGET_DIR}/var/log/samba"	\
 		-C $(SAMBA_DIR) installservers installbin installcifsmount
 	for file in $(SAMBA_TARGETS_) ; do \
 		rm -f $(TARGET_DIR)/$$file; \
