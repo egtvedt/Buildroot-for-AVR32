@@ -15,6 +15,7 @@ $(DL_DIR)/$(LIBID3TAG_SOURCE):
 
 $(LIBID3TAG_DIR)/.unpacked: $(DL_DIR)/$(LIBID3TAG_SOURCE)
 	$(LIBID3TAG_CAT) $(DL_DIR)/$(LIBID3TAG_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(CONFIG_UPDATE) $(LIBID3TAG_DIR)
 	touch $(LIBID3TAG_DIR)/.unpacked
 
 $(LIBID3TAG_DIR)/.configured: $(LIBID3TAG_DIR)/.unpacked
@@ -33,7 +34,7 @@ $(LIBID3TAG_DIR)/.configured: $(LIBID3TAG_DIR)/.unpacked
 
 $(LIBID3TAG_DIR)/libid3tag.la: $(LIBID3TAG_DIR)/.configured
 	rm -f $@
-	$(MAKE) CC=$(TARGET_CC) -C $(LIBID3TAG_DIR)
+	$(MAKE) -C $(LIBID3TAG_DIR)
 
 $(STAGING_DIR)/usr/lib/libid3tag.so: $(LIBID3TAG_DIR)/libid3tag.la
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBID3TAG_DIR) install
