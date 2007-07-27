@@ -85,7 +85,7 @@ Patch:
 *** 26,30 ****
      looks for to find the patch level (for the sccs version string). */
   
-! #define PATCHLEVEL 11
+! #define PATCHLEVEL 10
   
   #endif /* _PATCHLEVEL_H_ */
 --- 26,30 ----
