@@ -1,9 +1,0 @@
-#!/bin/sh
-
-for s in /etc/init.d/S*; do
-	$s start
-done
-
-echo
-echo "STK1000 ready"
-echo
