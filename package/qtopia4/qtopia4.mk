@@ -116,7 +116,7 @@ qtopia4-source: $(DL_DIR)/$(QTOPIA4_SOURCE)
 $(QTOPIA4_TARGET_DIR)/.unpacked: $(DL_DIR)/$(QTOPIA4_SOURCE)
 	$(QTOPIA4_CAT) $(DL_DIR)/$(QTOPIA4_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(QTOPIA4_TARGET_DIR) package/qtopia4/ \
-		qtopia-$(QTOPIA4_VER)-\*.patch\*
+		qtopia-$(QTOPIA4_VERSION)-\*.patch\*
 	touch $(QTOPIA4_TARGET_DIR)/.unpacked
 
 # This configure is very tailored towards my needs.
@@ -204,7 +204,7 @@ $(TARGET_DIR)/usr/lib/libQtCore.so.$(QTOPIA4_VERSION): $(STAGING_DIR)/usr/lib/li
 $(QTOPIA4_HOST_DIR)/.unpacked: $(DL_DIR)/$(QTOPIA4_SOURCE)
 	$(QTOPIA4_CAT) $(DL_DIR)/$(QTOPIA4_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(QTOPIA4_HOST_DIR) package/qtopia4/ \
-		qtopia-$(QTOPIA4_VER)-\*.patch\*
+		qtopia-$(QTOPIA4_VERSION)-\*.patch\*
 	touch $(QTOPIA4_HOST_DIR)/.unpacked
 
 # This configure is very tailored towards my needs.
