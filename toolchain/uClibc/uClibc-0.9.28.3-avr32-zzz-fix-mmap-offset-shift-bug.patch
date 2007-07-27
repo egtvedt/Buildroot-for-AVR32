@@ -1,0 +1,29 @@
+diff --git a/libc/sysdeps/linux/avr32/mmap.c b/libc/sysdeps/linux/avr32/mmap.c
+index c2983ae..93ccae7 100644
+--- a/libc/sysdeps/linux/avr32/mmap.c
++++ b/libc/sysdeps/linux/avr32/mmap.c
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include <errno.h>
++#include <unistd.h>
+ #include <sys/mman.h>
+ #include <sys/syscall.h>
+ 
+@@ -27,5 +28,15 @@ static _syscall6(__ptr_t, mmap2, __ptr_t, addr, size_t, len, int, prot, int, fla
+ 
+ __ptr_t mmap(__ptr_t addr, size_t len, int prot, int flags, int fd, __off_t offset)
+ {
+-	return mmap2(addr, len, prot, flags, fd, offset >> 12);
++	unsigned long page_size = sysconf(_SC_PAGESIZE);
++	unsigned long pgoff;
++
++	if (offset & (page_size - 1)) {
++		__set_errno(EINVAL);
++		return MAP_FAILED;
++	}
++
++	pgoff = (unsigned long)offset >> (31 - __builtin_clz(page_size));
++
++	return mmap2(addr, len, prot, flags, fd, pgoff);
+ }
