@@ -15,6 +15,7 @@ $(DL_DIR)/$(MADPLAY_SOURCE):
 
 $(MADPLAY_DIR)/.unpacked: $(DL_DIR)/$(MADPLAY_SOURCE)
 	$(MADPLAY_CAT) $(DL_DIR)/$(MADPLAY_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(CONFIG_UPDATE) $(MADPLAY_DIR)
 	touch $(MADPLAY_DIR)/.unpacked
 
 $(MADPLAY_DIR)/.configured: $(MADPLAY_DIR)/.unpacked
@@ -32,7 +33,7 @@ $(MADPLAY_DIR)/.configured: $(MADPLAY_DIR)/.unpacked
 	touch $(MADPLAY_DIR)/.configured
 
 $(MADPLAY_DIR)/src/madplay: $(MADPLAY_DIR)/.configured
-	$(MAKE) CC=$(TARGET_CC) -C $(MADPLAY_DIR)
+	$(MAKE) -C $(MADPLAY_DIR)
 
 $(MADPLAY_DIR)/.installed: $(MADPLAY_DIR)/src/madplay
 	$(MAKE) -C $(MADPLAY_DIR) DESTDIR=$(TARGET_DIR) install
