@@ -1,16 +1,16 @@
 #!/bin/sh
 
 echo -n "Get board type for GPIO: "
-if [ ! -e "/etc/release" ]; then
+if [ ! -e "/etc/hostname" ]; then
 	echo "missing";
 	exit 1
 fi
 
-BOARD=`cat /etc/release | cut -d ' ' -f1`
+BOARD=`cat /etc/hostname | cut -d '.' -f1`
 
 if [ "${BOARD}" == "" ]; then
 	echo "none";
-elif [ "${BOARD}" == "NGW100" ]; then
+elif [ "${BOARD}" == "ngw" ]; then
 	echo "'${BOARD}'"
 
 	echo -n "  boot LED: "
@@ -111,7 +111,7 @@ elif [ "${BOARD}" == "NGW100" ]; then
 		echo "failed"
 		exit 1
 	fi
-elif [ "${BOARD}" == "STK1000" ]; then # end NGW100
+elif [ "${BOARD}" == "stk1000" ]; then # end ngw
 	echo "'${BOARD}'"
 
 	echo -n "  switches: "
@@ -136,7 +136,7 @@ elif [ "${BOARD}" == "STK1000" ]; then # end NGW100
 		echo "failed"
 		exit 1
 	fi
-else # end STK1000
+else # end stk1000
 	echo "'${BOARD}'"
 	echo "  WARNING: no GPIO for this board"
 fi
