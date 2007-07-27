@@ -256,7 +256,6 @@ source "package/libmad/Config.in"
 source "package/libid3tag/Config.in"
 source "package/madplay/Config.in"
 source "package/libsndfile/Config.in"
-source "package/madplay/Config.in"
 source "package/mpg123/Config.in"
 endif
 
