@@ -1,0 +1,33 @@
+--- busybox-1.6.1/loginutils/adduser.c	Sat Jun 30 16:06:45 2007
++++ busybox-1.6.1-adduser/loginutils/adduser.c	Sat Jul 14 23:45:04 2007
+@@ -109,8 +109,9 @@
+ 	if (putpwent(p, file) == -1) {
+ 		bb_perror_nomsg_and_die();
+ 	}
+-	if (ENABLE_FEATURE_CLEAN_UP)
+-		fclose(file);
++	/* Do fclose even if !ENABLE_FEATURE_CLEAN_UP.
++	 * We will exec passwd, files must be flushed & closed before that! */
++	fclose(file);
+ 
+ #if ENABLE_FEATURE_SHADOWPASSWDS
+ 	/* add to shadow if necessary */
+@@ -123,8 +124,7 @@
+ 				0,                      /* sp->sp_min */
+ 				99999,                  /* sp->sp_max */
+ 				7);                     /* sp->sp_warn */
+-		if (ENABLE_FEATURE_CLEAN_UP)
+-			fclose(file);
++		fclose(file);
+ 	}
+ #endif
+ 
+@@ -134,7 +134,7 @@
+ 	if (addgroup) addgroup_wrapper(p);
+ 
+ 	/* Clear the umask for this process so it doesn't
+-	 * * screw up the permissions on the mkdir and chown. */
++	 * screw up the permissions on the mkdir and chown. */
+ 	umask(0);
+ 	if (!(option_mask32 & OPT_DONT_MAKE_HOME)) {
+ 		/* Set the owner and group so it is owned by the new user,
