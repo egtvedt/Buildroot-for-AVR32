@@ -5,7 +5,7 @@ top_builddir=../../
 srctree := .
 
 include Makefile.kconfig
-HOSTCFLAGS+=-Dinline="" -include foo.h
+#HOSTCFLAGS+=-Dinline="" -include foo.h
 -include .depend
 .depend: $(wildcard *.h *.c)
 	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) -MM *.c > .depend 2>/dev/null || :
@@ -34,6 +34,7 @@ distclean: clean
 	$(Q)rm -f $(lxdialog) $(conf-objs) $(mconf-objs) $(kxgettext-objs) \
 		$(hostprogs-y) $(qconf-cxxobjs) $(qconf-objs) $(gconf-objs) \
 		mconf .depend
+	$(Q)rm -rf buildroot-config
 
 FORCE:
 .PHONY: FORCE clean distclean

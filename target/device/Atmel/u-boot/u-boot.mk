@@ -8,11 +8,12 @@
 #
 #############################################################
 UBOOT_VERSION:=1.2.0-atmel
+ATMEL_MIRROR:=$(strip  $(subst ",, $(BR2_ATMEL_MIRROR)))
+#"))
 UBOOT_DIR:=$(BUILD_DIR)/u-boot-$(UBOOT_VERSION)
 UBOOT_BUILD_DIR:=$(PROJECT_BUILD_DIR)/u-boot-$(UBOOT_VERSION)
 UBOOT_SOURCE:=u-boot-$(UBOOT_VERSION).tar.bz2
 #UBOOT_SOURCE:=u-boot-1.1.5-atmel.tar.bz2
-ATMEL_MIRROR:=$(strip  $(subst ",, $(BR2_ATMEL_MIRROR)))
 #UBOOT_SITE:=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/u-boot
 UBOOT_SITE:=$(ATMEL_MIRROR)/Source
 UBOOT_PATCH_SITE:=$(ATMEL_MIRROR)/Source
@@ -30,28 +31,32 @@ UBOOT_ATMEL_BMP:=$(UBOOT_PATCHES)/atmel.bmp
 
 UBOOT_SCR=$(BINARIES_DIR)/autoscript
 TARGET_UBOOT_IPADDR:=$(strip  $(subst ",, $(BR2_TARGET_UBOOT_IPADDR)))
+#"))
 TARGET_UBOOT_SERVERIP:=$(strip  $(subst ",, $(BR2_TARGET_UBOOT_SERVERIP)))
+#"))
 TARGET_UBOOT_GATEWAY:=$(strip  $(subst ",, $(BR2_TARGET_UBOOT_GATEWAY)))
+#"))
 TARGET_UBOOT_NETMASK:=$(strip  $(subst ",, $(BR2_TARGET_UBOOT_NETMASK)))
+#"))
 TARGET_UBOOT_ETHADDR:=$(strip  $(subst ",, $(BR2_TARGET_UBOOT_ETHADDR)))
+#"))
 UBOOT_CUSTOM:=$(UBOOT_DIR)/include/custom.h
 
 $(DL_DIR)/$(UBOOT_SOURCE):
-	 $(WGET) -P $(DL_DIR) $(UBOOT_SITE)/$(UBOOT_SOURCE)
+	$(WGET) -P $(DL_DIR) $(UBOOT_SITE)/$(UBOOT_SOURCE)
 
 $(DL_DIR)/$(UBOOT_PATCH_SOURCE):
-	 $(WGET) -P $(DL_DIR) $(UBOOT_PATCH_SITE)/$(UBOOT_PATCH_SOURCE)
+	$(WGET) -P $(DL_DIR) $(UBOOT_PATCH_SITE)/$(UBOOT_PATCH_SOURCE)
 
 $(UBOOT_DIR)/.unpacked: $(DL_DIR)/$(UBOOT_SOURCE)
 	mkdir -p   $(BUILD_DIR)
 	$(UBOOT_CAT) $(DL_DIR)/$(UBOOT_SOURCE) | tar -C $(BUILD_DIR) -xvf -
-	touch $(UBOOT_DIR)/.unpacked
-	ls	$(UBOOT_DIR)/.unpacked
+	touch	$@
 
 $(UBOOT_PATCHES)/.unpacked: $(DL_DIR)/$(UBOOT_PATCH_SOURCE)
 	mkdir -p $(UBOOT_PATCHES)
 	bzcat 	$(DL_DIR)/$(UBOOT_PATCH_SOURCE) | tar -C $(UBOOT_PATCHES) -xvf -
-	touch $(UBOOT_PATCHES)/.unpacked
+	touch	$@
 
 $(UBOOT_DIR)/.patched.$(UBOOT_PATCH_SOURCE): $(UBOOT_DIR)/.unpacked $(UBOOT_PATCHES)/.unpacked
 	toolchain/patch-kernel.sh $(UBOOT_DIR) $(UBOOT_PATCHES) *.patch
@@ -83,7 +88,7 @@ $(MKIMAGE_BINLOC): $(UBOOT_BUILD_DIR)/.configured
 		-C $(UBOOT_DIR)	tools
 	touch $(MKIMAGE_BINLOC)
 
-$(UBOOT_BUILD_DIR)/u-boot.bin:	$(UBOOT_BUILD_DIR)/.configured $(UBOOT_BUILD_DIR)/.customized
+$(UBOOT_BUILD_DIR)/u-boot.bin:	$(UBOOT_BUILD_DIR)/.configured $(UBOOT_CUSTOM)
 	echo TARGET_CROSS=$(TARGET_CROSS)
 	$(MAKE) O=$(UBOOT_BUILD_DIR)		\
 		CROSS_COMPILE=$(TARGET_CROSS)	\
@@ -103,30 +108,30 @@ $(BINARIES_DIR)/$(UBOOT_BIN):	$(UBOOT_BUILD_DIR)/u-boot.bin
 
 uboot-bin:	$(BINARIES_DIR)/$(UBOOT_BIN)	/tftpboot/$(UBOOT_BIN)
 
-$(UBOOT_BUILD_DIR)/.customized:	.config	$(UBOOT_BUILD_DIR)/.configured
-	echo	"/* Automatically generated file, do not edit */"		>  $(UBOOT_CUSTOM)
-ifneq	($(HOSTNAME),)
-	echo	"#if defined(CONFIG_HOSTNAME)"					>> $(UBOOT_CUSTOM)
-	echo	"#undef	 CONFIG_HOSTNAME"					>> $(UBOOT_CUSTOM)
-	echo	"#define CONFIG_HOSTNAME		$(HOSTNAME)"		>> $(UBOOT_CUSTOM)
-	echo	"#endif"							>> $(UBOOT_CUSTOM)
+$(UBOOT_CUSTOM).test:	.config	$(UBOOT_BUILD_DIR)/.configured
+	echo	"/* Automatically generated file, do not edit */"		>  $(UBOOT_CUSTOM).test
+ifneq	($(TARGET_HOSTNAME),)
+	echo	"#if defined(CONFIG_HOSTNAME)"					>> $(UBOOT_CUSTOM).test
+	echo	"#undef	 CONFIG_HOSTNAME"					>> $(UBOOT_CUSTOM).test
+	echo	"#define CONFIG_HOSTNAME		$(TARGET_HOSTNAME)"	>> $(UBOOT_CUSTOM).test
+	echo	"#endif"							>> $(UBOOT_CUSTOM).test
 endif
 ifneq	($(TARGET_UBOOT_IPADDR),)
-	echo	"#define CONFIG_IPADDR		$(TARGET_UBOOT_IPADDR)"		>> $(UBOOT_CUSTOM)
+	echo	"#define CONFIG_IPADDR		$(TARGET_UBOOT_IPADDR)"		>> $(UBOOT_CUSTOM).test
 endif
 ifneq	($(TARGET_UBOOT_SERVERIP),)
-	echo	"#define CONFIG_SERVERIP		$(TARGET_UBOOT_SERVERIP)"	>> $(UBOOT_CUSTOM)
+	echo	"#define CONFIG_SERVERIP	$(TARGET_UBOOT_SERVERIP)"	>> $(UBOOT_CUSTOM).test
 endif
 ifneq	($(TARGET_UBOOT_GATEWAY),)
-	echo	"#define CONFIG_GATEWAYIP	$(TARGET_UBOOT_GATEWAY)"	>> $(UBOOT_CUSTOM)
+	echo	"#define CONFIG_GATEWAYIP	$(TARGET_UBOOT_GATEWAY)"	>> $(UBOOT_CUSTOM).test
 endif
 ifneq	($(TARGET_UBOOT_NETMASK),)
-	echo	"#define CONFIG_NETMASK		$(TARGET_UBOOT_NETMASK)"	>> $(UBOOT_CUSTOM)
+	echo	"#define CONFIG_NETMASK		$(TARGET_UBOOT_NETMASK)"	>> $(UBOOT_CUSTOM).test
 endif
 ifneq	($(TARGET_UBOOT_ETHADDR),)
-	echo	"#define CONFIG_ETHADDR		$(TARGET_UBOOT_ETHADDR)"	>> $(UBOOT_CUSTOM)
+	echo	"#define CONFIG_ETHADDR		$(TARGET_UBOOT_ETHADDR)"	>> $(UBOOT_CUSTOM).test
 endif
-	touch	$(UBOOT_BUILD_DIR)/.customized
+	diff -q $(UBOOT_CUSTOM).test $(UBOOT_CUSTOM) || cp -af $(UBOOT_CUSTOM).test $(UBOOT_CUSTOM)
 
 $(UBOOT_SCR):	.config
 ifneq	($(TARGET_UBOOT_IPADDR),)
@@ -144,7 +149,7 @@ endif
 	echo setenv linux		$(LINUX26_KERNEL)			>> $(UBOOT_SCR)
 	echo setenv kernel-version	$(LINUX26_VERSION)			>> $(UBOOT_SCR)
 	echo setenv kernel-date		$(DATE)					>> $(UBOOT_SCR)
-	echo setenv hostname		$(HOSTNAME)				>> $(UBOOT_SCR)
+	echo setenv hostname		$(TARGET_HOSTNAME)			>> $(UBOOT_SCR)
 	echo setenv fs-date		$(DATE)					>> $(UBOOT_SCR)
 	echo setenv rd-1		rootfs.$(BR2_ARCH)-$(DATE).ext2		>> $(UBOOT_SCR)
 	echo setenv rd-2		rootfs.$(BR2_ARCH)-$(DATE).jffs2	>> $(UBOOT_SCR)
@@ -159,7 +164,7 @@ endif
 	echo setargs								>> $(UBOOT_SCR)
 	echo saveenv								>> $(UBOOT_SCR)
 
-$(UBOOT_SCR).$(HOSTNAME):	$(UBOOT_SCR)	 $(MKIMAGE)
+$(UBOOT_SCR).$(PROJECT):	$(UBOOT_SCR)	 $(MKIMAGE)
 	$(MKIMAGE)  -A arm \
 				-O linux	\
 				-T script	\
@@ -168,13 +173,13 @@ $(UBOOT_SCR).$(HOSTNAME):	$(UBOOT_SCR)	 $(MKIMAGE)
 				-e 0		\
 				-n "autoscr config" \
 				-d $(UBOOT_SCR)	\
-				$(UBOOT_SCR).$(HOSTNAME)
-	cp	$(UBOOT_SCR).$(HOSTNAME) /tftpboot
+				$(UBOOT_SCR).$(PROJECT)
+	cp	$(UBOOT_SCR).$(PROJECT) /tftpboot
 
 $(MKIMAGE):	$(MKIMAGE_BINLOC) 
 	cp -f $(MKIMAGE_BINLOC)	 $(MKIMAGE)
 
-uboot: $(MKIMAGE)	uboot-bin $(UBOOT_SCR).$(HOSTNAME)
+uboot: $(MKIMAGE)	uboot-bin $(UBOOT_SCR).$(PROJECT)
 
 uboot-source: $(DL_DIR)/$(UBOOT_SOURCE)
 
@@ -184,7 +189,7 @@ uboot-clean:
 	rm -f	$(BINARIES_DIR)/$(UBOOT_BIN)
 	rm -fr	$(UBOOT_DIR)
 	rm -f	$(UBOOT_SCR)
-	rm -f	$(UBOOT_SCR).$(HOSTNAME)
+	rm -f	$(UBOOT_SCR).$(PROJECT)
 #	-$(MAKE) -C $(UBOOT_DIR)/uboot-tools clean
 
 uboot-dirclean:	uboot-clean
@@ -246,10 +251,30 @@ TARGETS+=uboot
 endif
 
 uboot-test:
+	-@echo	source=$(DL_DIR)/$(UBOOT_SOURCE)
+	-@ls	$(DL_DIR)/$(UBOOT_SOURCE)
+	-@echo	patch=$(DL_DIR)/$(UBOOT_PATCH_SOURCE)
+	-@ls	$(DL_DIR)/$(UBOOT_PATCH_SOURCE)
+	-@echo	unpacked=$(UBOOT_PATCHES)/.unpacked
+	-@ls	$(UBOOT_PATCHES)/.unpacked
+	-@echo	patch-unpacked=$(UBOOT_PATCHES)/.unpacked
+	-@ls	$(UBOOT_PATCHES)/.unpacked
+	-@echo	patched-source=$(UBOOT_DIR)/.patched.$(UBOOT_PATCH_SOURCE)
+	-@ls	$(UBOOT_DIR)/.patched.$(UBOOT_PATCH_SOURCE)
+	-@echo	configured=$(UBOOT_BUILD_DIR)/.configured
+	-@ls	$(UBOOT_BUILD_DIR)/.configured
+	-@echo	mkimage=$(MKIMAGE_BINLOC)
+	-@ls	$(MKIMAGE_BINLOC)
+	-@echo	u-boot.bin=$(UBOOT_BUILD_DIR)/u-boot.bin
+	-@ls	$(UBOOT_BUILD_DIR)/u-boot.bin
+	-@echo	binaries-u-boot.bin=$(BINARIES_DIR)/$(UBOOT_BIN)
+	-@ls	$(BINARIES_DIR)/$(UBOOT_BIN)
+	-@echo	tftpboot=/tftpboot/$(UBOOT_BIN)
+	-@ls	/tftpboot/$(UBOOT_BIN)
 	-@echo	"mkimage = $(MKIMAGE)"
 	-@ls	$(MKIMAGE)
-	-@echo	"u-boot script=$(UBOOT_SCR).$(HOSTNAME)"
-	-@ls	$(UBOOT_SCR).$(HOSTNAME)
+	-@echo	"u-boot script=$(UBOOT_SCR).$(PROJECT)"
+	-@ls	$(UBOOT_SCR).$(PROJECT)
 	-@echo	"u-boot script (ASCII)=$(UBOOT_SCR)"
 	-@ls	$(UBOOT_SCR)
 	-@echo "mkimage binary=$(MKIMAGE_BINLOC)"

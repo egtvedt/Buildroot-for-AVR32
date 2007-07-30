@@ -26,6 +26,7 @@ $(GETTEXT_DIR)/.unpacked: $(DL_DIR)/$(GETTEXT_SOURCE)
 	$(GETTEXT_CAT) $(DL_DIR)/$(GETTEXT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(GETTEXT_DIR) package/gettext/ gettext\*.patch
 	$(CONFIG_UPDATE) $(@D)
+	$(CONFIG_UPDATE) $(GETTEXT_DIR)/build-aux
 	touch $@
 
 ifeq ($(strip $(BR2_TOOLCHAIN_EXTERNAL)),y)
@@ -89,7 +90,6 @@ $(GETTEXT_DIR)/.configured: $(GETTEXT_DIR)/.unpacked
 		jm_cv_func_working_re_compile_pattern=yes \
 		ac_use_included_regex=no \
 		gl_cv_c_restrict=no \
-		LD=$(TARGET_CROSS)gcc \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \

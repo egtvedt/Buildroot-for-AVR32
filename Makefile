@@ -155,10 +155,12 @@ PREFERRED_LIB_FLAGS:=--enable-static --enable-shared
 #
 ##############################################################
 ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
-TARGETS:=uclibc-configured binutils gcc uclibc-target-utils
+BASE_TARGETS:=uclibc-configured binutils gcc uclibc-target-utils
 else
-TARGETS:=uclibc
+BASE_TARGETS:=uclibc
 endif
+TARGETS:=
+
 
 PROJECT:=$(strip $(subst ",,$(BR2_PROJECT)))
 #"))
@@ -166,7 +168,6 @@ TARGET_HOSTNAME:=$(strip $(subst ",,$(BR2_HOSTNAME)))
 #"))
 BANNER:=$(strip $(subst ",,$(BR2_BANNER)))
 #"))
-
 
 include toolchain/Makefile.in
 include package/Makefile.in
@@ -186,7 +187,17 @@ include .config.cmd
 # We also need the various per-package makefiles, which also add
 # each selected package to TARGETS if that package was selected
 # in the .config file.
+ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
+# avoid pulling in external toolchain which is broken for toplvl parallel builds
+include $(filter-out $(wildcard toolchain/external-toolchain/*),$(wildcard toolchain/*/*.mk))
+else
 include toolchain/*/*.mk
+endif
+
+ifeq ($(BR2_PACKAGE_LINUX),y)
+TARGETS+=linux26-modules
+endif
+
 include package/*/*.mk
 
 # target stuff is last so it can override anything else
@@ -196,14 +207,20 @@ TARGETS_CLEAN:=$(patsubst %,%-clean,$(TARGETS))
 TARGETS_SOURCE:=$(patsubst %,%-source,$(TARGETS))
 TARGETS_DIRCLEAN:=$(patsubst %,%-dirclean,$(TARGETS))
 
-world: $(DL_DIR) $(BUILD_DIR) $(PROJECT_BUILD_DIR) \
-	$(BINARIES_DIR) $(STAGING_DIR) $(TARGET_DIR) bsp $(TARGETS)
-dirs: $(DL_DIR) $(BUILD_DIR) $(PROJECT_BUILD_DIR) $(STAGING_DIR)
+# all targets depend on the crosscompiler and it's prerequisites
+$(TARGETS): $(BASE_TARGETS)
 
-.PHONY: all world dirs clean dirclean distclean source bsp $(TARGETS) \
+dirs: $(DL_DIR) $(TOOL_BUILD_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
+	$(BINARIES_DIR) $(PROJECT_BUILD_DIR)
+$(BASE_TARGETS): dirs
+world: dependencies dirs target-host-info $(BASE_TARGETS) $(TARGETS)
+
+
+.PHONY: all world dirs clean dirclean distclean source target-host-info \
+	$(BASE_TARGETS) $(TARGETS) \
 	$(TARGETS_CLEAN) $(TARGETS_DIRCLEAN) $(TARGETS_SOURCE) \
-	$(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR) $(STAGING_DIR) \
-	$(PROJECT_BUILD_DIR) $(BINARIES_DIR)
+	$(DL_DIR) $(TOOL_BUILD_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
+	$(BINARIES_DIR) $(PROJECT_BUILD_DIR)
 
 #############################################################
 #
@@ -211,8 +228,8 @@ dirs: $(DL_DIR) $(BUILD_DIR) $(PROJECT_BUILD_DIR) $(STAGING_DIR)
 # dependencies anywhere else
 #
 #############################################################
-$(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR) \
-	$(PROJECT_BUILD_DIR) $(BINARIES_DIR) :
+$(DL_DIR) $(TOOL_BUILD_DIR) $(BUILD_DIR) \
+	$(PROJECT_BUILD_DIR) $(BINARIES_DIR):
 	@mkdir -p $@
 
 $(STAGING_DIR):
@@ -228,7 +245,7 @@ else
 endif
 	@mkdir -p $(STAGING_DIR)/usr/include
 
-$(TARGET_DIR):
+$(TARGET_DIR): $(STAGING_DIR)
 	mkdir -p $(TARGET_DIR)
 	if [ -d "$(TARGET_SKELETON)" ] ; then \
 		cp -fa $(TARGET_SKELETON)/* $(TARGET_DIR)/; \
@@ -237,7 +254,7 @@ $(TARGET_DIR):
 	-find $(TARGET_DIR) -type d -name CVS | xargs rm -rf
 	-find $(TARGET_DIR) -type d -name .svn | xargs rm -rf
 
-bsp:	$(TARGET_DIR)/etc/issue	$(TARGET_DIR)/etc/hostname
+target-host-info: dirs $(TARGET_DIR)/etc/issue $(TARGET_DIR)/etc/hostname
 
 $(TARGET_DIR)/etc/issue:	$(TARGET_DIR) .config
 	echo ""			>  $(TARGET_DIR)/etc/issue
@@ -249,12 +266,8 @@ $(TARGET_DIR)/etc/hostname:	$(TARGET_DIR) .config
 
 source: $(TARGETS_SOURCE) $(HOST_SOURCE)
 
-.config.check: dependencies
-	$(SED) '/BR2_WGET/s/\"$$/ --spider\"/g' .config
-	touch $@
-
-_source-check: .config.check
-	$(MAKE) source
+_source-check: 
+	$(MAKE) SPIDER=--spider source
 
 #############################################################
 #
@@ -296,60 +309,60 @@ HOSTCFLAGS=$(CFLAGS_FOR_BUILD)
 export HOSTCFLAGS
 
 $(CONFIG)/conf:
-	$(MAKE) CC="$(HOSTCC)" MAKECMDGOALS="$(MAKECMDGOALS)" \
-		-C $(CONFIG) conf
+	$(MAKE) CC="$(HOSTCC)" -C $(CONFIG) conf
 	-@if [ ! -f .config ] ; then \
 		cp $(CONFIG_DEFCONFIG) .config; \
 	fi
 $(CONFIG)/mconf:
-	$(MAKE) CC="$(HOSTCC)" MAKECMDGOALS="$(MAKECMDGOALS)" \
-		-C $(CONFIG) conf mconf
+	$(MAKE) CC="$(HOSTCC)" -C $(CONFIG) conf mconf
 	-@if [ ! -f .config ] ; then \
 		cp $(CONFIG_DEFCONFIG) .config; \
 	fi
 
 menuconfig: $(CONFIG)/mconf
-	@-mkdir -p include/config
-	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
-		KCONFIG_AUTOHEADER=include/autoconf.h \
-		$(CONFIG)/mconf $(CONFIG_CONFIG_IN)
+	@-mkdir -p $(CONFIG)/buildroot-config
+	@if ! KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
+		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
+		$(CONFIG)/mconf $(CONFIG_CONFIG_IN); then \
+		test -f .config.cmd || rm -f .config; \
+	fi
 
 config: $(CONFIG)/conf
-	@-mkdir -p include/config
-	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
-		KCONFIG_AUTOHEADER=include/autoconf.h \
+	@-mkdir -p $(CONFIG)/buildroot-config
+	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
+		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf $(CONFIG_CONFIG_IN)
 
 oldconfig: $(CONFIG)/conf
-	@-mkdir -p include/config
-	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
-		KCONFIG_AUTOHEADER=include/autoconf.h \
+	@-mkdir -p $(CONFIG)/buildroot-config
+	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
+		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -o $(CONFIG_CONFIG_IN)
 
 randconfig: $(CONFIG)/conf
-	@-mkdir -p include/config
-	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
-		KCONFIG_AUTOHEADER=include/autoconf.h \
+	@-mkdir -p $(CONFIG)/buildroot-config
+	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
+		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -r $(CONFIG_CONFIG_IN)
 
 allyesconfig: $(CONFIG)/conf
 	cat $(CONFIG_DEFCONFIG) > .config
-	@-mkdir -p include/config
-	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
-		KCONFIG_AUTOHEADER=include/autoconf.h \
+	@-mkdir -p $(CONFIG)/buildroot-config
+	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
+		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -y $(CONFIG_CONFIG_IN)
 	#sed -i -e "s/^CONFIG_DEBUG.*/# CONFIG_DEBUG is not set/" .config
 
 allnoconfig: $(CONFIG)/conf
-	@-mkdir -p include/config
-	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
-		KCONFIG_AUTOHEADER=include/autoconf.h \
+	@-mkdir -p $(CONFIG)/buildroot-config
+	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
+		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -n $(CONFIG_CONFIG_IN)
 
 defconfig: $(CONFIG)/conf
-	@-mkdir -p include/config
-	@KCONFIG_AUTOCONFIG=include/config/auto.conf \
-		KCONFIG_AUTOHEADER=include/autoconf.h \
+	@-mkdir -p $(CONFIG)/buildroot-config
+	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
+		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -d $(CONFIG_CONFIG_IN)
 
 # check if download URLs are outdated 
