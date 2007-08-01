@@ -14,7 +14,7 @@ elif [ "${BOARD}" == "ngw" ]; then
 	echo "'${BOARD}'"
 
 	echo -n "  boot LED: "
-	if mkdir /config/gpio/bootled > /dev/null 2> /dev/null; then
+	if mkdir /config/gpio/bootled; then
 		if ! echo 0 > /config/gpio/bootled/gpio_id; then
 			echo "failed"
 			exit 1
@@ -47,7 +47,7 @@ elif [ "${BOARD}" == "ngw" ]; then
 	fi
 
 	echo -n "  LED A: "
-	if mkdir /config/gpio/leda > /dev/null 2> /dev/null; then
+	if mkdir /config/gpio/leda; then
 		if ! echo 0 > /config/gpio/leda/gpio_id; then
 			echo "failed"
 			exit 1
@@ -80,7 +80,7 @@ elif [ "${BOARD}" == "ngw" ]; then
 	fi
 
 	echo -n "  LED B: "
-	if mkdir /config/gpio/ledb > /dev/null 2> /dev/null; then
+	if mkdir /config/gpio/ledb; then
 		if ! echo 4 > /config/gpio/ledb/gpio_id; then
 			echo "failed"
 			exit 1
@@ -115,7 +115,7 @@ elif [ "${BOARD}" == "stk1000" ]; then # end ngw
 	echo "'${BOARD}'"
 
 	echo -n "  switches: "
-	if mkdir /config/gpio/switches > /dev/null 2> /dev/null; then
+	if mkdir /config/gpio/switches; then
 		if ! echo 1 > /config/gpio/switches/gpio_id; then
 			echo "failed"
 			exit 1
