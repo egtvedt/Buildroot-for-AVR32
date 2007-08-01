@@ -41,6 +41,7 @@ $(LIBMAD_DIR)/libmad.la: $(LIBMAD_DIR)/.configured
 
 $(STAGING_DIR)/usr/lib/libmad.0: $(LIBMAD_DIR)/libmad.la
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBMAD_DIR) install
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libmad.la
 
 $(TARGET_DIR)/usr/lib/libmad.0: $(STAGING_DIR)/usr/lib/libmad.0
 	cp -dpf $(STAGING_DIR)/usr/lib/libmad $(TARGET_DIR)/usr/lib/
