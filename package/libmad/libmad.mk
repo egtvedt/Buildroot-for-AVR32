@@ -41,21 +41,22 @@ $(LIBMAD_DIR)/libmad.la: $(LIBMAD_DIR)/.configured
 	rm -f $@
 	$(MAKE) -C $(LIBMAD_DIR)
 
-$(STAGING_DIR)/usr/lib/libmad.0: $(LIBMAD_DIR)/libmad.la
+$(STAGING_DIR)/usr/lib/libmad.so.0: $(LIBMAD_DIR)/libmad.la
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBMAD_DIR) install
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libmad.la
 
-$(TARGET_DIR)/usr/lib/libmad.0: $(STAGING_DIR)/usr/lib/libmad.0
-	cp -dpf $(STAGING_DIR)/usr/lib/libmad $(TARGET_DIR)/usr/lib/
-	cp -dpf $(STAGING_DIR)/usr/lib/libmad.0* $(TARGET_DIR)/usr/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libmad*
+$(TARGET_DIR)/usr/lib/libmad.so.0: $(STAGING_DIR)/usr/lib/libmad.so.0
+	cp -dpf $(STAGING_DIR)/usr/lib/libmad.so.* $(TARGET_DIR)/usr/lib/
+	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libmad.so.*
 
-$(TARGET_DIR)/usr/lib/libmad.a: $(STAGING_DIR)/usr/lib/libmad.0
+$(TARGET_DIR)/usr/lib/libmad.a: $(STAGING_DIR)/usr/lib/libmad.so.0
 	mkdir -p $(TARGET_DIR)/usr/include
 	cp -dpf $(STAGING_DIR)/usr/include/mad.h $(TARGET_DIR)/usr/include/
-	cp -dpf $(STAGING_DIR)/usr/lib/libmad.*a $(TARGET_DIR)/usr/lib/
+	cp -dpf $(STAGING_DIR)/usr/lib/libmad.la $(TARGET_DIR)/usr/lib/
+	cp -dpf $(STAGING_DIR)/usr/lib/libmad.so $(TARGET_DIR)/usr/lib/
+	cp -dpf $(STAGING_DIR)/usr/lib/libmad.a $(TARGET_DIR)/usr/lib/
 
-libmad:	uclibc $(TARGET_DIR)/usr/lib/libmad.0
+libmad:	uclibc $(TARGET_DIR)/usr/lib/libmad.so.0
 
 libmad-headers: $(TARGET_DIR)/usr/lib/libmad.a
 
