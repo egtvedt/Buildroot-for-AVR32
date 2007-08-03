@@ -14,11 +14,10 @@ choice
 		bool "uClibc 0.9.28"
 
 	config BR2_UCLIBC_VERSION_0_9_28_3
-		depends BR2_DEPRECATED || BR2_avr32
+		depends BR2_DEPRECATED
 		bool "uClibc 0.9.28.3"
 
 	config BR2_UCLIBC_VERSION_0_9_29
-		depends !BR2_avr32
 		bool "uClibc 0.9.29"
 
 	config BR2_UCLIBC_VERSION_SNAPSHOT
