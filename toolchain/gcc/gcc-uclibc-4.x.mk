@@ -29,6 +29,28 @@ GCC_OFFICIAL_VER:=$(GCC_VERSION)-$(GCC_SNAP_DATE)
 GCC_SITE:=ftp://sources.redhat.com/pub/gcc/snapshots/$(GCC_OFFICIAL_VER)
 endif
 
+# redefine if using an external prepatched gcc source
+ifeq	($(BR2_TOOLCHAIN_NORMAL),)
+GCC_SITE:=$(VENDOR_SITE)
+GCC_OFFICIAL_VER:=$(GCC_VERSION)$(VENDOR_SUFFIX)$(VENDOR_GCC_RELEASE)
+endif
+
+# define patch location
+ifeq	($(BR2_TOOLCHAIN_NORMAL),y)	# Normal toolchain
+ifeq ($(GCC_SNAP_DATE),)		# Not a snapshot
+GCC_PATCH_DIR:=toolchain/gcc/$(GCC_VERSION)
+else					# Is a snapshot
+ifneq ($(wildcard toolchain/gcc/$(GCC_OFFICIAL_VER)),)	# Snapshot patch?
+GCC_PATCH_DIR:=toolchain/gcc/$(GCC_OFFICIAL_VER)
+else					# Normal patch to snapshot
+# Use the normal location, if the dedicated location does not exist
+GCC_PATCH_DIR:=toolchain/gcc/$(GCC_VERSION)
+endif					# Snapshot patch
+endif					# Not a snapshot
+else					# Prepatched toolchain
+GCC_PATCH_DIR:=$(VENDOR_PATCH_DIR)/gcc-$(GCC_OFFICIAL_VER)
+endif					# Normal toolchain
+
 GCC_SOURCE:=gcc-$(GCC_OFFICIAL_VER).tar.bz2
 GCC_DIR:=$(TOOL_BUILD_DIR)/gcc-$(GCC_OFFICIAL_VER)
 GCC_CAT:=$(BZCAT)
@@ -53,9 +75,30 @@ GCC_STAGING_PREREQ= $(STAGING_DIR)/usr/lib/libc.a
 
 GCC_TARGET_LANGUAGES:=c
 
-GCC_COMMON_PREREQ= $(wildcard $(BASE_DIR)/include/config/br2/install/libstdcpp* $(BASE_DIR)/include/config/br2/install/libgcj* $(BASE_DIR)/include/config/br2/install/objc* $(BASE_DIR)/include/config/br2/install/fortran* $(BASE_DIR)/include/config/br2/prefer/ima* $(BASE_DIR)/include/config/br2/toolchain/sysroot* $(BASE_DIR)/include/config/br2/use/sjlj/exceptions* $(BASE_DIR)/include/config/br2/gcc/shared/libgcc*)
-GCC_TARGET_PREREQ += $(GCC_COMMON_PREREQ) $(wildcard $(BASE_DIR)/include/config/br2/extra/target/gcc/config/options*)
-GCC_STAGING_PREREQ+= $(GCC_COMMON_PREREQ) $(wildcard $(BASE_DIR)/include/config/br2/extra/gcc/config/options*)
+GCC_CROSS_LANGUAGES:=c
+ifeq ($(BR2_GCC_CROSS_CXX),y)
+GCC_CROSS_LANGUAGES:=$(GCC_CROSS_LANGUAGES),c++
+endif
+ifeq ($(BR2_GCC_CROSS_FORTRAN),y)
+GCC_CROSS_LANGUAGES:=$(GCC_CROSS_LANGUAGES),fortran
+endif
+ifeq ($(BR2_GCC_CROSS_OBJC),y)
+GCC_CROSS_LANGUAGES:=$(GCC_CROSS_LANGUAGES),objc
+endif
+
+GCC_COMMON_PREREQ= $(wildcard $(BR2_DEPENDS_DIR)/br2/install/libstdcpp*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/install/libgcj*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/install/objc*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/install/fortran*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/prefer/ima*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/toolchain/sysroot*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/use/sjlj/exceptions*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/gcc/shared/libgcc*)
+GCC_TARGET_PREREQ += $(GCC_COMMON_PREREQ) \
+$(wildcard $(BR2_DEPENDS_DIR)/br2/extra/target/gcc/config/options*)
+GCC_STAGING_PREREQ+= $(GCC_COMMON_PREREQ) \
+$(wildcard $(BR2_DEPENDS_DIR)/br2/extra/gcc/config/options*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/gcc/cross/*)
 
 ifeq ($(BR2_INSTALL_LIBSTDCPP),y)
 GCC_TARGET_LANGUAGES:=$(GCC_TARGET_LANGUAGES),c++
@@ -97,7 +140,7 @@ $(DL_DIR)/$(GCC_SOURCE):
 	mkdir -p $(DL_DIR)
 	$(WGET) -P $(DL_DIR) $(GCC_SITE)/$(GCC_SOURCE)
 
-gcc-unpacked: $(GCC_DIR)/.unpacked
+gcc-unpacked: $(GCC_DIR)/.patched
 $(GCC_DIR)/.unpacked: $(DL_DIR)/$(GCC_SOURCE)
 	mkdir -p $(TOOL_BUILD_DIR)
 	rm -rf $(GCC_DIR)
@@ -108,15 +151,7 @@ $(GCC_DIR)/.unpacked: $(DL_DIR)/$(GCC_SOURCE)
 gcc-patched: $(GCC_DIR)/.patched
 $(GCC_DIR)/.patched: $(GCC_DIR)/.unpacked
 	# Apply any files named gcc-*.patch from the source directory to gcc
-ifeq ($(GCC_SNAP_DATE),)
-	toolchain/patch-kernel.sh $(GCC_DIR) toolchain/gcc/$(GCC_VERSION) \*.patch
-else
-ifneq ($(wildcard toolchain/gcc/$(GCC_OFFICIAL_VER)),)
-	toolchain/patch-kernel.sh $(GCC_DIR) toolchain/gcc/$(GCC_OFFICIAL_VER) \*.patch
-else
-	toolchain/patch-kernel.sh $(GCC_DIR) toolchain/gcc/$(GCC_VERSION) \*.patch
-endif
-endif
+	toolchain/patch-kernel.sh $(GCC_DIR) $(GCC_PATCH_DIR) \*.patch
 
 	# Note: The soft float situation has improved considerably with gcc 3.4.x.
 	# We can dispense with the custom spec files, as well as libfloat for the arm case.
@@ -218,7 +253,7 @@ $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 		--build=$(GNU_HOST_NAME) \
 		--host=$(GNU_HOST_NAME) \
 		--target=$(REAL_GNU_TARGET_NAME) \
-		--enable-languages=$(GCC_TARGET_LANGUAGES) \
+		--enable-languages=$(GCC_CROSS_LANGUAGES) \
 		$(BR2_CONFIGURE_STAGING_SYSROOT) \
 		$(BR2_CONFIGURE_BUILD_TOOLS) \
 		--disable-__cxa_atexit \

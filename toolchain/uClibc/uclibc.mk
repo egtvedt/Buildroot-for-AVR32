@@ -20,6 +20,7 @@ UCLIBC_DIR:=$(TOOL_BUILD_DIR)/uClibc
 UCLIBC_SOURCE:=uClibc-$(strip $(subst ",, $(BR2_USE_UCLIBC_SNAPSHOT))).tar.bz2
 #"))
 UCLIBC_SITE:=http://www.uclibc.org/downloads/snapshots
+UCLIBC_PATCH_DIR:=toolchain/uClibc/
 else
 # releases
 ifeq ($(BR2_UCLIBC_VERSION_0_9_29),y)
@@ -33,13 +34,21 @@ UCLIBC_VER:=0.9.28
 endif
 UCLIBC_SITE:=http://www.uclibc.org/downloads
 
-ifeq	($(BR2_avr32),y)
-VENDOR_SUFFIX:=-avr32
-UCLIBC_SITE:=$(BR2_ATMEL_MIRROR)/Source
+ifeq	($(BR2_TOOLCHAIN_NORMAL),)
+UCLIBC_SITE:=$(VENDOR_SITE)
 endif
 
-UCLIBC_DIR:=$(TOOL_BUILD_DIR)/uClibc-$(UCLIBC_VER)$(VENDOR_SUFFIX)
-UCLIBC_SOURCE:=uClibc-$(UCLIBC_VER)$(VENDOR_SUFFIX).tar.bz2
+UCLIBC_OFFICIAL_VERSION:=$(UCLIBC_VER)$(VENDOR_SUFFIX)$(VENDOR_UCLIBC_RELEASE)
+
+
+ifeq	($(BR2_TOOLCHAIN_NORMAL),y)
+UCLIBC_PATCH_DIR:=toolchain/uClibc/
+else
+UCLIBC_PATCH_DIR:=$(VENDOR_PATCH_DIR)/uClibc-$(UCLIBC_OFFICIAL_VERSION)
+endif
+
+UCLIBC_DIR:=$(TOOL_BUILD_DIR)/uClibc-$(UCLIBC_OFFICIAL_VERSION)
+UCLIBC_SOURCE:=uClibc-$(UCLIBC_OFFICIAL_VERSION).tar.bz2
 endif
 
 UCLIBC_CAT:=$(BZCAT)
@@ -93,13 +102,13 @@ endif
 
 uclibc-unpacked: $(UCLIBC_DIR)/.unpacked
 $(UCLIBC_DIR)/.unpacked: $(DL_DIR)/$(UCLIBC_SOURCE) $(UCLIBC_LOCALE_DATA)
-	[ -d $(TOOL_BUILD_DIR) ] || $(INSTALL) -d $(TOOL_BUILD_DIR)
+	mkdir -p $(TOOL_BUILD_DIR)
 	rm -rf $(UCLIBC_DIR)
 	$(UCLIBC_CAT) $(DL_DIR)/$(UCLIBC_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
 ifneq ($(BR2_UCLIBC_VERSION_SNAPSHOT),y)
-	toolchain/patch-kernel.sh $(UCLIBC_DIR) toolchain/uClibc/ uClibc-$(UCLIBC_VER)$(VENDOR_SUFFIX)-\*.patch
+	toolchain/patch-kernel.sh $(UCLIBC_DIR) $(UCLIBC_PATCH_DIR) uClibc-$(UCLIBC_OFFICIAL_VERSION)-\*.patch
 else
-	toolchain/patch-kernel.sh $(UCLIBC_DIR) toolchain/uClibc/ uClibc.\*.patch
+	toolchain/patch-kernel.sh $(UCLIBC_DIR) $(UCLIBC_PATCH_DIR) uClibc.\*.patch
 endif
 ifneq ($(BR2_ENABLE_LOCALE),)
 	cp -dpf $(DL_DIR)/$(UCLIBC_SOURCE_LOCALE) $(UCLIBC_DIR)/extra/locale/
@@ -252,7 +261,6 @@ endif
 	mkdir -p $(TOOL_BUILD_DIR)/uClibc_dev/usr/include
 	mkdir -p $(TOOL_BUILD_DIR)/uClibc_dev/usr/lib
 	mkdir -p $(TOOL_BUILD_DIR)/uClibc_dev/lib
-	
 	touch $@
 
 $(UCLIBC_DIR)/.oldconfig:	$(UCLIBC_DIR)/.config
@@ -374,16 +382,15 @@ endif
 UCLIBC_TARGETS=$(TARGET_DIR)/lib/libc.so.0
 endif
 
-uclibc-configured: dependencies kernel-headers $(UCLIBC_DIR)/.configured
+uclibc: $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc $(STAGING_DIR)/usr/lib/libc.a $(UCLIBC_TARGETS)
+
+uclibc-source: $(DL_DIR)/$(UCLIBC_SOURCE)
 
 uclibc-config:	$(UCLIBC_DIR)/.config
 
 uclibc-oldconfig:	$(UCLIBC_DIR)/.oldconfig
 
-
-uclibc: $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc $(STAGING_DIR)/usr/lib/libc.a $(UCLIBC_TARGETS)
-
-uclibc-source: $(DL_DIR)/$(UCLIBC_SOURCE)
+uclibc-configured: kernel-headers $(UCLIBC_DIR)/.configured
 
 uclibc-configured-source: uclibc-source
 

@@ -29,6 +29,7 @@ $(MPG123_DIR)/.unpacked:	$(DL_DIR)/$(MPG123_SOURCE)
 
 $(MPG123_DIR)/.configured: $(MPG123_DIR)/.unpacked
 	(cd $(MPG123_DIR); rm -rf config.cache; \
+		$(TARGET_CONFIGURE_ARGS) \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
 		LDFLAGS="$(TARGET_LDFLAGS)" \
@@ -55,9 +56,7 @@ $(TARGET_DIR)/$(MPG123_TARGET_BIN): $(MPG123_DIR)/$(MPG123_BIN)
 mpg123:	uclibc $(MPG123_ALSA_DEP) $(TARGET_DIR)/$(MPG123_TARGET_BIN)
 
 mpg123-clean:
-	@if [ -d $(MPG123_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(MPG123_DIR) clean ; \
-	fi;
+	-$(MAKE) -C $(MPG123_DIR) clean
 
 mpg123-dirclean:
 	rm -rf $(MPG123_DIR) $(MPG123_DIR)
