@@ -1,0 +1,20 @@
+config BR2_TARGET_U_BOOT
+	bool "u-boot"
+	default n
+	depends on BR2_avr32 || BR2_arm || BR2_armeb || BR2_i386 || BR2_powerpc || BR2_m68k || BR2_mips || BR2_nios2
+	help
+	  U-Boot, the universal boot loader for multiple platforms and target
+	  boards.
+
+	  http://www.denx.de/wiki/UBoot/
+
+config BR2_TARGET_U_BOOT_CONFIG_BOARD
+	string "U-Boot target board configuration"
+	depends on BR2_TARGET_U_BOOT
+	help
+	  Set this variable to the target board you want to configure U-Boot
+	  for. This will use the default options for this board in U-Boot and
+	  build accordingly.
+
+	  For example "atstk1002_config" for ATSTK1000 with ATSTK1002 top
+	  module for the AVR32 starter kit.
