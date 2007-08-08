@@ -11,11 +11,6 @@ TARGET_OPTIMIZATION:=$(strip $(subst ",, $(BR2_TARGET_OPTIMIZATION)))
 EXTRA_GCC_CONFIG_OPTIONS:=$(strip $(subst ",, $(BR2_EXTRA_GCC_CONFIG_OPTIONS)))
 #"))
 
-# AVR32 GCC configuration
-ifeq ($(strip $(BR2_avr32)),y)
-EXTRA_GCC_CONFIG_OPTIONS+=--disable-libmudflap
-endif
-
 ifeq ($(strip $(subst ",, $(BR2_GCC_IS_SNAP))),y)
 #"))
 GCC_SNAP_DATE:=$(strip $(subst ",, $(BR2_GCC_SNAP_DATE)))
@@ -68,6 +63,12 @@ GCC_WITH_ABI:=--with-tune=$(BR2_GCC_TARGET_ABI)
 endif
 endif
 
+# AVR32 GCC configuration
+ifeq ($(strip $(BR2_avr32)),y)
+EXTRA_GCC_CONFIG_OPTIONS+=--disable-libmudflap
+SOFT_FLOAT_CONFIG_OPTION:=
+endif
+
 TARGET_GCC_FLAGS= CFLAGS_FOR_TARGET="$(TARGET_CFLAGS) $(TARGET_SOFT_FLOAT)" \
 	CXXFLAGS_FOR_TARGET="$(TARGET_CFLAGS) $(TARGET_SOFT_FLOAT)" \
 	CFLAGS="$(TARGET_CFLAGS) $(TARGET_SOFT_FLOAT)" \
@@ -88,6 +89,7 @@ endif # BR2_PREFER_IMA=y
 # AVR32 target GCC configuration
 ifeq ($(strip $(BR2_avr32)),y)
 EXTRA_TARGET_GCC_CONFIG_OPTIONS+=--disable-libmudflap
+SOFT_FLOAT_CONFIG_OPTION:=
 endif
 
 TARGETS+=gcc_target
