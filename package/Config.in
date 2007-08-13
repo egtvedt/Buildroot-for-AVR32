@@ -146,6 +146,7 @@ source "package/libcgicc/Config.in"
 source "package/libpcap/Config.in"
 source "package/links/Config.in"
 source "package/lrzsz/Config.in"
+source "package/mdnsresponder/Config.in"
 source "package/mrouted/Config.in"
 source "package/nbd/Config.in"
 source "package/ncftp/Config.in"
@@ -306,11 +307,16 @@ prompt "X Window System server"
 
 config BR2_PACKAGE_XSERVER_none
 	bool "none"
+config BR2_PACKAGE_XSERVER_x11r7
+	bool "x11r7"
 config BR2_PACKAGE_XSERVER_xorg
 	bool "xorg"
 config BR2_PACKAGE_XSERVER_tinyx
 	bool "tinyx"
 endchoice
+if BR2_PACKAGE_XSERVER_x11r7
+source "package/x11r7/Config.in"
+endif
 if BR2_PACKAGE_XSERVER_xorg
 source "package/xorg/Config.in"
 endif
@@ -323,6 +329,7 @@ comment "X libraries and helper libraries"
 source "package/atk/Config.in"
 source "package/cairo/Config.in"
 source "package/pango/Config.in"
+source "package/libdrm/Config.in"
 source "package/libglib12/Config.in"
 source "package/libglib2/Config.in"
 source "package/libgtk12/Config.in"

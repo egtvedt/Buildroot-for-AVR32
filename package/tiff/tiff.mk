@@ -5,6 +5,7 @@
 #############################################################
 TIFF_VERSION:=3.8.2
 TIFF_SOURCE:=tiff_$(TIFF_VERSION).orig.tar.gz
+TIFF_SOURCE2:=tiff-$(TIFF_VERSION).tar.gz
 TIFF_SITE:=http://ftp.debian.org/pool/main/t/tiff/
 TIFF_DIR:=$(BUILD_DIR)/tiff-$(TIFF_VERSION)
 TIFF_CAT:=$(ZCAT)
@@ -16,6 +17,7 @@ tiff-source: $(DL_DIR)/$(TIFF_SOURCE)
 
 $(TIFF_DIR)/.unpacked: $(DL_DIR)/$(TIFF_SOURCE)
 	$(TIFF_CAT) $(DL_DIR)/$(TIFF_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(TIFF_CAT) $(TIFF_DIR)/$(TIFF_SOURCE2) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(TIFF_DIR) package/tiff/ tiff\*.patch
 	$(CONFIG_UPDATE) $(TIFF_DIR)
 	$(CONFIG_UPDATE) $(TIFF_DIR)/config
@@ -38,16 +40,16 @@ $(TIFF_DIR)/.configured: $(TIFF_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
+		--includedir=/usr/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
 		--enable-shared \
 		--enable-static \
 		--disable-cxx \
 		--without-x \
-		--with-jpeg-include-dir=$(STAGING_DIR)/include \
+		--with-jpeg-include-dir=$(STAGING_DIR)/usr/include \
 		--with-jpeg-lib-dir=$(STAGING_DIR)/lib \
-		--with-zlib-include-dir=$(STAGING_DIR)/include \
+		--with-zlib-include-dir=$(STAGING_DIR)/usr/include \
 		--with-zlib-lib-dir=$(STAGING_DIR)/lib \
 	);
 	touch $(TIFF_DIR)/.configured
