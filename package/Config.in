@@ -279,6 +279,7 @@ source "package/dialog/Config.in"
 
 comment "graphic libraries"
 source "package/directfb/Config.in"
+source "package/fusion/Config.in"
 source "package/imagemagick/Config.in"
 source "package/jpeg/Config.in"
 source "package/libpng/Config.in"
@@ -304,6 +305,7 @@ prompt "X Window System server"
 	  Xserver to use.
 	  For more information about the X protocol see
 	  http://www.x.org
+	  You may have to enable LOCALE and WCHAR to build
 
 config BR2_PACKAGE_XSERVER_none
 	bool "none"
@@ -337,7 +339,9 @@ source "package/libgtk2/Config.in"
 source "package/gtk2-engines/Config.in"
 source "package/fontconfig/Config.in"
 source "package/freetype/Config.in"
+source "package/tslib/Config.in"
 comment "X Window managers"
+source "package/matchbox/Config.in"
 source "package/metacity/Config.in"
 comment "X applications"
 source "package/dillo/Config.in"

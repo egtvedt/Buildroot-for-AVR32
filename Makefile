@@ -162,14 +162,7 @@ BASE_TARGETS:=uclibc
 endif
 TARGETS:=
 
-
-PROJECT:=$(strip $(subst ",,$(BR2_PROJECT)))
-#"))
-TARGET_HOSTNAME:=$(strip $(subst ",,$(BR2_HOSTNAME)))
-#"))
-BANNER:=$(strip $(subst ",,$(BR2_BANNER)))
-#"))
-
+include project/Makefile.in
 include toolchain/Makefile.in
 include package/Makefile.in
 
@@ -184,6 +177,8 @@ all:   world
 
 # In this section, we need .config
 include .config.cmd
+
+include project/*.mk
 
 # We also need the various per-package makefiles, which also add
 # each selected package to TARGETS if that package was selected
@@ -204,6 +199,8 @@ include package/*/*.mk
 # target stuff is last so it can override anything else
 include target/Makefile.in
 
+TARGETS+=erase-fakeroots
+
 TARGETS_CLEAN:=$(patsubst %,%-clean,$(TARGETS))
 TARGETS_SOURCE:=$(patsubst %,%-source,$(TARGETS))
 TARGETS_DIRCLEAN:=$(patsubst %,%-dirclean,$(TARGETS))
@@ -213,11 +210,13 @@ $(TARGETS): $(BASE_TARGETS)
 
 dirs: $(DL_DIR) $(TOOL_BUILD_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
 	$(BINARIES_DIR) $(PROJECT_BUILD_DIR)
+
 $(BASE_TARGETS): dirs
+
 world: dependencies dirs target-host-info $(BASE_TARGETS) $(TARGETS)
 
 
-.PHONY: all world dirs clean dirclean distclean source target-host-info \
+.PHONY: all world dirs clean dirclean distclean source \
 	$(BASE_TARGETS) $(TARGETS) \
 	$(TARGETS_CLEAN) $(TARGETS_DIRCLEAN) $(TARGETS_SOURCE) \
 	$(DL_DIR) $(TOOL_BUILD_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
@@ -246,24 +245,22 @@ else
 endif
 	@mkdir -p $(STAGING_DIR)/usr/include
 
-$(TARGET_DIR): $(STAGING_DIR)
-	mkdir -p $(TARGET_DIR)
-	if [ -d "$(TARGET_SKELETON)" ] ; then \
-		cp -fa $(TARGET_SKELETON)/* $(TARGET_DIR)/; \
+$(PROJECT_BUILD_DIR)/.root:
+	mkdir	$(TARGET_DIR)
+	if ! [ -d "$(TARGET_DIR)/bin" ] ; then \
+		if [ -d "$(TARGET_SKELETON)" ] ; then \
+			cp -fa $(TARGET_SKELETON)/* $(TARGET_DIR)/; \
+		fi; \
+		touch $(STAGING_DIR)/.fakeroot.00000 ; \
+		-find $(TARGET_DIR) -type d -name CVS | xargs rm -rf ; \
+		-find $(TARGET_DIR) -type d -name .svn | xargs rm -rf ; \
 	fi;
-	touch $(STAGING_DIR)/.fakeroot.00000
-	-find $(TARGET_DIR) -type d -name CVS | xargs rm -rf
-	-find $(TARGET_DIR) -type d -name .svn | xargs rm -rf
+	touch	$@
 
-target-host-info: dirs $(TARGET_DIR)/etc/issue $(TARGET_DIR)/etc/hostname
+$(TARGET_DIR):	$(PROJECT_BUILD_DIR)/.root
 
-$(TARGET_DIR)/etc/issue:	$(TARGET_DIR) .config
-	echo ""			>  $(TARGET_DIR)/etc/issue
-	echo "" 		>> $(TARGET_DIR)/etc/issue
-	echo "$(BANNER)"	>> $(TARGET_DIR)/etc/issue
-
-$(TARGET_DIR)/etc/hostname:	$(TARGET_DIR) .config
-	echo "$(TARGET_HOSTNAME)" > $(TARGET_DIR)/etc/hostname
+erase-fakeroots:
+	rm -f $(STAGING_DIR)/.fakeroot*
 
 source: $(TARGETS_SOURCE) $(HOST_SOURCE)
 

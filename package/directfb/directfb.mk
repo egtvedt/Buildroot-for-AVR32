@@ -3,11 +3,21 @@
 # directfb
 #
 #############################################################
-DIRECTFB_VERSION:=0.9.25.1
+#DIRECTFB_VERSION:=0.9.25.1
+#DIRECTFB_SITE:=http://www.directfb.org/downloads/Old
+DIRECTFB_VERSION:=1.0.0
+DIRECTFB_SITE:=http://www.directfb.org/downloads/Core
 DIRECTFB_SOURCE:=DirectFB-$(DIRECTFB_VERSION).tar.gz
-DIRECTFB_SITE:=http://www.directfb.org/downloads/Old
 DIRECTFB_CAT:=$(ZCAT)
 DIRECTFB_DIR:=$(BUILD_DIR)/DirectFB-$(DIRECTFB_VERSION)
+
+ifeq ($(BR2_PACKAGE_DIRECTFB_MULTI),y)
+DIRECTFB_MULTI:=--enable-multi
+DIRECTFB_FUSION:=linux-fusion
+else
+DIRECTFB_MULTI:=
+DIRECTFB_FUSION:=
+endif
 
 $(DL_DIR)/$(DIRECTFB_SOURCE):
 	$(WGET) -P $(DL_DIR) $(DIRECTFB_SITE)/$(DIRECTFB_SOURCE)
@@ -32,35 +42,51 @@ $(DIRECTFB_DIR)/.configured: $(DIRECTFB_DIR)/.unpacked
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--exec-prefix=/usr \
-		--bindir=/usr/bin \
-		--sbindir=/usr/sbin \
+		--bindir=/bin \
+		--sbindir=/sbin \
 		--libdir=/lib \
-		--libexecdir=/usr/lib \
+		--libexecdir=/lib \
 		--sysconfdir=/etc \
-		--datadir=/usr/share \
+		--datadir=/share \
 		--localstatedir=/var \
-		--includedir=/usr/include \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--includedir=/include \
+		--mandir=/man \
+		--infodir=/info \
 		--with-gfxdrivers=cle266,unichrome \
+		--enable-shared \
+		$(DIRECTFB_MULTI) \
 		--enable-jpeg \
 		--enable-png \
 		--enable-linux-input \
 		--enable-zlib \
 		--enable-freetype \
-		--enable-sysfs \
+		--disable-sysfs \
 		--disable-sdl \
 		--disable-video4linux \
 		--disable-video4linux2 \
-		--disable-fusion );
+		--enable-fusion );
 	touch $(DIRECTFB_DIR)/.configured
 
 $(DIRECTFB_DIR)/.compiled: $(DIRECTFB_DIR)/.configured
-	$(MAKE) -C $(DIRECTFB_DIR)
+	$(MAKE) PATH=$(STAGING_DIR)/usr/lib:$(PATH) \
+		$(TARGET_CONFIGURE_OPTS) \
+		-C $(DIRECTFB_DIR)
 	touch $(DIRECTFB_DIR)/.compiled
 
 $(STAGING_DIR)/usr/lib/libdirectfb.so: $(DIRECTFB_DIR)/.compiled
 	$(MAKE) DESTDIR=$(STAGING_DIR)/usr -C $(DIRECTFB_DIR) install
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" \
+		$(STAGING_DIR)/usr/lib/libdirectfb.la
+	$(SED) "s,/lib/libfusion.la,$(STAGING_DIR)/usr/lib/libfusion.la,g" \
+		$(STAGING_DIR)/usr/lib/libdirectfb.la
+	$(SED) "s,/lib/libdirect.la,$(STAGING_DIR)/usr/lib/libdirect.la,g" \
+		$(STAGING_DIR)/usr/lib/libdirectfb.la
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" \
+		$(STAGING_DIR)/usr/lib/libdirect.la
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" \
+		$(STAGING_DIR)/usr/lib/libfusion.la
+	$(SED) "s,/lib/libdirect.la,$(STAGING_DIR)/usr/lib/libdirect.la,g" \
+		$(STAGING_DIR)/usr/lib/libfusion.la
 	touch -c $@
 
 $(TARGET_DIR)/usr/lib/libdirectfb.so: $(STAGING_DIR)/usr/lib/libdirectfb.so
@@ -71,7 +97,8 @@ $(TARGET_DIR)/usr/lib/libdirectfb.so: $(STAGING_DIR)/usr/lib/libdirectfb.so
 		$(TARGET_DIR)/usr/lib/libdirect.so \
 		$(TARGET_DIR)/usr/lib/libfusion.so
 
-directfb: uclibc jpeg libpng freetype libsysfs $(TARGET_DIR)/usr/lib/libdirectfb.so
+directfb: uclibc jpeg libpng freetype libsysfs tslib $(DIRECTFB_FUSION) \
+		$(TARGET_DIR)/usr/lib/libdirectfb.so
 
 directfb-clean:
 	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(DIRECTFB_DIR) uninstall
