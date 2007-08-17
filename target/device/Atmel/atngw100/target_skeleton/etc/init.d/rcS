@@ -5,5 +5,5 @@ for s in /etc/init.d/S*; do
 done
 
 echo
-echo "STK1000 ready"
+echo "NGW100 ready"
 echo
