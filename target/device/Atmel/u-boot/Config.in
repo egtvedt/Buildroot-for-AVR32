@@ -1,6 +1,6 @@
 config BR2_TARGET_UBOOT
 	bool "Das U-Boot Boot Monitor"
-	depends on BR2_TARGET_AT91 || BR2_TARGET_AVR32
+	depends on (BR2_TARGET_AT91 || BR2_TARGET_AVR32) && !BR2_TARGET_U_BOOT
 	default n
 	help
 	  Build "Das U-Boot" Boot Monitor
@@ -39,5 +39,3 @@ config BR2_TARGET_UBOOT_ETHADDR
 	default "04:25:fe:ed:00:18"
 	help
 	  Target ip address, this should be changed for production units
-
-
