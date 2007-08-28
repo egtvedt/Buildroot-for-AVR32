@@ -1,0 +1,134 @@
+From kernel-bounces@avr32linux.org Thu Aug 16 16:11:33 2007
+Return-Path: <kernel-bounces@avr32linux.org>
+Received: from relay.atmel.no ([unix socket]) by pat.norway.atmel.com
+	(Cyrus v2.2.12) with LMTPA; Thu, 16 Aug 2007 16:11:33 +0200
+X-Sieve: CMU Sieve 2.2
+Received: from sjogate2.atmel.com (sjogate2.atmel.com [10.64.0.119]) by
+	relay.atmel.no (8.13.4/8.13.4) with ESMTP id l7GEBV7s099388; Thu, 16 Aug
+	2007 16:11:33 +0200 (CEST) (envelope-from kernel-bounces@avr32linux.org)
+Received: from relay.atmel.no (pat.norway.atmel.com [10.191.254.102]) by
+	sjogate2.atmel.com (8.13.6/8.13.6) with ESMTP id l7GEAjTr015978; Thu, 16
+	Aug 2007 07:11:31 -0700 (PDT)
+Received: from relay.norway.atmel.com (relay.norway.atmel.com
+	[10.191.0.139]) by relay.atmel.no (8.13.4/8.13.4) with ESMTP id
+	l7GEAhEg099355; Thu, 16 Aug 2007 16:10:43 +0200 (CEST) (envelope-from
+	kernel-bounces@avr32linux.org)
+Received: from psmtp.com (exprod7mx99.postini.com [64.18.2.94]) by
+	relay.norway.atmel.com (8.13.8/8.13.1) with SMTP id l7GE9eTe065994; Thu, 16
+	Aug 2007 16:09:40 +0200 (CEST) (envelope-from kernel-bounces@avr32linux.org)
+Received: from source ([158.38.152.244]) (using TLSv1) by
+	exprod7mx99.postini.com ([64.18.6.14]) with SMTP; Thu, 16 Aug 2007 10:10:37
+	EDT
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1]) by
+	duppen.flaskehals.net (Postfix) with ESMTP id 7B54C27C46; Thu, 16 Aug 2007
+	16:10:53 +0200 (CEST)
+X-Original-To: kernel@avr32linux.org
+Delivered-To: kernel@duppen.flaskehals.net
+Received: from relay.atmel.no (nat-132.atmel.no [80.232.32.132]) (using
+	TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits)) (No client certificate
+	requested) by duppen.flaskehals.net (Postfix) with ESMTP id DE5F927C44 for
+	<kernel@avr32linux.org>; Thu, 16 Aug 2007 16:10:51 +0200 (CEST)
+Received: from dhcp-255-175.norway.atmel.com (dhcp-255-175.norway.atmel.com
+	[10.191.255.175]) by relay.atmel.no (8.13.4/8.13.4) with ESMTP id
+	l7GE9buW099329; Thu, 16 Aug 2007 16:09:37 +0200 (CEST) (envelope-from
+	hskinnemoen@norway.atmel.com)
+Received: from hskinnemoen by dhcp-255-175.norway.atmel.com with local
+	(Exim 4.67) (envelope-from <hskinnemoen@norway.atmel.com>) id
+	1ILg2b-0003bi-0p; Thu, 16 Aug 2007 16:09:37 +0200
+From: Haavard Skinnemoen <hskinnemoen@atmel.com>
+To: kernel@avr32linux.org
+Date: Thu, 16 Aug 2007 16:09:36 +0200
+Message-Id: <1187273376362-git-send-email-hskinnemoen@atmel.com>
+X-Mailer: git-send-email 1.5.2.3
+Subject: [PATCH] MMC: Add 10ms delay before SEND_OP_COND for SD and MMC
+	cards
+X-BeenThere: kernel@avr32linux.org
+X-Mailman-Version: 2.1.5
+Precedence: list
+List-Id: AVR32 Linux Kernel discussions and patches <kernel.avr32linux.org>
+List-Unsubscribe:
+	<http://duppen.flaskehals.net/cgi-bin/mailman/listinfo/kernel>, 
+	<mailto:kernel-request@avr32linux.org?subject=unsubscribe>
+List-Archive: <http://duppen.flaskehals.net/pipermail/kernel>
+List-Post: <mailto:kernel@avr32linux.org>
+List-Help: <mailto:kernel-request@avr32linux.org?subject=help>
+List-Subscribe:
+	<http://duppen.flaskehals.net/cgi-bin/mailman/listinfo/kernel>, 
+	<mailto:kernel-request@avr32linux.org?subject=subscribe>
+Sender: kernel-bounces@avr32linux.org
+Errors-To: kernel-bounces@avr32linux.org
+X-pstn-levels:     (S:99.90000/99.90000 R:95.9108 P:95.9108 M:97.0282
+	C:98.6951 )
+X-Virus-Scanned: by amavisd-new
+X-Evolution-Source: imap://hcegtvedt@imap.norway.atmel.com/
+Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+
+Some cards seem to need some extra time to get their brains into gear
+before they will respond to the MMC_SEND_OP_COND or SD_APP_OP_COND
+command. This hopefully fixes an issue many people have seen when
+using MMC and SD cards with the AT32AP7000 CPU where mmc layer fails
+to identify the card inserted into the SD card slot.
+
+Signed-off-by: Haavard Skinnemoen <hskinnemoen@atmel.com>
+---
+I don't entirely like this fix, but it's certainly better than adding
+a printk after every command. If this patch seems to fix things for
+you, I'm going to send it to the MMC maintainer. There's a chance he
+won't like it, but it's a starting point.
+
+ drivers/mmc/core/mmc_ops.c |    4 ++--
+ drivers/mmc/core/sd_ops.c  |    4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 7dd720f..22d2b85 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -98,6 +98,8 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 	cmd.flags = MMC_RSP_R3 | MMC_CMD_BCR;
+ 
+ 	for (i = 100; i; i--) {
++		mmc_delay(10);
++
+ 		err = mmc_wait_for_cmd(host, &cmd, 0);
+ 		if (err != MMC_ERR_NONE)
+ 			break;
+@@ -106,8 +108,6 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 			break;
+ 
+ 		err = MMC_ERR_TIMEOUT;
+-
+-		mmc_delay(10);
+ 	}
+ 
+ 	if (rocr)
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index 9697ce5..8c08e1a 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -151,6 +151,8 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 	cmd.flags = MMC_RSP_R3 | MMC_CMD_BCR;
+ 
+ 	for (i = 100; i; i--) {
++		mmc_delay(10);
++
+ 		err = mmc_wait_for_app_cmd(host, NULL, &cmd, MMC_CMD_RETRIES);
+ 		if (err != MMC_ERR_NONE)
+ 			break;
+@@ -159,8 +161,6 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 			break;
+ 
+ 		err = MMC_ERR_TIMEOUT;
+-
+-		mmc_delay(10);
+ 	}
+ 
+ 	if (rocr)
+-- 
+1.5.2.3
+
+_______________________________________________
+Kernel mailing list
+Kernel@avr32linux.org
+http://duppen.flaskehals.net/cgi-bin/mailman/listinfo/kernel
