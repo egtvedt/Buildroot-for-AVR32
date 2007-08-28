@@ -51,11 +51,7 @@ endif
 # Has to be set by the target/device
 ifndef LINUX26_BINLOC
 # default:
-ifeq ($(strip $(BR2_avr32)),y)
-LINUX26_BINLOC=arch/$(KERNEL_ARCH)/boot/images/$(LINUX26_FORMAT)
-else
 LINUX26_BINLOC=arch/$(KERNEL_ARCH)/boot/$(LINUX26_FORMAT)
-endif
 endif
 
 # File name for the Linux kernel binary
