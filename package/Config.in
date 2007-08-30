@@ -1,5 +1,10 @@
 menu "Package Selection for the target"
 
+if BR2_avr32
+comment "AVR32 packages"
+source "package/avr32-wiki-docs/Config.in"
+endif
+
 source "package/busybox/Config.in"
 source "package/customize/Config.in"
 

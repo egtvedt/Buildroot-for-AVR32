@@ -1,0 +1,17 @@
+config BR2_PACKAGE_AVR32_WIKI_DOCS
+	bool "avr32-wiki-docs"
+	default n
+	help
+	  This package adds the AVR32 wiki documentation snapshot to the /www
+	  folder on your target board file system.
+
+	  http://www.atmel.com/AVR32
+
+config BR2_PACKAGE_AVR32_WIKI_DOCS_ROOT_INDEX_FILE
+	bool "Redirecting index.html in /www"
+	depends on BR2_PACKAGE_AVR32_WIKI_DOCS
+	default y
+	help
+	  Enabling this option adds a index.html in /www directory which
+	  automatically redirects the user to /www/wiki when browsing the Wiki
+	  through a web client.
