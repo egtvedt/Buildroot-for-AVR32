@@ -17,12 +17,12 @@ mkisofs-source: $(DL_DIR)/$(MKISOFS_SOURCE)
 $(MKISOFS_DIR)/.unpacked: $(DL_DIR)/$(MKISOFS_SOURCE)
 	$(MKISOFS_CAT) $(DL_DIR)/$(MKISOFS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(MKISOFS_DIR) target/iso9660/ \*.patch
-	touch $(MKISOFS_DIR)/.unpacked
+	touch $@
 
 $(MKISOFS_DIR)/.configured: $(MKISOFS_DIR)/.unpacked
 	(cd $(MKISOFS_DIR); rm -rf config.cache; \
 	);
-	touch  $(MKISOFS_DIR)/.configured
+	touch $@
 
 $(MKISOFS_TARGET): $(MKISOFS_DIR)/.configured
 	$(MAKE) -C $(MKISOFS_DIR)
@@ -62,17 +62,17 @@ $(ISO9660_TARGET): host-fakeroot $(LINUX_KERNEL) $(EXT2_TARGET) grub mkisofs
 	cp $(LINUX_KERNEL) $(ISO9660_TARGET_DIR)/kernel
 	cp $(EXT2_TARGET) $(ISO9660_TARGET_DIR)/initrd
 	# Use fakeroot to pretend all target binaries are owned by root
-	rm -f $(STAGING_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
-	touch $(STAGING_DIR)/.fakeroot.00000
-	cat $(STAGING_DIR)/.fakeroot* > $(STAGING_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
-	echo "chown -R 0:0 $(ISO9660_TARGET_DIR)" >> $(STAGING_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
+	rm -f $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
+	touch $(PROJECT_BUILD_DIR)/.fakeroot.00000
+	cat $(PROJECT_BUILD_DIR)/.fakeroot* > $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
+	echo "chown -R 0:0 $(ISO9660_TARGET_DIR)" >> $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
 	# Use fakeroot so mkisofs believes the previous fakery
 	echo "$(MKISOFS_TARGET) -R -b boot/grub/stage2_eltorito -no-emul-boot " \
 		"-boot-load-size 4 -boot-info-table -o $(ISO9660_TARGET) $(ISO9660_TARGET_DIR)" \
-		>> $(STAGING_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
-	chmod a+x $(STAGING_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
-	$(STAGING_DIR)/usr/bin/fakeroot -- $(STAGING_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
-	-@rm -f $(STAGING_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
+		>> $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
+	chmod a+x $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
+	$(STAGING_DIR)/usr/bin/fakeroot -- $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
+	-@rm -f $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(ISO9660_TARGET))
 
 iso9660root: $(ISO9660_TARGET)
 	echo $(ISO9660_TARGET)

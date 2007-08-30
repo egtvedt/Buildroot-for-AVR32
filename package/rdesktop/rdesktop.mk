@@ -29,7 +29,7 @@ $(RDESKTOP_DIR)/.configured: $(RDESKTOP_DIR)/.unpacked
 		--prefix=/usr \
 		--with-openssl=$(STAGING_DIR) \
 		--sysconfdir=/etc \
-	);
+	)
 	touch $(RDESKTOP_DIR)/.configured
 
 $(RDESKTOP_DIR)/rdesktop: $(RDESKTOP_DIR)/.configured
@@ -44,9 +44,9 @@ rdesktop: uclibc openssl $(XSERVER) $(RDESKTOP_DIR)/.installed
 rdesktop-source: $(DL_DIR)/$(RDESKTOP_SOURCE)
 
 rdesktop-clean:
-	@if [ -d $(RDESKTOP_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(RDESKTOP_DIR) clean ; \
-	fi;
+	@if [ -d $(RDESKTOP_DIR)/Makefile ]; then \
+		$(MAKE) -C $(RDESKTOP_DIR) clean; \
+	fi
 
 rdesktop-dirclean:
 	rm -rf $(RDESKTOP_DIR) $(RDESKTOP_DIR)

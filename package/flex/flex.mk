@@ -26,7 +26,7 @@ $(FLEX_DIR)/.unpacked: $(DL_DIR)/$(FLEX_SOURCE) $(DL_DIR)/$(FLEX_PATCH)
 ifneq ($(FLEX_PATCH),)
 	toolchain/patch-kernel.sh $(FLEX_DIR) $(DL_DIR) $(FLEX_PATCH)
 	if [ -d $(FLEX_DIR)/debian/patches ]; then \
-		toolchain/patch-kernel.sh $(FLEX_DIR) $(FLEX_DIR)/debian/patches \*.patch ; \
+		toolchain/patch-kernel.sh $(FLEX_DIR) $(FLEX_DIR)/debian/patches \*.patch; \
 	fi
 endif
 	$(CONFIG_UPDATE) $(FLEX_DIR)
@@ -54,7 +54,7 @@ $(FLEX_DIR)/.configured: $(FLEX_DIR)/.unpacked
 		--includedir=$(TARGET_DIR)/usr/include \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
+	)
 	touch $@
 
 $(FLEX_DIR)/$(FLEX_BINARY): $(FLEX_DIR)/.configured

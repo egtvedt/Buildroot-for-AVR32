@@ -56,7 +56,7 @@ $(IMAGEMAGICK_DIR)/.configured: $(IMAGEMAGICK_DIR)/.unpacked
 		--without-fpx \
 		--without-freetype \
 		--without-x \
-	);
+	)
 	touch $@
 
 $(IMAGEMAGICK_DIR)/.compiled: $(IMAGEMAGICK_DIR)/.configured
@@ -69,66 +69,66 @@ $(STAGING_DIR)/usr/lib/libMagick.a: $(IMAGEMAGICK_DIR)/.compiled
 
 $(IMAGEMAGICK_LIB): $(STAGING_DIR)/usr/lib/libMagick.a
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/lib/libWand.so* $(TARGET_DIR)/usr/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libWand.so*
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libWand.so*
 	mkdir -p $(TARGET_DIR)/usr/lib/ImageMagick-$(IMAGEMAGICK_VERSION)
 	$(IMAGEMAGICK_COPY) -r $(STAGING_DIR)/usr/lib/ImageMagick-$(IMAGEMAGICK_VERSION) $(TARGET_DIR)/usr/lib
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/lib/libMagick.so* $(TARGET_DIR)/usr/lib/
-	-$(STRIP) --strip-unneeded $(IMAGEMAGICK_LIB)*
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(IMAGEMAGICK_LIB)*
 	touch -c $@
 
-$(IMAGEMAGICK_DIR)/.libinstall:	$(IMAGEMAGICK_LIB)
-	libtool	--finish $(TARGET_DIR)/usr/lib/ImageMagick-6.3.5/modules-Q16/coders
-	libtool	--finish $(TARGET_DIR)/usr/lib/ImageMagick-6.3.5/modules-Q16/filters
-	touch	$@
+$(IMAGEMAGICK_DIR)/.libinstall: $(IMAGEMAGICK_LIB)
+	libtool --finish $(TARGET_DIR)/usr/lib/ImageMagick-6.3.5/modules-Q16/coders
+	libtool --finish $(TARGET_DIR)/usr/lib/ImageMagick-6.3.5/modules-Q16/filters
+	touch $@
 
 $(TARGET_DIR)/usr/bin/animate: $(IMAGEMAGICK_LIB)
 	ls -l $(IMAGEMAGICK_LIB) >> datefile
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-animate $(TARGET_DIR)/usr/bin/animate
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/animate
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/animate
+	touch $@
 
 $(TARGET_DIR)/usr/bin/compare: $(IMAGEMAGICK_LIB)
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-compare $(TARGET_DIR)/usr/bin/compare
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/compare
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/compare
+	touch $@
 
 $(TARGET_DIR)/usr/bin/composite: $(IMAGEMAGICK_LIB)
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-composite $(TARGET_DIR)/usr/bin/composite
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/composite
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/composite
+	touch $@
 
 $(TARGET_DIR)/usr/bin/conjure: $(IMAGEMAGICK_LIB)
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-conjure $(TARGET_DIR)/usr/bin/conjure
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/conjure
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/conjure
+	touch $@
 
 $(TARGET_DIR)/usr/bin/display: $(IMAGEMAGICK_LIB)
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-display $(TARGET_DIR)/usr/bin/display
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/display
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/display
+	touch $@
 
 $(TARGET_DIR)/usr/bin/import: $(IMAGEMAGICK_LIB)
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-import $(TARGET_DIR)/usr/bin/import
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/import
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/import
+	touch $@
 
 $(TARGET_DIR)/usr/bin/mogrify: $(IMAGEMAGICK_LIB)
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-mogrify $(TARGET_DIR)/usr/bin/mogrify
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/mogrify
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/mogrify
+	touch $@
 
 $(TARGET_DIR)/usr/bin/montage: $(IMAGEMAGICK_LIB)
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-montage $(TARGET_DIR)/usr/bin/montage
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/montage
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/montage
+	touch $@
 
-$(TARGET_DIR)/usr/bin/convert:	$(IMAGEMAGICK_LIB)
+$(TARGET_DIR)/usr/bin/convert: $(IMAGEMAGICK_LIB)
 	$(IMAGEMAGICK_COPY) $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-convert $(TARGET_DIR)/usr/bin/convert
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/convert
-	touch	$@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/convert
+	touch $@
 
 imagemagick: uclibc jpeg tiff $(IMAGEMAGICK_LIB) \
-		$(IMAGEMAGICK_DIR)/.libinstall	\
+		$(IMAGEMAGICK_DIR)/.libinstall \
 		$(IMAGEMAGICK_TARGET_BINARIES)
 
 imagemagick-clean:

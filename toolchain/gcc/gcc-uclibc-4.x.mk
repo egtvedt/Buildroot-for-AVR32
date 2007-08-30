@@ -30,26 +30,26 @@ GCC_SITE:=ftp://sources.redhat.com/pub/gcc/snapshots/$(GCC_OFFICIAL_VER)
 endif
 
 # redefine if using an external prepatched gcc source
-ifeq	($(BR2_TOOLCHAIN_NORMAL),)
+ifeq ($(BR2_TOOLCHAIN_NORMAL),)
 GCC_SITE:=$(VENDOR_SITE)
 GCC_OFFICIAL_VER:=$(GCC_VERSION)$(VENDOR_SUFFIX)$(VENDOR_GCC_RELEASE)
 endif
 
 # define patch location
-ifeq	($(BR2_TOOLCHAIN_NORMAL),y)	# Normal toolchain
-ifeq ($(GCC_SNAP_DATE),)		# Not a snapshot
+ifeq ($(BR2_TOOLCHAIN_NORMAL),y) # Normal toolchain
+ifeq ($(GCC_SNAP_DATE),) # Not a snapshot
 GCC_PATCH_DIR:=toolchain/gcc/$(GCC_VERSION)
-else					# Is a snapshot
-ifneq ($(wildcard toolchain/gcc/$(GCC_OFFICIAL_VER)),)	# Snapshot patch?
+else # Is a snapshot
+ifneq ($(wildcard toolchain/gcc/$(GCC_OFFICIAL_VER)),) # Snapshot patch?
 GCC_PATCH_DIR:=toolchain/gcc/$(GCC_OFFICIAL_VER)
-else					# Normal patch to snapshot
+else # Normal patch to snapshot
 # Use the normal location, if the dedicated location does not exist
 GCC_PATCH_DIR:=toolchain/gcc/$(GCC_VERSION)
-endif					# Snapshot patch
-endif					# Not a snapshot
-else					# Prepatched toolchain
+endif # Snapshot patch
+endif # Not a snapshot
+else # Prepatched toolchain
 GCC_PATCH_DIR:=$(VENDOR_PATCH_DIR)/gcc-$(GCC_OFFICIAL_VER)
-endif					# Normal toolchain
+endif # Normal toolchain
 
 GCC_SOURCE:=gcc-$(GCC_OFFICIAL_VER).tar.bz2
 GCC_DIR:=$(TOOL_BUILD_DIR)/gcc-$(GCC_OFFICIAL_VER)
@@ -70,8 +70,8 @@ endif
 #
 #############################################################
 
-GCC_TARGET_PREREQ =
-GCC_STAGING_PREREQ= $(STAGING_DIR)/usr/lib/libc.a
+GCC_TARGET_PREREQ=
+GCC_STAGING_PREREQ=$(STAGING_DIR)/usr/lib/libc.a
 
 GCC_TARGET_LANGUAGES:=c
 
@@ -86,7 +86,7 @@ ifeq ($(BR2_GCC_CROSS_OBJC),y)
 GCC_CROSS_LANGUAGES:=$(GCC_CROSS_LANGUAGES),objc
 endif
 
-GCC_COMMON_PREREQ= $(wildcard $(BR2_DEPENDS_DIR)/br2/install/libstdcpp*)\
+GCC_COMMON_PREREQ=$(wildcard $(BR2_DEPENDS_DIR)/br2/install/libstdcpp*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/install/libgcj*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/install/objc*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/install/fortran*)\
@@ -94,9 +94,9 @@ $(wildcard $(BR2_DEPENDS_DIR)/br2/prefer/ima*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/toolchain/sysroot*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/use/sjlj/exceptions*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/gcc/shared/libgcc*)
-GCC_TARGET_PREREQ += $(GCC_COMMON_PREREQ) \
+GCC_TARGET_PREREQ+=$(GCC_COMMON_PREREQ) \
 $(wildcard $(BR2_DEPENDS_DIR)/br2/extra/target/gcc/config/options*)
-GCC_STAGING_PREREQ+= $(GCC_COMMON_PREREQ) \
+GCC_STAGING_PREREQ+=$(GCC_COMMON_PREREQ) \
 $(wildcard $(BR2_DEPENDS_DIR)/br2/extra/gcc/config/options*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/gcc/cross/*)
 
@@ -118,8 +118,8 @@ GCC_WITH_HOST_MPFR=--with-mpfr=$(MPFR_HOST_DIR)
 
 ifeq ($(BR2_INSTALL_FORTRAN),y)
 GCC_TARGET_LANGUAGES:=$(GCC_TARGET_LANGUAGES),fortran
-#GCC_TARGET_PREREQ += $(TARGET_DIR)/usr/lib/libmpfr.so $(TARGET_DIR)/usr/lib/libgmp.so
-#GCC_STAGING_PREREQ+= $(TOOL_BUILD_DIR)/mpfr/lib/libmpfr.so
+#GCC_TARGET_PREREQ+=$(TARGET_DIR)/usr/lib/libmpfr.so $(TARGET_DIR)/usr/lib/libgmp.so
+#GCC_STAGING_PREREQ+=$(TOOL_BUILD_DIR)/mpfr/lib/libmpfr.so
 GCC_WITH_TARGET_GMP=--with-gmp="$(GMP_TARGET_DIR)"
 GCC_WITH_TARGET_MPFR=--with-mpfr="$(MPFR_TARGET_DIR)"
 endif
@@ -155,9 +155,9 @@ $(GCC_DIR)/.patched: $(GCC_DIR)/.unpacked
 
 	# Note: The soft float situation has improved considerably with gcc 3.4.x.
 	# We can dispense with the custom spec files, as well as libfloat for the arm case.
-	# However, we still need a patch for arm.  There's a similar patch for gcc 3.3.x
+	# However, we still need a patch for arm. There's a similar patch for gcc 3.3.x
 	# which needs to be integrated so we can kill of libfloat for good, except for
-	# anyone (?) who might still be using gcc 2.95.  mjn3
+	# anyone (?) who might still be using gcc 2.95. mjn3
 ifeq ($(BR2_SOFT_FLOAT),y)
 ifeq ("$(strip $(ARCH))","arm")
 	toolchain/patch-kernel.sh $(GCC_DIR) toolchain/gcc/$(GCC_VERSION) arm-softfloat.patch.conditional
@@ -186,7 +186,7 @@ GCC_BUILD_DIR1:=$(TOOL_BUILD_DIR)/gcc-$(GCC_VERSION)-initial
 
 $(GCC_BUILD_DIR1)/.configured: $(GCC_DIR)/.patched
 	mkdir -p $(GCC_BUILD_DIR1)
-	(cd $(GCC_BUILD_DIR1); rm -rf config.cache ; \
+	(cd $(GCC_BUILD_DIR1); rm -rf config.cache; \
 		$(HOST_CONFIGURE_OPTS) \
 		$(GCC_DIR)/configure \
 		--prefix=$(STAGING_DIR)/usr \
@@ -206,7 +206,7 @@ $(GCC_BUILD_DIR1)/.configured: $(GCC_DIR)/.patched
 		$(MULTILIB) \
 		$(SOFT_FLOAT_CONFIG_OPTION) \
 		$(GCC_WITH_ABI) $(GCC_WITH_ARCH) $(GCC_WITH_TUNE) \
-		$(EXTRA_GCC_CONFIG_OPTIONS));
+		$(EXTRA_GCC_CONFIG_OPTIONS))
 	touch $@
 
 $(GCC_BUILD_DIR1)/.compiled: $(GCC_BUILD_DIR1)/.configured
@@ -228,25 +228,25 @@ gcc_initial-dirclean:
 
 #############################################################
 #
-# second pass compiler build.  Build the compiler targeting
+# second pass compiler build. Build the compiler targeting
 # the newly built shared uClibc library.
 #
 #############################################################
 #
 # Sigh... I had to rework things because using --with-gxx-include-dir
-# causes issues with include dir search order for g++.  This seems to
+# causes issues with include dir search order for g++. This seems to
 # have something to do with "path translations" and possibly doesn't
-# affect gcc-target.  However, I haven't tested gcc-target yet so no
-# guarantees.  mjn3
+# affect gcc-target. However, I haven't tested gcc-target yet so no
+# guarantees. mjn3
 
 GCC_BUILD_DIR2:=$(TOOL_BUILD_DIR)/gcc-$(GCC_VERSION)-final
 $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 	mkdir -p $(GCC_BUILD_DIR2)
-	# Important!  Required for limits.h to be fixed.
+	# Important! Required for limits.h to be fixed.
 	ln -snf ../include/ $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/sys-include
 	#-rmdir $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib
 	#ln -snf ../lib $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib
-	(cd $(GCC_BUILD_DIR2); rm -rf config.cache ; \
+	(cd $(GCC_BUILD_DIR2); rm -rf config.cache; \
 		$(HOST_CONFIGURE_OPTS) \
 		$(GCC_DIR)/configure \
 		--prefix=$(BR2_SYSROOT_PREFIX)/usr \
@@ -269,7 +269,7 @@ $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 		$(GCC_WITH_ABI) $(GCC_WITH_ARCH) $(GCC_WITH_TUNE) \
 		$(GCC_USE_SJLJ_EXCEPTIONS) \
 		$(DISABLE_LARGEFILE) \
-		$(EXTRA_GCC_CONFIG_OPTIONS));
+		$(EXTRA_GCC_CONFIG_OPTIONS))
 	touch $@
 
 $(GCC_BUILD_DIR2)/.compiled: $(GCC_BUILD_DIR2)/.configured
@@ -279,12 +279,12 @@ $(GCC_BUILD_DIR2)/.compiled: $(GCC_BUILD_DIR2)/.configured
 $(GCC_BUILD_DIR2)/.installed: $(GCC_BUILD_DIR2)/.compiled
 	PATH=$(TARGET_PATH) $(MAKE) $(BR2_SYSROOT_STAGING_DESTDIR) \
 		-C $(GCC_BUILD_DIR2) install
-	if [ -d "$(STAGING_DIR)/lib64" ] ; then \
-		if [ ! -e "$(STAGING_DIR)/lib" ] ; then \
-			mkdir "$(STAGING_DIR)/lib" ; \
-		fi ; \
-		mv "$(STAGING_DIR)/lib64/"* "$(STAGING_DIR)/lib/" ; \
-		rmdir "$(STAGING_DIR)/lib64" ; \
+	if [ -d "$(STAGING_DIR)/lib64" ]; then \
+		if [ ! -e "$(STAGING_DIR)/lib" ]; then \
+			mkdir "$(STAGING_DIR)/lib"; \
+		fi; \
+		mv "$(STAGING_DIR)/lib64/"* "$(STAGING_DIR)/lib/"; \
+		rmdir "$(STAGING_DIR)/lib64"; \
 	fi
 	# Move gcc bug reporting script out of path of real executables
 	mv -f $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gccbug \
@@ -295,62 +295,67 @@ ifeq ($(GCC_STRIP_HOST_BINARIES),true)
 	-strip --strip-all -R .note -R .comment $(STAGING_DIR)/usr/bin/faked
 endif
 	# Make sure we have 'cc'.
-	if [ ! -e $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-cc ] ; then \
+	if [ ! -e $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-cc ]; then \
 		ln -snf $(REAL_GNU_TARGET_NAME)-gcc \
-			$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-cc ; \
-	fi;
-	if [ ! -e $(STAGING_DIR)/usr/bin/cc ] ; then \
-		ln -snf gcc $(STAGING_DIR)/usr/bin/cc ; \
-	fi;
+			$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-cc; \
+	fi
+	if [ ! -e $(STAGING_DIR)/usr/bin/cc ]; then \
+		ln -snf gcc $(STAGING_DIR)/usr/bin/cc; \
+	fi
 	# Set up the symlinks to enable lying about target name.
 	set -e; \
 	(cd $(STAGING_DIR); \
 		ln -snf $(REAL_GNU_TARGET_NAME) $(GNU_TARGET_NAME); \
 		cd usr/bin; \
-		for app in $(REAL_GNU_TARGET_NAME)-* ; do \
+		for app in $(REAL_GNU_TARGET_NAME)-*; do \
 			ln -snf $${app} \
-		   	$(GNU_TARGET_NAME)$${app##$(REAL_GNU_TARGET_NAME)}; \
+			$(GNU_TARGET_NAME)$${app##$(REAL_GNU_TARGET_NAME)}; \
 		done; \
-	);
+	)
 	#
 	# Now for the ugly 3.3.x soft float hack...
 	#
 ifeq ($(BR2_SOFT_FLOAT),y)
 ifeq ($(findstring 3.3.,$(GCC_VERSION)),3.3.)
 	# Make sure we have a soft float specs file for this arch
-	if [ ! -f toolchain/gcc/$(GCC_VERSION)/specs-$(ARCH)-soft-float ] ; then \
-		echo soft float configured but no specs file for this arch ; \
-		/bin/false ; \
-	fi;
+	if [ ! -f toolchain/gcc/$(GCC_VERSION)/specs-$(ARCH)-soft-float ]; then \
+		echo soft float configured but no specs file for this arch; \
+		/bin/false; \
+	fi
 	# Replace specs file with one that defaults to soft float mode.
-	if [ ! -f $(STAGING_DIR)/lib/gcc-lib/$(REAL_GNU_TARGET_NAME)/$(GCC_VERSION)/specs ] ; then \
-		echo staging dir specs file is missing ; \
-		/bin/false ; \
-	fi;
+	if [ ! -f $(STAGING_DIR)/lib/gcc-lib/$(REAL_GNU_TARGET_NAME)/$(GCC_VERSION)/specs ]; then \
+		echo staging dir specs file is missing; \
+		/bin/false; \
+	fi
 	cp toolchain/gcc/$(GCC_VERSION)/specs-$(ARCH)-soft-float $(STAGING_DIR)/lib/gcc-lib/$(REAL_GNU_TARGET_NAME)/$(GCC_VERSION)/specs
 endif
 endif
 	#
 	# Ok... that's enough of that.
 	#
+	mkdir -p $(TARGET_DIR)/usr/lib $(TARGET_DIR)/usr/sbin
 	touch $@
 
 $(GCC_BUILD_DIR2)/.libs_installed: $(GCC_BUILD_DIR2)/.installed
 ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
 	# These are in /lib, so...
 	rm -rf $(TARGET_DIR)/usr/lib/libgcc_s*.so*
-	-cp -dpf $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib/libgcc_s* $(TARGET_DIR)/lib/
+	cp -dpf $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib/libgcc_s* \
+		$(TARGET_DIR)/lib/
 endif
 ifeq ($(BR2_INSTALL_LIBSTDCPP),y)
-	-cp -dpf $(STAGING_DIR)/usr/lib/libstdc++.so* $(TARGET_DIR)/lib/
+	cp -dpf $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib/libstdc++.so* \
+		$(TARGET_DIR)/usr/lib/
 endif
 ifeq ($(BR2_INSTALL_LIBGCJ),y)
-	-cp -dpf $(STAGING_DIR)/lib/libgcj.so* $(TARGET_DIR)/lib/
-	-cp -dpf $(STAGING_DIR)/lib/lib-org-w3c-dom.so* $(TARGET_DIR)/lib/
-	-cp -dpf $(STAGING_DIR)/lib/lib-org-xml-sax.so* $(TARGET_DIR)/lib/
-	-mkdir -p $(TARGET_DIR)/usr/lib/security
-	-cp -dpf $(STAGING_DIR)/usr/lib/security/libgcj.security $(TARGET_DIR)/usr/lib/security/
-	-cp -dpf $(STAGING_DIR)/usr/lib/security/classpath.security $(TARGET_DIR)/usr/lib/security/
+	cp -dpf $(STAGING_DIR)/lib/libgcj.so* $(TARGET_DIR)/lib/
+	cp -dpf $(STAGING_DIR)/lib/lib-org-w3c-dom.so* $(TARGET_DIR)/lib/
+	cp -dpf $(STAGING_DIR)/lib/lib-org-xml-sax.so* $(TARGET_DIR)/lib/
+	mkdir -p $(TARGET_DIR)/usr/lib/security
+	cp -dpf $(STAGING_DIR)/usr/lib/security/libgcj.security \
+		$(TARGET_DIR)/usr/lib/security/
+	cp -dpf $(STAGING_DIR)/usr/lib/security/classpath.security \
+		$(TARGET_DIR)/usr/lib/security/
 endif
 	touch $@
 
@@ -363,8 +368,8 @@ gcc-source: $(DL_DIR)/$(GCC_SOURCE)
 gcc-clean:
 	rm -rf $(GCC_BUILD_DIR2)
 	for prog in cpp gcc gcc-[0-9]* protoize unprotoize gcov gccbug cc; do \
-	    rm -f $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-$$prog \
-	    rm -f $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-$$prog; \
+		rm -f $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-$$prog; \
+		rm -f $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-$$prog; \
 	done
 
 gcc-dirclean: gcc_initial-dirclean
@@ -382,7 +387,7 @@ $(GCC_BUILD_DIR3)/.prepared: $(GCC_BUILD_DIR2)/.libs_installed $(GCC_TARGET_PRER
 	touch $@
 
 $(GCC_BUILD_DIR3)/.configured: $(GCC_BUILD_DIR3)/.prepared
-	(cd $(GCC_BUILD_DIR3); rm -rf config.cache ; \
+	(cd $(GCC_BUILD_DIR3); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_GCC_FLAGS) \
 		$(GCC_DIR)/configure \
@@ -405,7 +410,7 @@ $(GCC_BUILD_DIR3)/.configured: $(GCC_BUILD_DIR3)/.prepared
 		$(GCC_USE_SJLJ_EXCEPTIONS) \
 		$(DISABLE_LARGEFILE) \
 		$(EXTRA_GCC_CONFIG_OPTIONS) \
-		$(EXTRA_TARGET_GCC_CONFIG_OPTIONS));
+		$(EXTRA_TARGET_GCC_CONFIG_OPTIONS))
 	touch $@
 
 $(GCC_BUILD_DIR3)/.compiled: $(GCC_BUILD_DIR3)/.configured
@@ -466,15 +471,15 @@ endif
 	#rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
 	#	$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
 	# Work around problem of missing syslimits.h
-	if [ ! -f $(TARGET_DIR)/usr/$(GCC_LIB_SUBDIR)/include/syslimits.h ] ; then \
-		echo "warning: working around missing syslimits.h" ; \
+	if [ ! -f $(TARGET_DIR)/usr/$(GCC_LIB_SUBDIR)/include/syslimits.h ]; then \
+		echo "warning: working around missing syslimits.h"; \
 		cp -f $(STAGING_DIR)/$(GCC_LIB_SUBDIR)/include/syslimits.h \
-			$(TARGET_DIR)/usr/$(GCC_LIB_SUBDIR)/include/ ; \
+			$(TARGET_DIR)/usr/$(GCC_LIB_SUBDIR)/include/; \
 	fi
 	# Make sure we have 'cc'.
-	if [ ! -e $(TARGET_DIR)/usr/bin/cc ] ; then \
-		ln -snf gcc $(TARGET_DIR)/usr/bin/cc ; \
-	fi;
+	if [ ! -e $(TARGET_DIR)/usr/bin/cc ]; then \
+		ln -snf gcc $(TARGET_DIR)/usr/bin/cc; \
+	fi
 	# These are in /lib, so...
 	#rm -rf $(TARGET_DIR)/usr/lib/libgcc_s*.so*
 	touch -c $@

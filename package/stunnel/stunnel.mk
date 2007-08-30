@@ -47,7 +47,7 @@ $(STUNNEL_DIR)/.configured: $(STUNNEL_DIR)/.unpacked
 		--with-ssl=$(STAGING_DIR) \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
+	)
 	touch $(STUNNEL_DIR)/.configured
 
 $(STUNNEL_DIR)/src/stunnel: $(STUNNEL_DIR)/.configured
@@ -62,13 +62,13 @@ ifeq ($(strip $(BR2_CROSS_TOOLCHAIN_TARGET_UTILS)),y)
 		$(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/target_utils/stunnel
 endif
 
-stunnel: uclibc $(TARGET_DIR)/usr/bin/stunnel 
+stunnel: uclibc $(TARGET_DIR)/usr/bin/stunnel
 
-stunnel-clean: 
+stunnel-clean:
 	$(MAKE) -C $(STUNNEL_DIR) clean
 
-stunnel-dirclean: 
-	rm -rf $(STUNNEL_DIR) 
+stunnel-dirclean:
+	rm -rf $(STUNNEL_DIR)
 
 
 #############################################################

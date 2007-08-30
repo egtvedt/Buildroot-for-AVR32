@@ -16,6 +16,7 @@ $(DL_DIR)/$(FREETYPE_SOURCE):
 
 $(FREETYPE_DIR)/.unpacked: $(DL_DIR)/$(FREETYPE_SOURCE)
 	$(FREETYPE_CAT) $(DL_DIR)/$(FREETYPE_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(CONFIG_UPDATE) $(FREETYPE_DIR)
 	touch $(FREETYPE_DIR)/.unpacked
 
 # freetype for the target
@@ -39,7 +40,7 @@ $(FREETYPE_DIR)/.configured: $(FREETYPE_DIR)/.unpacked
 		--includedir=/usr/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-	);
+	)
 	touch $(FREETYPE_DIR)/.configured
 
 $(FREETYPE_DIR)/.compiled: $(FREETYPE_DIR)/.configured
@@ -47,10 +48,10 @@ $(FREETYPE_DIR)/.compiled: $(FREETYPE_DIR)/.configured
 	touch $(FREETYPE_DIR)/.compiled
 
 $(STAGING_DIR)/usr/include/freetype:
-	ln -sf ./freetype2/freetype  $(STAGING_DIR)/usr/include/freetype
+	ln -sf ./freetype2/freetype $(STAGING_DIR)/usr/include/freetype
 
 $(STAGING_DIR)/include/freetype:
-	ln -sf ../usr/include/freetype2/freetype  $(STAGING_DIR)/include/freetype
+	ln -sf ../usr/include/freetype2/freetype $(STAGING_DIR)/include/freetype
 
 $(STAGING_DIR)/lib/libfreetype.so: $(FREETYPE_DIR)/.compiled
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(FREETYPE_DIR) install
@@ -64,7 +65,7 @@ $(STAGING_DIR)/lib/libfreetype.so: $(FREETYPE_DIR)/.compiled
 
 $(TARGET_DIR)/lib/libfreetype.so: $(STAGING_DIR)/lib/libfreetype.so
 	cp -dpf $(STAGING_DIR)/lib/libfreetype.so* $(TARGET_DIR)/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libfreetype.so
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libfreetype.so
 
 # freetype for the host, needed for build-tools of fontconfig
 
@@ -78,7 +79,7 @@ $(FREETYPE_DIR1)/.configured: $(FREETYPE_DIR1)/.unpacked
 	./configure \
 		CC="$(HOSTCC)" \
 		--prefix="$(FREETYPE_HOST_DIR)" \
-	);
+	)
 	touch $(FREETYPE_DIR1)/.configured
 
 $(FREETYPE_DIR1)/.compiled: $(FREETYPE_DIR1)/.configured
@@ -89,13 +90,13 @@ $(FREETYPE_HOST_DIR)/lib/libfreetype.so: $(FREETYPE_DIR1)/.configured
 	$(MAKE) -C $(FREETYPE_DIR1) install
 	touch -c $@
 
-.PHONY:	freetype freetype-source freetype-links freetype-clean freetype-dirclean
+.PHONY: freetype freetype-source freetype-links freetype-clean freetype-dirclean
 
 freetype: uclibc pkgconfig $(TARGET_DIR)/lib/libfreetype.so freetype-links
 
 freetype-source: $(DL_DIR)/$(FREETYPE_SOURCE)
 
-freetype-links:	$(STAGING_DIR)/usr/include/freetype $(STAGING_DIR)/include/freetype
+freetype-links: $(STAGING_DIR)/usr/include/freetype $(STAGING_DIR)/include/freetype
 
 freetype-clean:
 	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(FREETYPE_DIR) uninstall
@@ -104,7 +105,7 @@ freetype-clean:
 freetype-dirclean:
 	rm -rf $(FREETYPE_DIR)
 
-.PHONY:	host-freetype
+.PHONY: host-freetype
 
 host-freetype: $(FREETYPE_HOST_DIR)/lib/libfreetype.so
 

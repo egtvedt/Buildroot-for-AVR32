@@ -45,7 +45,7 @@ $(EXPAT_DIR)/.configured: $(EXPAT_DIR)/.unpacked
 		--mandir=/man \
 		--infodir=/info \
 		--enable-shared \
-	);
+	)
 	touch $@
 
 $(EXPAT_DIR)/$(EXPAT_BINARY): $(EXPAT_DIR)/.configured
@@ -61,7 +61,7 @@ $(STAGING_DIR)/$(EXPAT_TARGET_BINARY): $(EXPAT_DIR)/$(EXPAT_BINARY)
 $(TARGET_DIR)/$(EXPAT_TARGET_BINARY): $(STAGING_DIR)/$(EXPAT_TARGET_BINARY)
 	cp -dpf $(STAGING_DIR)/usr/lib/libexpat.so* $(TARGET_DIR)/usr/lib/
 	#cp -dpf $(STAGING_DIR)/usr/bin/xmlwf $(TARGET_DIR)/usr/bin/xmlwf
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libexpat.so*
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libexpat.so*
 	touch -c $@
 
 expat: uclibc pkgconfig $(TARGET_DIR)/$(EXPAT_TARGET_BINARY)
@@ -70,7 +70,7 @@ expat-clean:
 	rm -f $(EXPAT_DIR)/.configured
 	rm -f $(STAGING_DIR)/usr/lib/libexpat.* \
 		$(TARGET_DIR)/usr/lib/libexpat.*
-	#rm -f $(STAGING_DIR)/usr/bin/xmlwf  $(TARGET_DIR)/usr/bin/xmlwf
+	#rm -f $(STAGING_DIR)/usr/bin/xmlwf $(TARGET_DIR)/usr/bin/xmlwf
 	-$(MAKE) -C $(EXPAT_DIR) clean
 
 expat-dirclean:

@@ -15,6 +15,12 @@ LZMA_CFLAGS+=-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 endif
 LZMA_TARGET_BINARY:=bin/lzma
 
+# lzma binary for use on the host
+LZMA=$(TOOL_BUILD_DIR)/bin/lzma
+HOST_LZMA_BINARY=$(shell $(CONFIG_SHELL) package/lzma/lzmacheck.sh)
+HOST_LZMA_IF_ANY=$(shell $(CONFIG_SHELL) toolchain/dependencies/check-host-lzma.sh)
+
+
 $(DL_DIR)/$(LZMA_SOURCE):
 	$(WGET) -P $(DL_DIR) $(LZMA_SITE)/$(LZMA_SOURCE)
 
@@ -30,12 +36,12 @@ $(LZMA_HOST_DIR)/.unpacked: $(DL_DIR)/$(LZMA_SOURCE)
 	touch $@
 
 $(LZMA_HOST_DIR)/.configured: $(LZMA_HOST_DIR)/.unpacked
-	(cd $(LZMA_HOST_DIR); rm -f config.cache ;\
+	(cd $(LZMA_HOST_DIR); rm -f config.cache;\
 		CC="$(HOSTCC)" \
 		CXX="$(HOSTCXX)" \
 		./configure \
 		--prefix=/ \
-	);
+	)
 	touch $@
 
 $(LZMA_HOST_DIR)/src/lzma/lzma: $(LZMA_HOST_DIR)/.configured
@@ -47,12 +53,30 @@ $(STAGING_DIR)/bin/lzma: $(LZMA_HOST_DIR)/src/lzma/lzma
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" \
 		$(STAGING_DIR)/lib/liblzmadec.la
 
+.PHONY: lzma-host use-lzma-host-binary
+use-lzma-host-binary:
+	if [ ! -f "$(TOOL_BUILD_DIR)/bin/lzma" ]; then \
+		[ -d $(TOOL_BUILD_DIR)/bin ] || mkdir $(TOOL_BUILD_DIR)/bin; \
+		ln -sf "$(HOST_LZMA_IF_ANY)" "$(TOOL_BUILD_DIR)/bin/lzma"; \
+	fi
+
+build-lzma-host-binary: $(LZMA_HOST_DIR)/src/lzma/lzma
+	-rm -f $(TOOL_BUILD_DIR)/bin/lzma
+	[ -d $(TOOL_BUILD_DIR)/bin ] || mkdir $(TOOL_BUILD_DIR)/bin
+	cp -pf $(LZMA_HOST_DIR)/src/lzma/lzma $(TOOL_BUILD_DIR)/bin/lzma
+
+host-lzma: $(HOST_LZMA_BINARY)
+
 lzma-host: $(STAGING_DIR)/bin/lzma
+
 lzma-host-clean:
 	rm -f $(STAGING_DIR)/bin/lzma
 	-$(MAKE) -C $(LZMA_HOST_DIR) clean
 lzma-host-dirclean:
 	rm -rf $(LZMA_HOST_DIR)
+
+lzma-host-install: /usr/local/bin/lzma
+
 ######################################################################
 #
 # lzma target
@@ -65,7 +89,7 @@ $(LZMA_TARGET_DIR)/.unpacked: $(DL_DIR)/$(LZMA_SOURCE)
 	touch $@
 
 $(LZMA_TARGET_DIR)/.configured: $(LZMA_TARGET_DIR)/.unpacked
-	(cd $(LZMA_TARGET_DIR); rm -f config.cache ;\
+	(cd $(LZMA_TARGET_DIR); rm -f config.cache;\
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		CFLAGS="$(TARGET_CFLAGS) $(LZMA_CFLAGS)" \
@@ -81,7 +105,7 @@ $(LZMA_TARGET_DIR)/.configured: $(LZMA_TARGET_DIR)/.unpacked
 		--disable-debug \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
+	)
 	touch $@
 
 $(LZMA_TARGET_DIR)/src/lzma/lzma: $(LZMA_TARGET_DIR)/.configured
@@ -90,7 +114,7 @@ $(LZMA_TARGET_DIR)/src/lzma/lzma: $(LZMA_TARGET_DIR)/.configured
 
 $(TARGET_DIR)/$(LZMA_TARGET_BINARY): $(LZMA_TARGET_DIR)/src/lzma/lzma
 	cp -dpf $(LZMA_TARGET_DIR)/src/lzma/lzma $@
-	-$(STRIP) --strip-unneeded $@
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $@
 	touch -c $@
 
 #lzma-headers: $(TARGET_DIR)/$(LZMA_TARGET_BINARY)

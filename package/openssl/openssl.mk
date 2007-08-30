@@ -60,15 +60,15 @@ $(STAGING_DIR)/usr/lib/libcrypto.a: $(OPENSSL_DIR)/apps/openssl
 	$(MAKE) CC=$(TARGET_CC) INSTALL_PREFIX=$(STAGING_DIR)/usr -C $(OPENSSL_DIR) install
 	cp -fa $(OPENSSL_DIR)/libcrypto.so* $(STAGING_DIR)/usr/lib/
 	chmod a-x $(STAGING_DIR)/usr/lib/libcrypto.so.0.9.7
-	(cd $(STAGING_DIR)/usr/lib ; \
-	 ln -fs libcrypto.so.0.9.7 libcrypto.so ; \
-	 ln -fs libcrypto.so.0.9.7 libcrypto.so.0 ; \
+	(cd $(STAGING_DIR)/usr/lib; \
+	 ln -fs libcrypto.so.0.9.7 libcrypto.so; \
+	 ln -fs libcrypto.so.0.9.7 libcrypto.so.0; \
 	)
 	cp -fa $(OPENSSL_DIR)/libssl.so* $(STAGING_DIR)/usr/lib/
 	chmod a-x $(STAGING_DIR)/usr/lib/libssl.so.0.9.7
-	(cd $(STAGING_DIR)/usr/lib ; \
-	 ln -fs libssl.so.0.9.7 libssl.so ; \
-	 ln -fs libssl.so.0.9.7 libssl.so.0 ; \
+	(cd $(STAGING_DIR)/usr/lib; \
+	 ln -fs libssl.so.0.9.7 libssl.so; \
+	 ln -fs libssl.so.0.9.7 libssl.so.0; \
 	)
 	touch -c $@
 
@@ -76,12 +76,12 @@ $(TARGET_DIR)/usr/lib/libcrypto.so.0.9.7: $(STAGING_DIR)/usr/lib/libcrypto.a
 	mkdir -p $(TARGET_DIR)/usr/lib
 	cp -fa $(STAGING_DIR)/usr/lib/libcrypto.so* $(TARGET_DIR)/usr/lib/
 	cp -fa $(STAGING_DIR)/usr/lib/libssl.so* $(TARGET_DIR)/usr/lib/
-	#cp -fa $(STAGING_DIR)/bin/openssl  $(TARGET_DIR)/bin/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libssl.so.0.9.7
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libcrypto.so.0.9.7
+	#cp -fa $(STAGING_DIR)/bin/openssl $(TARGET_DIR)/bin/
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libssl.so.0.9.7
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libcrypto.so.0.9.7
 
 $(TARGET_DIR)/usr/lib/libssl.a: $(STAGING_DIR)/usr/lib/libcrypto.a
-	mkdir -p $(TARGET_DIR)/usr/include 
+	mkdir -p $(TARGET_DIR)/usr/include
 	cp -a $(STAGING_DIR)/usr/include/openssl $(TARGET_DIR)/usr/include/
 	cp -dpf $(STAGING_DIR)/usr/lib/libssl.a $(TARGET_DIR)/usr/lib/
 	cp -dpf $(STAGING_DIR)/usr/lib/libcrypto.a $(TARGET_DIR)/usr/lib/
@@ -93,14 +93,14 @@ openssl: uclibc $(TARGET_DIR)/usr/lib/libcrypto.so.0.9.7
 
 openssl-source: $(DL_DIR)/$(OPENSSL_SOURCE)
 
-openssl-clean: 
+openssl-clean:
 	$(MAKE) -C $(OPENSSL_DIR) clean
-	rm -f $(STAGING_DIR)/usr/bin/openssl  $(TARGET_DIR)/usr/bin/openssl
+	rm -f $(STAGING_DIR)/usr/bin/openssl $(TARGET_DIR)/usr/bin/openssl
 	rm -f $(STAGING_DIR)/usr/lib/libcrypto.so* $(TARGET_DIR)/usr/lib/libcrypto.so*
 	rm -f $(STAGING_DIR)/usr/lib/libssl.so* $(TARGET_DIR)/usr/lib/libssl.so*
 	rm -rf $(STAGING_DIR)/usr/include/openssl $(TARGET_DIR)/usr/include/openssl
 
-openssl-dirclean: 
+openssl-dirclean:
 	rm -rf $(OPENSSL_DIR)
 #############################################################
 #

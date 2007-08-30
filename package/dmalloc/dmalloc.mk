@@ -63,7 +63,7 @@ $(DMALLOC_DIR)/.configured: $(DMALLOC_DIR)/.unpacked
 		--infodir=/usr/info \
 		--enable-shlib \
 		$(DMALLOC_CONFIG_ARGS) \
-	);
+	)
 	touch $@
 
 $(DMALLOC_DIR)/$(DMALLOC_BINARY): $(DMALLOC_DIR)/.configured
@@ -71,16 +71,16 @@ $(DMALLOC_DIR)/$(DMALLOC_BINARY): $(DMALLOC_DIR)/.configured
 
 $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY): $(DMALLOC_DIR)/$(DMALLOC_BINARY)
 	# both DESTDIR and PREFIX are ignored..
-	$(MAKE)	includedir="$(STAGING_DIR)/usr/include" \
+	$(MAKE) includedir="$(STAGING_DIR)/usr/include" \
 		bindir="$(STAGING_DIR)/usr/bin" \
 		libdir="$(STAGING_DIR)/usr/lib" \
 		shlibdir="$(STAGING_DIR)/usr/lib" \
 		includedir="$(STAGING_DIR)/usr/share/info/" \
 		-C $(DMALLOC_DIR) install
 	(cd $(STAGING_DIR)/usr/lib; \
-		mv libdmalloc*.so $(TARGET_DIR)/usr/lib);
+		mv libdmalloc*.so $(TARGET_DIR)/usr/lib)
 	cp -dpf $(STAGING_DIR)/usr/bin/dmalloc $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
-	$(STRIP) -s $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
+	$(STRIP) $(STRIP_STRIP_ALL) $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
 
 dmalloc: uclibc $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
 

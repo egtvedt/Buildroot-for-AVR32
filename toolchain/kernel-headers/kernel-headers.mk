@@ -1,8 +1,8 @@
 #############################################################
 #
-# Setup the kernel headers.  I include a generic package of
+# Setup the kernel headers. I include a generic package of
 # kernel headers here, so you shouldn't need to include your
-# own.  Be aware these kernel headers _will_ get blown away
+# own. Be aware these kernel headers _will_ get blown away
 # by a 'make clean' so don't put anything sacred in here...
 #
 #############################################################
@@ -37,5 +37,6 @@ kernel-headers-clean: clean
 
 kernel-headers-dirclean:
 	rm -rf $(LINUX_HEADERS_DIR)
+	rm -rf $(LINUX_HEADERS_UNPACK_DIR)
 
 .PHONY: kernel-headers

@@ -24,15 +24,15 @@
 
 ifneq ($(strip $(BR2_PACKAGE_XORG)),y)
 ifeq ($(strip $(BR2_PACKAGE_TINYX)),y)
-
+ifeq ($(strip $(BR2_PACKAGE_TINYX_OLD)),y)
 #############################################################
 # You may want to change these.
 #############################################################
 
 TINYX_APPS:=xlsfonts/xlsfonts xmodmap/xmodmap
 #xset/xset xdpyinfo/xdpyinfo xsetroot/xsetroot \
-#	xrdb/xrdb xrandr/xrandr \
-#	xhost/xhost xauth/xauth oclock/oclock xeyes/xeyes
+# xrdb/xrdb xrandr/xrandr \
+# xhost/xhost xauth/xauth oclock/oclock xeyes/xeyes
 #
 
 TINYX_LIBS:=ICE X11 Xext Xpm
@@ -83,9 +83,9 @@ $(TINYX_DIR)/.configure: $(DL_DIR)/$(TINYX_SOURCE)
 #
 $(TINYX_XFBDEV): $(TINYX_DIR)/.configure
 	rm -f $(TINYX_BINX)/Xfbdev
-	#make World CROSSCOMPILEFLAGS="CROSSCOMPILEDIR=<cross compiler dir>";
-	#( cd $(TINYX_DIR) ; $(MAKE) World CROSSCOMPILEFLAGS="CROSSCOMPILEDIR=$(STAGING_DIR)/bin" )
-	#( cd $(TINYX_DIR) ; $(MAKE) $(TARGET_CONFIGURE_OPTS) World )
+	#make World CROSSCOMPILEFLAGS="CROSSCOMPILEDIR=<cross compiler dir>"
+	#( cd $(TINYX_DIR); $(MAKE) World CROSSCOMPILEFLAGS="CROSSCOMPILEDIR=$(STAGING_DIR)/bin" )
+	#( cd $(TINYX_DIR); $(MAKE) $(TARGET_CONFIGURE_OPTS) World )
 	#
 	#mv $(TINYX_DIR)/Makefile $(TINYX_DIR)/Makefile.xxxx
 	#echo "AS=$(TARGET_CROSS)as" > $(TINYX_DIR)/Makefile
@@ -97,7 +97,7 @@ $(TINYX_XFBDEV): $(TINYX_DIR)/.configure
 	#echo "RANLIB=$(TARGET_CROSS)ranlib" >> $(TINYX_DIR)/Makefile
 	#echo "OBJCOPY=$(TARGET_CROSS)objcopy" >> $(TINYX_DIR)/Makefile
 	#cat $(TINYX_DIR)/Makefile.xxxx >> $(TINYX_DIR)/Makefile
-	( cd $(TINYX_DIR) ; $(MAKE) $(TARGET_CONFIGURE_OPTS) World )
+	( cd $(TINYX_DIR); $(MAKE) $(TARGET_CONFIGURE_OPTS) World )
 
 #
 # Install x-includes and x-libraries in $(STAGING_DIR)/usr/X11R6/
@@ -114,9 +114,9 @@ $(STAGING_DIR)/usr/X11R6/lib/libX11.so.6.2: $(TINYX_XFBDEV)
 $(TINYX_BINX)/Xfbdev: $(TINYX_XFBDEV)
 	-mkdir $(TARGET_DIR)/usr/X11R6
 	-mkdir $(TINYX_BINX)
-	for file in $(TINYX_APPS) ; do \
-		cp -f $(TINYX_DIR)/programs/$$file $(TINYX_BINX) ; \
-		$(STRIP) $(TINYX_PROGS)/$$file ; \
+	for file in $(TINYX_APPS); do \
+		cp -f $(TINYX_DIR)/programs/$$file $(TINYX_BINX); \
+		$(STRIP) $(TINYX_PROGS)/$$file; \
 	done
 	cp $(TINYX_DIR)/programs/Xserver/Xfbdev $(TINYX_BINX)
 	$(STRIP) $(TINYX_BINX)/Xfbdev
@@ -126,12 +126,12 @@ $(TINYX_BINX)/Xfbdev: $(TINYX_XFBDEV)
 #
 # After we have executables installed, install the libraries.
 $(TINYX_LIBX)/libX11.so.6.2: $(TINYX_XFBDEV)
-	for dirs in $(TINYX_LIBS) ; do \
-		file=`find $(TINYX_LDIR)/$$dirs -type f -iname "lib$$dirs.so*"` ; \
-		$(STRIP) --strip-unneeded $$file ; \
-		cp -f $$file $(TINYX_LIBX) ; \
-		file=`find $(TINYX_LDIR)/$$dirs -type l -iname "lib$$dirs.so*"` ; \
-		cp -pRf $$file $(TINYX_LIBX) ; \
+	for dirs in $(TINYX_LIBS); do \
+		file=`find $(TINYX_LDIR)/$$dirs -type f -iname "lib$$dirs.so*"`; \
+		$(STRIP) --strip-unneeded $$file; \
+		cp -f $$file $(TINYX_LIBX); \
+		file=`find $(TINYX_LDIR)/$$dirs -type l -iname "lib$$dirs.so*"`; \
+		cp -pRf $$file $(TINYX_LIBX); \
 	done
 
 tinyx: zlib $(STAGING_DIR)/usr/X11R6/lib/libX11.so.6.2 \
@@ -152,5 +152,6 @@ tinyx-dirclean:
 #
 #############################################################
 TARGETS+=tinyx
+endif
 endif
 endif

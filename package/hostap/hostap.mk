@@ -1,10 +1,15 @@
 #############################################################
 #
 # hostap
+# 
+# Note! Host AP driver was added into the main kernel tree in Linux v2.6.14. 
+# The version in the kernel tree should be used instead of this external hostap-driver package. 
+# The external releases are only for older kernel versions and all
+# the future development will be in the main kernel tree.
 #
 #############################################################
-HOSTAP_VERSION=0.5.8
-HOSTAP_SOURCE=hostapd-$(HOSTAP_VERSION).tar.gz
+HOSTAP_VERSION=0.4.9
+HOSTAP_SOURCE=hostap-driver-$(HOSTAP_VERSION).tar.gz
 HOSTAP_SITE=http://hostap.epitest.fi/releases
 HOSTAP_DIR=$(BUILD_DIR)/hostapd-$(HOSTAP_VERSION)
 
@@ -20,7 +25,7 @@ $(HOSTAP_DIR)/.unpacked: $(DL_DIR)/$(HOSTAP_SOURCE)
 
 $(HOSTAP_DIR)/.configured: $(HOSTAP_DIR)/.unpacked
 	#$(SED) "s,/.*#define PRISM2_DOWNLOAD_SUPPORT.*/,#define PRISM2_DOWNLOAD_SUPPORT,g" \
-	#	$(HOSTAP_DIR)/driver/modules/hostap_config.h
+	# $(HOSTAP_DIR)/driver/modules/hostap_config.h
 	touch $(HOSTAP_DIR)/.configured
 
 $(HOSTAP_DIR)/utils/hostap_crypt_conf: $(HOSTAP_DIR)/.configured
@@ -31,9 +36,9 @@ $(HOSTAP_DIR)/utils/hostap_crypt_conf: $(HOSTAP_DIR)/.configured
 $(TARGET_DIR)//usr/bin/hostap_crypt_conf: $(HOSTAP_DIR)/utils/hostap_crypt_conf
 	# Make the dir
 	-rm -rf $(HOSTAP_TARGET_MODULE_DIR)
-	-mkdir -p $(HOSTAP_TARGET_MODULE_DIR)
+	mkdir -p $(HOSTAP_TARGET_MODULE_DIR)
 	# Copy the pcmcia-cs conf file
-	-mkdir -p $(TARGET_DIR)/etc/pcmcia
+	mkdir -p $(TARGET_DIR)/etc/pcmcia
 	cp -af $(HOSTAP_DIR)/driver/etc/hostap_cs.conf $(TARGET_DIR)/etc/pcmcia/
 	# Copy The Utils
 	cp -af $(HOSTAP_DIR)/utils/hostap_crypt_conf $(TARGET_DIR)/usr/bin/

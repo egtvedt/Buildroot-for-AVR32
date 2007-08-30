@@ -7,7 +7,7 @@ PHP_VER:=5.2.3
 PHP_SOURCE:=php-$(PHP_VER).tar.bz2
 PHP_SITE:=http://us.php.net/get/${PHP_SOURCE}/from/us2.php.net/mirror
 PHP_DIR:=$(BUILD_DIR)/php-$(PHP_VER)
-PHP_CAT=bzcat
+PHP_CAT=$(BZCAT)
 PHP_DEPS=
 PHP_TARGET_DEPS=
 
@@ -19,10 +19,13 @@ else
 endif
 
 ifneq ($(BR2_PACKAGE_PHP_CGI),y)
-	PHP_CGI="--disable-cgi"
+	PHP_CGI=--disable-cgi
 else
-	PHP_CGI="--enable-cgi"
+	PHP_CGI=--enable-cgi
 	PHP_TARGET_DEPS+=$(TARGET_DIR)/usr/bin/php-cgi
+	ifeq ($(BR2_PACKAGE_PHP_FASTCGI),y)
+		PHP_CGI+=--enable-fastcgi
+	endif
 endif
 
 ifeq ($(BR2_PACKAGE_PHP_OPENSSL),y)
@@ -52,7 +55,7 @@ php-source: $(DL_DIR)/$(PHP_SOURCE)
 
 $(PHP_DIR)/.unpacked: $(DL_DIR)/$(PHP_SOURCE)
 	$(PHP_CAT) $(DL_DIR)/$(PHP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	touch $(PHP_DIR)/.unpacked
+	touch $@
 
 $(PHP_DIR)/.configured: $(PHP_DIR)/.unpacked
 	(cd $(PHP_DIR); rm -rf config.cache; \
@@ -69,6 +72,7 @@ $(PHP_DIR)/.configured: $(PHP_DIR)/.unpacked
 		--sbindir=/usr/sbin \
 		--libexecdir=/usr/lib \
 		--sysconfdir=/etc \
+		--with-config-file-path=/etc \
 		--datadir=/usr/share/misc \
 		--localstatedir=/var \
 		--mandir=/usr/man \
@@ -77,6 +81,7 @@ $(PHP_DIR)/.configured: $(PHP_DIR)/.unpacked
 		--enable-spl \
 		--enable-session \
 		--enable-sockets \
+		--enable-posix \
 		--with-pcre-regex \
 		--without-pear \
 		--disable-ipv6 \
@@ -86,32 +91,37 @@ $(PHP_DIR)/.configured: $(PHP_DIR)/.unpacked
 		$(PHP_CLI) \
 		$(PHP_CGI) \
 		$(PHP_ZLIB) \
-	);
-	touch $(PHP_DIR)/.configured
+	)
+	touch $@
 
 $(PHP_DIR)/.built: $(PHP_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(PHP_DIR)
-	touch $(PHP_DIR)/.built
+	touch $@
 
 $(PHP_DIR)/.staged: $(PHP_DIR)/.built
 	$(MAKE) DESTDIR=$(STAGING_DIR) INSTALL_ROOT=$(STAGING_DIR) CC=$(TARGET_CC) -C $(PHP_DIR) install
-	touch $(PHP_DIR)/.staged
+	touch $@
 
 $(TARGET_DIR)/usr/bin/php: $(PHP_DIR)/.staged
 	cp -dpf $(STAGING_DIR)/usr/bin/php $(TARGET_DIR)/usr/bin/php
 	chmod 755 $(TARGET_DIR)/usr/bin/php
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/php
 
 $(TARGET_DIR)/usr/bin/php-cgi: $(PHP_DIR)/.staged
 	cp -dpf $(STAGING_DIR)/usr/bin/php-cgi $(TARGET_DIR)/usr/bin/php-cgi
 	chmod 755 $(TARGET_DIR)/usr/bin/php-cgi
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/php-cgi
 
 $(TARGET_DIR)/etc/php.ini: $(PHP_DIR)/.staged
-	cp $(PHP_DIR)/php.ini-dist $(TARGET_DIR)/etc/php.ini
+	cp -f $(PHP_DIR)/php.ini-dist $(TARGET_DIR)/etc/php.ini
 
 php: uclibc $(PHP_DEPS) $(PHP_TARGET_DEPS) $(TARGET_DIR)/etc/php.ini
 
 php-clean:
 	rm -f $(PHP_DIR)/.configured $(PHP_DIR)/.built $(PHP_DIR)/.staged
+	rm -f $(TARGET_DIR)/usr/bin/php $(TARGET_DIR)/usr/bin/php-cgi
+	rm -f $(STAGING_DIR)/usr/bin/php* $(STAGING_DIR)/usr/man/man1/php*
+	rm -rf $(STAGING_DIR)/usr/include/php
 	-$(MAKE) -C $(PHP_DIR) clean
 
 php-dirclean:

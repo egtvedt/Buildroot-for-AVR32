@@ -64,7 +64,7 @@ $(DIRECTFB_DIR)/.configured: $(DIRECTFB_DIR)/.unpacked
 		--disable-sdl \
 		--disable-video4linux \
 		--disable-video4linux2 \
-		--enable-fusion );
+		--enable-fusion )
 	touch $(DIRECTFB_DIR)/.configured
 
 $(DIRECTFB_DIR)/.compiled: $(DIRECTFB_DIR)/.configured
@@ -92,7 +92,7 @@ $(STAGING_DIR)/usr/lib/libdirectfb.so: $(DIRECTFB_DIR)/.compiled
 $(TARGET_DIR)/usr/lib/libdirectfb.so: $(STAGING_DIR)/usr/lib/libdirectfb.so
 	cp -dpf $(STAGING_DIR)/usr/lib/libdirect* $(STAGING_DIR)/usr/lib/libfusion* $(TARGET_DIR)/usr/lib/
 	cp -rdpf $(STAGING_DIR)/usr/lib/directfb-* $(TARGET_DIR)/usr/lib/
-	-$(STRIP) --strip-unneeded \
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) \
 		$(TARGET_DIR)/usr/lib/libdirectfb.so \
 		$(TARGET_DIR)/usr/lib/libdirect.so \
 		$(TARGET_DIR)/usr/lib/libfusion.so

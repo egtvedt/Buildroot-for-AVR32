@@ -24,7 +24,7 @@ $(SDL_DIR)/.unpacked: $(DL_DIR)/$(SDL_SOURCE)
 	touch $@
 
 $(SDL_DIR)/.configured: $(SDL_DIR)/.unpacked
-	(cd $(SDL_DIR); rm -rf config.cache ; \
+	(cd $(SDL_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
@@ -46,26 +46,26 @@ $(SDL_DIR)/.configured: $(SDL_DIR)/.unpacked
 		--disable-arts \
 		--disable-esd \
 		--disable-nasm \
-		--disable-video-x11 );
+		--disable-video-x11 )
 	touch $@
 
 $(STAGING_DIR)/include/directfb:
 	ln -s ../usr/include/directfb $(STAGING_DIR)/include/directfb
 
 $(SDL_DIR)/.compiled: $(SDL_DIR)/.configured $(STAGING_DIR)/include/directfb
-	$(MAKE1) $(TARGET_CONFIGURE_OPTS)	\
+	$(MAKE1) $(TARGET_CONFIGURE_OPTS) \
 		INCLUDE="-I./include -I$(STAGING_DIR)/usr/include/directfb" \
 		LDFLAGS=-L$(STAGING_DIR)/usr \
-		DESTDIR=$(STAGING_DIR)/usr -C $(SDL_DIR) 
+		DESTDIR=$(STAGING_DIR)/usr -C $(SDL_DIR)
 	touch $@
 
 $(STAGING_DIR)/usr/lib/libSDL.so: $(SDL_DIR)/.compiled
-	$(MAKE) DESTDIR=$(STAGING_DIR)/usr -C $(SDL_DIR) install;
+	$(MAKE) DESTDIR=$(STAGING_DIR)/usr -C $(SDL_DIR) install
 	touch -c $@
 
 $(TARGET_DIR)/usr/lib/libSDL.so: $(STAGING_DIR)/usr/lib/libSDL.so
 	cp -dpf $(STAGING_DIR)/usr/lib/libSDL*.so* $(TARGET_DIR)/usr/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libSDL.so
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libSDL.so
 
 SDL sdl: uclibc $(TARGET_DIR)/usr/lib/libSDL.so
 

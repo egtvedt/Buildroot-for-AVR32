@@ -16,10 +16,10 @@ libdrm-source: $(DL_DIR)/$(LIBDRM_SOURCE)
 
 $(LIBDRM_DIR)/.unpacked: $(DL_DIR)/$(LIBDRM_SOURCE)
 	$(LIBDRM_CAT) $(DL_DIR)/$(LIBDRM_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	touch $(LIBDRM_DIR)/.unpacked
+	touch $@
 
 $(LIBDRM_DIR)/.configured: $(LIBDRM_DIR)/.unpacked
-	(cd $(LIBDRM_DIR); \
+	(cd $(LIBDRM_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
 	CFLAGS="$(TARGET_CFLAGS) " \
 	LDFLAGS="$(TARGET_LDFLAGS)" \
@@ -36,11 +36,11 @@ $(LIBDRM_DIR)/.configured: $(LIBDRM_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
+		--includedir=/usr/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-	);
-	touch $(LIBDRM_DIR)/.configured
+	)
+	touch $@
 
 $(LIBDRM_DIR)/.compiled: $(LIBDRM_DIR)/.configured
 	$(MAKE) CCexe="$(HOSTCC)" -C $(LIBDRM_DIR)
@@ -50,15 +50,15 @@ $(STAGING_DIR)/lib/libdrm.so: $(LIBDRM_DIR)/.compiled
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBDRM_DIR) install
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" $(STAGING_DIR)/lib/libdrm.la
 	#$(SED) "s,^prefix=.*,prefix=\'$(STAGING_DIR)\',g" \
-	#	-e "s,^exec_prefix=.*,exec_prefix=\'$(STAGING_DIR)/usr\',g" \
-	#	-e "s,^includedir=.*,includedir=\'$(STAGING_DIR)/include\',g" \
-	#	-e "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" \
-	#	$(STAGING_DIR)/usr/bin/libdrm-config
+	# -e "s,^exec_prefix=.*,exec_prefix=\'$(STAGING_DIR)/usr\',g" \
+	# -e "s,^includedir=.*,includedir=\'$(STAGING_DIR)/include\',g" \
+	# -e "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" \
+	# $(STAGING_DIR)/usr/bin/libdrm-config
 	touch -c $(STAGING_DIR)/lib/libdrm.so
 
 $(TARGET_DIR)/lib/libdrm.so: $(STAGING_DIR)/lib/libdrm.so
 	cp -dpf $(STAGING_DIR)/lib/libdrm.so* $(TARGET_DIR)/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libdrm.so
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libdrm.so
 
 libdrm: uclibc pkgconfig $(TARGET_DIR)/lib/libdrm.so
 

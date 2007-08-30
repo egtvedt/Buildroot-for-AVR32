@@ -32,7 +32,7 @@ $(CURL_DIR)/.configured: $(CURL_DIR)/.unpacked
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=$(STAGING_DIR) \
-	);
+	)
 	touch $(CURL_DIR)/.configured
 
 $(CURL_DIR)/src/.libs/$(CURL_BINARY): $(CURL_DIR)/.configured
@@ -48,11 +48,11 @@ $(TARGET_DIR)/usr/lib/libcurl.so.3.0.0: $(STAGING_DIR)/bin/$(CURL_BINARY)
 	-mkdir $(TARGET_DIR)/usr/lib
 	-mkdir $(TARGET_DIR)/usr/bin
 	cp -a $(STAGING_DIR)/lib/libcurl.so* $(TARGET_DIR)/usr/lib
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libcurl.so.3.0.0
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libcurl.so.3.0.0
 
 $(TARGET_DIR)/usr/bin/$(CURL_BINARY): $(TARGET_DIR)/usr/lib/libcurl.so.3.0.0
 	cp -a $(STAGING_DIR)/bin/$(CURL_BINARY) $(TARGET_DIR)/usr/bin
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/$(CURL_BINARY)
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/$(CURL_BINARY)
 
 curl: uclibc $(TARGET_DIR)/usr/bin/$(CURL_BINARY)
 

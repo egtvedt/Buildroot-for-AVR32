@@ -6,7 +6,7 @@
 #
 # This program is free software; you can redistribute it
 # and/or modify it under the terms of the GNU Lesser General
-# Public License as published by the Free Software Foundation;
+# Public License as published by the Free Software Foundation
 # either version 2.1 of the License, or (at your option) any
 # later version.
 
@@ -27,7 +27,7 @@ AVAHI_TARGETS+=$(TARGET_DIR)/usr/sbin/avahi-daemon
 AVAHI_DISABLE_EXPAT:=
 # depend on the exact library file instead of expat so avahi isn't always
 # considered out-of-date
-AVAHI_EXPAT_DEP:=$(STAGING_DIR)/lib/libexpat.so.1
+AVAHI_EXPAT_DEP:=$(STAGING_DIR)/usr/lib/libexpat.so.1
 else
 AVAHI_DISABLE_EXPAT:=--disable-expat
 AVAHI_EXPAT_DEP:=
@@ -41,7 +41,7 @@ avahi-source: $(DL_DIR)/$(AVAHI_SOURCE)
 $(AVAHI_DIR)/.unpacked: $(DL_DIR)/$(AVAHI_SOURCE)
 	$(AVAHI_CAT) $(DL_DIR)/$(AVAHI_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(AVAHI_DIR) package/avahi/ \*.patch
-	touch $(AVAHI_DIR)/.unpacked
+	touch $@
 
 $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXPAT_DEP)
 	(cd $(AVAHI_DIR) && rm -rf config.cache && autoconf)
@@ -139,12 +139,12 @@ $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXPAT_DEP)
 		--with-avahi-group=default \
 		--with-autoipd-user=default \
 		--with-autoipd-group=default \
-	);
-	touch $(AVAHI_DIR)/.configured
+	)
+	touch $@
 
 $(AVAHI_DIR)/.compiled: $(AVAHI_DIR)/.configured
 	$(MAKE) -C $(AVAHI_DIR)
-	touch $(AVAHI_DIR)/.compiled
+	touch $@
 
 $(STAGING_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.compiled
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR)/avahi-autoipd install
@@ -159,7 +159,7 @@ $(TARGET_DIR)/usr/sbin/avahi-autoipd: $(STAGING_DIR)/usr/sbin/avahi-autoipd
 	cp -af $(BASE_DIR)/package/avahi/busybox-udhcpc-default.script $(TARGET_DIR)/usr/share/udhcpc/default.script
 	cp -af $(BASE_DIR)/package/avahi/S05avahi-setup.sh $(TARGET_DIR)/etc/init.d/
 	chmod 0755 $(TARGET_DIR)/usr/share/udhcpc/default.script
-	$(STRIP) --strip-unneeded $@
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $@
 
 $(STAGING_DIR)/usr/lib/libavahi-common.so: $(AVAHI_DIR)/.compiled
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR)/avahi-common install
@@ -178,8 +178,8 @@ $(TARGET_DIR)/usr/sbin/avahi-daemon: $(STAGING_DIR)/usr/sbin/avahi-daemon
 	cp -dpf $(STAGING_DIR)/lib/libavahi-*.so* $(TARGET_DIR)/usr/lib/
 	mkdir -p $(TARGET_DIR)/etc/avahi/services
 	cp -af $(BASE_DIR)/package/avahi/S50avahi-daemon $(TARGET_DIR)/etc/init.d/
-	$(STRIP) --strip-unneeded $@
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libavahi-*.so*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $@
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libavahi-*.so*
 
 avahi: uclibc busybox libdaemon $(AVAHI_TARGETS)
 

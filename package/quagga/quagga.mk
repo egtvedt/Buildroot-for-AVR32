@@ -129,7 +129,7 @@ $(QUAGGA_DIR)/.unpacked: $(DL_DIR)/$(QUAGGA_SOURCE) $(DL_DIR)/$(QUAGGA_PATCH)
 ifneq ($(QUAGGA_PATCH),)
 	(cd $(QUAGGA_DIR) && $(QUAGGA_CAT) $(DL_DIR)/$(QUAGGA_PATCH) | patch -p1)
 	if [ -d $(QUAGGA_DIR)/debian/patches ]; then \
-		toolchain/patch-kernel.sh $(QUAGGA_DIR) $(QUAGGA_DIR)/debian/patches \*.patch ; \
+		toolchain/patch-kernel.sh $(QUAGGA_DIR) $(QUAGGA_DIR)/debian/patches \*.patch; \
 	fi
 endif
 	touch $@
@@ -148,7 +148,7 @@ $(QUAGGA_DIR)/.configured: $(QUAGGA_DIR)/.unpacked
 		$(DISABLE_IPV6) \
 		$(QUAGGA_CONFIGURE) \
 		--program-transform-name='' \
-	);
+	)
 	touch $@
 
 $(QUAGGA_BINARY): $(QUAGGA_DIR)/.configured

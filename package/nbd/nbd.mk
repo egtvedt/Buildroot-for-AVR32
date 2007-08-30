@@ -27,7 +27,7 @@ $(NBD_DIR)/.configured: $(NBD_DIR)/.unpacked
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
-	);
+	)
 	touch $(NBD_DIR)/.configured
 
 $(NBD_DIR)/nbd-client: $(NBD_DIR)/.configured
@@ -37,14 +37,14 @@ $(TARGET_DIR)/sbin/nbd-client: $(NBD_DIR)/nbd-client
 	cp $< $@
 	$(STRIP) $@
 
-nbd:	uclibc $(TARGET_DIR)/sbin/nbd-client
+nbd: uclibc $(TARGET_DIR)/sbin/nbd-client
 
 nbd-source: $(DL_DIR)/$(NBD_SOURCE)
 
 nbd-clean:
-	@if [ -d $(NBD_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(NBD_DIR) clean ; \
-	fi;
+	@if [ -d $(NBD_DIR)/Makefile ]; then \
+		$(MAKE) -C $(NBD_DIR) clean; \
+	fi
 
 nbd-dirclean:
 	rm -rf $(NBD_DIR)

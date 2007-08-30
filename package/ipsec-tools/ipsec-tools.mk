@@ -19,43 +19,43 @@ IPSEC_TOOLS_TARGET_BINARY_RACOONCTL:=usr/sbin/racoonctl
 IPSEC_TOOLS_SITE=http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/ipsec-tools/
 
 ifeq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS_ADMINPORT)), y)
-IPSEC_TOOLS_CONFIG_FLAGS+=	--enable-adminport
+IPSEC_TOOLS_CONFIG_FLAGS+= --enable-adminport
 else
-IPSEC_TOOLS_CONFIG_FLAGS+=	--disable-adminport
+IPSEC_TOOLS_CONFIG_FLAGS+= --disable-adminport
 endif
 
 ifeq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS_NATT)), y)
-IPSEC_TOOLS_CONFIG_FLAGS+=	--enable-natt
+IPSEC_TOOLS_CONFIG_FLAGS+= --enable-natt
 else
-IPSEC_TOOLS_CONFIG_FLAGS+=	--disable-natt
+IPSEC_TOOLS_CONFIG_FLAGS+= --disable-natt
 endif
 
 ifeq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS_FRAG)), y)
-IPSEC_TOOLS_CONFIG_FLAGS+=	--enable-frag
+IPSEC_TOOLS_CONFIG_FLAGS+= --enable-frag
 else
-IPSEC_TOOLS_CONFIG_FLAGS+=	--disable-frag
+IPSEC_TOOLS_CONFIG_FLAGS+= --disable-frag
 endif
 
 ifeq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS_STATS)), y)
-IPSEC_TOOLS_CONFIG_FLAGS+=	--enable-stats
+IPSEC_TOOLS_CONFIG_FLAGS+= --enable-stats
 else
-IPSEC_TOOLS_CONFIG_FLAGS+=	--disable-stats
+IPSEC_TOOLS_CONFIG_FLAGS+= --disable-stats
 endif
 
 ifeq ($(BR2_INET_IPV6),y)
 
 ifeq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS_IPV6)), y)
-IPSEC_TOOLS_CONFIG_FLAGS+=	--enable-ipv6
+IPSEC_TOOLS_CONFIG_FLAGS+= --enable-ipv6
 else
-IPSEC_TOOLS_CONFIG_FLAGS+=	$(DISABLE_IPV6)
+IPSEC_TOOLS_CONFIG_FLAGS+= $(DISABLE_IPV6)
 endif
 
 else # ignore user's choice if it doesn't
-IPSEC_TOOLS_CONFIG_FLAGS+=	$(DISABLE_IPV6)
+IPSEC_TOOLS_CONFIG_FLAGS+= $(DISABLE_IPV6)
 endif
 
 ifneq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS_READLINE)), y)
-IPSEC_TOOLS_CONFIG_FLAGS+=	--without-readline
+IPSEC_TOOLS_CONFIG_FLAGS+= --without-readline
 endif
 
 $(DL_DIR)/$(IPSEC_TOOLS_SOURCE):
@@ -68,7 +68,7 @@ $(IPSEC_TOOLS_DIR)/.patched: $(DL_DIR)/$(IPSEC_TOOLS_SOURCE)
 	touch $@
 
 $(IPSEC_TOOLS_DIR)/.configured: $(IPSEC_TOOLS_DIR)/.patched
-	( cd $(IPSEC_TOOLS_DIR); rm -rf config.cache ; \
+	( cd $(IPSEC_TOOLS_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 	  ./configure \
@@ -82,14 +82,14 @@ $(IPSEC_TOOLS_DIR)/.configured: $(IPSEC_TOOLS_DIR)/.patched
 	  --disable-gssapi \
 	  --with-kernel-headers=$(STAGING_DIR)/usr/include \
 	  $(IPSEC_TOOLS_CONFIG_FLAGS) \
-	); 
+	)
 	# simpler than patching that cruft..
-	(echo '#undef bzero' ; \
-	 echo '#define bzero(a, b) memset((a), 0, (b))' ; \
-	 echo '#undef bcopy' ; \
-	 echo '#define bcopy(src, dest, len) memmove(dest, src, len)' ; \
-	 echo '#undef index' ; \
-	 echo '#define index(a, b) strchr(a, b)' ; \
+	(echo '#undef bzero'; \
+	 echo '#define bzero(a, b) memset((a), 0, (b))'; \
+	 echo '#undef bcopy'; \
+	 echo '#define bcopy(src, dest, len) memmove(dest, src, len)'; \
+	 echo '#undef index'; \
+	 echo '#define index(a, b) strchr(a, b)'; \
 	) >> $(IPSEC_TOOLS_DIR)/config.h
 	touch $@
 
@@ -98,16 +98,16 @@ $(IPSEC_TOOLS_DIR)/$(IPSEC_TOOLS_BINARY_RACOON) \
 $(IPSEC_TOOLS_DIR)/$(IPSEC_TOOLS_BINARY_RACOONCTL): \
     $(IPSEC_TOOLS_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(IPSEC_TOOLS_DIR)
-	
+
 $(TARGET_DIR)/$(IPSEC_TOOLS_TARGET_BINARY_SETKEY) \
 $(TARGET_DIR)/$(IPSEC_TOOLS_TARGET_BINARY_RACOON) \
 $(TARGET_DIR)/$(IPSEC_TOOLS_TARGET_BINARY_RACOONCTL): \
   $(IPSEC_TOOLS_DIR)/$(IPSEC_TOOLS_BINARY_SETKEY) \
   $(IPSEC_TOOLS_DIR)/$(IPSEC_TOOLS_BINARY_RACOON) \
-  $(IPSEC_TOOLS_DIR)/$(IPSEC_TOOLS_BINARY_RACOONCTL) 
+  $(IPSEC_TOOLS_DIR)/$(IPSEC_TOOLS_BINARY_RACOONCTL)
 	$(MAKE) -C $(IPSEC_TOOLS_DIR) DESTDIR=$(TARGET_DIR) install
-	$(STRIP) --strip-unneeded --remove-section=.comment \
-	  --remove-section=.note \
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(REMOVE_SECTION_COMMENT) \
+	  $(REMOVE_SECTION_NOTE) \
 	  $(TARGET_DIR)/$(IPSEC_TOOLS_TARGET_BINARY_SETKEY) \
 	  $(TARGET_DIR)/$(IPSEC_TOOLS_TARGET_BINARY_RACOON) \
 	  $(TARGET_DIR)/$(IPSEC_TOOLS_TARGET_BINARY_RACOONCTL)
@@ -159,4 +159,4 @@ ipsec-tools-dirclean:
 
 ifeq ($(strip $(BR2_PACKAGE_IPSEC_TOOLS)), y)
 TARGETS+=ipsec-tools
-endif 
+endif

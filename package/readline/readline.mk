@@ -16,7 +16,7 @@ READLINE_TARGET_SHARED_BINARY:=lib/$(READLINE_SHARED_BINARY)
 $(DL_DIR)/$(READLINE_SOURCE):
 	$(WGET) -P $(DL_DIR) $(READLINE_SITE)/$(READLINE_SOURCE)
 
-readline-source:  $(DL_DIR)/$(READLINE_SOURCE)
+readline-source: $(DL_DIR)/$(READLINE_SOURCE)
 
 $(READLINE_DIR)/.unpacked: $(DL_DIR)/$(READLINE_SOURCE)
 	mkdir -p $(READLINE_DIR)
@@ -45,7 +45,7 @@ $(READLINE_DIR)/.configured: $(READLINE_DIR)/.unpacked
 		--includedir=/usr/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-	);
+	)
 	touch $@
 
 $(READLINE_DIR)/$(READLINE_BINARY): $(READLINE_DIR)/.configured
@@ -54,7 +54,7 @@ $(READLINE_DIR)/$(READLINE_BINARY): $(READLINE_DIR)/.configured
 	touch -c $@
 
 $(STAGING_DIR)/$(READLINE_TARGET_BINARY): $(READLINE_DIR)/.configured
-	$(MAKE) -C $(READLINE_DIR)  install
+	$(MAKE) -C $(READLINE_DIR) install
 	touch -c $@
 
 # Install to Staging area

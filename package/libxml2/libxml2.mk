@@ -44,14 +44,11 @@ $(LIBXML2_DIR)/.configured: $(LIBXML2_DIR)/.unpacked
 		--without-python \
 		--without-threads \
 		$(DISABLE_NLS) \
-	);
+	)
 	touch $(LIBXML2_DIR)/.configured
 
-$(LIBXML2_DIR)/libxml2.la: $(LIBXML2_DIR)/.configured
-	rm -f $@
+$(STAGING_DIR)/usr/lib/libxml2.so: $(LIBXML2_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(LIBXML2_DIR)
-
-$(STAGING_DIR)/usr/lib/libxml2.so: $(LIBXML2_DIR)/libxml2.la
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBXML2_DIR) install
 	rm -f $(STAGING_DIR)/usr/lib/libxml2.la
 	$(SED) 's:prefix=/usr:prefix=$(STAGING_DIR)/usr:' \
@@ -59,33 +56,32 @@ $(STAGING_DIR)/usr/lib/libxml2.so: $(LIBXML2_DIR)/libxml2.la
 		$(STAGING_DIR)/usr/bin/xml2-config
 
 $(TARGET_DIR)/usr/lib/libxml2.so: $(STAGING_DIR)/usr/lib/libxml2.so
+	mkdir -p $(TARGET_DIR)/usr/include $(TARGET_DIR)/usr/lib
 	cp -dpf $(STAGING_DIR)/usr/lib/libxml2.so* $(TARGET_DIR)/usr/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libxml2.so*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libxml2.so*
 
 $(TARGET_DIR)/usr/lib/libxml2.a: $(STAGING_DIR)/usr/lib/libxml2.so
-	mkdir -p $(TARGET_DIR)/usr/include
 	cp -dpf $(STAGING_DIR)/usr/lib/libxml2.*a $(TARGET_DIR)/usr/lib/
-#	cp -dpf $(STAGING_DIR)/usr/include/libxml $(TARGET_DIR)/usr/include/
 
-libxml2:	uclibc $(TARGET_DIR)/usr/lib/libxml2.so libxml2-headers
+libxml2: uclibc $(TARGET_DIR)/usr/lib/libxml2.so libxml2-headers
 
-$(STAGING_DIR)/usr/include/libxml:	$(TARGET_DIR)/usr/lib/libxml2.a
+$(STAGING_DIR)/usr/include/libxml: $(TARGET_DIR)/usr/lib/libxml2.so
 	cp -af $(LIBXML2_DIR)/include/libxml $(STAGING_DIR)/usr/include/libxml2
 
-$(TARGET_DIR)/usr/include/libxml2:	libxml2-headers
+$(TARGET_DIR)/usr/include/libxml2: libxml2-headers
 	cp -af $(LIBXML2_DIR)/include/libxml $(TARGET_DIR)/usr/include/libxml2
 
 
-libxml2-headers:	$(STAGING_DIR)/usr/include/libxml
+libxml2-headers: $(STAGING_DIR)/usr/include/libxml
 
-libxml2-target-headers: $(TARGET_DIR)/usr/include/libxml2
+libxml2-target-headers: $(TARGET_DIR)/usr/include/libxml2 $(TARGET_DIR)/usr/lib/libxml2.a
 
 libxml2-source: $(DL_DIR)/$(LIBXML2_SOURCE)
 
 libxml2-clean:
-	@if [ -d $(LIBXML2_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(LIBXML2_DIR) clean ; \
-	fi;
+	@if [ -d $(LIBXML2_DIR)/Makefile ]; then \
+		$(MAKE) -C $(LIBXML2_DIR) clean; \
+	fi
 	rm -f $(STAGING_DIR)/usr/lib/libxml2.*
 	rm -f $(TARGET_DIR)/usr/lib/libxml2.*
 
@@ -93,7 +89,7 @@ libxml2-clean:
 libxml2-dirclean:
 	rm -rf $(LIBXML2_DIR)
 
-.PHONY:	libxml2-headers libxml2-target-headers
+.PHONY: libxml2-headers libxml2-target-headers
 #############################################################
 #
 # Toplevel Makefile options

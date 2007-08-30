@@ -42,11 +42,11 @@ $(CVS_DIR)/.unpacked: $(DL_DIR)/$(CVS_SOURCE) $(CVS_PATCH_FILE)
 ifneq ($(CVS_PATCH),)
 	toolchain/patch-kernel.sh $(CVS_DIR) $(DL_DIR) $(CVS_PATCH)
 	if [ -d $(CVS_DIR)/debian/patches ]; then \
-		(cd $(CVS_DIR)/debian/patches && for i in * ; \
-		 do $(SED) 's,^\+\+\+ .*cvs-$(CVS_VERSION)/,+++ cvs-$(CVS_VERSION)/,' $$i ; \
-		 done ; \
-		) ; \
-		toolchain/patch-kernel.sh $(CVS_DIR) $(CVS_DIR)/debian/patches \* ; \
+		(cd $(CVS_DIR)/debian/patches && for i in *; \
+		 do $(SED) 's,^\+\+\+ .*cvs-$(CVS_VERSION)/,+++ cvs-$(CVS_VERSION)/,' $$i; \
+		 done; \
+		); \
+		toolchain/patch-kernel.sh $(CVS_DIR) $(CVS_DIR)/debian/patches \*; \
 	fi
 endif
 	touch $@
@@ -64,7 +64,7 @@ $(CVS_DIR)/.configured: $(CVS_DIR)/.unpacked
 		$(DISABLE_LARGEFILE) \
 		$(DISABLE_NLS) \
 		$(CVS_CONFIGURE_ARGS) \
-	);
+	)
 	touch $@
 
 $(CVS_DIR)/$(CVS_BINARY): $(CVS_DIR)/.configured
@@ -72,7 +72,7 @@ $(CVS_DIR)/$(CVS_BINARY): $(CVS_DIR)/.configured
 
 $(TARGET_DIR)/$(CVS_TARGET_BINARY): $(CVS_DIR)/$(CVS_BINARY)
 	install -D $(CVS_DIR)/$(CVS_BINARY) $(TARGET_DIR)/$(CVS_TARGET_BINARY)
-	$(STRIP) -s $(TARGET_DIR)/$(CVS_TARGET_BINARY)
+	$(STRIP) $(STRIP_STRIP_ALL) $(TARGET_DIR)/$(CVS_TARGET_BINARY)
 
 cvs: uclibc ncurses $(TARGET_DIR)/$(CVS_TARGET_BINARY)
 

@@ -73,6 +73,8 @@ UCLIBC_TARGET_ENDIAN:=$(shell $(SHELL) -c "echo $(ARCH) | sed \
 		-e 's/arm/LITTLE/' \
 		-e 's/mipsel/LITTLE/' \
 		-e 's/mips/BIG/' \
+		-e 's/sh[234].*eb/BIG/' \
+		-e 's/sh[234]/LITTLE/' \
 ")
 
 ifneq ($(UCLIBC_TARGET_ENDIAN),LITTLE)
@@ -142,6 +144,38 @@ endif
 ifeq ($(BR2_ARM_OABI),y)
 	/bin/echo "CONFIG_ARM_OABI=y" >> $(UCLIBC_DIR)/.oldconfig
 	/bin/echo "# CONFIG_ARM_EABI is not set" >> $(UCLIBC_DIR)/.oldconfig
+endif
+endif
+ifeq ($(UCLIBC_TARGET_ARCH),sh)
+	/bin/echo "# CONFIG_SH2A is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# CONFIG_SH2 is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# CONFIG_SH3 is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# CONFIG_SH4 is not set" >> $(UCLIBC_DIR)/.oldconfig
+ifeq ($(BR2_sh2a_nofpueb),y)
+	$(SED) 's,# CONFIG_SH2A is not set,CONFIG_SH2A=y,g' $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# UCLIBC_FORMAT_FDPIC_ELF is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# UCLIBC_FORMAT_FLAT is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# UCLIBC_FORMAT_FLAT_SEP_DATA is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# UCLIBC_FORMAT_SHARED_FLAT is not set" >> $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_sh2eb),y)
+	$(SED) 's,# CONFIG_SH2 is not set,CONFIG_SH2=y,g' $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# UCLIBC_FORMAT_FDPIC_ELF is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# UCLIBC_FORMAT_FLAT is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# UCLIBC_FORMAT_FLAT_SEP_DATA is not set" >> $(UCLIBC_DIR)/.oldconfig
+	/bin/echo "# UCLIBC_FORMAT_SHARED_FLAT is not set" >> $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_sh3eb),y)
+	$(SED) 's,# CONFIG_SH3 is not set,CONFIG_SH3=y,g' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_sh3),y)
+	$(SED) 's,# CONFIG_SH3 is not set,CONFIG_SH3=y,g' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_sh4eb),y)
+	$(SED) 's,# CONFIG_SH4 is not set,CONFIG_SH4=y,g' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_sh4),y)
+	$(SED) 's,# CONFIG_SH4 is not set,CONFIG_SH4=y,g' $(UCLIBC_DIR)/.oldconfig
 endif
 endif
 ifneq ($(UCLIBC_TARGET_ENDIAN),)
@@ -266,7 +300,7 @@ ifeq ($(BR2_x86_i686),y)
 endif
 endif
 
-$(UCLIBC_DIR)/.config:	$(UCLIBC_DIR)/.oldconfig
+$(UCLIBC_DIR)/.config: $(UCLIBC_DIR)/.oldconfig
 	cp -f $(UCLIBC_DIR)/.oldconfig $(UCLIBC_DIR)/.config
 	mkdir -p $(TOOL_BUILD_DIR)/uClibc_dev/usr/include
 	mkdir -p $(TOOL_BUILD_DIR)/uClibc_dev/usr/lib
@@ -279,28 +313,31 @@ $(UCLIBC_DIR)/.config:	$(UCLIBC_DIR)/.oldconfig
 		oldconfig
 	touch $@
 
-$(UCLIBC_DIR)/.configured: $(UCLIBC_DIR)/.config
+$(UCLIBC_DIR)/.configured: $(LINUX_HEADERS_DIR)/.configured $(UCLIBC_DIR)/.config
 	set -x && $(MAKE1) -C $(UCLIBC_DIR) \
 		PREFIX=$(TOOL_BUILD_DIR)/uClibc_dev/ \
 		DEVEL_PREFIX=/usr/ \
 		RUNTIME_PREFIX=$(TOOL_BUILD_DIR)/uClibc_dev/ \
 		HOSTCC="$(HOSTCC)" \
 		pregen install_dev
-	# Install the kernel headers to the first stage gcc include dir if necessary
+	# Install the kernel headers to the first stage gcc include dir
+	# if necessary
 ifeq ($(LINUX_HEADERS_IS_KERNEL),y)
-	if [ ! -f $(TOOL_BUILD_DIR)/uClibc_dev/usr/include/linux/version.h ] ; \
-	then \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/* $(TOOL_BUILD_DIR)/uClibc_dev/usr/include/ ; \
+	if [ ! -f $(TOOL_BUILD_DIR)/uClibc_dev/usr/include/linux/version.h ]; then \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/* \
+			$(TOOL_BUILD_DIR)/uClibc_dev/usr/include/; \
 	fi
 else
-	if [ ! -f $(STAGING_DIR)/usr/include/linux/version.h ] ; then \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/asm $(TOOL_BUILD_DIR)/uClibc_dev/usr/include/ ; \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/linux $(TOOL_BUILD_DIR)/uClibc_dev/usr/include/ ; \
-		if [ -d $(LINUX_HEADERS_DIR)/include/asm-generic ] ; then \
+	if [ ! -f $(STAGING_DIR)/usr/include/linux/version.h ]; then \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/asm \
+			$(TOOL_BUILD_DIR)/uClibc_dev/usr/include/; \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/linux \
+			$(TOOL_BUILD_DIR)/uClibc_dev/usr/include/; \
+		if [ -d $(LINUX_HEADERS_DIR)/include/asm-generic ]; then \
 			cp -pLR $(LINUX_HEADERS_DIR)/include/asm-generic \
-				$(TOOL_BUILD_DIR)/uClibc_dev/usr/include/ ; \
+				$(TOOL_BUILD_DIR)/uClibc_dev/usr/include/; \
 		fi; \
-	fi;
+	fi
 endif
 	touch $@
 
@@ -340,21 +377,24 @@ else
 endif
 	# Install the kernel headers to the staging dir if necessary
 ifeq ($(LINUX_HEADERS_IS_KERNEL),y)
-	if [ ! -f $(STAGING_DIR)/usr/include/linux/version.h ] ; then \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/* $(STAGING_DIR)/usr/include/ ; \
+	if [ ! -f $(STAGING_DIR)/usr/include/linux/version.h ]; then \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/* \
+			$(STAGING_DIR)/usr/include/; \
 	fi
 else
 
-	if [ ! -f $(STAGING_DIR)/usr/include/linux/version.h ] ; then \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/asm $(STAGING_DIR)/usr/include/ ; \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/linux $(STAGING_DIR)/usr/include/ ; \
-		if [ -d $(LINUX_HEADERS_DIR)/include/asm-generic ] ; then \
+	if [ ! -f $(STAGING_DIR)/usr/include/linux/version.h ]; then \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/asm \
+			$(STAGING_DIR)/usr/include/; \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/linux \
+			$(STAGING_DIR)/usr/include/; \
+		if [ -d $(LINUX_HEADERS_DIR)/include/asm-generic ]; then \
 			cp -pLR $(LINUX_HEADERS_DIR)/include/asm-generic \
-				$(STAGING_DIR)/usr/include/ ; \
+				$(STAGING_DIR)/usr/include/; \
 		fi; \
-	fi;
+	fi
 endif
-	# Build the host utils.  Need to add an install target...
+	# Build the host utils. Need to add an install target...
 	$(MAKE1) -C $(UCLIBC_DIR)/utils \
 		PREFIX=$(STAGING_DIR) \
 		HOSTCC="$(HOSTCC)" \
@@ -425,19 +465,21 @@ $(TARGET_DIR)/usr/lib/libc.a: $(STAGING_DIR)/usr/lib/libc.a
 		install_dev
 	# Install the kernel headers to the target dir if necessary
 ifeq ($(LINUX_HEADERS_IS_KERNEL),y)
-	if [ ! -f $(TARGET_DIR)/usr/include/linux/version.h ] ; \
-	then \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/* $(TARGET_DIR)/usr/include/ ; \
+	if [ ! -f $(TARGET_DIR)/usr/include/linux/version.h ]; then \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/* \
+			$(TARGET_DIR)/usr/include/; \
 	fi
 else
-	if [ ! -f $(TARGET_DIR)/usr/include/linux/version.h ] ; then \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/asm $(TARGET_DIR)/usr/include/ ; \
-		cp -pLR $(LINUX_HEADERS_DIR)/include/linux $(TARGET_DIR)/usr/include/ ; \
-		if [ -d $(LINUX_HEADERS_DIR)/include/asm-generic ] ; then \
+	if [ ! -f $(TARGET_DIR)/usr/include/linux/version.h ]; then \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/asm \
+			$(TARGET_DIR)/usr/include/; \
+		cp -pLR $(LINUX_HEADERS_DIR)/include/linux \
+			$(TARGET_DIR)/usr/include/; \
+		if [ -d $(LINUX_HEADERS_DIR)/include/asm-generic ]; then \
 			cp -pLR $(LINUX_HEADERS_DIR)/include/asm-generic \
-				$(TARGET_DIR)/usr/include/ ; \
+				$(TARGET_DIR)/usr/include/; \
 		fi; \
-	fi;
+	fi
 endif
 	touch -c $@
 

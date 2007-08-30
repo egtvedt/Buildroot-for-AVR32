@@ -19,6 +19,7 @@ diffutils-source: $(DL_DIR)/$(DIFFUTILS_SOURCE)
 
 $(DIFFUTILS_DIR)/.unpacked: $(DL_DIR)/$(DIFFUTILS_SOURCE)
 	$(DIFFUTILS_CAT) $(DL_DIR)/$(DIFFUTILS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(CONFIG_UPDATE) $(DIFFUTILS_DIR)/config
 	touch $(DIFFUTILS_DIR)/.unpacked
 
 $(DIFFUTILS_DIR)/.configured: $(DIFFUTILS_DIR)/.unpacked
@@ -95,7 +96,7 @@ $(DIFFUTILS_DIR)/.configured: $(DIFFUTILS_DIR)/.unpacked
 		--infodir=/usr/info \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
+	)
 	touch $(DIFFUTILS_DIR)/.configured
 
 $(DIFFUTILS_DIR)/$(DIFFUTILS_BINARY): $(DIFFUTILS_DIR)/.configured
@@ -107,6 +108,8 @@ $(TARGET_DIR)/$(DIFFUTILS_TARGET_BINARY): $(DIFFUTILS_DIR)/$(DIFFUTILS_BINARY)
 		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
 
 diffutils: uclibc $(TARGET_DIR)/$(DIFFUTILS_TARGET_BINARY)
+
+diff-utils-unpacked: $(DIFFUTILS_DIR)/.unpacked
 
 diffutils-clean:
 	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(DIFFUTILS_DIR) uninstall

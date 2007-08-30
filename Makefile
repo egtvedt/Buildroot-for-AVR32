@@ -28,14 +28,17 @@ CONFIG = package/config
 DATE:=$(shell date -u +%Y%m%d)
 
 noconfig_targets := menuconfig config oldconfig randconfig \
-	defconfig allyesconfig allnoconfig release tags    \
+	defconfig allyesconfig allnoconfig release tags \
 	source-check help
 
-#	$(shell find . -name *_defconfig |sed 's/.*\///')
+# $(shell find . -name *_defconfig |sed 's/.*\///')
 
 # Pull in the user's configuration file
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
 -include $(TOPDIR).config
+endif
+ifneq ($(BUILDROOT_DL_DIR),)
+BR2_DL_DIR:=$(BUILDROOT_DL_DIR)
 endif
 
 # To put more focus on warnings, be less verbose as default
@@ -82,12 +85,12 @@ endif
 ifndef HOSTLN
 HOSTLN:=ln
 endif
-HOSTAR :=$(shell $(CONFIG_SHELL) -c "which $(HOSTAR)"  || type -p $(HOSTAR)  || echo ar)
-HOSTAS :=$(shell $(CONFIG_SHELL) -c "which $(HOSTAS)"  || type -p $(HOSTAS)  || echo as)
-HOSTCC :=$(shell $(CONFIG_SHELL) -c "which $(HOSTCC)"  || type -p $(HOSTCC)  || echo gcc)
+HOSTAR :=$(shell $(CONFIG_SHELL) -c "which $(HOSTAR)" || type -p $(HOSTAR) || echo ar)
+HOSTAS :=$(shell $(CONFIG_SHELL) -c "which $(HOSTAS)" || type -p $(HOSTAS) || echo as)
+HOSTCC :=$(shell $(CONFIG_SHELL) -c "which $(HOSTCC)" || type -p $(HOSTCC) || echo gcc)
 HOSTCXX:=$(shell $(CONFIG_SHELL) -c "which $(HOSTCXX)" || type -p $(HOSTCXX) || echo g++)
-HOSTLD :=$(shell $(CONFIG_SHELL) -c "which $(HOSTLD)"  || type -p $(HOSTLD)  || echo ld)
-HOSTLN :=$(shell $(CONFIG_SHELL) -c "which $(HOSTLN)"  || type -p $(HOSTLN)  || echo ln)
+HOSTLD :=$(shell $(CONFIG_SHELL) -c "which $(HOSTLD)" || type -p $(HOSTLD) || echo ld)
+HOSTLN :=$(shell $(CONFIG_SHELL) -c "which $(HOSTLN)" || type -p $(HOSTLN) || echo ln)
 ifndef CFLAGS_FOR_BUILD
 CFLAGS_FOR_BUILD:=-g -O2
 endif
@@ -147,8 +150,6 @@ LIBTGTEXT=.so
 endif
 PREFERRED_LIB_FLAGS:=--enable-static --enable-shared
 
-BR2_DEPENDS_DIR=$(BASE_DIR)/package/config/buildroot-config/
-
 ##############################################################
 #
 # The list of stuff to build for the target toolchain
@@ -162,7 +163,11 @@ BASE_TARGETS:=uclibc
 endif
 TARGETS:=
 
+# setup uor pathes
 include project/Makefile.in
+
+BR2_DEPENDS_DIR=$(PROJECT_BUILD_DIR)/buildroot-config
+
 include toolchain/Makefile.in
 include package/Makefile.in
 
@@ -173,7 +178,7 @@ include package/Makefile.in
 #
 #############################################################
 
-all:   world
+all: world
 
 # In this section, we need .config
 include .config.cmd
@@ -208,7 +213,12 @@ TARGETS_DIRCLEAN:=$(patsubst %,%-dirclean,$(TARGETS))
 # all targets depend on the crosscompiler and it's prerequisites
 $(TARGETS): $(BASE_TARGETS)
 
+$(BR2_DEPENDS_DIR): .config
+	rm -rf $@
+	cp -dpRf $(CONFIG)/buildroot-config $@
+
 dirs: $(DL_DIR) $(TOOL_BUILD_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
+	$(BR2_DEPENDS_DIR) \
 	$(BINARIES_DIR) $(PROJECT_BUILD_DIR)
 
 $(BASE_TARGETS): dirs
@@ -220,6 +230,7 @@ world: dependencies dirs target-host-info $(BASE_TARGETS) $(TARGETS)
 	$(BASE_TARGETS) $(TARGETS) \
 	$(TARGETS_CLEAN) $(TARGETS_DIRCLEAN) $(TARGETS_SOURCE) \
 	$(DL_DIR) $(TOOL_BUILD_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
+	$(BR2_DEPENDS_DIR) \
 	$(BINARIES_DIR) $(PROJECT_BUILD_DIR)
 
 #############################################################
@@ -246,25 +257,25 @@ endif
 	@mkdir -p $(STAGING_DIR)/usr/include
 
 $(PROJECT_BUILD_DIR)/.root:
-	mkdir	$(TARGET_DIR)
-	if ! [ -d "$(TARGET_DIR)/bin" ] ; then \
-		if [ -d "$(TARGET_SKELETON)" ] ; then \
-			cp -fa $(TARGET_SKELETON)/* $(TARGET_DIR)/; \
+	mkdir -p $(TARGET_DIR)
+	if ! [ -d "$(TARGET_DIR)/bin" ]; then \
+		if [ -d "$(TARGET_SKELETON)" ]; then \
+			cp -fa $(TARGET_SKELETON)/* $(TARGET_DIR)/ ; \
 		fi; \
 		touch $(STAGING_DIR)/.fakeroot.00000 ; \
-		-find $(TARGET_DIR) -type d -name CVS | xargs rm -rf ; \
-		-find $(TARGET_DIR) -type d -name .svn | xargs rm -rf ; \
-	fi;
-	touch	$@
+	fi
+	-find $(TARGET_DIR) -type d -name CVS | xargs rm -rf
+	-find $(TARGET_DIR) -type d -name .svn | xargs rm -rf
+	touch $@
 
-$(TARGET_DIR):	$(PROJECT_BUILD_DIR)/.root
+$(TARGET_DIR): $(PROJECT_BUILD_DIR)/.root
 
 erase-fakeroots:
-	rm -f $(STAGING_DIR)/.fakeroot*
+	rm -f $(PROJECT_BUILD_DIR)/.fakeroot*
 
 source: $(TARGETS_SOURCE) $(HOST_SOURCE)
 
-_source-check: 
+_source-check:
 	$(MAKE) SPIDER=--spider source
 
 #############################################################
@@ -282,13 +293,13 @@ distclean:
 ifeq ($(DL_DIR),$(BASE_DIR)/dl)
 	rm -rf $(DL_DIR)
 endif
-	rm -rf $(BUILD_DIR) $(PROJECT_BUILD_DIR)  $(BINARIES_DIR) \
+	rm -rf $(BUILD_DIR) $(PROJECT_BUILD_DIR) $(BINARIES_DIR) \
 	$(LINUX_KERNEL) $(IMAGE) $(BASE_DIR)/include \
 		.config.cmd
 	$(MAKE) -C $(CONFIG) clean
 
 sourceball:
-	rm -rf $(BUILD_DIR) $(PROJECT_BUILD_DIR)  $(BINARIES_DIR)
+	rm -rf $(BUILD_DIR) $(PROJECT_BUILD_DIR) $(BINARIES_DIR)
 	set -e; \
 	cd ..; \
 	rm -f buildroot.tar.bz2; \
@@ -307,18 +318,20 @@ HOSTCFLAGS=$(CFLAGS_FOR_BUILD)
 export HOSTCFLAGS
 
 $(CONFIG)/conf:
+	@mkdir -p $(CONFIG)/buildroot-config
 	$(MAKE) CC="$(HOSTCC)" -C $(CONFIG) conf
 	-@if [ ! -f .config ] ; then \
 		cp $(CONFIG_DEFCONFIG) .config; \
 	fi
 $(CONFIG)/mconf:
+	@mkdir -p $(CONFIG)/buildroot-config
 	$(MAKE) CC="$(HOSTCC)" -C $(CONFIG) conf mconf
 	-@if [ ! -f .config ] ; then \
 		cp $(CONFIG_DEFCONFIG) .config; \
 	fi
 
 menuconfig: $(CONFIG)/mconf
-	@-mkdir -p $(CONFIG)/buildroot-config
+	@mkdir -p $(CONFIG)/buildroot-config
 	@if ! KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
 		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/mconf $(CONFIG_CONFIG_IN); then \
@@ -326,44 +339,44 @@ menuconfig: $(CONFIG)/mconf
 	fi
 
 config: $(CONFIG)/conf
-	@-mkdir -p $(CONFIG)/buildroot-config
+	@mkdir -p $(CONFIG)/buildroot-config
 	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
 		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf $(CONFIG_CONFIG_IN)
 
 oldconfig: $(CONFIG)/conf
-	@-mkdir -p $(CONFIG)/buildroot-config
+	@mkdir -p $(CONFIG)/buildroot-config
 	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
 		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -o $(CONFIG_CONFIG_IN)
 
 randconfig: $(CONFIG)/conf
-	@-mkdir -p $(CONFIG)/buildroot-config
+	@mkdir -p $(CONFIG)/buildroot-config
 	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
 		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -r $(CONFIG_CONFIG_IN)
 
 allyesconfig: $(CONFIG)/conf
 	cat $(CONFIG_DEFCONFIG) > .config
-	@-mkdir -p $(CONFIG)/buildroot-config
+	@mkdir -p $(CONFIG)/buildroot-config
 	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
 		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -y $(CONFIG_CONFIG_IN)
 	#sed -i -e "s/^CONFIG_DEBUG.*/# CONFIG_DEBUG is not set/" .config
 
 allnoconfig: $(CONFIG)/conf
-	@-mkdir -p $(CONFIG)/buildroot-config
+	@mkdir -p $(CONFIG)/buildroot-config
 	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
 		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -n $(CONFIG_CONFIG_IN)
 
 defconfig: $(CONFIG)/conf
-	@-mkdir -p $(CONFIG)/buildroot-config
+	@mkdir -p $(CONFIG)/buildroot-config
 	@KCONFIG_AUTOCONFIG=$(CONFIG)/buildroot-config/auto.conf \
 		KCONFIG_AUTOHEADER=$(CONFIG)/buildroot-config/autoconf.h \
 		$(CONFIG)/conf -d $(CONFIG_CONFIG_IN)
 
-# check if download URLs are outdated 
+# check if download URLs are outdated
 source-check: allyesconfig
 	$(MAKE) _source-check
 
@@ -399,7 +412,9 @@ help:
 	@echo
 	@echo 'Miscellaneous:'
 	@echo '  source                 - download all sources needed for offline-build'
-	@echo '  source-check           - check all packages for valid download URLS'
+	@echo '  source-check           - check all packages for valid download URLs'
+	@echo
+	@echo 'See docs/README and docs/buildroot.html for further details'
 	@echo
 
 .PHONY: dummy subdirs release distclean clean config oldconfig \

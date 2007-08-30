@@ -48,7 +48,7 @@ $(SQLITE_DIR)/.configured: $(SQLITE_DIR)/.unpacked
 		--enable-tempstore \
 		--enable-threadsafe \
 		--enable-releasemode \
-	);
+	)
 	touch $(SQLITE_DIR)/.configured
 
 $(SQLITE_DIR)/sqlite3: $(SQLITE_DIR)/.configured
@@ -60,16 +60,16 @@ $(STAGING_DIR)/usr/bin/sqlite3: $(SQLITE_DIR)/sqlite3
 $(TARGET_DIR)/usr/bin/sqlite3: $(STAGING_DIR)/usr/bin/sqlite3
 	cp -a $(STAGING_DIR)/usr/bin/sqlite3 $(TARGET_DIR)/usr/bin
 	cp -a $(STAGING_DIR)/lib/libsqlite3*.so* $(TARGET_DIR)/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libsqlite3.so*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libsqlite3.so*
 
-sqlite:	uclibc readline-target ncurses $(TARGET_DIR)/usr/bin/sqlite3
+sqlite: uclibc readline-target ncurses $(TARGET_DIR)/usr/bin/sqlite3
 
 sqlite-source: $(DL_DIR)/$(SQLITE_SOURCE)
 
 sqlite-clean:
-	@if [ -d $(SQLITE_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(SQLITE_DIR) clean ; \
-	fi;
+	@if [ -d $(SQLITE_DIR)/Makefile ]; then \
+		$(MAKE) -C $(SQLITE_DIR) clean; \
+	fi
 
 sqlite-dirclean:
 	rm -rf $(SQLITE_DIR)

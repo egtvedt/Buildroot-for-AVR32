@@ -40,8 +40,8 @@ $(LIBGPG_ERROR_DIR)/.configured: $(LIBGPG_ERROR_DIR)/.source
 			--includedir=/include \
 			--mandir=/usr/man \
 			--infodir=/usr/info \
-	);
-	touch $(LIBGPG_ERROR_DIR)/.configured;
+	)
+	touch $(LIBGPG_ERROR_DIR)/.configured
 
 $(LIBGPG_ERROR_DIR)/$(LIBGPG_ERROR_LIBRARY): $(LIBGPG_ERROR_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(LIBGPG_ERROR_DIR)
@@ -51,9 +51,9 @@ $(STAGING_DIR)/$(LIBGPG_ERROR_TARGET_LIBRARY): $(LIBGPG_ERROR_DIR)/$(LIBGPG_ERRO
 
 
 $(TARGET_DIR)/$(LIBGPG_ERROR_TARGET_LIBRARY): $(STAGING_DIR)/$(LIBGPG_ERROR_TARGET_LIBRARY)
-	cp -dpf $<* $(TARGET_DIR)/$(LIBGPG_ERROR_DESTDIR)	
+	cp -dpf $<* $(TARGET_DIR)/$(LIBGPG_ERROR_DESTDIR)
 
-libgpg-error: uclibc $(TARGET_DIR)/$(LIBGPG_ERROR_TARGET_LIBRARY) 
+libgpg-error: uclibc $(TARGET_DIR)/$(LIBGPG_ERROR_TARGET_LIBRARY)
 
 libgpg-error-source: $(DL_DIR)/$(LIBGPG_ERROR_SOURCE)
 
@@ -64,7 +64,7 @@ libgpg-error-clean:
 libgpg-error-dirclean:
 	rm -rf $(LIBGPG_ERROR_DIR)
 
-.PHONY:	libgpg-error
+.PHONY: libgpg-error
 #############################################################
 #
 # Toplevel Makefile options

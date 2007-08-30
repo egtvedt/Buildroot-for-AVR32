@@ -20,7 +20,7 @@ $(DL_DIR)/$(NCFTP_SOURCE):
 	$(WGET) -P $(DL_DIR) $(NCFTP_SITE)/$(NCFTP_SOURCE)
 
 $(NCFTP_DIR)/.source: $(DL_DIR)/$(NCFTP_SOURCE)
-	bzcat $(DL_DIR)/$(NCFTP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(BZCAT) $(DL_DIR)/$(NCFTP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	touch $@
 
 $(NCFTP_DIR)/.configured: $(NCFTP_DIR)/.source
@@ -33,7 +33,7 @@ $(NCFTP_DIR)/.configured: $(NCFTP_DIR)/.source
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--sysconfdir=/etc \
-	);
+	)
 	touch $@
 
 $(NCFTP_DIR)/bin/%: $(NCFTP_DIR)/.configured
@@ -41,7 +41,7 @@ $(NCFTP_DIR)/bin/%: $(NCFTP_DIR)/.configured
 
 $(TARGET_DIR)/usr/bin/ncftp $(TARGET_DIR)/usr/bin/ncftp%: $(addprefix $(NCFTP_DIR)/bin/, $(NCFTP_TARGET_BINS))
 	$(INSTALL) -m 0755 $(NCFTP_DIR)/bin/$(notdir $@) $(TARGET_DIR)/usr/bin
-	$(STRIP) -s $@
+	$(STRIP) $(STRIP_STRIP_ALL) $@
 
 ncftp: uclibc $(addprefix $(TARGET_DIR)/usr/bin/, $(NCFTP_TARGET_BINS))
 

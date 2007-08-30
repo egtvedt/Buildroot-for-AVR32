@@ -37,7 +37,7 @@ $(LIBUNGIF_DIR)/.configured: $(LIBUNGIF_DIR)/.unpacked
 		--enable-static \
 		--prefix=/usr \
 		--without-x \
-	);
+	)
 	touch $@
 
 $(LIBUNGIF_DIR)/lib/.libs/libungif.a: $(LIBUNGIF_DIR)/.configured
@@ -49,7 +49,7 @@ $(STAGING_DIR)/usr/lib/libungif.a: $(LIBUNGIF_DIR)/lib/.libs/libungif.a
 
 $(TARGET_DIR)/$(LIBUNGIF_TARGET_BINARY): $(STAGING_DIR)/usr/lib/libungif.a
 	cp -dpf $(STAGING_DIR)/$(LIBUNGIF_TARGET_BINARY)* $(TARGET_DIR)/usr/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/$(LIBUNGIF_TARGET_BINARY)*
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/$(LIBUNGIF_TARGET_BINARY)*
 
 libungif: uclibc $(TARGET_DIR)/$(LIBUNGIF_TARGET_BINARY)
 

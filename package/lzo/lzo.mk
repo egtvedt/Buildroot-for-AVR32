@@ -3,7 +3,7 @@
 # lzo
 #
 # Note: this builds only a static library, it does not provide
-#       anything to be installed into the target system.
+# anything to be installed into the target system.
 #
 #############################################################
 LZO_VERSION:=1.08
@@ -40,7 +40,7 @@ $(LZO_DIR)/.configured: $(LZO_DIR)/.unpacked
 		--includedir=/usr/include \
 		--libdir=/usr/lib \
 		$(LZO_CONFIG_SHARED) \
-	);
+	)
 	touch $@
 
 $(LZO_DIR)/src/liblzo.la: $(LZO_DIR)/.configured

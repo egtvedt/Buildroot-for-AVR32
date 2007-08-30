@@ -1,27 +1,13 @@
-ifndef	MAKE
+ifndef MAKE
 MAKE:=make
 endif
 ifndef HOSTMAKE
 HOSTMAKE=$(MAKE)
 endif
-HOSTMAKE :=$(shell $(CONFIG_SHELL) -c "which $(HOSTMAKE)"  || type -p $(HOSTMAKE)  || echo make)
+HOSTMAKE :=$(shell $(CONFIG_SHELL) -c "which $(HOSTMAKE)" || type -p $(HOSTMAKE) || echo make)
 
 MAKE1:=$(HOSTMAKE) MAKE="$(firstword $(HOSTMAKE)) -j1"
 MAKE:=$(HOSTMAKE) -j$(BR2_JLEVEL)
-
-# Strip off the annoying quoting
-ARCH:=$(strip $(subst ",, $(BR2_ARCH)))
-#"))
-WGET:=$(strip $(subst ",, $(BR2_WGET))) $(SPIDER)
-#"))
-SVN:=$(strip $(subst ",, $(BR2_SVN)))
-#"))
-ZCAT:=$(strip $(subst ",, $(BR2_ZCAT)))
-#"))
-BZCAT:=$(strip $(subst ",, $(BR2_BZCAT)))
-#"))
-TAR_OPTIONS=$(subst ",, $(BR2_TAR_OPTIONS)) -xf
-#")
 
 
 ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
@@ -72,40 +58,6 @@ endif
 #########################################################################
 
 
-BASE_DIR:=$(shell pwd)
-
-TOPDIR_PREFIX:=$(strip $(subst ",, $(BR2_TOPDIR_PREFIX)))_
-#"))
-TOPDIR_SUFFIX:=_$(strip $(subst ",, $(BR2_TOPDIR_SUFFIX)))
-#"))
-ifeq ($(TOPDIR_PREFIX),_)
-TOPDIR_PREFIX:=
-endif
-ifeq ($(TOPDIR_SUFFIX),_)
-TOPDIR_SUFFIX:=
-endif
-
-DL_DIR=$(strip $(subst ",, $(BR2_DL_DIR)))
-#"))
-ifeq ($(DL_DIR),)
-DL_DIR:=$(BASE_DIR)/dl
-endif
-#PATCH_DIR=$(BASE_DIR)/sources/patches
-
-# All non-configurable packages should be built in BUILD_DIR
-BUILD_DIR:=$(BASE_DIR)/$(TOPDIR_PREFIX)build_$(ARCH)$(ARCH_FPU_SUFFIX)$(TOPDIR_SUFFIX)
-
-# All configurable packages (like Busybox,Linux etc) should be built in PROJECT_BUILD_DIR
-PROJECT_BUILD_DIR:=$(BASE_DIR)/$(TOPDIR_PREFIX)project_build_$(ARCH)$(ARCH_FPU_SUFFIX)$(TOPDIR_SUFFIX)/$(PROJECT)
-BINARIES_DIR:=$(BASE_DIR)/binaries/$(PROJECT)
-TARGET_DIR:=$(PROJECT_BUILD_DIR)/root
-
-
-GNU_TARGET_SUFFIX:=-$(strip $(subst ",, $(BR2_GNU_TARGET_SUFFIX)))
-#"))
-
-STAGING_DIR:=$(strip $(subst ",, $(BR2_STAGING_DIR)))
-#"))
 ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
 TOOL_BUILD_DIR=$(BASE_DIR)/$(TOPDIR_PREFIX)toolchain_build_$(ARCH)$(ARCH_FPU_SUFFIX)$(TOPDIR_SUFFIX)
 
@@ -138,9 +90,19 @@ TARGET_LDCONFIG=$(TARGET_CROSS)ldconfig
 INSTALL=/usr/bin/install
 ifeq ($(BR2_STRIP_strip),y)
 STRIP=$(TARGET_CROSS)strip --remove-section=.comment --remove-section=.note
+STRIP_DISCARD_ALL:=--discard-all
+STRIP_STRIP_UNNEEDED:=--strip-unneeded
+STRIP_STRIP_ALL:=--strip-all
+REMOVE_SECTION_COMMENT:=--remove-section=.comment
+REMOVE_SECTION_NOTE:=--remove-section=.note
 endif
 ifeq ($(BR2_STRIP_sstrip),y)
 STRIP=$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-sstrip
+STRIP_DISCARD_ALL:=
+STRIP_STRIP_UNNEEDED:=
+STRIP_STRIP_ALL:=
+REMOVE_SECTION_COMMENT:=
+REMOVE_SECTION_NOTE:=
 endif
 ifeq ($(BR2_STRIP_none),y)
 STRIP=true -Not_stripping
@@ -197,6 +159,12 @@ HOST_CONFIGURE_OPTS=PATH=$(TARGET_PATH) \
 		CFLAGS_FOR_BUILD="$(HOST_CFLAGS)" \
 		CXXFLAGS_FOR_BUILD="$(HOST_CXXFLAGS)" \
 		LDFLAGS_FOR_BUILD="$(HOST_LDFLAGS)" \
+		AR="$(HOSTAR)" \
+		AS="$(HOSTAS)" \
+		CC="$(HOSTCC) $(HOST_CFLAGS)" \
+		GCC="$(HOSTCC) $(HOST_CFLAGS)" \
+		CXX="$(HOSTCXX)" \
+		LD="$(HOSTLD) $(HOST_LDFLAGS)" \
 		AR_FOR_TARGET=$(TARGET_CROSS)ar \
 		AS_FOR_TARGET=$(TARGET_CROSS)as \
 		LD_FOR_TARGET=$(TARGET_CROSS)ld \
@@ -272,6 +240,9 @@ endif
 ifeq ($(strip $(BR2_PACKAGE_XGGI)),y)
 XSERVER+=xggi
 endif
+
+X11_PREFIX:=$(strip $(subst ",, $(BR2_X11_PREFIX)))
+#"))
 
 include package/Makefile.autotools.in
 

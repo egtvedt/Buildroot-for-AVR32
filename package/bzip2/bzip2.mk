@@ -19,7 +19,7 @@ bzip2-source: $(DL_DIR)/$(BZIP2_SOURCE)
 $(BZIP2_DIR)/.unpacked: $(DL_DIR)/$(BZIP2_SOURCE)
 	$(BZIP2_CAT) $(DL_DIR)/$(BZIP2_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(SED) "s,ln \$$(,ln -snf \$$(,g" $(BZIP2_DIR)/Makefile
-	$(SED) "s,ln -s (lib.*),ln -snf \$$1 ; ln -snf libbz2.so.$(BZIP2_VERSION) \
+	$(SED) "s,ln -s (lib.*),ln -snf \$$1; ln -snf libbz2.so.$(BZIP2_VERSION) \
 	    libbz2.so,g" $(BZIP2_DIR)/Makefile-libbz2_so
 ifneq ($(BR2_LARGEFILE),y)
 	$(SED) "s,^BIGFILES,#BIGFILES,g" $(BZIP2_DIR)/Makefile
@@ -37,8 +37,8 @@ $(STAGING_DIR)/lib/libbz2.so.$(BZIP2_VERSION): $(BZIP2_DIR)/.unpacked
 	cp $(BZIP2_DIR)/bzlib.h $(STAGING_DIR)/usr/include/
 	cp $(BZIP2_DIR)/libbz2.so.$(BZIP2_VERSION) $(STAGING_DIR)/lib/
 	cp $(BZIP2_DIR)/libbz2.a $(STAGING_DIR)/usr/lib/
-	(cd $(STAGING_DIR)/usr/lib/ ; ln -snf ../../lib/libbz2.so.$(BZIP2_VERSION) libbz2.so)
-	(cd $(STAGING_DIR)/lib ; ln -snf libbz2.so.$(BZIP2_VERSION) libbz2.so.1.0; \
+	(cd $(STAGING_DIR)/usr/lib/; ln -snf ../../lib/libbz2.so.$(BZIP2_VERSION) libbz2.so)
+	(cd $(STAGING_DIR)/lib; ln -snf libbz2.so.$(BZIP2_VERSION) libbz2.so.1.0; \
 	 ln -snf libbz2.so.$(BZIP2_VERSION) libbz2.so.1)
 
 $(BZIP2_BINARY): $(STAGING_DIR)/lib/libbz2.so.$(BZIP2_VERSION)
@@ -48,7 +48,7 @@ $(BZIP2_BINARY): $(STAGING_DIR)/lib/libbz2.so.$(BZIP2_VERSION)
 
 $(BZIP2_TARGET_BINARY): $(BZIP2_BINARY)
 	(cd $(TARGET_DIR)/usr/bin; \
-	rm -f bzip2 bunzip2 bzcat bzip2recover bzgrep bzegrep bzfgrep bzmore bzless bzdiff bzcmp);
+	rm -f bzip2 bunzip2 bzcat bzip2recover bzgrep bzegrep bzfgrep bzmore bzless bzdiff bzcmp)
 	$(TARGET_CONFIGURE_OPTS) \
 	$(MAKE) PREFIX=$(TARGET_DIR)/usr -C $(BZIP2_DIR) install
 	rm -f $(TARGET_DIR)/usr/lib/libbz2.a
@@ -75,7 +75,7 @@ $(TARGET_DIR)/usr/lib/libbz2.a: $(STAGING_DIR)/lib/libbz2.a
 	(cd $(TARGET_DIR)/usr/lib; \
 		ln -fs /usr/lib/libbz2.so.1.0 libbz2.so; \
 	)
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libbz2.so.1.0
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libbz2.so.1.0
 	touch -c $@
 
 bzip2-headers: $(TARGET_DIR)/usr/lib/libbz2.a

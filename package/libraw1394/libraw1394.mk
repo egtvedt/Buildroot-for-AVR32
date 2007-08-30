@@ -17,7 +17,7 @@ $(LIBRAW1394_DIR)/.unpacked: $(DL_DIR)/$(LIBRAW1394_SOURCE)
 	touch $@
 
 $(LIBRAW1394_DIR)/.configured: $(LIBRAW1394_DIR)/.unpacked
-	(cd $(LIBRAW1394_DIR); rm -rf config.cache ; \
+	(cd $(LIBRAW1394_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
@@ -36,7 +36,7 @@ $(LIBRAW1394_DIR)/.configured: $(LIBRAW1394_DIR)/.unpacked
 		--includedir=/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-	);
+	)
 	touch $@
 
 $(LIBRAW1394_DIR)/.compiled: $(LIBRAW1394_DIR)/.configured

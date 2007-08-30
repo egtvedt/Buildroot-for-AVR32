@@ -110,7 +110,7 @@ $(CAIRO_DIR)/.configured: $(CAIRO_DIR)/.unpacked
 		--enable-freetype=yes \
 		--enable-xlib=yes \
 		--enable-xlib-xrender=yes \
-	);
+	)
 	touch $(CAIRO_DIR)/.configured
 
 $(CAIRO_DIR)/src/.libs/$(CAIRO_BINARY): $(CAIRO_DIR)/.configured
@@ -118,14 +118,14 @@ $(CAIRO_DIR)/src/.libs/$(CAIRO_BINARY): $(CAIRO_DIR)/.configured
 	touch -c $(CAIRO_DIR)/src/.libs/$(CAIRO_BINARY)
 
 $(STAGING_DIR)/lib/$(CAIRO_BINARY): $(CAIRO_DIR)/src/.libs/$(CAIRO_BINARY)
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(CAIRO_DIR) install;
+	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(CAIRO_DIR) install
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" $(STAGING_DIR)/lib/libcairo.la
 	touch -c $(STAGING_DIR)/lib/$(CAIRO_BINARY)
 
 $(TARGET_DIR)/lib/libcairo.so.2.9.3: $(STAGING_DIR)/lib/$(CAIRO_BINARY)
 	cp -a $(STAGING_DIR)/lib/libcairo.so $(TARGET_DIR)/lib/
 	cp -a $(STAGING_DIR)/lib/libcairo.so.2* $(TARGET_DIR)/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libcairo.so.2.*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libcairo.so.2.*
 	touch -c $(TARGET_DIR)/lib/libcairo.so.2.9.3
 
 cairo: uclibc gettext libintl pkgconfig libglib2 $(XSERVER) $(TARGET_DIR)/lib/libcairo.so.2.9.3

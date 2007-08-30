@@ -32,7 +32,7 @@ $(LIBID3TAG_DIR)/.configured: $(LIBID3TAG_DIR)/.unpacked
 		--prefix=/usr \
 		--sysconfdir=/etc \
 		$(DISABLE_NLS) \
-	);
+	)
 	touch $@
 
 $(LIBID3TAG_DIR)/src/.libs/$(LIBID3TAG_BIN): $(LIBID3TAG_DIR)/.configured
@@ -44,17 +44,17 @@ $(STAGING_DIR)/$(LIBID3TAG_TARGET_BIN): $(LIBID3TAG_DIR)/src/.libs/$(LIBID3TAG_B
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libid3tag.la
 
 $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN): $(STAGING_DIR)/$(LIBID3TAG_TARGET_BIN)
-	cp -dpf  $(STAGING_DIR)/usr/lib/libid3tag.so*  $(TARGET_DIR)/usr/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libid3tag.so*
+	cp -dpf $(STAGING_DIR)/usr/lib/libid3tag.so* $(TARGET_DIR)/usr/lib/
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libid3tag.so*
 
 libid3tag: uclibc libmad $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN)
 
 libid3tag-source: $(DL_DIR)/$(LIBID3TAG_SOURCE)
 
 libid3tag-clean:
-	@if [ -d $(LIBID3TAG_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(LIBID3TAG_DIR) clean ; \
-	fi;
+	@if [ -d $(LIBID3TAG_DIR)/Makefile ]; then \
+		$(MAKE) -C $(LIBID3TAG_DIR) clean; \
+	fi
 	rm -f $(STAGING_DIR)/$(LIBID3TAG_TARGET_BIN)
 	rm -f $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN)
 

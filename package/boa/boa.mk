@@ -18,7 +18,7 @@ BOA_WORKDIR=$(BUILD_DIR)/boa_workdir
 $(DL_DIR)/$(BOA_SOURCE):
 	$(WGET) -P $(DL_DIR) $(BOA_SITE)/$(BOA_SOURCE)
 
-$(BOA_DIR)/.unpacked:	$(DL_DIR)/$(BOA_SOURCE)
+$(BOA_DIR)/.unpacked: $(DL_DIR)/$(BOA_SOURCE)
 	$(BOA_CAT) $(DL_DIR)/$(BOA_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	touch $(BOA_DIR)/.unpacked
 
@@ -45,10 +45,10 @@ $(BOA_WORKDIR)/Makefile: $(BOA_DIR)/.unpacked
 		--mandir=/usr/man \
 		--infodir=/usr/info \
 		$(DISABLE_NLS) \
-	);
+	)
 	touch $(BOA_WORKDIR)/Makefile
 
-$(BOA_WORKDIR)/src/boa $(BOA_WORKDIR)/src/boa_indexer:	$(BOA_WORKDIR)/Makefile
+$(BOA_WORKDIR)/src/boa $(BOA_WORKDIR)/src/boa_indexer: $(BOA_WORKDIR)/Makefile
 	rm -f $@
 	$(MAKE) -C $(BOA_WORKDIR)
 
@@ -60,17 +60,17 @@ $(BOA_WORKDIR)/.installed: $(BOA_WORKDIR)/src/boa $(BOA_WORKDIR)/src/boa_indexer
 	mkdir -p $(TARGET_DIR)/etc/boa
 	cp -f package/boa/boa.conf $(TARGET_DIR)/etc/boa
 	cp -f package/boa/mime.types $(TARGET_DIR)/etc/mime.types
-	$(STRIP) --strip-all $(TARGET_DIR)/usr/sbin/boa $(TARGET_DIR)/usr/lib/boa/boa_indexer
+	$(STRIP) $(STRIP_STRIP_ALL) $(TARGET_DIR)/usr/sbin/boa $(TARGET_DIR)/usr/lib/boa/boa_indexer
 	touch $(BOA_WORKDIR)/.installed
 
-boa:	uclibc $(BOA_WORKDIR)/.installed
+boa: uclibc $(BOA_WORKDIR)/.installed
 
 boa-source: $(DL_DIR)/$(BOA_SOURCE)
 
 boa-clean:
-	@if [ -d $(BOA_WORKDIR)/Makefile ] ; then \
-		$(MAKE) -C $(BOA_WORKDIR) clean ; \
-	fi;
+	@if [ -d $(BOA_WORKDIR)/Makefile ]; then \
+		$(MAKE) -C $(BOA_WORKDIR) clean; \
+	fi
 
 boa-dirclean:
 	rm -rf $(BOA_DIR) $(BOA_WORKDIR)

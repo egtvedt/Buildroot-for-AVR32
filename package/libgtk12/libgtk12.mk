@@ -50,7 +50,7 @@ $(LIBGTK12_DIR)/.configured: $(LIBGTK12_DIR)/.unpacked
 		--disable-glibtest \
 		--disable-xim \
 		--enable-shared \
-	);
+	)
 	touch $(LIBGTK12_DIR)/.configured
 
 $(LIBGTK12_DIR)/gtk/.libs/$(LIBGTK12_BINARY): $(LIBGTK12_DIR)/.configured
@@ -72,7 +72,7 @@ $(STAGING_DIR)/lib/$(LIBGTK12_BINARY): $(LIBGTK12_DIR)/gtk/.libs/$(LIBGTK12_BINA
 	    oldincludedir=$(STAGING_DIR)/include \
 	    infodir=$(STAGING_DIR)/info \
 	    mandir=$(STAGING_DIR)/man \
-	    -C $(LIBGTK12_DIR) install;
+	    -C $(LIBGTK12_DIR) install
 	touch -c $(STAGING_DIR)/lib/$(LIBGTK12_BINARY)
 
 $(TARGET_DIR)/lib/libgtk-1.2.so.0.9.1: $(STAGING_DIR)/lib/$(LIBGTK12_BINARY)
@@ -82,8 +82,8 @@ $(TARGET_DIR)/lib/libgtk-1.2.so.0.9.1: $(STAGING_DIR)/lib/$(LIBGTK12_BINARY)
 	cp -a $(STAGING_DIR)/lib/libgdk.so $(TARGET_DIR)/lib/
 	cp -a $(STAGING_DIR)/lib/libgdk-1.2.so.0 $(TARGET_DIR)/lib/
 	cp -a $(STAGING_DIR)/lib/libgdk-1.2.so.0.9.1 $(TARGET_DIR)/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libgtk-1.2.so.0.9.1
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libgdk-1.2.so.0.9.1
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libgtk-1.2.so.0.9.1
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libgdk-1.2.so.0.9.1
 	touch -c $(TARGET_DIR)/lib/libgtk-1.2.so.0.9.1
 
 libgtk12: uclibc libglib12 $(XSERVER) $(TARGET_DIR)/lib/libgtk-1.2.so.0.9.1

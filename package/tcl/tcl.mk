@@ -30,15 +30,15 @@ $(TCL_DIR)/.configured: $(TCL_DIR)/.source
 		--disable-symbols \
 		--disable-langinfo \
 		--disable-framework \
-	);
-	touch $(TCL_DIR)/.configured;
+	)
+	touch $(TCL_DIR)/.configured
 
 $(TCL_DIR)/unix/libtcl8.4.so: $(TCL_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(TCL_DIR)/unix
 
 $(TARGET_DIR)/usr/lib/libtcl8.4.so: $(TCL_DIR)/unix/libtcl8.4.so
 	$(MAKE) INSTALL_ROOT=$(TARGET_DIR) -C $(TCL_DIR)/unix install
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libtcl8.4.so
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libtcl8.4.so
 	rm -Rf $(TARGET_DIR)/usr/man
 	-if [ "$(strip $(BR2_PACKAGE_TCL_DEL_ENCODINGS))" == "y" ]; then \
 	rm -Rf $(TARGET_DIR)/usr/lib/tcl8.4/encoding/*; \

@@ -30,7 +30,7 @@ $(NETCAT_DIR)/.configured: $(NETCAT_DIR)/.unpacked
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/ \
-	);
+	)
 	touch $@
 
 
@@ -39,7 +39,7 @@ $(NETCAT_DIR)/$(NETCAT_BINARY): $(NETCAT_DIR)/.configured
 
 $(TARGET_DIR)/$(NETCAT_TARGET_BINARY): $(NETCAT_DIR)/$(NETCAT_BINARY)
 	install -D $(NETCAT_DIR)/$(NETCAT_BINARY) $(TARGET_DIR)/$(NETCAT_TARGET_BINARY)
-	$(STRIP) -s $@
+	$(STRIP) $(STRIP_STRIP_ALL) $@
 
 netcat: uclibc $(TARGET_DIR)/$(NETCAT_TARGET_BINARY)
 

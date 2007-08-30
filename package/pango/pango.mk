@@ -111,7 +111,7 @@ $(PANGO_DIR)/.configured: $(PANGO_DIR)/.unpacked
 		--disable-glibtest \
 		--enable-explicit-deps=no \
 		--disable-debug \
-	);
+	)
 	touch $(PANGO_DIR)/.configured
 
 $(PANGO_DIR)/pango/.libs/$(PANGO_BINARY): $(PANGO_DIR)/.configured
@@ -119,7 +119,7 @@ $(PANGO_DIR)/pango/.libs/$(PANGO_BINARY): $(PANGO_DIR)/.configured
 	touch -c $(PANGO_DIR)/pango/.libs/$(PANGO_BINARY)
 
 $(STAGING_DIR)/lib/$(PANGO_BINARY): $(PANGO_DIR)/pango/.libs/$(PANGO_BINARY)
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(PANGO_DIR) install;
+	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(PANGO_DIR) install
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" $(STAGING_DIR)/lib/libpango-1.0.la
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" $(STAGING_DIR)/lib/libpangocairo-1.0.la
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/lib\',g" $(STAGING_DIR)/lib/libpangoft2-1.0.la
@@ -137,11 +137,11 @@ $(TARGET_DIR)/lib/libpango-1.0.so.0: $(STAGING_DIR)/lib/$(PANGO_BINARY)
 	cp -a $(STAGING_DIR)/lib/libpangoxft-1.0.so.0* $(TARGET_DIR)/lib/
 	cp -a $(STAGING_DIR)/lib/libpangocairo-1.0.so $(TARGET_DIR)/lib/
 	cp -a $(STAGING_DIR)/lib/libpangocairo-1.0.so.0* $(TARGET_DIR)/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libpango-1.0.so.0.*
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libpangox-1.0.so.0.*
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libpangoft2-1.0.so.0.*
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libpangoxft-1.0.so.0.*
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libpangocairo-1.0.so.0.*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libpango-1.0.so.0.*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libpangox-1.0.so.0.*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libpangoft2-1.0.so.0.*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libpangoxft-1.0.so.0.*
+	$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libpangocairo-1.0.so.0.*
 	mkdir -p $(TARGET_DIR)/lib/pango/1.5.0/modules
 	cp -a $(STAGING_DIR)/lib/pango/1.5.0/modules/*.so $(TARGET_DIR)/lib/pango/1.5.0/modules/
 	mkdir -p $(TARGET_DIR)/etc/pango

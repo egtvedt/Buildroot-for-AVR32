@@ -51,7 +51,7 @@ $(TIFF_DIR)/.configured: $(TIFF_DIR)/.unpacked
 		--with-jpeg-lib-dir=$(STAGING_DIR)/lib \
 		--with-zlib-include-dir=$(STAGING_DIR)/usr/include \
 		--with-zlib-lib-dir=$(STAGING_DIR)/lib \
-	);
+	)
 	touch $(TIFF_DIR)/.configured
 
 $(TIFF_DIR)/libtiff/.libs/libtiff.a: $(TIFF_DIR)/.configured
@@ -65,7 +65,7 @@ $(STAGING_DIR)/lib/libtiff.so.$(TIFF_VERSION): $(TIFF_DIR)/libtiff/.libs/libtiff
 
 $(TARGET_DIR)/lib/libtiff.so.$(TIFF_VERSION): $(STAGING_DIR)/lib/libtiff.so.$(TIFF_VERSION)
 	cp -dpf $(STAGING_DIR)/lib/libtiff.so* $(TARGET_DIR)/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libtiff.so.$(TIFF_VERSION)
+	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libtiff.so.$(TIFF_VERSION)
 
 tiff: uclibc zlib jpeg $(TARGET_DIR)/lib/libtiff.so.$(TIFF_VERSION)
 

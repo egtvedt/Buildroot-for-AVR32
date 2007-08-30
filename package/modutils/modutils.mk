@@ -39,8 +39,8 @@ $(MODUTILS_DIR1)/.configured: $(MODUTILS_DIR1)/.source
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/ \
 		--sysconfdir=/etc \
-	);
-	touch $(MODUTILS_DIR1)/.configured
+	)
+	touch $@
 
 $(MODUTILS_DIR1)/.build: $(MODUTILS_DIR1)/.configured
 	$(MAKE1) CC=$(TARGET_CC) -C $(MODUTILS_DIR1)
@@ -51,17 +51,15 @@ $(STAGING_DIR)/$(MODUTILS_TARGET_BINARY): $(MODUTILS_DIR1)/.build
 	$(MAKE) prefix=$(STAGING_DIR) -C $(MODUTILS_DIR1) install-bin
 	touch -c $@
 
-$(TARGET_DIR)/sbin/rmmod:	$(STAGING_DIR)/$(MODUTILS_TARGET_BINARY)
-	cp -dpf $(STAGING_DIR)/sbin/depmod	$(TARGET_DIR)/sbin/depmod
-	cp -dpf $(STAGING_DIR)/sbin/insmod	$(TARGET_DIR)/sbin/insmod
-	cp -dpf $(STAGING_DIR)/sbin/modinfo	$(TARGET_DIR)/sbin/modinfo
-	ln -s	insmod $(TARGET_DIR)/sbin/kallsyms
-	ln -s	insmod $(TARGET_DIR)/sbin/ksyms
-	ln -s	insmod $(TARGET_DIR)/sbin/lsmod
-	ln -s	insmod $(TARGET_DIR)/sbin/modprobe
-	ln -s	insmod $(TARGET_DIR)/sbin/rmmod
-
-
+$(TARGET_DIR)/sbin/rmmod: $(STAGING_DIR)/$(MODUTILS_TARGET_BINARY)
+	cp -dpf $(STAGING_DIR)/sbin/depmod $(TARGET_DIR)/sbin/depmod
+	cp -dpf $(STAGING_DIR)/sbin/insmod $(TARGET_DIR)/sbin/insmod
+	cp -dpf $(STAGING_DIR)/sbin/modinfo $(TARGET_DIR)/sbin/modinfo
+	ln -s insmod $(TARGET_DIR)/sbin/kallsyms
+	ln -s insmod $(TARGET_DIR)/sbin/ksyms
+	ln -s insmod $(TARGET_DIR)/sbin/lsmod
+	ln -s insmod $(TARGET_DIR)/sbin/modprobe
+	ln -s insmod $(TARGET_DIR)/sbin/rmmod
 
 modutils: uclibc $(TARGET_DIR)/sbin/rmmod
 
@@ -100,7 +98,7 @@ $(MODUTILS_DIR2)/.source: $(DL_DIR)/$(MODUTILS_SOURCE)
 	$(MODUTILS_CAT) $(DL_DIR)/$(MODUTILS_SOURCE) | tar -C $(TOOL_BUILD_DIR) -xvf -
 	toolchain/patch-kernel.sh $(MODUTILS_DIR2) \
 		package/modutils \*.patch
-	touch $(MODUTILS_DIR2)/.source
+	touch $@
 
 $(MODUTILS_DIR2)/.configured: $(MODUTILS_DIR2)/.source
 	(cd $(MODUTILS_DIR2); \
@@ -110,17 +108,17 @@ $(MODUTILS_DIR2)/.configured: $(MODUTILS_DIR2)/.source
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/ \
 		--sysconfdir=/etc \
-	);
-	touch $(MODUTILS_DIR2)/.configured;
+	)
+	touch $@
 
 $(MODUTILS_DIR2)/$(MODUTILS_BINARY): $(MODUTILS_DIR2)/.configured
 	$(MAKE1) -C $(MODUTILS_DIR2)
-	touch -c $(MODUTILS_DIR2)/$(MODUTILS_BINARY)
+	touch -c $@
 
 $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod: $(MODUTILS_DIR2)/$(MODUTILS_BINARY)
 	mkdir -p $(STAGING_DIR)/bin
 	cp $(MODUTILS_DIR2)/$(MODUTILS_BINARY) $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod
-	touch -c $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod
+	touch -c $@
 
 cross-depmod: uclibc $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod
 
