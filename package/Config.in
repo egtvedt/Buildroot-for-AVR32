@@ -31,6 +31,9 @@ source "package/sed/Config.in"
 source "package/tar/Config.in"
 endif
 
+comment "Documentation stuff"
+source "package/avr32-wiki-docs/Config.in"
+
 comment "Other development stuff"
 source "package/autoconf/Config.in"
 source "package/automake/Config.in"
