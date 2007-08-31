@@ -45,7 +45,7 @@ $(MPG123_DIR)/.configured: $(MPG123_DIR)/.unpacked
 	);
 	touch $@
 
-$(MPG123_DIR)/$(MPG123_BIN): $(MPG123_DIR)/.configured
+$(MPG123_DIR)/src/$(MPG123_BIN): $(MPG123_DIR)/.configured
 	$(MAKE) -C $(MPG123_DIR)
 
 $(TARGET_DIR)/$(MPG123_TARGET_BIN): $(MPG123_DIR)/src/$(MPG123_BIN)
