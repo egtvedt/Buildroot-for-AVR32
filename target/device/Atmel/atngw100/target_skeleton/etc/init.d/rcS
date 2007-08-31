@@ -1,7 +1,7 @@
 #!/bin/sh
 
 for s in /etc/init.d/S*; do
-	if [ -x $S ]; then
+	if [ -x $s ]; then
 		$s start
 	fi
 done
