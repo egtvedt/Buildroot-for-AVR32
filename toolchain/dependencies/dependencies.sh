@@ -176,6 +176,10 @@ COMPILER=$(which $HOSTCC 2> /dev/null)
 if [ -z "$COMPILER" ] ; then
 	COMPILER=$(which cc 2> /dev/null)
 fi;
+# If it is not executable, it does not work.
+if [ ! -x "$COMPILER" ] ; then
+	COMPILER=""
+fi
 if [ -z "$COMPILER" ] ; then
 	echo "C Compiler installed:		    FALSE"
 	/bin/echo -e "\n\nYou must install 'gcc' on your build machine\n";
@@ -202,6 +206,10 @@ echo "C compiler version '$COMPILER_VERSION':			Ok"
 CXXCOMPILER=$(which $HOSTCXX 2> /dev/null)
 if [ -z "$CXXCOMPILER" ] ; then
 	CXXCOMPILER=$(which c++ 2> /dev/null)
+fi
+# If it is not executable, it does not work.
+if [ ! -x "$CXXCOMPILER" ] ; then
+	CXXCOMPILER=""
 fi
 if [ -z "$CXXCOMPILER" ] ; then
 	echo "C++ Compiler installed:		    FALSE"
