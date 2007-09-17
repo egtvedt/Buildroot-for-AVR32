@@ -127,17 +127,17 @@ ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS),y)
 	echo "CONFIG_INITRAMFS_ROOT_GID=0" >> $(LINUX26_DIR)/.config
 endif
 	$(TARGET_CONFIGURE_OPTS) \
-	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) oldconfig
+		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) oldconfig
 	touch $@
 
 $(LINUX26_DIR)/.depend_done: $(LINUX26_DIR)/.configured
 	$(TARGET_CONFIGURE_OPTS) \
-	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) prepare
+		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) prepare
 	touch $@
 
 $(LINUX26_KERNEL): $(LINUX26_DIR)/.depend_done
 	$(TARGET_CONFIGURE_OPTS) \
-	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) $(LINUX26_FORMAT)
+		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR)
 	cp -dpf $(LINUX26_DIR)/$(LINUX26_BINLOC) $(LINUX26_KERNEL)
 	touch -c $@
 
@@ -149,21 +149,21 @@ $(TARGET_DIR)/boot/$(LINUX26_FORMAT): $(LINUX26_KERNEL)
 $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/modules.dep: $(LINUX26_DIR)/.configured
 	rm -rf $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)
 	rm -f $(TARGET_DIR)/sbin/cardmgr
+# Make Linux depend on modules only if enabled in the .config.
+ifneq ($(strip $(shell grep -c CONFIG_MODULES=y $(LINUX_DIR)/.config)),0)
 	$(TARGET_CONFIGURE_OPTS) \
-	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) modules
-	$(TARGET_CONFIGURE_OPTS) \
-	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) \
+		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) \
 		DEPMOD=$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26 \
 		INSTALL_MOD_PATH=$(TARGET_DIR) modules_install
 	rm -f $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/build
 	rm -f $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/source
 	$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26 -b $(TARGET_DIR) $(LINUX_HEADERS_VERSION)
-	touch -c $@
+endif
 
 linux26-menuconfig: $(LINUX26_DIR)/.patched host-sed
 	[ -f $(LINUX26_DIR)/.config ] || cp $(LINUX26_KCONFIG) $(LINUX26_DIR)/.config
 	$(TARGET_CONFIGURE_OPTS) \
-	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) menuconfig
+		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) menuconfig
 	-[ -f $(LINUX26_DIR)/.config ] && touch $(LINUX26_DIR)/.configured
 
 linux26: $(DEPEND_ON_U_BOOT) $(INITRAMFS_TARGET) $(TARGET_DIR)/boot/$(LINUX26_FORMAT) linux26-modules
