@@ -88,6 +88,10 @@ COMPILER=$(which $HOSTCC 2> /dev/null)
 if [ -z "$COMPILER" ] ; then
 	COMPILER=$(which cc 2> /dev/null)
 fi;
+# If it is not executable, it does not work.
+if [ ! -x "$COMPILER" ] ; then
+	COMPILER=""
+fi
 if [ -z "$COMPILER" ] ; then
 	/bin/echo -e "\nYou must install 'gcc' on your build machine\n";
 	exit 1;
@@ -110,6 +114,10 @@ fi;
 CXXCOMPILER=$(which $HOSTCXX 2> /dev/null)
 if [ -z "$CXXCOMPILER" ] ; then
 	CXXCOMPILER=$(which c++ 2> /dev/null)
+fi
+# If it is not executable, it does not work.
+if [ ! -x "$CXXCOMPILER" ] ; then
+	CXXCOMPILER=""
 fi
 if [ -z "$CXXCOMPILER" ] ; then
 	/bin/echo -e "\nYou may have to install 'g++' on your build machine\n"
