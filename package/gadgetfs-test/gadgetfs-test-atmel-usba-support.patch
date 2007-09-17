@@ -1,0 +1,47 @@
+From cc9396e48b8ea4ea5a2e754364023e1bb38945d8 Mon Sep 17 00:00:00 2001
+From: Haavard Skinnemoen <hskinnemoen@atmel.com>
+Date: Sat, 23 Jun 2007 19:13:40 +0200
+Subject: [PATCH] Add support for Atmel USBA device controller
+
+Support bulk+int endpoints on Atmel USBA UDC. No iso support yet,
+although the controller supports it.
+
+Signed-off-by: Haavard Skinnemoen <hskinnemoen@atmel.com>
+---
+ usb.c |   20 ++++++++++++++++++++
+ 1 files changed, 20 insertions(+), 0 deletions(-)
+
+diff --git a/usb.c b/usb.c
+index b161154..a95a912 100644
+--- a/usb.c
++++ b/usb.c
+@@ -402,6 +402,26 @@ static int autoconfig ()
+ 		fs_status_desc.bEndpointAddress = USB_DIR_IN | 3;
+ 		EP_STATUS_NAME = "ep3in-int";
+ 
++	/* Atmel AT32AP700x processors, high/full speed */
++	} else if (stat (DEVNAME = "atmel_usba_udc", &statb) == 0) {
++		HIGHSPEED = 1;
++		device_desc.bcdDevice = __constant_cpu_to_le16 (0x0108);
++
++		fs_source_desc.bEndpointAddress
++			= hs_source_desc.bEndpointAddress
++			= USB_DIR_IN | 1;
++		EP_IN_NAME = "ep1in-bulk";
++		fs_sink_desc.bEndpointAddress
++			= hs_sink_desc.bEndpointAddress
++			= USB_DIR_OUT | 2;
++		EP_OUT_NAME = "ep2out-bulk";
++
++		source_sink_intf.bNumEndpoints = 3;
++		fs_status_desc.bEndpointAddress
++			= hs_status_desc.bEndpointAddress
++			= USB_DIR_IN | 5;
++		EP_STATUS_NAME = "ep5in-int";
++
+ 	} else {
+ 		DEVNAME = 0;
+ 		return -ENODEV;
+-- 
+1.5.2.3
+
