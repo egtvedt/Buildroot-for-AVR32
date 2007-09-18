@@ -11,7 +11,7 @@ U_BOOT_CAT:=$(BZCAT)
 U_BOOT_BIN:=u-boot.bin
 U_BOOT_TOOLS_BIN:=mkimage
 
-U_BOOT_INC_CONF_FILE:=$(U_BOOT_DIR)/include/configs/$(subst "_config,,$(BR2_TARGET_U_BOOT_CONFIG_BOARD)").h
+U_BOOT_INC_CONF_FILE:=$(U_BOOT_DIR)/include/configs/$(subst _config,,$(BR2_TARGET_U_BOOT_CONFIG_BOARD)).h
 
 $(DL_DIR)/$(U_BOOT_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(U_BOOT_SITE)/$(U_BOOT_SOURCE)
@@ -24,13 +24,23 @@ $(U_BOOT_DIR)/.unpacked: $(DL_DIR)/$(U_BOOT_SOURCE)
 	touch $@
 
 $(U_BOOT_DIR)/.header_copied: $(U_BOOT_DIR)/.unpacked
-ifneq ($(strip $(BR2_TARGET_U_BOOT_CONFIG_HEADER_FILE)),"")
+ifneq ($(BR2_TARGET_U_BOOT_CONFIG_HEADER_FILE),"")
+	@if [ ! -f "$(BR2_TARGET_U_BOOT_CONFIG_HEADER_FILE)" ]; then	\
+		echo "	You specified BR2_TARGET_U_BOOT_CONFIG_HEADER_FILE,"; \
+		echo "	but the file at:";				\
+		echo "	'$(BR2_TARGET_U_BOOT_CONFIG_HEADER_FILE)'";	\
+		echo "	does not exist.";				\
+		echo;							\
+		echo "	Configure the BR2_TARGET_U_BOOT_CONFIG_HEADER_FILE variable."; \
+		echo;							\
+		exit 1;							\
+	fi
 	cp -dpf $(BR2_TARGET_U_BOOT_CONFIG_HEADER_FILE) $(U_BOOT_INC_CONF_FILE)
 endif
 	touch $@
 
 $(U_BOOT_DIR)/.configured: $(U_BOOT_DIR)/.header_copied
-ifeq ($(BR2_TARGET_U_BOOT_CONFIG_BOARD),"")
+ifeq ($(strip $(BR2_TARGET_U_BOOT_CONFIG_BOARD)),"")
 	@echo
 	@echo "	You did not specify a target u-boot config board, so u-boot"
 	@echo "	has no way of knowing which board you want to build your"
