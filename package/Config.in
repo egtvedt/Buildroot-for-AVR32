@@ -1,5 +1,10 @@
 menu "Package Selection for the target"
 
+if BR2_avr32
+comment "AVR32 stuff"
+source "package/avr32-wiki-docs/Config.in"
+endif
+
 
 comment "The default minimal system"
 source "package/busybox/Config.in"
@@ -30,9 +35,6 @@ source "package/patch/Config.in"
 source "package/sed/Config.in"
 source "package/tar/Config.in"
 endif
-
-comment "Documentation stuff"
-source "package/avr32-wiki-docs/Config.in"
 
 comment "Other development stuff"
 source "package/autoconf/Config.in"
