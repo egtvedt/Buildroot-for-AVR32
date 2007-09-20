@@ -213,10 +213,12 @@ $(GCC_BUILD_DIR1)/.compiled: $(GCC_BUILD_DIR1)/.configured
 	$(MAKE) -C $(GCC_BUILD_DIR1) all-gcc
 	touch $@
 
-$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc: $(GCC_BUILD_DIR1)/.compiled
+gcc_initial=$(GCC_BUILD_DIR1)/.installed
+$(gcc_initial) $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc: $(GCC_BUILD_DIR1)/.compiled
 	PATH=$(TARGET_PATH) $(MAKE) -C $(GCC_BUILD_DIR1) install-gcc
 	#rm -f $(STAGING_DIR)/usr/bin/gccbug $(STAGING_DIR)/usr/bin/gcov
 	#rm -rf $(STAGING_DIR)/usr/info $(STAGING_DIR)/usr/man $(STAGING_DIR)/usr/share/doc $(STAGING_DIR)/usr/share/locale
+	touch $(gcc_initial)
 
 gcc_initial: uclibc-configured binutils $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc
 
@@ -286,13 +288,9 @@ $(GCC_BUILD_DIR2)/.installed: $(GCC_BUILD_DIR2)/.compiled
 		mv "$(STAGING_DIR)/lib64/"* "$(STAGING_DIR)/lib/"; \
 		rmdir "$(STAGING_DIR)/lib64"; \
 	fi
-	# Move gcc bug reporting script out of path of real executables
-	mv -f $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gccbug \
-		$(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-gccbug
 	# Strip the host binaries
 ifeq ($(GCC_STRIP_HOST_BINARIES),true)
-	-strip --strip-all -R .note -R .comment $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-*
-	-strip --strip-all -R .note -R .comment $(STAGING_DIR)/usr/bin/faked
+	strip --strip-all -R .note -R .comment $(filter-out %-gccbug,$(wildcard $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-*))
 endif
 	# Make sure we have 'cc'.
 	if [ ! -e $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-cc ]; then \

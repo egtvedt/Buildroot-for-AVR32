@@ -80,16 +80,26 @@ endif
 #
 #############################################################
 
-GCC_TARGET_LANGUAGES:=c
 
+GCC_CROSS_LANGUAGES:=c
+ifeq ($(BR2_GCC_CROSS_CXX),y)
+GCC_CROSS_LANGUAGES:=$(GCC_CROSS_LANGUAGES),c++
+endif
+ifeq ($(BR2_GCC_CROSS_FORTRAN),y)
+GCC_CROSS_LANGUAGES:=$(GCC_CROSS_LANGUAGES),fortran
+endif
+ifeq ($(BR2_GCC_CROSS_OBJC),y)
+GCC_CROSS_LANGUAGES:=$(GCC_CROSS_LANGUAGES),objc
+endif
+
+
+GCC_TARGET_LANGUAGES:=c
 ifeq ($(BR2_INSTALL_LIBSTDCPP),y)
 GCC_TARGET_LANGUAGES:=$(GCC_TARGET_LANGUAGES),c++
 endif
-
 ifeq ($(BR2_INSTALL_LIBGCJ),y)
 GCC_TARGET_LANGUAGES:=$(GCC_TARGET_LANGUAGES),java
 endif
-
 ifeq ($(BR2_INSTALL_OBJC),y)
 GCC_TARGET_LANGUAGES:=$(GCC_TARGET_LANGUAGES),objc
 endif
@@ -196,10 +206,12 @@ $(GCC_BUILD_DIR1)/.compiled: $(GCC_BUILD_DIR1)/.configured
 	PATH=$(TARGET_PATH) $(MAKE) -C $(GCC_BUILD_DIR1) all-gcc
 	touch $@
 
-$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc: $(GCC_BUILD_DIR1)/.compiled
+gcc_initial=$(GCC_BUILD_DIR1)/.installed
+$(gcc_initial) $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc: $(GCC_BUILD_DIR1)/.compiled
 	PATH=$(TARGET_PATH) $(MAKE) -C $(GCC_BUILD_DIR1) install-gcc
 	#rm -f $(STAGING_DIR)/bin/gccbug $(STAGING_DIR)/bin/gcov
 	#rm -rf $(STAGING_DIR)/info $(STAGING_DIR)/man $(STAGING_DIR)/share/doc $(STAGING_DIR)/share/locale
+	touch $(gcc_initial)
 
 gcc_initial: uclibc-configured binutils $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc
 
@@ -237,7 +249,7 @@ $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 		--build=$(GNU_HOST_NAME) \
 		--host=$(GNU_HOST_NAME) \
 		--target=$(REAL_GNU_TARGET_NAME) \
-		--enable-languages=$(GCC_TARGET_LANGUAGES) \
+		--enable-languages=$(GCC_CROSS_LANGUAGES) \
 		--disable-__cxa_atexit \
 		--enable-target-optspace \
 		--with-gnu-ld \
@@ -270,7 +282,7 @@ $(GCC_BUILD_DIR2)/.installed: $(GCC_BUILD_DIR2)/.compiled
 	fi
 	# Strip the host binaries
 ifeq ($(GCC_STRIP_HOST_BINARIES),true)
-	-strip --strip-all -R .note -R .comment $(STAGING_DIR)/usr/bin/*
+	strip --strip-all -R .note -R .comment $(filter-out %-gccbug,$(wildcard $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-*))
 endif
 	# Make sure we have 'cc'.
 	if [ ! -e $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-cc ]; then \

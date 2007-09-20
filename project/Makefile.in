@@ -72,4 +72,3 @@ VENDOR_GDB_RELEASE:=$(strip $(subst ",,$(BR2_VENDOR_GDB_RELEASE)))
 #"))
 VENDOR_PATCH_DIR:=$(strip $(subst ",,$(BR2_VENDOR_PATCH_DIR)))
 #"))
-

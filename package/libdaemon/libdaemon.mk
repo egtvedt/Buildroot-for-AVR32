@@ -11,7 +11,7 @@
 # either version 2.1 of the License, or (at your option) any
 # later version.
 
-LIBDAEMON_VERSION:=0.10
+LIBDAEMON_VERSION:=0.12
 LIBDAEMON_NAME:=libdaemon-$(LIBDAEMON_VERSION)
 LIBDAEMON_DIR:=$(BUILD_DIR)/$(LIBDAEMON_NAME)
 LIBDAEMON_SITE:=http://0pointer.de/lennart/projects/libdaemon/
@@ -26,16 +26,18 @@ libdaemon-source: $(DL_DIR)/$(LIBDAEMON_SOURCE)
 $(LIBDAEMON_DIR)/.unpacked: $(DL_DIR)/$(LIBDAEMON_SOURCE)
 	$(LIBDAEMON_CAT) $(DL_DIR)/$(LIBDAEMON_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(LIBDAEMON_DIR) package/libdaemon/ \*.patch
-	mkdir -p $(PROJECT_BUILD_DIR)/patches
-	$(BZCAT) package/libdaemon/$(LIBDAEMON_NAME).patch.bz2 \
-		> $(PROJECT_BUILD_DIR)/patches/$(LIBDAEMON_NAME).patch
-	toolchain/patch-kernel.sh $(LIBDAEMON_DIR) $(PROJECT_BUILD_DIR)/patches/ $(LIBDAEMON_NAME)\*.patch
-	$(CONFIG_UPDATE) $(LIBDAEMON_DIR)
-	touch $(LIBDAEMON_DIR)/.unpacked
+# Ulf, what was this supposed to fix? Your patch is broken
+# (hardcoded for /home/ulf/..)
+#	mkdir -p $(PROJECT_BUILD_DIR)/patches
+#	$(BZCAT) package/libdaemon/$(LIBDAEMON_NAME).patch.bz2 \
+#		> $(PROJECT_BUILD_DIR)/patches/$(LIBDAEMON_NAME).patch
+#	toolchain/patch-kernel.sh $(LIBDAEMON_DIR) $(PROJECT_BUILD_DIR)/patches/ $(LIBDAEMON_NAME)\*.patch
+#	$(CONFIG_UPDATE) $(LIBDAEMON_DIR)
+	touch $@
 
 $(LIBDAEMON_DIR)/.configured: $(LIBDAEMON_DIR)/.unpacked
 	(cd $(LIBDAEMON_DIR) && rm -rf config.cache && autoconf)
-	( cd $(LIBDAEMON_DIR) && \
+	(cd $(LIBDAEMON_DIR) && \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
@@ -51,23 +53,23 @@ $(LIBDAEMON_DIR)/.configured: $(LIBDAEMON_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--includedir=/usr/include \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 		--disable-lynx \
 		--disable-shared \
 	)
-	touch $(LIBDAEMON_DIR)/.configured
+	touch $@
 
 $(LIBDAEMON_DIR)/.compiled: $(LIBDAEMON_DIR)/.configured
 	$(MAKE) LIBTOOL=$(LIBDAEMON_DIR)/libtool -C $(LIBDAEMON_DIR)
-	touch $(LIBDAEMON_DIR)/.compiled
+	touch $@
 
 $(STAGING_DIR)/lib/libdaemon.a: $(LIBDAEMON_DIR)/.compiled
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBDAEMON_DIR) install
-	touch -c $(STAGING_DIR)/lib/libdaemon.a
+	touch -c $@
 
 #$(TARGET_DIR)/usr/lib/libdaemon.a: $(STAGING_DIR)/lib/libdaemon.a
 # -$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libdaemon.a

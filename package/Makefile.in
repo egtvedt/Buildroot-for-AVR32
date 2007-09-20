@@ -46,6 +46,11 @@ ifeq ($(BR2_SOFT_FLOAT),y)
 TARGET_CFLAGS+=-msoft-float
 endif
 
+# enable VIS for v9a and v9b
+ifeq ($(findstring y,$(BR2_sparc_v9a)$(BR2_sparc64_v9a)$(BR2_sparc_v9b)$(BR2_sparc64_v9b)),y)
+TARGET_CFLAGS+=-mvis
+endif
+
 TARGET_CXXFLAGS=$(TARGET_CFLAGS)
 
 # else it's an external toolchain
@@ -63,7 +68,7 @@ TOOL_BUILD_DIR=$(BASE_DIR)/$(TOPDIR_PREFIX)toolchain_build_$(ARCH)$(ARCH_FPU_SUF
 
 # Quotes are needed for spaces et al in path components.
 TARGET_PATH="$(TOOL_BUILD_DIR)/bin:$(STAGING_DIR)/bin:$(STAGING_DIR)/usr/bin:$(PATH)"
-IMAGE:=$(BINARIES_DIR)/rootfs.$(ARCH)$(ARCH_FPU_SUFFIX)
+IMAGE:=$(BINARIES_DIR)/rootfs.$(ARCH)$(ARCH_FPU_SUFFIX)-$(DATE)
 GNU_TARGET_NAME=$(OPTIMIZE_FOR_CPU)-linux
 REAL_GNU_TARGET_NAME=$(OPTIMIZE_FOR_CPU)$(GNU_TARGET_SUFFIX)
 TARGET_CROSS=$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-
@@ -75,7 +80,7 @@ TOOLCHAIN_EXTERNAL_PATH:=$(strip $(subst ",, $(BR2_TOOLCHAIN_EXTERNAL_PATH)))
 #"))
 TOOL_BUILD_DIR=$(BASE_DIR)/$(TOPDIR_PREFIX)toolchain_build_$(TOOLCHAIN_EXTERNAL_PREFIX)
 TARGET_PATH="$(STAGING_DIR)/bin:$(TOOL_BUILD_DIR)/bin:$(TOOLCHAIN_EXTERNAL_PATH)/bin:$(PATH)"
-IMAGE:=$(BINARIES_DIR)/rootfs.$(TOOLCHAIN_EXTERNAL_PREFIX)
+IMAGE:=$(BINARIES_DIR)/rootfs.$(TOOLCHAIN_EXTERNAL_PREFIX)-$(DATE)
 
 REAL_GNU_TARGET_NAME=$(TOOLCHAIN_EXTERNAL_PREFIX)
 GNU_TARGET_NAME=$(TOOLCHAIN_EXTERNAL_PREFIX)
@@ -89,12 +94,12 @@ TARGET_RANLIB=$(TARGET_CROSS)ranlib
 TARGET_LDCONFIG=$(TARGET_CROSS)ldconfig
 INSTALL=/usr/bin/install
 ifeq ($(BR2_STRIP_strip),y)
-STRIP=$(TARGET_CROSS)strip --remove-section=.comment --remove-section=.note
 STRIP_DISCARD_ALL:=--discard-all
 STRIP_STRIP_UNNEEDED:=--strip-unneeded
 STRIP_STRIP_ALL:=--strip-all
 REMOVE_SECTION_COMMENT:=--remove-section=.comment
 REMOVE_SECTION_NOTE:=--remove-section=.note
+STRIP=$(TARGET_CROSS)strip $(REMOVE_SECTION_COMMENT) $(REMOVE_SECTION_NOTE)
 endif
 ifeq ($(BR2_STRIP_sstrip),y)
 STRIP=$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-sstrip
@@ -236,6 +241,9 @@ XSERVER+=tinyx
 endif
 ifeq ($(strip $(BR2_PACKAGE_XORG)),y)
 XSERVER+=xorg
+endif
+ifeq ($(strip $(BR2_PACKAGE_XORG7)),y)
+XSERVER+=xserver_xorg-server
 endif
 ifeq ($(strip $(BR2_PACKAGE_XGGI)),y)
 XSERVER+=xggi

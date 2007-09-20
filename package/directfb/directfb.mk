@@ -5,7 +5,7 @@
 #############################################################
 #DIRECTFB_VERSION:=0.9.25.1
 #DIRECTFB_SITE:=http://www.directfb.org/downloads/Old
-DIRECTFB_VERSION:=1.0.0
+DIRECTFB_VERSION:=1.0.1
 DIRECTFB_SITE:=http://www.directfb.org/downloads/Core
 DIRECTFB_SOURCE:=DirectFB-$(DIRECTFB_VERSION).tar.gz
 DIRECTFB_CAT:=$(ZCAT)
@@ -18,6 +18,11 @@ else
 DIRECTFB_MULTI:=
 DIRECTFB_FUSION:=
 endif
+ifeq ($(BR2_PACKAGE_XSERVER_none),y)
+DIRECTFB_X:=--disable-x11
+else
+DIRECTFB_X:=--enable-x11
+endif
 
 $(DL_DIR)/$(DIRECTFB_SOURCE):
 	$(WGET) -P $(DL_DIR) $(DIRECTFB_SITE)/$(DIRECTFB_SOURCE)
@@ -27,7 +32,7 @@ directfb-source: $(DL_DIR)/$(DIRECTFB_SOURCE)
 $(DIRECTFB_DIR)/.unpacked: $(DL_DIR)/$(DIRECTFB_SOURCE)
 	$(DIRECTFB_CAT) $(DL_DIR)/$(DIRECTFB_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(DIRECTFB_DIR) package/directfb/ directfb\*.patch
-	touch $(DIRECTFB_DIR)/.unpacked
+	touch $@
 
 $(DIRECTFB_DIR)/.configured: $(DIRECTFB_DIR)/.unpacked
 	(cd $(DIRECTFB_DIR); \
@@ -55,6 +60,7 @@ $(DIRECTFB_DIR)/.configured: $(DIRECTFB_DIR)/.unpacked
 		--with-gfxdrivers=cle266,unichrome \
 		--enable-shared \
 		$(DIRECTFB_MULTI) \
+		$(DIRECTFB_X) \
 		--enable-jpeg \
 		--enable-png \
 		--enable-linux-input \
@@ -65,7 +71,7 @@ $(DIRECTFB_DIR)/.configured: $(DIRECTFB_DIR)/.unpacked
 		--disable-video4linux \
 		--disable-video4linux2 \
 		--enable-fusion )
-	touch $(DIRECTFB_DIR)/.configured
+	touch $@
 
 $(DIRECTFB_DIR)/.compiled: $(DIRECTFB_DIR)/.configured
 	$(MAKE) PATH=$(STAGING_DIR)/usr/lib:$(PATH) \
