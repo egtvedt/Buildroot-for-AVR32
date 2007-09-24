@@ -54,7 +54,7 @@ endif # Normal toolchain
 GCC_SOURCE:=gcc-$(GCC_OFFICIAL_VER).tar.bz2
 GCC_DIR:=$(TOOL_BUILD_DIR)/gcc-$(GCC_OFFICIAL_VER)
 GCC_CAT:=$(BZCAT)
-GCC_STRIP_HOST_BINARIES:=true
+GCC_STRIP_HOST_BINARIES:=nope
 
 
 ifeq ($(findstring x3.,x$(GCC_VERSION)),x3.)
@@ -90,6 +90,7 @@ GCC_COMMON_PREREQ=$(wildcard $(BR2_DEPENDS_DIR)/br2/install/libstdcpp*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/install/libgcj*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/install/objc*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/install/fortran*)\
+$(wildcard $(BR2_DEPENDS_DIR)/br2/install/libstdcpp*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/prefer/ima*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/toolchain/sysroot*)\
 $(wildcard $(BR2_DEPENDS_DIR)/br2/use/sjlj/exceptions*)\
@@ -357,7 +358,9 @@ ifeq ($(BR2_INSTALL_LIBGCJ),y)
 endif
 	touch $@
 
-gcc: uclibc-configured binutils gcc_initial $(LIBFLOAT_TARGET) uclibc \
+cross_compiler:=$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc
+cross_compiler gcc: uclibc-configured binutils gcc_initial \
+	$(LIBFLOAT_TARGET) uclibc \
 	$(GCC_BUILD_DIR2)/.installed $(GCC_BUILD_DIR2)/.libs_installed \
 	$(GCC_TARGETS)
 

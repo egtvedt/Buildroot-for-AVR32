@@ -18,29 +18,33 @@ $(LIBGCRYPT_DIR)/.source: $(DL_DIR)/$(LIBGCRYPT_SOURCE)
 	$(BZCAT) $(DL_DIR)/$(LIBGCRYPT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(LIBGCRYPT_DIR) package/libgcrypt/ libgcrypt\*.patch
 	$(CONFIG_UPDATE) $(LIBGCRYPT_DIR)
+	# This is incorrectly hardwired to yes for cross-compiles with no
+	# sane way to pass pre-existing knowledge so fix it with the chainsaw..
+	$(SED) '/GNUPG_SYS_SYMBOL_UNDERSCORE/d' $(LIBGCRYPT_DIR)/configure
 	touch $@
 
 $(LIBGCRYPT_DIR)/.configured: $(LIBGCRYPT_DIR)/.source
-	(cd $(LIBGCRYPT_DIR); \
+	(cd $(LIBGCRYPT_DIR); rm -f config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
+		ac_cv_sys_symbol_underscore=no \
 		./configure \
-			--target=$(GNU_TARGET_NAME) \
-			--host=$(GNU_TARGET_NAME) \
-			--build=$(GNU_HOST_NAME) \
-			--prefix=/usr \
-			--exec-prefix=/usr \
-			--bindir=/usr/bin \
-			--sbindir=/usr/sbin \
-			--libdir=/lib \
-			--libexecdir=/$(LIBGCRYPT_DESTDIR) \
-			--sysconfdir=/etc \
-			--datadir=/usr/share \
-			--localstatedir=/var \
-			--includedir=/include \
-			--includedir=/usr/include \
-			--mandir=/usr/man \
-			--infodir=/usr/info \
+		--target=$(GNU_TARGET_NAME) \
+		--host=$(GNU_TARGET_NAME) \
+		--build=$(GNU_HOST_NAME) \
+		--prefix=/usr \
+		--exec-prefix=/usr \
+		--bindir=/usr/bin \
+		--sbindir=/usr/sbin \
+		--libdir=/lib \
+		--libexecdir=/$(LIBGCRYPT_DESTDIR) \
+		--sysconfdir=/etc \
+		--datadir=/usr/share \
+		--localstatedir=/var \
+		--includedir=/usr/include \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
+		--disable-optimization \
 	)
 	touch $@
 
@@ -53,6 +57,9 @@ $(STAGING_DIR)/$(LIBGCRYPT_TARGET_LIBRARY): $(LIBGCRYPT_DIR)/$(LIBGCRYPT_LIBRARY
 
 $(TARGET_DIR)/$(LIBGCRYPT_TARGET_LIBRARY): $(STAGING_DIR)/$(LIBGCRYPT_TARGET_LIBRARY)
 	cp -dpf $<* $(TARGET_DIR)/$(LIBGCRYPT_DESTDIR)
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(STAGING_DIR)/usr/share/info
+endif
 
 libgcrypt: uclibc libgpg-error $(TARGET_DIR)/$(LIBGCRYPT_TARGET_LIBRARY)
 
@@ -65,7 +72,6 @@ libgcrypt-clean:
 libgcrypt-dirclean:
 	rm -rf $(LIBGCRYPT_DIR)
 
-.PHONY: libgcrypt
 #############################################################
 #
 # Toplevel Makefile options

@@ -6,8 +6,6 @@ config BR2_HAVE_DOT_CONFIG
 	bool
 	default y
 
-source "project/Config.in"
-
 choice
 	prompt "Target Architecture"
 	default BR2_i386
@@ -672,9 +670,13 @@ config BR2_WGET
 	string "Wget command"
 	default "wget --passive-ftp -nd"
 
-config BR2_SVN
+config BR2_SVN_CO
 	string "Subversion (svn) command to download source tree"
 	default "svn co"
+
+config BR2_SVN_UP
+	string "Subversion (svn) command to update source tree"
+	default "svn up"
 
 config BR2_GIT
 	string "Git command to download source tree"
