@@ -22,7 +22,7 @@ ifeq ($(BR2_TOOLCHAIN_SYSROOT),y)
 
 ifeq ($(GCC_SNAP_DATE),)
 GCC_OFFICIAL_VER:=$(GCC_VERSION)
-GCC_SITE:=http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)
+GCC_SITE:=$(BR2_GNU_MIRROR)/gcc/gcc-$(GCC_VERSION)
 #GCC_SITE:=ftp://ftp.ibiblio.org/pub/mirrors/gnu/ftp/gnu/gcc/gcc-$(GCC_OFFICIAL_VER)
 else
 GCC_OFFICIAL_VER:=$(GCC_VERSION)-$(GCC_SNAP_DATE)
@@ -306,8 +306,8 @@ endif
 		ln -snf $(REAL_GNU_TARGET_NAME)-gcc \
 			$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-cc; \
 	fi
-	if [ ! -e $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/bin/cc ]; then \
-		ln -snf gcc $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/bin/cc; \
+	if [ ! -e $(STAGING_DIR)/usr/bin/cc ]; then \
+		ln -snf gcc $(STAGING_DIR)/usr/bin/cc; \
 	fi
 	# Set up the symlinks to enable lying about target name.
 	set -e; \
