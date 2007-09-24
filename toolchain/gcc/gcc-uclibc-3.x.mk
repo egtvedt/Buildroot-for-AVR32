@@ -176,7 +176,7 @@ endif
 $(GCC_BUILD_DIR1)/.configured: $(GCC_DIR)/.patched
 	mkdir -p $(GCC_BUILD_DIR1)
 	(cd $(GCC_BUILD_DIR1); PATH=$(TARGET_PATH) \
-		CC="$(HOSTCC)" \
+		$(HOST_CONFIGURE_OPTS) \
 		$(GCC_DIR)/configure \
 		--prefix=$(STAGING_DIR)/usr \
 		--build=$(GNU_HOST_NAME) \
@@ -230,6 +230,7 @@ gcc_initial-dirclean:
 # have something to do with "path translations" and possibly doesn't
 # affect gcc-target. However, I haven't tested gcc-target yet so no
 # guarantees. mjn3
+
 comma:=,
 GCC_BUILD_DIR2:=$(TOOL_BUILD_DIR)/gcc-$(GCC_VERSION)-final
 $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
@@ -240,6 +241,7 @@ $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 	#ln -snf ../lib/ $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib
 	(cd $(GCC_BUILD_DIR2); rm -rf config.cache; \
 		$(HOST_CONFIGURE_OPTS) \
+		GCC=$(TARGET_CROSS)gcc \
 		LDFLAGS_FOR_TARGET="$(patsubst %,LDFLAGS+=-Wl$(comma)%,$(TARGET_LDFLAGS)) -L$(STAGING_DIR)/lib -L$(STAGING_DIR)/usr/lib" \
 		$(GCC_DIR)/configure \
 		--prefix=$(STAGING_DIR) \
@@ -265,11 +267,14 @@ $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 	touch $@
 
 $(GCC_BUILD_DIR2)/.compiled: $(GCC_BUILD_DIR2)/.configured
-	PATH=$(TARGET_PATH) $(MAKE) -C $(GCC_BUILD_DIR2) all
+	PATH=$(TARGET_PATH) $(MAKE) $(HOST_CONFIGURE_OPTS) -C $(GCC_BUILD_DIR2) all
 	touch $@
 
 $(GCC_BUILD_DIR2)/.installed: $(GCC_BUILD_DIR2)/.compiled
-	PATH=$(TARGET_PATH) $(MAKE) -C $(GCC_BUILD_DIR2) install
+	PATH=$(TARGET_PATH) \
+	$(MAKE) $(HOST_CONFIGURE_OPTS) \
+	LDFLAGS_FOR_TARGET="$(patsubst %,LDFLAGS+=-Wl$(comma)%,$(TARGET_LDFLAGS)) -L$(STAGING_DIR)/lib -L$(STAGING_DIR)/usr/lib" \
+	-C $(GCC_BUILD_DIR2) install
 	if [ -d "$(STAGING_DIR)/usr/lib64" ]; then \
 		if [ ! -e "$(STAGING_DIR)/usr/lib" ]; then \
 			mkdir "$(STAGING_DIR)/usr/lib"; \
@@ -348,12 +353,13 @@ endif
 	touch $@
 
 cross_compiler:=$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc
-cross_compiler gcc: uclibc-configured binutils gcc_initial \
-	$(LIBFLOAT_TARGET) uclibc \
-	$(GCC_BUILD_DIR2)/.installed $(GCC_BUILD_DIR2)/.libs_installed \
+cross_compiler gcc: gcc-config $(GCC_BUILD_DIR2)/.installed $(GCC_BUILD_DIR2)/.libs_installed \
 	$(GCC_TARGETS)
 
 gcc-source: $(DL_DIR)/$(GCC_SOURCE)
+
+gcc-config: uclibc-configured binutils gcc_initial $(LIBFLOAT_TARGET) \
+	uclibc $(GCC_BUILD_DIR2)/.configured
 
 gcc-clean:
 	rm -rf $(GCC_BUILD_DIR2)
@@ -390,6 +396,7 @@ $(GCC_BUILD_DIR3)/.configured: $(GCC_BUILD_DIR3)/.prepared
 		--with-gxx-include-dir=/usr/include/c++ \
 		--disable-__cxa_atexit \
 		--with-gnu-ld \
+		--with-gnu-as \
 		$(GCC_SHARED_LIBGCC) \
 		$(GCC_WITH_TARGET_GMP) \
 		$(GCC_WITH_TARGET_MPFR) \
@@ -407,7 +414,10 @@ $(GCC_BUILD_DIR3)/.configured: $(GCC_BUILD_DIR3)/.prepared
 
 $(GCC_BUILD_DIR3)/.compiled: $(GCC_BUILD_DIR3)/.configured
 	PATH=$(TARGET_PATH) \
-	$(MAKE) -C $(GCC_BUILD_DIR3) all
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) \
+	CFLAGS_FOR_BUILD="-g -O2 $(HOST_CFLAGS)" \
+	$(TARGET_GCC_FLAGS) \
+	-C $(GCC_BUILD_DIR3) all
 	touch $@
 
 #
@@ -436,7 +446,11 @@ endif
 
 $(TARGET_DIR)/usr/bin/gcc: $(GCC_BUILD_DIR3)/.compiled
 	PATH=$(TARGET_PATH) \
-	$(MAKE) DESTDIR=$(TARGET_DIR) -C $(GCC_BUILD_DIR3) install
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) \
+	CFLAGS_FOR_BUILD="-g -O2 $(HOST_CFLAGS)" \
+	$(TARGET_GCC_FLAGS) \
+	DESTDIR=$(TARGET_DIR) \
+	-C $(GCC_BUILD_DIR3) install
 	# Remove broken specs file (cross compile flag is set).
 	rm -f $(TARGET_DIR)/usr/$(GCC_LIB_SUBDIR)/specs
 	#
@@ -453,11 +467,11 @@ endif
 	#
 	# Ok... that's enough of that.
 	#
-	-(cd $(TARGET_DIR)/bin && find -type f | xargs $(STRIP) > /dev/null 2>&1)
-	-(cd $(TARGET_DIR)/usr/bin && find -type f | xargs $(STRIP) > /dev/null 2>&1)
-	-(cd $(TARGET_DIR)/usr/$(GCC_LIB_SUBDIR) && $(STRIP) cc1 cc1plus collect2 > /dev/null 2>&1)
-	-(cd $(TARGET_DIR)/usr/lib && $(STRIP) libstdc++.so.*.*.* > /dev/null 2>&1)
-	-(cd $(TARGET_DIR)/lib && $(STRIP) libgcc_s*.so.*.*.* > /dev/null 2>&1)
+	-(cd $(TARGET_DIR)/bin && find -type f | xargs $(STRIPCMD) > /dev/null 2>&1)
+	-(cd $(TARGET_DIR)/usr/bin && find -type f | xargs $(STRIPCMD) > /dev/null 2>&1)
+	-(cd $(TARGET_DIR)/usr/$(GCC_LIB_SUBDIR) && $(STRIPCMD) cc1 cc1plus collect2 > /dev/null 2>&1)
+	-(cd $(TARGET_DIR)/usr/lib && $(STRIPCMD) libstdc++.so.*.*.* > /dev/null 2>&1)
+	-(cd $(TARGET_DIR)/lib && $(STRIPCMD) libgcc_s*.so.*.*.* > /dev/null 2>&1)
 	#
 	rm -f $(TARGET_DIR)/usr/lib/*.la*
 	#rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \

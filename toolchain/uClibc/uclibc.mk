@@ -108,7 +108,6 @@ else
 UCLIBC_LOCALE_DATA=
 endif
 
-uclibc-unpacked: $(UCLIBC_DIR)/.unpacked
 $(UCLIBC_DIR)/.unpacked: $(DL_DIR)/$(UCLIBC_SOURCE) $(UCLIBC_LOCALE_DATA)
 	mkdir -p $(TOOL_BUILD_DIR)
 	rm -rf $(UCLIBC_DIR)
@@ -128,7 +127,7 @@ $(UCLIBC_DIR)/.oldconfig: $(UCLIBC_DIR)/.unpacked $(UCLIBC_CONFIG_FILE)
 	cp -f $(UCLIBC_CONFIG_FILE) $(UCLIBC_DIR)/.oldconfig
 	$(SED) 's,^CROSS_COMPILER_PREFIX=.*,CROSS_COMPILER_PREFIX="$(TARGET_CROSS)",g' \
 		-e 's,# TARGET_$(UCLIBC_TARGET_ARCH) is not set,TARGET_$(UCLIBC_TARGET_ARCH)=y,g' \
-		-e 's,^TARGET_ARCH="none",TARGET_ARCH=\"$(UCLIBC_TARGET_ARCH)\",g' \
+		-e 's,^TARGET_ARCH=".*",TARGET_ARCH=\"$(UCLIBC_TARGET_ARCH)\",g' \
 		-e 's,^KERNEL_SOURCE=.*,KERNEL_SOURCE=\"$(LINUX_HEADERS_DIR)\",g' \
 		-e 's,^KERNEL_HEADERS=.*,KERNEL_HEADERS=\"$(LINUX_HEADERS_DIR)/include\",g' \
 		-e 's,^RUNTIME_PREFIX=.*,RUNTIME_PREFIX=\"/\",g' \
@@ -147,6 +146,50 @@ endif
 ifeq ($(BR2_ARM_OABI),y)
 	/bin/echo "CONFIG_ARM_OABI=y" >> $(UCLIBC_DIR)/.oldconfig
 	/bin/echo "# CONFIG_ARM_EABI is not set" >> $(UCLIBC_DIR)/.oldconfig
+endif
+endif
+ifeq ($(UCLIBC_TARGET_ARCH),mips)
+	$(SED) '/CONFIG_MIPS_[NO].._ABI/d' $(UCLIBC_DIR)/.oldconfig
+	$(SED) '/CONFIG_MIPS_ISA_.*/d' $(UCLIBC_DIR)/.oldconfig
+	(/bin/echo "# CONFIG_MIPS_O32_ABI is not set"; \
+	 /bin/echo "# CONFIG_MIPS_N32_ABI is not set"; \
+	 /bin/echo "# CONFIG_MIPS_N64_ABI is not set"; \
+	 /bin/echo "# CONFIG_MIPS_ISA_1 is not set"; \
+	 /bin/echo "# CONFIG_MIPS_ISA_2 is not set"; \
+	 /bin/echo "# CONFIG_MIPS_ISA_3 is not set"; \
+	 /bin/echo "# CONFIG_MIPS_ISA_4 is not set"; \
+	 /bin/echo "# CONFIG_MIPS_ISA_MIPS32 is not set"; \
+	 /bin/echo "# CONFIG_MIPS_ISA_MIPS64 is not set"; \
+	) >> $(UCLIBC_DIR)/.oldconfig
+ifeq ($(BR2_MIPS_OABI),y)
+	$(SED) 's/.*\(CONFIG_MIPS_O32_ABI\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_MIPS_EABI),y)
+	$(SED) 's/.*\(CONFIG_MIPS_N32_ABI\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_MIPS_ABI64),y)
+	$(SED) 's/.*\(CONFIG_MIPS_N64_ABI\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_mips_1),y)
+	$(SED) 's/.*\(CONFIG_MIPS_ISA_1\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_mips_2),y)
+	$(SED) 's/.*\(CONFIG_MIPS_ISA_2\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_mips_3),y)
+	$(SED) 's/.*\(CONFIG_MIPS_ISA_3\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_mips_4),y)
+	$(SED) 's/.*\(CONFIG_MIPS_ISA_4\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_mips_32),y)
+	$(SED) 's/.*\(CONFIG_MIPS_ISA_MIPS32\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_mips_32r2),y)
+	$(SED) 's/.*\(CONFIG_MIPS_ISA_MIPS32\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
+endif
+ifeq ($(BR2_mips_64),y)
+	$(SED) 's/.*\(CONFIG_MIPS_ISA_MIPS64\).*/\1=y/' $(UCLIBC_DIR)/.oldconfig
 endif
 endif
 ifeq ($(UCLIBC_TARGET_ARCH),sh)
@@ -367,7 +410,6 @@ uclibc-menuconfig: host-sed $(UCLIBC_DIR)/.config
 		RUNTIME_PREFIX=$(TOOL_BUILD_DIR)/uClibc_dev/ \
 		HOSTCC="$(HOSTCC)" \
 		menuconfig && \
-	cp -f $(UCLIBC_DIR)/.config $(UCLIBC_CONFIG_FILE) && \
 	touch -c $(UCLIBC_DIR)/.config
 
 
@@ -442,11 +484,13 @@ uclibc: $(cross_compiler) $(STAGING_DIR)/usr/lib/libc.a $(UCLIBC_TARGETS)
 
 uclibc-source: $(DL_DIR)/$(UCLIBC_SOURCE)
 
-uclibc-config: host-sed $(UCLIBC_DIR)/.config
+uclibc-unpacked: $(UCLIBC_DIR)/.unpacked
 
-uclibc-oldconfig: host-sed $(UCLIBC_DIR)/.oldconfig
+uclibc-config: $(UCLIBC_DIR)/.config
 
-uclibc-update:
+uclibc-oldconfig: $(UCLIBC_DIR)/.oldconfig
+
+uclibc-update: uclibc-config
 	cp -f $(UCLIBC_DIR)/.config $(UCLIBC_CONFIG_FILE)
 
 uclibc-configured: kernel-headers $(UCLIBC_DIR)/.configured

@@ -91,25 +91,43 @@ endif
 ifndef HOSTCXX
 HOSTCXX:=g++
 endif
+ifndef HOSTFC
+HOSTFC:=gfortran
+endif
+ifndef HOSTCPP
+HOSTCPP:=cpp
+endif
 ifndef HOSTLD
 HOSTLD:=ld
 endif
 ifndef HOSTLN
 HOSTLN:=ln
 endif
+ifndef HOSTNM
+HOSTNM:=nm
+endif
 HOSTAR:=$(shell $(CONFIG_SHELL) -c "which $(HOSTAR)" || type -p $(HOSTAR) || echo ar)
 HOSTAS:=$(shell $(CONFIG_SHELL) -c "which $(HOSTAS)" || type -p $(HOSTAS) || echo as)
 HOSTCC:=$(shell $(CONFIG_SHELL) -c "which $(HOSTCC)" || type -p $(HOSTCC) || echo gcc)
 HOSTCXX:=$(shell $(CONFIG_SHELL) -c "which $(HOSTCXX)" || type -p $(HOSTCXX) || echo g++)
+HOSTFC:=$(shell $(CONFIG_SHELL) -c "which $(HOSTLD)" || type -p $(HOSTLD) || echo || which g77 || type -p g77 || echo gfortran)
+HOSTCPP:=$(shell $(CONFIG_SHELL) -c "which $(HOSTCPP)" || type -p $(HOSTCPP) || echo cpp)
 HOSTLD:=$(shell $(CONFIG_SHELL) -c "which $(HOSTLD)" || type -p $(HOSTLD) || echo ld)
 HOSTLN:=$(shell $(CONFIG_SHELL) -c "which $(HOSTLN)" || type -p $(HOSTLN) || echo ln)
+HOSTNM:=$(shell $(CONFIG_SHELL) -c "which $(HOSTNM)" || type -p $(HOSTNM) || echo nm)
 ifndef CFLAGS_FOR_BUILD
 CFLAGS_FOR_BUILD:=-g -O2
 endif
-export HOSTAR HOSTAS HOSTCC HOSTCXX HOSTLD
+ifndef CXXFLAGS_FOR_BUILD
+CXXFLAGS_FOR_BUILD:=-g -O2
+endif
+ifndef FCFLAGS_FOR_BUILD
+FCFLAGS_FOR_BUILD:=-g -O2
+endif
+export HOSTAR HOSTAS HOSTCC HOSTCXX HOSTFC HOSTLD
 
 
-ifeq ($(strip $(BR2_HAVE_DOT_CONFIG)),y)
+ifeq ($(BR2_HAVE_DOT_CONFIG),y)
 
 # cc-option
 # Usage: cflags-y+=$(call cc-option, -march=winchip-c6, -march=i586)
@@ -331,7 +349,7 @@ sourceball:
 	bzip2 -9 buildroot.tar; \
 
 
-else # ifeq ($(strip $(BR2_HAVE_DOT_CONFIG)),y)
+else # ifeq ($(BR2_HAVE_DOT_CONFIG),y)
 
 all: menuconfig
 
@@ -416,11 +434,15 @@ clean:
 distclean: clean
 	rm -rf sources/*
 
-endif # ifeq ($(strip $(BR2_HAVE_DOT_CONFIG)),y)
+endif # ifeq ($(BR2_HAVE_DOT_CONFIG),y)
 
 %_defconfig: $(CONFIG)/conf
 	cp $(shell find ./target/ -name $@) .config
 	-@$(MAKE) oldconfig
+
+configured: dirs host-sed kernel-headers uclibc-config busybox-config linux26-config
+
+cross: $(BASE_TARGETS)
 
 help:
 	@echo 'Cleaning:'
