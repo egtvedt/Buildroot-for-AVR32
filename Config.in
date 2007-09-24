@@ -84,6 +84,14 @@ config BR2_STAGING_DIR
 	  Most people will leave this set to the default value of
 	  "$(BUILD_DIR)/staging_dir".
 
+config BR2_FPU_SUFFIX
+	bool "Add '_nofpu' suffix for softfloat toolchains"
+	default n
+	help
+	  If the toolchain is configured to use softfloat, then
+	  the "_nofpu" suffix will be added to the toolchain build
+	  directory name and to any rootfs image name
+
 config BR2_TOPDIR_PREFIX
 	string "Custom build dir prefix"
 	default ""
@@ -101,6 +109,19 @@ config BR2_TOPDIR_SUFFIX
 
 	  build_ARCH -> build_ARCH_[SUFFIX]
 	  toolchain_build_ARCH -> toolchain_build_ARCH_[SUFFIX]
+
+config BR2_ROOTFS_PREFIX
+	string "Custom root fs prefix"
+	default "rootfs"
+	help
+	  Add a custom string to the beginning of the root file system name.
+
+config BR2_ROOTFS_SUFFIX
+	string "Custom root fs suffix"
+	default "$(DATE)" if BR2_TARGET_ATMEL
+	default "" if !BR2_TARGET_ATMEL
+	help
+	  Add a custom string to the end of the root file system name.
 
 config BR2_GNU_BUILD_SUFFIX
 	string "GNU build hostname suffix"
@@ -131,6 +152,7 @@ config BR2_GNU_TARGET_SUFFIX
 	  Default options are:
 	      linux-uclibcgnueabi for ARM EABI
 	      linux-uclibc for the rest
+	      gnuhurd-uclibc for the hurd
 
 config BR2_JLEVEL
 	int "Number of jobs to run simultaneously"
@@ -155,6 +177,12 @@ config BR2_DEPRECATED
 	default n
 	help
 	  This option hides outdated/obsolete versions of packages.
+
+config BR2_RECENT
+	bool "Show packages that are of the latest major version"
+	default y
+	help
+	  This option show recent versions of packages.
 
 choice
 	prompt "strip"

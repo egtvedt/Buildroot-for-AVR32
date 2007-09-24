@@ -127,6 +127,7 @@ ifneq ($(BR2_ENABLE_LOCALE),y)
 GCC_ENABLE_CLOCALE:=--disable-clocale
 endif
 
+HOST_SOURCE+=gcc-source
 
 #############################################################
 #
@@ -242,6 +243,7 @@ $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 	(cd $(GCC_BUILD_DIR2); rm -rf config.cache; \
 		$(HOST_CONFIGURE_OPTS) \
 		GCC=$(TARGET_CROSS)gcc \
+		CPP=$(TARGET_CROSS)cpp \
 		LDFLAGS_FOR_TARGET="$(patsubst %,LDFLAGS+=-Wl$(comma)%,$(TARGET_LDFLAGS)) -L$(STAGING_DIR)/lib -L$(STAGING_DIR)/usr/lib" \
 		$(GCC_DIR)/configure \
 		--prefix=$(STAGING_DIR) \
@@ -267,7 +269,7 @@ $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 	touch $@
 
 $(GCC_BUILD_DIR2)/.compiled: $(GCC_BUILD_DIR2)/.configured
-	PATH=$(TARGET_PATH) $(MAKE) $(HOST_CONFIGURE_OPTS) -C $(GCC_BUILD_DIR2) all
+	PATH=$(TARGET_PATH) $(MAKE) $(HOST_CONFIGURE_OPTS) CPP=$(TARGET_CROSS)cpp -C $(GCC_BUILD_DIR2) all
 	touch $@
 
 $(GCC_BUILD_DIR2)/.installed: $(GCC_BUILD_DIR2)/.compiled
@@ -277,7 +279,7 @@ $(GCC_BUILD_DIR2)/.installed: $(GCC_BUILD_DIR2)/.compiled
 	-C $(GCC_BUILD_DIR2) install
 	if [ -d "$(STAGING_DIR)/usr/lib64" ]; then \
 		if [ ! -e "$(STAGING_DIR)/usr/lib" ]; then \
-			mkdir "$(STAGING_DIR)/usr/lib"; \
+			mkdir -p "$(STAGING_DIR)/usr/lib"; \
 		fi; \
 		mv "$(STAGING_DIR)/usr/lib64/"* "$(STAGING_DIR)/usr/lib/"; \
 		rmdir "$(STAGING_DIR)/usr/lib64"; \
@@ -332,13 +334,15 @@ $(GCC_BUILD_DIR2)/.libs_installed: $(GCC_BUILD_DIR2)/.installed
 ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
 	# These are in /lib, so...
 	rm -rf $(TARGET_DIR)/usr/lib/libgcc_s*.so*
-	cp -dpf $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib/libgcc_s* \
+	-cp -dpf $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib/libgcc_s* \
 		$(TARGET_DIR)/lib/
 	-strip --strip-unneeded $(TARGET_DIR)/lib/libgcc_s*
 endif
 ifeq ($(BR2_INSTALL_LIBSTDCPP),y)
-	cp -dpf $(STAGING_DIR)/lib/libstdc++.so* $(TARGET_DIR)/usr/lib/
+ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
+	-cp -dpf $(STAGING_DIR)/lib/libstdc++.so* $(TARGET_DIR)/usr/lib/
 	-strip --strip-unneeded $(TARGET_DIR)/usr/lib/libstdc++.so*
+endif
 endif
 ifeq ($(BR2_INSTALL_LIBGCJ),y)
 	cp -dpf $(STAGING_DIR)/lib/libgcj.so* $(TARGET_DIR)/usr/lib/
