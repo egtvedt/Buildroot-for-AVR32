@@ -1,6 +1,6 @@
-diff -urN haserl-0.9.20-0rig/src/haserl.c haserl-0.9.20/src/haserl.c
---- haserl-0.9.20-0rig/src/haserl.c	2007-10-30 22:58:00.000000000 +0100
-+++ haserl-0.9.20/src/haserl.c	2007-10-30 23:00:10.000000000 +0100
+diff -urN haserl-0.9.21-0rig/src/haserl.c haserl-0.9.21/src/haserl.c
+--- haserl-0.9.21-0rig/src/haserl.c	2007-12-13 22:58:00.000000000 +0100
++++ haserl-0.9.21/src/haserl.c	2007-12-13 23:00:10.000000000 +0100
 @@ -210,7 +210,7 @@
      }
    memcpy ((char *) (entry + strlen (prefix)), str, strlen (str));

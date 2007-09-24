@@ -11,6 +11,14 @@ DBUS_CAT:=$(ZCAT)
 DBUS_BINARY:=bus/dbus-daemon
 DBUS_TARGET_BINARY:=usr/bin/dbus-daemon
 
+ifeq ($(strip $(BR2_DBUS_EXPAT)),y)
+DBUS_XML:=expat
+DBUS_XML_DEP:=expat
+else
+DBUS_XML:=libxml
+DBUS_XML_DEP:=libxml2-headers
+endif
+
 $(DL_DIR)/$(DBUS_SOURCE):
 	$(WGET) -P $(DL_DIR) $(DBUS_SITE)/$(DBUS_SOURCE)
 
@@ -44,33 +52,33 @@ $(DBUS_DIR)/.configured: $(DBUS_DIR)/.unpacked
 		--disable-static \
 		--enable-dnotify \
 		--without-x \
-		--without-xml \
+		--with-xml=$(DBUS_XML) \
 		--with-system-socket=/var/run/dbus/system_bus_socket \
 		--with-system-pid-file=/var/run/messagebus.pid \
 	)
 	touch $@
 
 $(DBUS_DIR)/$(DBUS_BINARY): $(DBUS_DIR)/.configured
-	$(MAKE) DBUS_BUS_LIBS="$(STAGING_DIR)/usr/lib/libexpat.so $(STAGING_DIR)/usr/lib/libxml2.so" -C $(DBUS_DIR) all
+	$(MAKE) -C $(DBUS_DIR) all
 
 $(STAGING_DIR)/usr/lib/libdbus-1.so: $(DBUS_DIR)/$(DBUS_BINARY)
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(DBUS_DIR)/dbus install
+	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(DBUS_DIR) install
 
 $(TARGET_DIR)/$(DBUS_TARGET_BINARY): $(STAGING_DIR)/usr/lib/libdbus-1.so
 	mkdir -p $(TARGET_DIR)/var/run/dbus $(TARGET_DIR)/etc/init.d
-	$(MAKE) DESTDIR=$(TARGET_DIR) -C $(DBUS_DIR)/dbus install
-	rm -rf $(TARGET_DIR)/usr/lib/dbus-1.0
-	rm -f $(TARGET_DIR)/usr/lib/libdbus-1.la \
-		$(TARGET_DIR)/usr/lib/libdbus-1.so
-	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libdbus-1.so.3.2.0
-	$(MAKE) DESTDIR=$(TARGET_DIR) initddir=/etc/init.d -C $(DBUS_DIR)/bus install
+	$(MAKE) DESTDIR=$(TARGET_DIR) STRIPPROG='$(STRIPCMD)' \
+		initdir=/etc/init.d -C $(DBUS_DIR) install-strip
+	rm -rf $(TARGET_DIR)/usr/lib/dbus-1.0 \
+		$(TARGET_DIR)/usr/lib/libdbus-1.la \
+		$(TARGET_DIR)/usr/include/dbus-1.0 \
+		$(TARGET_DIR)/usr/lib/pkgconfig
 	$(INSTALL) -m 0755 package/dbus/S97messagebus $(TARGET_DIR)/etc/init.d
 	rm -f $(TARGET_DIR)/etc/init.d/messagebus
+ifneq ($(BR2_HAVE_MANPAGES),y)
 	rm -rf $(TARGET_DIR)/usr/share/man
-	rmdir --ignore-fail-on-non-empty $(TARGET_DIR)/usr/share
-	rm -rf $(TARGET_DIR)/etc/rc.d
+endif
 
-dbus: uclibc expat libxml2-headers $(TARGET_DIR)/$(DBUS_TARGET_BINARY)
+dbus: uclibc $(DBUS_XML_DEP) $(TARGET_DIR)/$(DBUS_TARGET_BINARY)
 
 dbus-clean:
 	rm -f $(TARGET_DIR)/etc/dbus-1/session.conf
