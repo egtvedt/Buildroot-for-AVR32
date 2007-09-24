@@ -5,16 +5,17 @@
 #############################################################
 # Copyright 2003-2005 Lennart Poettering <mzqnrzba@0pointer.de>
 #
-# This library is free software; you can redistribute it 
-# and/or modify it under the terms of the GNU Lesser General 
-# Public License as published by the Free Software Foundation; 
-# either version 2.1 of the License, or (at your option) any 
+# This library is free software; you can redistribute it
+# and/or modify it under the terms of the GNU Lesser General
+# Public License as published by the Free Software Foundation
+# either version 2.1 of the License, or (at your option) any
 # later version.
 
-LIBDAEMON_VERSION:=0.10
-LIBDAEMON_DIR:=$(BUILD_DIR)/libdaemon-$(LIBDAEMON_VERSION)
+LIBDAEMON_VERSION:=0.12
+LIBDAEMON_NAME:=libdaemon-$(LIBDAEMON_VERSION)
+LIBDAEMON_DIR:=$(BUILD_DIR)/$(LIBDAEMON_NAME)
 LIBDAEMON_SITE:=http://0pointer.de/lennart/projects/libdaemon/
-LIBDAEMON_SOURCE:=libdaemon-$(LIBDAEMON_VERSION).tar.gz
+LIBDAEMON_SOURCE:=$(LIBDAEMON_NAME).tar.gz
 LIBDAEMON_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(LIBDAEMON_SOURCE):
@@ -26,11 +27,11 @@ $(LIBDAEMON_DIR)/.unpacked: $(DL_DIR)/$(LIBDAEMON_SOURCE)
 	$(LIBDAEMON_CAT) $(DL_DIR)/$(LIBDAEMON_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(LIBDAEMON_DIR) package/libdaemon/ \*.patch
 	$(CONFIG_UPDATE) $(LIBDAEMON_DIR)
-	touch $(LIBDAEMON_DIR)/.unpacked
+	touch $@
 
 $(LIBDAEMON_DIR)/.configured: $(LIBDAEMON_DIR)/.unpacked
-	(cd $(LIBDAEMON_DIR) && rm -rf config.cache && autoconf)
-	( cd $(LIBDAEMON_DIR) && \
+	(cd $(LIBDAEMON_DIR) && rm -rf config.cache && autoreconf)
+	(cd $(LIBDAEMON_DIR) && \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
@@ -46,34 +47,44 @@ $(LIBDAEMON_DIR)/.configured: $(LIBDAEMON_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--includedir=/usr/include \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 		--disable-lynx \
 		--disable-shared \
-	);
-	touch $(LIBDAEMON_DIR)/.configured
+	)
+	touch $@
 
 $(LIBDAEMON_DIR)/.compiled: $(LIBDAEMON_DIR)/.configured
-	$(MAKE) -C $(LIBDAEMON_DIR)
-	touch $(LIBDAEMON_DIR)/.compiled
+	$(MAKE) LIBTOOL=$(LIBDAEMON_DIR)/libtool -C $(LIBDAEMON_DIR)
+	touch $@
 
 $(STAGING_DIR)/lib/libdaemon.a: $(LIBDAEMON_DIR)/.compiled
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBDAEMON_DIR) install
-	touch -c $(STAGING_DIR)/lib/libdaemon.a
+	touch -c $@
 
 #$(TARGET_DIR)/usr/lib/libdaemon.a: $(STAGING_DIR)/lib/libdaemon.a
-#	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libdaemon.a
+# -$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libdaemon.a
 
 libdaemon: uclibc pkgconfig $(STAGING_DIR)/lib/libdaemon.a
+
+libdaemon-unpacked: $(LIBDAEMON_DIR)/.unpacked
 
 libdaemon-clean:
 	-$(MAKE) -C $(LIBDAEMON_DIR) clean
 
+libdaemon-patch-prep: libdaemon-dirclean libdaemon-unpacked
+	cp -af $(LIBDAEMON_DIR) $(LIBDAEMON_DIR)-0rig
+
+libdaemon-patch:
+	(cd $(BUILD_DIR); \
+	diff -urN $(LIBDAEMON_NAME)-0rig $(LIBDAEMON_NAME) > ../../$(LIBDAEMON_NAME)-$(DATE).patch || echo)
+
 libdaemon-dirclean:
 	rm -rf $(LIBDAEMON_DIR)
+	rm -rf $(LIBDAEMON_DIR)-0rig
 
 #############################################################
 #
