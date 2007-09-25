@@ -212,10 +212,10 @@ index 6c4dc0a..d649974 100644
  }
 diff --git a/arch/avr32/boards/atstk1000/Kconfig b/arch/avr32/boards/atstk1000/Kconfig
 new file mode 100644
-index 0000000..718578f
+index 0000000..b1f5a62
 --- /dev/null
 +++ b/arch/avr32/boards/atstk1000/Kconfig
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,91 @@
 +# STK1000 customization
 +
 +if BOARD_ATSTK1002
@@ -294,9 +294,21 @@ index 0000000..718578f
 +
 +endchoice
 +
++config BOARD_ATSTK1002_ENABLE_AC97
++	bool "Use AC97C instead of ABDAC"
++	help
++	  Select this if you want to use the built-in AC97 controller
++	  instead of the built-in Audio Bitstream DAC. These share
++	  the same I/O pins on the AP7000, so both can't be enabled
++	  at the same time.
++
++	  Note that the STK1000/STK1002 kit doesn't ship with an AC97
++	  codec on board, so say N unless you've got an expansion
++	  board with an AC97 codec on it that you want to use.
++
 +endif	# stk 1002
 diff --git a/arch/avr32/boards/atstk1000/atstk1002.c b/arch/avr32/boards/atstk1000/atstk1002.c
-index e253e86..c958fd4 100644
+index e253e86..9a0f875 100644
 --- a/arch/avr32/boards/atstk1000/atstk1002.c
 +++ b/arch/avr32/boards/atstk1000/atstk1002.c
 @@ -11,10 +11,12 @@
@@ -488,7 +500,7 @@ index e253e86..c958fd4 100644
  #endif
  	/* USART 2/unused: expansion connector */
  	at32_map_usart(3, 2);	/* USART 3/C: /dev/ttyS2, DB9 */
-@@ -140,18 +276,46 @@ static int __init atstk1002_init(void)
+@@ -140,18 +276,50 @@ static int __init atstk1002_init(void)
  
  	at32_add_system_devices();
  
@@ -525,7 +537,11 @@ index e253e86..c958fd4 100644
 +	at32_add_device_mci(0, &mci0_data);
 +#endif
 +	at32_add_device_usba(0, NULL);
++#ifdef CONFIG_BOARD_ATSTK1002_ENABLE_AC97
++	at32_add_device_ac97c(0);
++#else
 +	at32_add_device_abdac(0);
++#endif
 +#ifndef CONFIG_BOARD_ATSTK1002_SW3_CUSTOM
 +	at32_add_device_ssc(0, ATMEL_SSC_TX);
 +#endif
@@ -2310,9 +2326,18 @@ index 0000000..fb654b3
 +}
 +EXPORT_SYMBOL(find_dma_controller);
 diff --git a/arch/avr32/kernel/setup.c b/arch/avr32/kernel/setup.c
-index b279d66..d08b0bc 100644
+index b279d66..4b4c188 100644
 --- a/arch/avr32/kernel/setup.c
 +++ b/arch/avr32/kernel/setup.c
+@@ -248,7 +248,7 @@ static int __init early_parse_fbmem(char *p)
+ 
+ 	fbmem_size = memparse(p, &p);
+ 	if (*p == '@') {
+-		fbmem_start = memparse(p, &p);
++		fbmem_start = memparse(p + 1, &p);
+ 		ret = add_reserved_region(fbmem_start,
+ 					  fbmem_start + fbmem_size - 1,
+ 					  "Framebuffer");
 @@ -313,7 +313,7 @@ __tagtable(ATAG_MEM, parse_tag_mem);
  
  static int __init parse_tag_rdimg(struct tag *tag)
@@ -2406,10 +2431,10 @@ index 90f207e..7c4987f 100644
  	at32_portmux_init();
  }
 diff --git a/arch/avr32/mach-at32ap/at32ap7000.c b/arch/avr32/mach-at32ap/at32ap7000.c
-index 4dda42d..1130c8a 100644
+index 4dda42d..59555d8 100644
 --- a/arch/avr32/mach-at32ap/at32ap7000.c
 +++ b/arch/avr32/mach-at32ap/at32ap7000.c
-@@ -17,14 +17,20 @@
+@@ -17,14 +17,14 @@
  #include <asm/arch/at32ap7000.h>
  #include <asm/arch/board.h>
  #include <asm/arch/portmux.h>
@@ -2423,16 +2448,10 @@ index 4dda42d..1130c8a 100644
 -#include "sm.h"
 +#include "pm.h"
 +
-+/*
-+ * We can reduce the code size a bit by using a constant here. Since
-+ * this file is completely chip-specific, it's safe to not use
-+ * ioremap. Generic drivers should of course never do this.
-+ */
-+#define AT32_PM_BASE	0xfff00000
  
  #define PBMEM(base)					\
  	{						\
-@@ -88,6 +94,8 @@ static struct clk devname##_##_name = {				\
+@@ -88,6 +88,8 @@ static struct clk devname##_##_name = {				\
  	.index		= _index,				\
  }
  
@@ -2441,7 +2460,7 @@ index 4dda42d..1130c8a 100644
  unsigned long at32ap7000_osc_rates[3] = {
  	[0] = 32768,
  	/* FIXME: these are ATSTK1002-specific */
-@@ -104,11 +112,11 @@ static unsigned long pll_get_rate(struct clk *clk, unsigned long control)
+@@ -104,11 +106,11 @@ static unsigned long pll_get_rate(struct clk *clk, unsigned long control)
  {
  	unsigned long div, mul, rate;
  
@@ -2456,7 +2475,7 @@ index 4dda42d..1130c8a 100644
  
  	rate = clk->parent->get_rate(clk->parent);
  	rate = (rate + div / 2) / div;
-@@ -121,7 +129,7 @@ static unsigned long pll0_get_rate(struct clk *clk)
+@@ -121,7 +123,7 @@ static unsigned long pll0_get_rate(struct clk *clk)
  {
  	u32 control;
  
@@ -2465,7 +2484,7 @@ index 4dda42d..1130c8a 100644
  
  	return pll_get_rate(clk, control);
  }
-@@ -130,7 +138,7 @@ static unsigned long pll1_get_rate(struct clk *clk)
+@@ -130,7 +132,7 @@ static unsigned long pll1_get_rate(struct clk *clk)
  {
  	u32 control;
  
@@ -2474,7 +2493,7 @@ index 4dda42d..1130c8a 100644
  
  	return pll_get_rate(clk, control);
  }
-@@ -187,108 +195,139 @@ static unsigned long bus_clk_get_rate(struct clk *clk, unsigned int shift)
+@@ -187,108 +189,139 @@ static unsigned long bus_clk_get_rate(struct clk *clk, unsigned int shift)
  
  static void cpu_clk_mode(struct clk *clk, int enabled)
  {
@@ -2646,7 +2665,7 @@ index 4dda42d..1130c8a 100644
  
  	return bus_clk_get_rate(clk, shift);
  }
-@@ -296,6 +335,7 @@ static unsigned long pbb_clk_get_rate(struct clk *clk)
+@@ -296,6 +329,7 @@ static unsigned long pbb_clk_get_rate(struct clk *clk)
  static struct clk cpu_clk = {
  	.name		= "cpu",
  	.get_rate	= cpu_clk_get_rate,
@@ -2654,7 +2673,7 @@ index 4dda42d..1130c8a 100644
  	.users		= 1,
  };
  static struct clk hsb_clk = {
-@@ -327,12 +367,12 @@ static void genclk_mode(struct clk *clk, int enabled)
+@@ -327,12 +361,12 @@ static void genclk_mode(struct clk *clk, int enabled)
  {
  	u32 control;
  
@@ -2671,7 +2690,7 @@ index 4dda42d..1130c8a 100644
  }
  
  static unsigned long genclk_get_rate(struct clk *clk)
-@@ -340,9 +380,9 @@ static unsigned long genclk_get_rate(struct clk *clk)
+@@ -340,9 +374,9 @@ static unsigned long genclk_get_rate(struct clk *clk)
  	u32 control;
  	unsigned long div = 1;
  
@@ -2684,7 +2703,7 @@ index 4dda42d..1130c8a 100644
  
  	return clk->parent->get_rate(clk->parent) / div;
  }
-@@ -353,23 +393,22 @@ static long genclk_set_rate(struct clk *clk, unsigned long rate, int apply)
+@@ -353,23 +387,22 @@ static long genclk_set_rate(struct clk *clk, unsigned long rate, int apply)
  	unsigned long parent_rate, actual_rate, div;
  
  	parent_rate = clk->parent->get_rate(clk->parent);
@@ -2714,7 +2733,7 @@ index 4dda42d..1130c8a 100644
  
  	return actual_rate;
  }
-@@ -378,24 +417,24 @@ int genclk_set_parent(struct clk *clk, struct clk *parent)
+@@ -378,24 +411,24 @@ int genclk_set_parent(struct clk *clk, struct clk *parent)
  {
  	u32 control;
  
@@ -2747,7 +2766,7 @@ index 4dda42d..1130c8a 100644
  	clk->parent = parent;
  
  	return 0;
-@@ -408,11 +447,11 @@ static void __init genclk_init_parent(struct clk *clk)
+@@ -408,11 +441,11 @@ static void __init genclk_init_parent(struct clk *clk)
  
  	BUG_ON(clk->index > 7);
  
@@ -2763,7 +2782,7 @@ index 4dda42d..1130c8a 100644
  
  	clk->parent = parent;
  }
-@@ -420,21 +459,53 @@ static void __init genclk_init_parent(struct clk *clk)
+@@ -420,21 +453,53 @@ static void __init genclk_init_parent(struct clk *clk)
  /* --------------------------------------------------------------------
   *  System peripherals
   * -------------------------------------------------------------------- */
@@ -2785,8 +2804,7 @@ index 4dda42d..1130c8a 100644
 +		.flags	= IORESOURCE_MEM,
 +	},
 +	IRQ(20),
- };
--static struct clk at32_sm_pclk = {
++};
 +
 +static struct resource at32ap700x_rtc0_resource[] = {
 +	{
@@ -2803,7 +2821,8 @@ index 4dda42d..1130c8a 100644
 +		.end	= 0xfff000bf,
 +		.flags	= IORESOURCE_MEM,
 +	},
-+};
+ };
+-static struct clk at32_sm_pclk = {
 +
 +static struct resource at32_eic0_resource[] = {
 +	{
@@ -2830,7 +2849,7 @@ index 4dda42d..1130c8a 100644
  	.parent		= &pbb_clk,
  	.mode		= pbb_clk_mode,
  	.get_rate	= pbb_clk_get_rate,
-@@ -491,6 +562,17 @@ static struct clk pico_clk = {
+@@ -491,6 +556,17 @@ static struct clk pico_clk = {
  	.users		= 1,
  };
  
@@ -2848,7 +2867,7 @@ index 4dda42d..1130c8a 100644
  /* --------------------------------------------------------------------
   * HMATRIX
   * -------------------------------------------------------------------- */
-@@ -583,12 +665,14 @@ DEV_CLK(mck, pio4, pba, 14);
+@@ -583,12 +659,14 @@ DEV_CLK(mck, pio4, pba, 14);
  
  void __init at32_add_system_devices(void)
  {
@@ -2866,7 +2885,7 @@ index 4dda42d..1130c8a 100644
  
  	platform_device_register(&at32_systc0_device);
  
-@@ -894,6 +978,83 @@ at32_add_device_spi(unsigned int id, struct spi_board_info *b, unsigned int n)
+@@ -894,6 +972,83 @@ at32_add_device_spi(unsigned int id, struct spi_board_info *b, unsigned int n)
  }
  
  /* --------------------------------------------------------------------
@@ -2950,7 +2969,7 @@ index 4dda42d..1130c8a 100644
   *  LCDC
   * -------------------------------------------------------------------- */
  static struct atmel_lcdfb_info atmel_lcdfb0_data;
-@@ -1013,6 +1174,228 @@ err_dup_modedb:
+@@ -1013,6 +1168,228 @@ err_dup_modedb:
  }
  
  /* --------------------------------------------------------------------
@@ -3179,7 +3198,7 @@ index 4dda42d..1130c8a 100644
   *  GCLK
   * -------------------------------------------------------------------- */
  static struct clk gclk0 = {
-@@ -1066,7 +1449,7 @@ struct clk *at32_clock_list[] = {
+@@ -1066,7 +1443,7 @@ struct clk *at32_clock_list[] = {
  	&hsb_clk,
  	&pba_clk,
  	&pbb_clk,
@@ -3188,7 +3207,7 @@ index 4dda42d..1130c8a 100644
  	&at32_intc0_pclk,
  	&hmatrix_clk,
  	&ebi_clk,
-@@ -1075,6 +1458,7 @@ struct clk *at32_clock_list[] = {
+@@ -1075,6 +1452,7 @@ struct clk *at32_clock_list[] = {
  	&smc0_mck,
  	&pdc_hclk,
  	&pdc_pclk,
@@ -3196,7 +3215,7 @@ index 4dda42d..1130c8a 100644
  	&pico_clk,
  	&pio0_mck,
  	&pio1_mck,
-@@ -1092,8 +1476,18 @@ struct clk *at32_clock_list[] = {
+@@ -1092,8 +1470,18 @@ struct clk *at32_clock_list[] = {
  	&macb1_pclk,
  	&atmel_spi0_spi_clk,
  	&atmel_spi1_spi_clk,
@@ -3215,7 +3234,7 @@ index 4dda42d..1130c8a 100644
  	&gclk0,
  	&gclk1,
  	&gclk2,
-@@ -1113,18 +1507,20 @@ void __init at32_portmux_init(void)
+@@ -1113,18 +1501,20 @@ void __init at32_portmux_init(void)
  
  void __init at32_clock_init(void)
  {
@@ -3241,7 +3260,7 @@ index 4dda42d..1130c8a 100644
  		pll1.parent = &osc1;
  
  	genclk_init_parent(&gclk0);
-@@ -1133,6 +1529,7 @@ void __init at32_clock_init(void)
+@@ -1133,6 +1523,7 @@ void __init at32_clock_init(void)
  	genclk_init_parent(&gclk3);
  	genclk_init_parent(&gclk4);
  	genclk_init_parent(&atmel_lcdfb0_pixclk);
@@ -3249,7 +3268,7 @@ index 4dda42d..1130c8a 100644
  
  	/*
  	 * Turn on all clocks that have at least one user already, and
-@@ -1157,8 +1554,8 @@ void __init at32_clock_init(void)
+@@ -1157,8 +1548,8 @@ void __init at32_clock_init(void)
  			pbb_mask |= 1 << clk->index;
  	}
  
@@ -3262,6 +3281,130 @@ index 4dda42d..1130c8a 100644
 +	pm_writel(PBA_MASK, pba_mask);
 +	pm_writel(PBB_MASK, pbb_mask);
  }
+diff --git a/arch/avr32/mach-at32ap/clock.c b/arch/avr32/mach-at32ap/clock.c
+index 0f8c89c..4642117 100644
+--- a/arch/avr32/mach-at32ap/clock.c
++++ b/arch/avr32/mach-at32ap/clock.c
+@@ -150,3 +150,119 @@ struct clk *clk_get_parent(struct clk *clk)
+ 	return clk->parent;
+ }
+ EXPORT_SYMBOL(clk_get_parent);
++
++
++
++#ifdef CONFIG_DEBUG_FS
++
++/* /sys/kernel/debug/at32ap_clk */
++
++#include <linux/io.h>
++#include <linux/debugfs.h>
++#include <linux/seq_file.h>
++#include "pm.h"
++
++
++#define	NEST_DELTA	2
++#define	NEST_MAX	6
++
++struct clkinf {
++	struct seq_file	*s;
++	unsigned	nest;
++};
++
++static void
++dump_clock(struct clk *parent, struct clkinf *r)
++{
++	unsigned	nest = r->nest;
++	char		buf[16 + NEST_MAX];
++	struct clk	*clk;
++	unsigned	i;
++
++	/* skip clocks coupled to devices that aren't registered */
++	if (parent->dev && !parent->dev->bus_id[0] && !parent->users)
++		return;
++
++	/* <nest spaces> name <pad to end> */
++	memset(buf, ' ', sizeof(buf) - 1);
++	buf[sizeof(buf) - 1] = 0;
++	i = strlen(parent->name);
++	memcpy(buf + nest, parent->name,
++			min(i, (unsigned)(sizeof(buf) - 1 - nest)));
++
++	seq_printf(r->s, "%s%c users=%2d %-3s %9ld Hz",
++		buf, parent->set_parent ? '*' : ' ',
++		parent->users,
++		parent->users ? "on" : "off",	/* NOTE: not-paranoid!! */
++		clk_get_rate(parent));
++	if (parent->dev)
++		seq_printf(r->s, ", for %s", parent->dev->bus_id);
++	seq_printf(r->s, "\n");
++
++	/* cost of this scan is small, but not linear... */
++	r->nest = nest + NEST_DELTA;
++	for (i = 3; i < at32_nr_clocks; i++) {
++		clk = at32_clock_list[i];
++		if (clk->parent == parent)
++			dump_clock(clk, r);
++	}
++	r->nest = nest;
++}
++
++static int clk_show(struct seq_file *s, void *unused)
++{
++	struct clkinf	r;
++	int		i;
++
++	/* show all the power manager registers */
++	seq_printf(s, "MCCTRL  = %8x\n", pm_readl(MCCTRL));
++	seq_printf(s, "CKSEL   = %8x\n", pm_readl(CKSEL));
++	seq_printf(s, "CPUMASK = %8x\n", pm_readl(CPU_MASK));
++	seq_printf(s, "HSBMASK = %8x\n", pm_readl(HSB_MASK));
++	seq_printf(s, "PBAMASK = %8x\n", pm_readl(PBA_MASK));
++	seq_printf(s, "PBBMASK = %8x\n", pm_readl(PBB_MASK));
++	seq_printf(s, "PLL0    = %8x\n", pm_readl(PLL0));
++	seq_printf(s, "PLL1    = %8x\n", pm_readl(PLL1));
++	seq_printf(s, "IMR     = %8x\n", pm_readl(IMR));
++	for (i = 0; i < 8; i++) {
++		if (i == 5)
++			continue;
++		seq_printf(s, "GCCTRL%d = %8x\n", i, pm_readl(GCCTRL(i)));
++	}
++
++	seq_printf(s, "\n");
++
++	/* show clock tree as derived from the three oscillators
++	 * we "know" are at the head of the list
++	 */
++	r.s = s;
++	r.nest = 0;
++	dump_clock(at32_clock_list[0], &r);
++	dump_clock(at32_clock_list[1], &r);
++	dump_clock(at32_clock_list[2], &r);
++
++	return 0;
++}
++
++static int clk_open(struct inode *inode, struct file *file)
++{
++	return single_open(file, clk_show, NULL);
++}
++
++static const struct file_operations clk_operations = {
++	.open		= clk_open,
++	.read		= seq_read,
++	.llseek		= seq_lseek,
++	.release	= single_release,
++};
++
++static int __init clk_debugfs_init(void)
++{
++	(void) debugfs_create_file("at32ap_clk", S_IFREG | S_IRUGO,
++			NULL, NULL, &clk_operations);
++
++	return 0;
++}
++postcore_initcall(clk_debugfs_init);
++
++#endif
 diff --git a/arch/avr32/mach-at32ap/cpufreq.c b/arch/avr32/mach-at32ap/cpufreq.c
 new file mode 100644
 index 0000000..235524b
@@ -4250,10 +4393,21 @@ index 0000000..3d4810d
 +}
 +late_initcall(gpio_dev_init);
 diff --git a/arch/avr32/mach-at32ap/pio.c b/arch/avr32/mach-at32ap/pio.c
-index 1eb99b8..153bb9a 100644
+index 1eb99b8..c978c36 100644
 --- a/arch/avr32/mach-at32ap/pio.c
 +++ b/arch/avr32/mach-at32ap/pio.c
-@@ -158,6 +158,82 @@ fail:
+@@ -110,6 +110,10 @@ void __init at32_select_gpio(unsigned int pin, unsigned long flags)
+ 			pio_writel(pio, SODR, mask);
+ 		else
+ 			pio_writel(pio, CODR, mask);
++		if (flags & AT32_GPIOF_MULTIDRV)
++			pio_writel(pio, MDER, mask);
++		else
++			pio_writel(pio, MDDR, mask);
+ 		pio_writel(pio, PUDR, mask);
+ 		pio_writel(pio, OER, mask);
+ 	} else {
+@@ -158,6 +162,82 @@ fail:
  	dump_stack();
  }
  
@@ -4338,15 +4492,23 @@ index 1eb99b8..153bb9a 100644
  /* GPIO API */
 diff --git a/arch/avr32/mach-at32ap/pm.h b/arch/avr32/mach-at32ap/pm.h
 new file mode 100644
-index 0000000..a1f8ace
+index 0000000..47efd0d
 --- /dev/null
 +++ b/arch/avr32/mach-at32ap/pm.h
-@@ -0,0 +1,112 @@
+@@ -0,0 +1,120 @@
 +/*
 + * Register definitions for the Power Manager (PM)
 + */
 +#ifndef __ARCH_AVR32_MACH_AT32AP_PM_H__
 +#define __ARCH_AVR32_MACH_AT32AP_PM_H__
++
++/*
++ * We can reduce the code size a bit by using a constant here. Since
++ * this file is only used on AVR32 AP CPUs with segmentation enabled,
++ * it's safe to not use ioremap. Generic drivers should of course
++ * never do this.
++ */
++#define AT32_PM_BASE	0xfff00000
 +
 +/* PM register offsets */
 +#define PM_MCCTRL				0x0000
@@ -11995,10 +12157,10 @@ index c6e2266..965a78b 100644
  obj-$(CONFIG_BACKLIGHT_HP680)	+= hp680_bl.o
 diff --git a/drivers/video/backlight/ltv350qv.c b/drivers/video/backlight/ltv350qv.c
 new file mode 100644
-index 0000000..342b97a
+index 0000000..64ce69e
 --- /dev/null
 +++ b/drivers/video/backlight/ltv350qv.c
-@@ -0,0 +1,340 @@
+@@ -0,0 +1,339 @@
 +/*
 + * Power control for Samsung LTV350QV Quarter VGA LCD Panel
 + *
@@ -12046,7 +12208,6 @@ index 0000000..342b97a
 +	};
 +	struct spi_transfer value_xfer = {
 +		.len		= 3,
-+		.cs_change	= 1,
 +	};
 +
 +	spi_message_init(&msg);
@@ -12516,10 +12677,17 @@ index 9fd2e32..9b36eb8 100644
 +
  #endif /* __ASM_ARCH_BOARD_H */
 diff --git a/include/asm-avr32/arch-at32ap/portmux.h b/include/asm-avr32/arch-at32ap/portmux.h
-index 9930871..0f95567 100644
+index 9930871..135e034 100644
 --- a/include/asm-avr32/arch-at32ap/portmux.h
 +++ b/include/asm-avr32/arch-at32ap/portmux.h
-@@ -25,4 +25,16 @@ void at32_select_periph(unsigned int pin, unsigned int periph,
+@@ -19,10 +19,23 @@
+ #define AT32_GPIOF_OUTPUT	0x00000002	/* (OUT) Enable output driver */
+ #define AT32_GPIOF_HIGH		0x00000004	/* (OUT) Set output high */
+ #define AT32_GPIOF_DEGLITCH	0x00000008	/* (IN) Filter glitches */
++#define AT32_GPIOF_MULTIDRV	0x00000010	/* Enable multidriver option */
+ 
+ void at32_select_periph(unsigned int pin, unsigned int periph,
+ 			unsigned long flags);
  void at32_select_gpio(unsigned int pin, unsigned long flags);
  void at32_reserve_pin(unsigned int pin);
  
@@ -12569,28 +12737,6 @@ index 265a9ea..0000000
 -extern struct at32_sm system_manager;
 -
 -#endif /* __ASM_AVR32_AT32_SM_H__ */
-diff --git a/include/asm-avr32/atomic.h b/include/asm-avr32/atomic.h
-index b9c2548..7ef3862 100644
---- a/include/asm-avr32/atomic.h
-+++ b/include/asm-avr32/atomic.h
-@@ -101,7 +101,7 @@ static inline int atomic_sub_unless(atomic_t *v, int a, int u)
- 		"	mov	%1, 1\n"
- 		"1:"
- 		: "=&r"(tmp), "=&r"(result), "=o"(v->counter)
--		: "m"(v->counter), "rKs21"(a), "rKs21"(u)
-+		: "m"(v->counter), "rKs21"(a), "rKs21"(u), "1"(result)
- 		: "cc", "memory");
- 
- 	return result;
-@@ -137,7 +137,7 @@ static inline int atomic_add_unless(atomic_t *v, int a, int u)
- 			"	mov	%1, 1\n"
- 			"1:"
- 			: "=&r"(tmp), "=&r"(result), "=o"(v->counter)
--			: "m"(v->counter), "r"(a), "ir"(u)
-+			: "m"(v->counter), "r"(a), "ir"(u), "1"(result)
- 			: "cc", "memory");
- 	}
- 
 diff --git a/include/asm-avr32/dma-controller.h b/include/asm-avr32/dma-controller.h
 new file mode 100644
 index 0000000..56a4965
@@ -12763,6 +12909,100 @@ index 0000000..56a4965
 +extern struct dma_controller *find_dma_controller(int id);
 +
 +#endif /* __ASM_AVR32_DMA_CONTROLLER_H */
+diff --git a/include/asm-avr32/io.h b/include/asm-avr32/io.h
+index e30d4b3..64bb92b 100644
+--- a/include/asm-avr32/io.h
++++ b/include/asm-avr32/io.h
+@@ -255,6 +255,8 @@ static inline void memset_io(volatile void __iomem *addr, unsigned char val,
+ 	memset((void __force *)addr, val, count);
+ }
+ 
++#define mmiowb()
++
+ #define IO_SPACE_LIMIT	0xffffffff
+ 
+ extern void __iomem *__ioremap(unsigned long offset, size_t size,
+diff --git a/include/asm-avr32/pgalloc.h b/include/asm-avr32/pgalloc.h
+index bb82e70..0e680f4 100644
+--- a/include/asm-avr32/pgalloc.h
++++ b/include/asm-avr32/pgalloc.h
+@@ -27,13 +27,7 @@ static __inline__ void pmd_populate(struct mm_struct *mm, pmd_t *pmd,
+  */
+ static __inline__ pgd_t *pgd_alloc(struct mm_struct *mm)
+ {
+-	unsigned int pgd_size = (USER_PTRS_PER_PGD * sizeof(pgd_t));
+-	pgd_t *pgd = kmalloc(pgd_size, GFP_KERNEL);
+-
+-	if (pgd)
+-		memset(pgd, 0, pgd_size);
+-
+-	return pgd;
++	return kcalloc(USER_PTRS_PER_PGD, sizeof(pgd_t), GFP_KERNEL);
+ }
+ 
+ static inline void pgd_free(pgd_t *pgd)
+@@ -44,18 +38,9 @@ static inline void pgd_free(pgd_t *pgd)
+ static inline pte_t *pte_alloc_one_kernel(struct mm_struct *mm,
+ 					  unsigned long address)
+ {
+-	int count = 0;
+ 	pte_t *pte;
+ 
+-	do {
+-		pte = (pte_t *) __get_free_page(GFP_KERNEL | __GFP_REPEAT);
+-		if (pte)
+-			clear_page(pte);
+-		else {
+-			current->state = TASK_UNINTERRUPTIBLE;
+-			schedule_timeout(HZ);
+-		}
+-	} while (!pte && (count++ < 10));
++	pte = (pte_t *)get_zeroed_page(GFP_KERNEL | __GFP_REPEAT);
+ 
+ 	return pte;
+ }
+@@ -63,18 +48,9 @@ static inline pte_t *pte_alloc_one_kernel(struct mm_struct *mm,
+ static inline struct page *pte_alloc_one(struct mm_struct *mm,
+ 					 unsigned long address)
+ {
+-	int count = 0;
+ 	struct page *pte;
+ 
+-	do {
+-		pte = alloc_pages(GFP_KERNEL, 0);
+-		if (pte)
+-			clear_page(page_address(pte));
+-		else {
+-			current->state = TASK_UNINTERRUPTIBLE;
+-			schedule_timeout(HZ);
+-		}
+-	} while (!pte && (count++ < 10));
++	pte = alloc_page(GFP_KERNEL | __GFP_REPEAT | __GFP_ZERO);
+ 
+ 	return pte;
+ }
+diff --git a/include/asm-avr32/pgtable.h b/include/asm-avr32/pgtable.h
+index f6cc2b0..66e58d7 100644
+--- a/include/asm-avr32/pgtable.h
++++ b/include/asm-avr32/pgtable.h
+@@ -32,8 +32,6 @@
+ #define USER_PTRS_PER_PGD	(TASK_SIZE / PGDIR_SIZE)
+ #define FIRST_USER_ADDRESS	0
+ 
+-#define PTE_PHYS_MASK	0x1ffff000
+-
+ #ifndef __ASSEMBLY__
+ extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
+ extern void paging_init(void);
+@@ -293,7 +291,7 @@ static inline pte_t pte_mkyoung(pte_t pte)
+  * trivial.
+  */
+ #define pages_to_mb(x)	((x) >> (20-PAGE_SHIFT))
+-#define pte_page(x) 	phys_to_page(pte_val(x) & PTE_PHYS_MASK)
++#define pte_page(x)	(pfn_to_page(pte_pfn(x)))
+ 
+ /*
+  * Mark the prot value as uncacheable and unbufferable
 diff --git a/include/asm-avr32/unaligned.h b/include/asm-avr32/unaligned.h
 index 3042723..36f5fd4 100644
 --- a/include/asm-avr32/unaligned.h
@@ -13485,39 +13725,1934 @@ index f7844f6..6631586 100755
  	} elsif ($arch =~ /^i[3456]86$/) {
  		#c0105234:       81 ec ac 05 00 00       sub    $0x5ac,%esp
  		$re = qr/^.*[as][du][db]    \$(0x$x{1,8}),\%esp$/o;
+diff --git a/scripts/kallsyms.c b/scripts/kallsyms.c
+index 8b809b2..9ff8502 100644
+--- a/scripts/kallsyms.c
++++ b/scripts/kallsyms.c
+@@ -378,6 +378,17 @@ static void build_initial_tok_table(void)
+ 	table_cnt = pos;
+ }
+ 
++static void *find_token(unsigned char *str, int len, unsigned char *token)
++{
++	int i;
++
++	for (i = 0; i < len - 1; i++) {
++		if (str[i] == token[0] && str[i+1] == token[1])
++			return &str[i];
++	}
++	return NULL;
++}
++
+ /* replace a given token in all the valid symbols. Use the sampled symbols
+  * to update the counts */
+ static void compress_symbols(unsigned char *str, int idx)
+@@ -391,7 +402,7 @@ static void compress_symbols(unsigned char *str, int idx)
+ 		p1 = table[i].sym;
+ 
+ 		/* find the token on the symbol */
+-		p2 = memmem(p1, len, str, 2);
++		p2 = find_token(p1, len, str);
+ 		if (!p2) continue;
+ 
+ 		/* decrease the counts for this symbol's tokens */
+@@ -410,7 +421,7 @@ static void compress_symbols(unsigned char *str, int idx)
+ 			if (size < 2) break;
+ 
+ 			/* find the token on the symbol */
+-			p2 = memmem(p1, size, str, 2);
++			p2 = find_token(p1, size, str);
+ 
+ 		} while (p2);
+ 
+diff --git a/scripts/mod/modpost.h b/scripts/mod/modpost.h
+index 0858caa..91ed78f 100644
+--- a/scripts/mod/modpost.h
++++ b/scripts/mod/modpost.h
+@@ -9,6 +9,11 @@
+ #include <unistd.h>
+ #include <elf.h>
+ 
++#ifdef __APPLE__
++typedef uint16_t Elf32_Section;
++typedef uint16_t Elf64_Section;
++#endif
++
+ #include "elfconfig.h"
+ 
+ #if KERNEL_ELFCLASS == ELFCLASS32
 diff --git a/sound/Kconfig b/sound/Kconfig
-index 9ea4738..9217739 100644
+index 9ea4738..f0551c8 100644
 --- a/sound/Kconfig
 +++ b/sound/Kconfig
-@@ -63,9 +63,13 @@ source "sound/aoa/Kconfig"
+@@ -63,6 +63,12 @@ source "sound/aoa/Kconfig"
  
  source "sound/arm/Kconfig"
  
++source "sound/avr32/Kconfig"
++
 +if SPI
 +source "sound/spi/Kconfig"
 +endif
 +
  source "sound/mips/Kconfig"
  
--# the following will depend on the order of config.
-+# tee following will depend on the order of config.
- # here assuming USB is defined before ALSA
- source "sound/usb/Kconfig"
- 
+ # the following will depend on the order of config.
 diff --git a/sound/Makefile b/sound/Makefile
-index b7c7fb7..581ea5e 100644
+index b7c7fb7..25f6042 100644
 --- a/sound/Makefile
 +++ b/sound/Makefile
-@@ -5,7 +5,8 @@ obj-$(CONFIG_SOUND) += soundcore.o
+@@ -5,7 +5,9 @@ obj-$(CONFIG_SOUND) += soundcore.o
  obj-$(CONFIG_SOUND_PRIME) += sound_firmware.o
  obj-$(CONFIG_SOUND_PRIME) += oss/
  obj-$(CONFIG_DMASOUND) += oss/
 -obj-$(CONFIG_SND) += core/ i2c/ drivers/ isa/ pci/ ppc/ arm/ synth/ usb/ sparc/ parisc/ pcmcia/ mips/ soc/
-+obj-$(CONFIG_SND) += core/ i2c/ drivers/ isa/ pci/ ppc/ arm/ synth/ usb/ \
++obj-$(CONFIG_SND) += core/ i2c/ drivers/ isa/ pci/ ppc/ arm/ avr32/ synth/ usb/ \
 +		      sparc/ spi/ parisc/ pcmcia/ mips/ soc/
++
  obj-$(CONFIG_SND_AOA) += aoa/
  
  # This one must be compilable even if sound is configured out
+diff --git a/sound/avr32/Kconfig b/sound/avr32/Kconfig
+new file mode 100644
+index 0000000..17d1d91
+--- /dev/null
++++ b/sound/avr32/Kconfig
+@@ -0,0 +1,11 @@
++menu "AVR32 devices"
++	depends on SND != n && AVR32
++
++config SND_ATMEL_AC97
++	tristate "Atmel AC97 Controller Driver"
++	select SND_PCM
++	select SND_AC97_CODEC
++	help
++	  ALSA sound driver for the Atmel AC97 controller.
++
++endmenu
+diff --git a/sound/avr32/Makefile b/sound/avr32/Makefile
+new file mode 100644
+index 0000000..5d87d0e
+--- /dev/null
++++ b/sound/avr32/Makefile
+@@ -0,0 +1,3 @@
++snd-atmel-ac97-objs		:= ac97c.o
++
++obj-$(CONFIG_SND_ATMEL_AC97)	+= snd-atmel-ac97.o
+diff --git a/sound/avr32/ac97c.c b/sound/avr32/ac97c.c
+new file mode 100644
+index 0000000..0ec0b1c
+--- /dev/null
++++ b/sound/avr32/ac97c.c
+@@ -0,0 +1,914 @@
++/*
++ * Driver for the Atmel AC97 controller
++ *
++ * Copyright (C) 2005-2007 Atmel Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published by
++ * the Free Software Foundation.
++ */
++#include <linux/clk.h>
++#include <linux/delay.h>
++#include <linux/dma-mapping.h>
++#include <linux/init.h>
++#include <linux/interrupt.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/mutex.h>
++#include <linux/io.h>
++
++#include <sound/driver.h>
++#include <sound/core.h>
++#include <sound/initval.h>
++#include <sound/pcm.h>
++#include <sound/pcm_params.h>
++#include <sound/ac97_codec.h>
++#include <sound/memalloc.h>
++
++#include <asm/dma-controller.h>
++
++#include "ac97c.h"
++
++/* Serialize access to opened */
++static DEFINE_MUTEX(opened_mutex);
++
++struct atmel_ac97_dma_info {
++	struct dma_request_cyclic req_tx;
++	struct dma_request_cyclic req_rx;
++	unsigned short rx_periph_id;
++	unsigned short tx_periph_id;
++};
++
++struct atmel_ac97 {
++	/* Serialize access to opened */
++	spinlock_t lock;
++	void __iomem *regs;
++	struct snd_pcm_substream *playback_substream;
++	struct snd_pcm_substream *capture_substream;
++	struct snd_card *card;
++	struct snd_pcm *pcm;
++	struct snd_ac97 *ac97;
++	struct snd_ac97_bus *ac97_bus;
++	int opened;
++	int period;
++	u64 cur_format;
++	unsigned int cur_rate;
++	struct clk *mck;
++	struct platform_device *pdev;
++	struct atmel_ac97_dma_info dma;
++};
++
++#define get_chip(card) ((struct atmel_ac97 *)(card)->private_data)
++
++#define ac97c_writel(chip, reg, val)			\
++	__raw_writel((val), (chip)->regs + AC97C_##reg)
++#define ac97c_readl(chip, reg)				\
++	__raw_readl((chip)->regs + AC97C_##reg)
++
++/*
++ * PCM part
++ */
++static struct snd_pcm_hardware snd_atmel_ac97_playback_hw = {
++	.info			= (SNDRV_PCM_INFO_INTERLEAVED
++				  | SNDRV_PCM_INFO_MMAP
++				  | SNDRV_PCM_INFO_MMAP_VALID
++				  | SNDRV_PCM_INFO_BLOCK_TRANSFER
++				  | SNDRV_PCM_INFO_JOINT_DUPLEX),
++	.formats		= (SNDRV_PCM_FMTBIT_S16_BE
++				  | SNDRV_PCM_FMTBIT_S16_LE),
++	.rates			= (SNDRV_PCM_RATE_CONTINUOUS),
++	.rate_min		= 4000,
++	.rate_max		= 48000,
++	.channels_min		= 1,
++	.channels_max		= 6,
++	.buffer_bytes_max	= 64*1024,
++	.period_bytes_min	= 512,
++	.period_bytes_max	= 4095,
++	.periods_min		= 8,
++	.periods_max		= 1024,
++};
++
++static struct snd_pcm_hardware snd_atmel_ac97_capture_hw = {
++	.info			= (SNDRV_PCM_INFO_INTERLEAVED
++				  | SNDRV_PCM_INFO_MMAP
++				  | SNDRV_PCM_INFO_MMAP_VALID
++				  | SNDRV_PCM_INFO_BLOCK_TRANSFER
++				  | SNDRV_PCM_INFO_JOINT_DUPLEX),
++	.formats		= (SNDRV_PCM_FMTBIT_S16_BE
++				  | SNDRV_PCM_FMTBIT_S16_LE),
++	.rates			= (SNDRV_PCM_RATE_CONTINUOUS),
++	.rate_min		= 4000,
++	.rate_max		= 48000,
++	.channels_min		= 1,
++	.channels_max		= 2,
++	.buffer_bytes_max	= 64*1024,
++	.period_bytes_min	= 512,
++	.period_bytes_max	= 4095,
++	.periods_min		= 8,
++	.periods_max		= 1024,
++};
++
++/*
++ * PCM functions
++ */
++static int
++snd_atmel_ac97_playback_open(struct snd_pcm_substream *substream)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	struct snd_pcm_runtime *runtime = substream->runtime;
++
++	mutex_lock(&opened_mutex);
++	chip->opened++;
++	runtime->hw = snd_atmel_ac97_playback_hw;
++	if (chip->cur_rate) {
++		runtime->hw.rate_min = chip->cur_rate;
++		runtime->hw.rate_max = chip->cur_rate;
++	}
++	if (chip->cur_format)
++		runtime->hw.formats = (1ULL << chip->cur_format);
++	mutex_unlock(&opened_mutex);
++	chip->playback_substream = substream;
++	chip->period = 0;
++	return 0;
++}
++
++static int
++snd_atmel_ac97_capture_open(struct snd_pcm_substream *substream)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	struct snd_pcm_runtime *runtime = substream->runtime;
++
++	mutex_lock(&opened_mutex);
++	chip->opened++;
++	runtime->hw = snd_atmel_ac97_capture_hw;
++	if (chip->cur_rate) {
++		runtime->hw.rate_min = chip->cur_rate;
++		runtime->hw.rate_max = chip->cur_rate;
++	}
++	if (chip->cur_format)
++		runtime->hw.formats = (1ULL << chip->cur_format);
++	mutex_unlock(&opened_mutex);
++	chip->capture_substream = substream;
++	chip->period = 0;
++	return 0;
++}
++
++static int snd_atmel_ac97_playback_close(struct snd_pcm_substream *substream)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	mutex_lock(&opened_mutex);
++	chip->opened--;
++	if (!chip->opened) {
++		chip->cur_rate = 0;
++		chip->cur_format = 0;
++	}
++	mutex_unlock(&opened_mutex);
++	return 0;
++}
++
++static int snd_atmel_ac97_capture_close(struct snd_pcm_substream *substream)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	mutex_lock(&opened_mutex);
++	chip->opened--;
++	if (!chip->opened) {
++		chip->cur_rate = 0;
++		chip->cur_format = 0;
++	}
++	mutex_unlock(&opened_mutex);
++	return 0;
++}
++
++static int
++snd_atmel_ac97_playback_hw_params(struct snd_pcm_substream *substream,
++		struct snd_pcm_hw_params *hw_params)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	int err;
++
++	err = snd_pcm_lib_malloc_pages(substream,
++					params_buffer_bytes(hw_params));
++	if (err < 0)
++		return err;
++
++	/* Set restrictions to params */
++	mutex_lock(&opened_mutex);
++	chip->cur_rate = params_rate(hw_params);
++	chip->cur_format = params_format(hw_params);
++	mutex_unlock(&opened_mutex);
++
++	return 0;
++}
++
++static int
++snd_atmel_ac97_capture_hw_params(struct snd_pcm_substream *substream,
++		struct snd_pcm_hw_params *hw_params)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	int err;
++
++	err = snd_pcm_lib_malloc_pages(substream,
++					params_buffer_bytes(hw_params));
++	if (err < 0)
++		return err;
++
++	/* Set restrictions to params */
++	mutex_lock(&opened_mutex);
++	chip->cur_rate = params_rate(hw_params);
++	chip->cur_format = params_format(hw_params);
++	mutex_unlock(&opened_mutex);
++
++	return 0;
++}
++
++static int snd_atmel_ac97_playback_hw_free(struct snd_pcm_substream *substream)
++{
++	return snd_pcm_lib_free_pages(substream);
++}
++
++static int snd_atmel_ac97_capture_hw_free(struct snd_pcm_substream *substream)
++{
++
++	return snd_pcm_lib_free_pages(substream);
++}
++
++static int snd_atmel_ac97_playback_prepare(struct snd_pcm_substream *substream)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	struct platform_device *pdev = chip->pdev;
++	struct snd_pcm_runtime *runtime = substream->runtime;
++	int block_size = frames_to_bytes(runtime, runtime->period_size);
++	unsigned long word = 0;
++	unsigned long buffer_size = 0;
++
++	dma_sync_single_for_device(&pdev->dev, runtime->dma_addr,
++			block_size * 2, DMA_TO_DEVICE);
++
++	/* Assign slots to channels */
++	switch (substream->runtime->channels) {
++	case 1:
++		word |= AC97C_CH_ASSIGN(PCM_LEFT, A);
++		break;
++	case 2:
++		/* Assign Left and Right slot to Channel A */
++		word |= AC97C_CH_ASSIGN(PCM_LEFT, A)
++			| AC97C_CH_ASSIGN(PCM_RIGHT, A);
++		break;
++	default:
++		/* TODO: support more than two channels */
++		return -EINVAL;
++		break;
++	}
++	ac97c_writel(chip, OCA, word);
++
++	/* Configure sample format and size */
++	word = AC97C_CMR_PDCEN | AC97C_CMR_SIZE_16;
++
++	switch (runtime->format) {
++	case SNDRV_PCM_FORMAT_S16_LE:
++		word |= AC97C_CMR_CEM_LITTLE;
++		break;
++	case SNDRV_PCM_FORMAT_S16_BE: /* fall through */
++	default:
++		word &= ~AC97C_CMR_CEM_LITTLE;
++		break;
++	}
++
++	ac97c_writel(chip, CAMR, word);
++
++	/* Set variable rate if needed */
++	if (runtime->rate != 48000) {
++		word = ac97c_readl(chip, MR);
++		word |= AC97C_MR_VRA;
++		ac97c_writel(chip, MR, word);
++	} else {
++		/* Clear Variable Rate Bit */
++		word = ac97c_readl(chip, MR);
++		word &= ~AC97C_MR_VRA;
++		ac97c_writel(chip, MR, word);
++	}
++
++	/* Set rate */
++	snd_ac97_set_rate(chip->ac97, AC97_PCM_FRONT_DAC_RATE, runtime->rate);
++
++	buffer_size = frames_to_bytes(runtime, runtime->period_size) *
++		runtime->periods;
++
++	chip->dma.req_tx.buffer_size = buffer_size;
++	chip->dma.req_tx.periods = runtime->periods;
++
++	BUG_ON(chip->dma.req_tx.buffer_size !=
++			(chip->dma.req_tx.periods *
++			 frames_to_bytes(runtime, runtime->period_size)));
++
++	chip->dma.req_tx.buffer_start = runtime->dma_addr;
++	chip->dma.req_tx.data_reg = (dma_addr_t)(chip->regs + AC97C_CATHR + 2);
++	chip->dma.req_tx.periph_id = chip->dma.tx_periph_id;
++	chip->dma.req_tx.direction = DMA_DIR_MEM_TO_PERIPH;
++	chip->dma.req_tx.width = DMA_WIDTH_16BIT;
++	chip->dma.req_tx.dev_id = chip;
++
++	return 0;
++}
++
++static int snd_atmel_ac97_capture_prepare(struct snd_pcm_substream *substream)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	struct platform_device *pdev = chip->pdev;
++	struct snd_pcm_runtime *runtime = substream->runtime;
++	int block_size = frames_to_bytes(runtime, runtime->period_size);
++	unsigned long word = 0;
++	unsigned long buffer_size = 0;
++
++	dma_sync_single_for_device(&pdev->dev, runtime->dma_addr,
++			block_size * 2, DMA_FROM_DEVICE);
++
++	/* Assign slots to channels */
++	switch (substream->runtime->channels) {
++	case 1:
++		word |= AC97C_CH_ASSIGN(PCM_LEFT, A);
++		break;
++	case 2:
++		/* Assign Left and Right slot to Channel A */
++		word |= AC97C_CH_ASSIGN(PCM_LEFT, A)
++			| AC97C_CH_ASSIGN(PCM_RIGHT, A);
++		break;
++	default:
++		/* TODO: support more than two channels */
++		return -EINVAL;
++		break;
++	}
++	ac97c_writel(chip, ICA, word);
++
++	/* Configure sample format and size */
++	word = AC97C_CMR_PDCEN | AC97C_CMR_SIZE_16;
++
++	switch (runtime->format) {
++	case SNDRV_PCM_FORMAT_S16_LE:
++		word |= AC97C_CMR_CEM_LITTLE;
++		break;
++	case SNDRV_PCM_FORMAT_S16_BE:
++	default:
++		word &= ~(AC97C_CMR_CEM_LITTLE);
++		break;
++	}
++
++	ac97c_writel(chip, CAMR, word);
++
++	/* Set variable rate if needed */
++	if (runtime->rate != 48000) {
++		word = ac97c_readl(chip, MR);
++		word |= AC97C_MR_VRA;
++		ac97c_writel(chip, MR, word);
++	} else {
++		/* Clear Variable Rate Bit */
++		word = ac97c_readl(chip, MR);
++		word &= ~(AC97C_MR_VRA);
++		ac97c_writel(chip, MR, word);
++	}
++
++	/* Set rate */
++	snd_ac97_set_rate(chip->ac97, AC97_PCM_LR_ADC_RATE, runtime->rate);
++
++	buffer_size = frames_to_bytes(runtime, runtime->period_size) *
++		runtime->periods;
++
++	chip->dma.req_rx.buffer_size = buffer_size;
++	chip->dma.req_rx.periods = runtime->periods;
++
++	BUG_ON(chip->dma.req_rx.buffer_size !=
++			(chip->dma.req_rx.periods *
++			 frames_to_bytes(runtime, runtime->period_size)));
++
++	chip->dma.req_rx.buffer_start = runtime->dma_addr;
++	chip->dma.req_rx.data_reg = (dma_addr_t)(chip->regs + AC97C_CARHR + 2);
++	chip->dma.req_rx.periph_id = chip->dma.rx_periph_id;
++	chip->dma.req_rx.direction = DMA_DIR_PERIPH_TO_MEM;
++	chip->dma.req_rx.width = DMA_WIDTH_16BIT;
++	chip->dma.req_rx.dev_id = chip;
++
++	return 0;
++}
++
++	static int
++snd_atmel_ac97_playback_trigger(struct snd_pcm_substream *substream, int cmd)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	unsigned long camr;
++	int flags, err = 0;
++
++	spin_lock_irqsave(&chip->lock, flags);
++	camr = ac97c_readl(chip, CAMR);
++
++	switch (cmd) {
++	case SNDRV_PCM_TRIGGER_START:
++		err = dma_prepare_request_cyclic(chip->dma.req_tx.req.dmac,
++				&chip->dma.req_tx);
++		dma_start_request(chip->dma.req_tx.req.dmac,
++				chip->dma.req_tx.req.channel);
++		camr |= AC97C_CMR_CENA;
++		break;
++	case SNDRV_PCM_TRIGGER_STOP:
++		err = dma_stop_request(chip->dma.req_tx.req.dmac,
++				chip->dma.req_tx.req.channel);
++		if (chip->opened <= 1)
++			camr &= ~AC97C_CMR_CENA;
++		break;
++	default:
++		err = -EINVAL;
++		break;
++	}
++
++	ac97c_writel(chip, CAMR, camr);
++
++	spin_unlock_irqrestore(&chip->lock, flags);
++	return err;
++}
++
++	static int
++snd_atmel_ac97_capture_trigger(struct snd_pcm_substream *substream, int cmd)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	unsigned long camr;
++	int flags, err = 0;
++
++	spin_lock_irqsave(&chip->lock, flags);
++	camr = ac97c_readl(chip, CAMR);
++
++	switch (cmd) {
++	case SNDRV_PCM_TRIGGER_START:
++		err = dma_prepare_request_cyclic(chip->dma.req_rx.req.dmac,
++				&chip->dma.req_rx);
++		dma_start_request(chip->dma.req_rx.req.dmac,
++				chip->dma.req_rx.req.channel);
++		camr |= AC97C_CMR_CENA;
++		break;
++	case SNDRV_PCM_TRIGGER_STOP:
++		err = dma_stop_request(chip->dma.req_rx.req.dmac,
++				chip->dma.req_rx.req.channel);
++		mutex_lock(&opened_mutex);
++		if (chip->opened <= 1)
++			camr &= ~AC97C_CMR_CENA;
++		mutex_unlock(&opened_mutex);
++		break;
++	default:
++		err = -EINVAL;
++		break;
++	}
++
++	ac97c_writel(chip, CAMR, camr);
++
++	spin_unlock_irqrestore(&chip->lock, flags);
++	return err;
++}
++
++	static snd_pcm_uframes_t
++snd_atmel_ac97_playback_pointer(struct snd_pcm_substream *substream)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	struct snd_pcm_runtime *runtime = substream->runtime;
++	snd_pcm_uframes_t pos;
++	unsigned long bytes;
++
++	bytes = (dma_get_current_pos
++			(chip->dma.req_tx.req.dmac,
++			 chip->dma.req_tx.req.channel) - runtime->dma_addr);
++	pos = bytes_to_frames(runtime, bytes);
++	if (pos >= runtime->buffer_size)
++		pos -= runtime->buffer_size;
++
++	return pos;
++}
++
++	static snd_pcm_uframes_t
++snd_atmel_ac97_capture_pointer(struct snd_pcm_substream *substream)
++{
++	struct atmel_ac97 *chip = snd_pcm_substream_chip(substream);
++	struct snd_pcm_runtime *runtime = substream->runtime;
++	snd_pcm_uframes_t pos;
++	unsigned long bytes;
++
++	bytes = (dma_get_current_pos
++			(chip->dma.req_rx.req.dmac,
++			 chip->dma.req_rx.req.channel)
++			- runtime->dma_addr);
++	pos = bytes_to_frames(runtime, bytes);
++	if (pos >= runtime->buffer_size)
++		pos -= runtime->buffer_size;
++
++
++	return pos;
++}
++
++static struct snd_pcm_ops atmel_ac97_playback_ops = {
++	.open		= snd_atmel_ac97_playback_open,
++	.close		= snd_atmel_ac97_playback_close,
++	.ioctl		= snd_pcm_lib_ioctl,
++	.hw_params	= snd_atmel_ac97_playback_hw_params,
++	.hw_free	= snd_atmel_ac97_playback_hw_free,
++	.prepare	= snd_atmel_ac97_playback_prepare,
++	.trigger	= snd_atmel_ac97_playback_trigger,
++	.pointer	= snd_atmel_ac97_playback_pointer,
++};
++
++static struct snd_pcm_ops atmel_ac97_capture_ops = {
++	.open		= snd_atmel_ac97_capture_open,
++	.close		= snd_atmel_ac97_capture_close,
++	.ioctl		= snd_pcm_lib_ioctl,
++	.hw_params	= snd_atmel_ac97_capture_hw_params,
++	.hw_free	= snd_atmel_ac97_capture_hw_free,
++	.prepare	= snd_atmel_ac97_capture_prepare,
++	.trigger	= snd_atmel_ac97_capture_trigger,
++	.pointer	= snd_atmel_ac97_capture_pointer,
++};
++
++static struct ac97_pcm atmel_ac97_pcm_defs[] __devinitdata = {
++	/* Playback */
++	{
++		.exclusive = 1,
++		.r = { {
++			.slots = ((1 << AC97_SLOT_PCM_LEFT)
++					| (1 << AC97_SLOT_PCM_RIGHT)
++					| (1 << AC97_SLOT_PCM_CENTER)
++					| (1 << AC97_SLOT_PCM_SLEFT)
++					| (1 << AC97_SLOT_PCM_SRIGHT)
++					| (1 << AC97_SLOT_LFE)),
++		} }
++	},
++	/* PCM in */
++	{
++		.stream = 1,
++		.exclusive = 1,
++		.r = { {
++			.slots = ((1 << AC97_SLOT_PCM_LEFT)
++					| (1 << AC97_SLOT_PCM_RIGHT)),
++		} }
++	},
++	/* Mic in */
++	{
++		.stream = 1,
++		.exclusive = 1,
++		.r = { {
++			.slots = (1<<AC97_SLOT_MIC),
++		} }
++	},
++};
++
++static int __devinit snd_atmel_ac97_pcm_new(struct atmel_ac97 *chip)
++{
++	struct snd_pcm *pcm;
++	int err;
++
++	err = snd_ac97_pcm_assign(chip->ac97_bus,
++			ARRAY_SIZE(atmel_ac97_pcm_defs),
++			atmel_ac97_pcm_defs);
++	if (err)
++		return err;
++
++	err = snd_pcm_new(chip->card, "Atmel-AC97", 0, 1, 1, &pcm);
++	if (err)
++		return err;
++
++	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_PLAYBACK,
++			&atmel_ac97_playback_ops);
++
++	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_CAPTURE,
++			&atmel_ac97_capture_ops);
++
++	snd_pcm_lib_preallocate_pages_for_all(pcm, SNDRV_DMA_TYPE_DEV,
++			&chip->pdev->dev,
++			128 * 1024, 128 * 1024);
++
++	pcm->private_data = chip;
++	pcm->info_flags = 0;
++	strcpy(pcm->name, "Atmel-AC97");
++	chip->pcm = pcm;
++
++	return 0;
++}
++
++/*
++ * Mixer part.
++ */
++static int snd_atmel_ac97_mixer_new(struct atmel_ac97 *chip)
++{
++	int err;
++	struct snd_ac97_template template;
++
++	memset(&template, 0, sizeof(template));
++	template.private_data = chip;
++	err = snd_ac97_mixer(chip->ac97_bus, &template, &chip->ac97);
++
++	return err;
++}
++
++static void atmel_ac97_error(struct dma_request *_req)
++{
++	struct dma_request_cyclic *req = to_dma_request_cyclic(_req);
++	struct atmel_ac97 *chip = req->dev_id;
++
++	dev_dbg(&chip->pdev->dev, "DMA Controller error, channel %d\n",
++			req->req.channel);
++}
++
++static void atmel_ac97_block_complete(struct dma_request *_req)
++{
++	struct dma_request_cyclic *req = to_dma_request_cyclic(_req);
++	struct atmel_ac97 *chip = req->dev_id;
++	if (req->periph_id == chip->dma.tx_periph_id)
++		snd_pcm_period_elapsed(chip->playback_substream);
++	else
++		snd_pcm_period_elapsed(chip->capture_substream);
++}
++
++/*
++ * Codec part.
++ */
++static void snd_atmel_ac97_write(struct snd_ac97 *ac97, unsigned short reg,
++		unsigned short val)
++{
++	struct atmel_ac97 *chip = get_chip(ac97);
++	unsigned long word;
++	int timeout = 40;
++
++	word = (reg & 0x7f) << 16 | val;
++
++	do {
++		if (ac97c_readl(chip, COSR) & AC97C_CSR_TXRDY) {
++			ac97c_writel(chip, COTHR, word);
++			return;
++		}
++		udelay(1);
++	} while (--timeout);
++
++	dev_dbg(&chip->pdev->dev, "codec write timeout\n");
++}
++
++static unsigned short snd_atmel_ac97_read(struct snd_ac97 *ac97,
++		unsigned short reg)
++{
++	struct atmel_ac97 *chip = get_chip(ac97);
++	unsigned long word;
++	int timeout = 40;
++	int write = 10;
++
++	word = (0x80 | (reg & 0x7f)) << 16;
++
++	if ((ac97c_readl(chip, COSR) & AC97C_CSR_RXRDY) != 0)
++		ac97c_readl(chip, CORHR);
++
++retry_write:
++	timeout = 40;
++
++	do {
++		if ((ac97c_readl(chip, COSR) & AC97C_CSR_TXRDY) != 0) {
++			ac97c_writel(chip, COTHR, word);
++			goto read_reg;
++		}
++		mdelay(10);
++	} while (--timeout);
++
++	if (!--write)
++		goto timed_out;
++	goto retry_write;
++
++read_reg:
++	do {
++		if ((ac97c_readl(chip, COSR) & AC97C_CSR_RXRDY) != 0) {
++			unsigned short val = ac97c_readl(chip, CORHR);
++			return val;
++		}
++		mdelay(10);
++	} while (--timeout);
++
++	if (!--write)
++		goto timed_out;
++	goto retry_write;
++
++timed_out:
++	dev_dbg(&chip->pdev->dev, "codec read timeout\n");
++	return 0xffff;
++}
++
++static void snd_atmel_ac97_reset(struct atmel_ac97 *chip)
++{
++	ac97c_writel(chip, MR, AC97C_MR_WRST);
++	mdelay(1);
++	ac97c_writel(chip, MR, AC97C_MR_ENA);
++}
++
++static void snd_atmel_ac97_destroy(struct snd_card *card)
++{
++	struct atmel_ac97 *chip = get_chip(card);
++
++	if (chip->regs)
++		iounmap(chip->regs);
++
++	if (chip->mck) {
++		clk_disable(chip->mck);
++		clk_put(chip->mck);
++	}
++
++	if (chip->dma.req_tx.req.dmac) {
++		dma_release_channel(chip->dma.req_tx.req.dmac,
++				chip->dma.req_tx.req.channel);
++	}
++	if (chip->dma.req_rx.req.dmac) {
++		dma_release_channel(chip->dma.req_rx.req.dmac,
++				chip->dma.req_rx.req.channel);
++	}
++}
++
++static int __devinit snd_atmel_ac97_create(struct snd_card *card,
++		struct platform_device *pdev)
++{
++	static struct snd_ac97_bus_ops ops = {
++		.write	= snd_atmel_ac97_write,
++		.read	= snd_atmel_ac97_read,
++	};
++	struct atmel_ac97 *chip = get_chip(card);
++	struct resource *regs;
++	struct clk *mck;
++	int err;
++
++	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!regs)
++		return -ENXIO;
++
++	mck = clk_get(&pdev->dev, "pclk");
++	if (IS_ERR(mck))
++		return PTR_ERR(mck);
++	clk_enable(mck);
++	chip->mck = mck;
++
++	card->private_free = snd_atmel_ac97_destroy;
++
++	spin_lock_init(&chip->lock);
++	chip->card = card;
++	chip->pdev = pdev;
++
++	chip->regs = ioremap(regs->start, regs->end - regs->start + 1);
++	if (!chip->regs)
++		return -ENOMEM;
++
++	snd_card_set_dev(card, &pdev->dev);
++
++	err = snd_ac97_bus(card, 0, &ops, chip, &chip->ac97_bus);
++
++	return err;
++}
++
++static int __devinit snd_atmel_ac97_probe(struct platform_device *pdev)
++{
++	static int dev;
++	struct snd_card *card;
++	struct atmel_ac97 *chip;
++	int err;
++	int ch;
++
++	mutex_init(&opened_mutex);
++
++	err = -ENOMEM;
++	card = snd_card_new(SNDRV_DEFAULT_IDX1, SNDRV_DEFAULT_STR1,
++			THIS_MODULE, sizeof(struct atmel_ac97));
++	if (!card)
++		goto out;
++	chip = get_chip(card);
++
++	err = snd_atmel_ac97_create(card, pdev);
++	if (err)
++		goto out_free_card;
++
++	snd_atmel_ac97_reset(chip);
++
++	err = snd_atmel_ac97_mixer_new(chip);
++	if (err)
++		goto out_free_card;
++
++	err = snd_atmel_ac97_pcm_new(chip);
++	if (err)
++		goto out_free_card;
++
++	/* TODO: Get this information from the platform device */
++	chip->dma.req_tx.req.dmac = find_dma_controller(0);
++	if (!chip->dma.req_tx.req.dmac) {
++		dev_dbg(&chip->pdev->dev, "DMA controller for TX missing\n");
++		err = -ENODEV;
++		goto out_free_card;
++	}
++	chip->dma.req_rx.req.dmac = find_dma_controller(0);
++	if (!chip->dma.req_rx.req.dmac) {
++		dev_dbg(&chip->pdev->dev, "DMA controller for RX missing\n");
++		err = -ENODEV;
++		goto out_free_card;
++	}
++
++	chip->dma.rx_periph_id = 3;
++	chip->dma.tx_periph_id = 4;
++
++	ch = dma_alloc_channel(chip->dma.req_tx.req.dmac);
++	if (ch < 0) {
++		dev_dbg(&chip->pdev->dev,
++				"could not allocate TX DMA channel\n");
++		err = ch;
++		goto out_free_card;
++	}
++	chip->dma.req_tx.req.channel = ch;
++	chip->dma.req_tx.width = DMA_WIDTH_16BIT;
++	chip->dma.req_tx.req.block_complete = atmel_ac97_block_complete;
++	chip->dma.req_tx.req.error = atmel_ac97_error;
++
++	ch = dma_alloc_channel(chip->dma.req_rx.req.dmac);
++	if (ch < 0) {
++		dev_dbg(&chip->pdev->dev,
++				"could not allocate RX DMA channel\n");
++		err = ch;
++		goto out_free_card;
++	}
++	chip->dma.req_rx.req.channel = ch;
++	chip->dma.req_rx.width = DMA_WIDTH_16BIT;
++	chip->dma.req_rx.req.block_complete = atmel_ac97_block_complete;
++	chip->dma.req_rx.req.error = atmel_ac97_error;
++
++	strcpy(card->driver, "atmel_ac97c");
++	strcpy(card->shortname, "atmel_ac97c");
++	sprintf(card->longname, "Atmel AVR32 AC97 controller");
++
++	err = snd_card_register(card);
++	if (err)
++		goto out_free_card;
++
++	platform_set_drvdata(pdev, card);
++	dev++;
++
++	dev_info(&pdev->dev, "Atmel AVR32 AC97 controller at 0x%p\n",
++			chip->regs);
++
++	return 0;
++
++out_free_card:
++	snd_card_free(card);
++out:
++	return err;
++}
++
++#ifdef CONFIG_PM
++	static int
++snd_atmel_ac97_suspend(struct platform_device *pdev, pm_message_t msg)
++{
++	struct snd_card *card = platform_get_drvdata(pdev);
++	struct atmel_ac97 *chip = card->private_data;
++
++	clk_disable(chip->mck);
++
++	return 0;
++}
++
++static int snd_atmel_ac97_resume(struct platform_device *pdev)
++{
++	struct snd_card *card = dev_get_drvdata(pdev);
++	struct atmel_ac97 *chip = card->private_data;
++
++	clk_enable(chip->mck);
++
++	return 0;
++}
++#else
++#define snd_atmel_ac97_suspend NULL
++#define snd_atmel_ac97_resume NULL
++#endif
++
++static int __devexit snd_atmel_ac97_remove(struct platform_device *pdev)
++{
++	struct snd_card *card = platform_get_drvdata(pdev);
++
++	snd_card_free(card);
++	platform_set_drvdata(pdev, NULL);
++	return 0;
++}
++
++static struct platform_driver atmel_ac97_driver = {
++	.remove		= __devexit_p(snd_atmel_ac97_remove),
++	.driver		= {
++		.name	= "atmel_ac97c",
++	},
++	.suspend	= snd_atmel_ac97_suspend,
++	.resume		= snd_atmel_ac97_resume,
++};
++
++static int __init atmel_ac97_init(void)
++{
++	return platform_driver_probe(&atmel_ac97_driver,
++			snd_atmel_ac97_probe);
++}
++module_init(atmel_ac97_init);
++
++static void __exit atmel_ac97_exit(void)
++{
++	platform_driver_unregister(&atmel_ac97_driver);
++}
++module_exit(atmel_ac97_exit);
++
++MODULE_LICENSE("GPL");
++MODULE_DESCRIPTION("Driver for Atmel AC97 Controller");
++MODULE_AUTHOR("Haavard Skinnemoen <hskinnemoen@atmel.com>");
+diff --git a/sound/avr32/ac97c.h b/sound/avr32/ac97c.h
+new file mode 100644
+index 0000000..96246e7
+--- /dev/null
++++ b/sound/avr32/ac97c.h
+@@ -0,0 +1,71 @@
++/*
++ * Register definitions for the Atmel AC97 Controller.
++ *
++ * Copyright (C) 2005-2006 Atmel Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++#ifndef __SOUND_AVR32_AC97C_H
++#define __SOUND_AVR32_AC97C_H
++
++#define AC97C_MR		0x08
++#define AC97C_ICA		0x10
++#define AC97C_OCA		0x14
++#define AC97C_CARHR		0x20
++#define AC97C_CATHR		0x24
++#define AC97C_CASR		0x28
++#define AC97C_CAMR		0x2c
++#define AC97C_CBRHR		0x30
++#define AC97C_CBTHR		0x34
++#define AC97C_CBSR		0x38
++#define AC97C_CBMR		0x3c
++#define AC97C_CORHR		0x40
++#define AC97C_COTHR		0x44
++#define AC97C_COSR		0x48
++#define AC97C_COMR		0x4c
++#define AC97C_SR		0x50
++#define AC97C_IER		0x54
++#define AC97C_IDR		0x58
++#define AC97C_IMR		0x5c
++#define AC97C_VERSION		0xfc
++
++#define AC97C_CATPR		PDC_TPR
++#define AC97C_CATCR		PDC_TCR
++#define AC97C_CATNPR		PDC_TNPR
++#define AC97C_CATNCR		PDC_TNCR
++#define AC97C_CARPR		PDC_RPR
++#define AC97C_CARCR		PDC_RCR
++#define AC97C_CARNPR		PDC_RNPR
++#define AC97C_CARNCR		PDC_RNCR
++#define AC97C_PTCR		PDC_PTCR
++
++#define AC97C_MR_ENA		(1 << 0)
++#define AC97C_MR_WRST		(1 << 1)
++#define AC97C_MR_VRA		(1 << 2)
++
++#define AC97C_CSR_TXRDY		(1 << 0)
++#define AC97C_CSR_UNRUN		(1 << 2)
++#define AC97C_CSR_RXRDY		(1 << 4)
++#define AC97C_CSR_ENDTX		(1 << 10)
++#define AC97C_CSR_ENDRX		(1 << 14)
++
++#define AC97C_CMR_SIZE_20	(0 << 16)
++#define AC97C_CMR_SIZE_18	(1 << 16)
++#define AC97C_CMR_SIZE_16	(2 << 16)
++#define AC97C_CMR_SIZE_10	(3 << 16)
++#define AC97C_CMR_CEM_LITTLE	(1 << 18)
++#define AC97C_CMR_CEM_BIG	(0 << 18)
++#define AC97C_CMR_CENA		(1 << 21)
++#define AC97C_CMR_PDCEN		(1 << 22)
++
++#define AC97C_SR_CAEVT		(1 << 3)
++
++#define AC97C_CH_ASSIGN(slot, channel)					\
++	(AC97C_CHANNEL_##channel << (3 * (AC97_SLOT_##slot - 3)))
++#define AC97C_CHANNEL_NONE	0x0
++#define AC97C_CHANNEL_A		0x1
++#define AC97C_CHANNEL_B		0x2
++
++#endif /* __SOUND_AVR32_AC97C_H */
+diff --git a/sound/oss/Kconfig b/sound/oss/Kconfig
+index 4b30ae6..de910e0 100644
+--- a/sound/oss/Kconfig
++++ b/sound/oss/Kconfig
+@@ -738,3 +738,7 @@ config SOUND_SH_DAC_AUDIO_CHANNEL
+ 	int "DAC channel"
+ 	default "1"
+ 	depends on SOUND_SH_DAC_AUDIO
++
++config SOUND_AT32_ABDAC
++	tristate "Atmel AT32 Audio Bitstream DAC (ABDAC) support"
++	depends on SOUND_PRIME && AVR32
+diff --git a/sound/oss/Makefile b/sound/oss/Makefile
+index 2489bd6..2b731af 100644
+--- a/sound/oss/Makefile
++++ b/sound/oss/Makefile
+@@ -10,6 +10,7 @@ obj-$(CONFIG_SOUND_CS4232)	+= cs4232.o ad1848.o
+ 
+ # Please leave it as is, cause the link order is significant !
+ 
++obj-$(CONFIG_SOUND_AT32_ABDAC)	+= at32_abdac.o
+ obj-$(CONFIG_SOUND_SH_DAC_AUDIO)	+= sh_dac_audio.o
+ obj-$(CONFIG_SOUND_HAL2)	+= hal2.o
+ obj-$(CONFIG_SOUND_AEDSP16)	+= aedsp16.o
+diff --git a/sound/oss/at32_abdac.c b/sound/oss/at32_abdac.c
+new file mode 100644
+index 0000000..cb997d7
+--- /dev/null
++++ b/sound/oss/at32_abdac.c
+@@ -0,0 +1,722 @@
++/*
++ * OSS Sound Driver for the Atmel AT32 on-chip DAC.
++ *
++ * Copyright (C) 2006 Atmel Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++#include <linux/clk.h>
++#include <linux/dma-mapping.h>
++#include <linux/fs.h>
++#include <linux/init.h>
++#include <linux/interrupt.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/sound.h>
++#include <linux/soundcard.h>
++
++#include <asm/byteorder.h>
++#include <asm/dma-controller.h>
++#include <asm/io.h>
++#include <asm/uaccess.h>
++
++/* We want to use the "bizarre" swap-bytes-in-each-halfword macro */
++#include <linux/byteorder/swabb.h>
++
++#include "at32_abdac.h"
++
++#define DMA_BUFFER_SIZE	32768
++#define DMA_PERIOD_SHIFT 10
++#define DMA_PERIOD_SIZE (1 << DMA_PERIOD_SHIFT)
++#define DMA_WRITE_THRESHOLD DMA_PERIOD_SIZE
++
++struct sound_settings {
++	unsigned int format;
++	unsigned int channels;
++	unsigned int sample_rate;
++	/* log2(bytes per sample) */
++	unsigned int input_order;
++};
++
++struct at32_dac {
++	spinlock_t lock;
++	void __iomem *regs;
++
++	/* head and tail refer to number of words */
++	struct {
++		u32 *buf;
++		int head;
++		int tail;
++	} dma;
++
++	struct semaphore sem;
++	wait_queue_head_t write_wait;
++
++	/*
++	 * Read at most ucount bytes from ubuf, translate to 2-channel
++	 * signed 16-bit big endian format and write to the DMA buffer
++	 * as long as there is room left.  Return the number of bytes
++	 * successfully copied from ubuf, or -EFAULT if the first
++	 * sample from ubuf couldn't be read.  This function is not
++	 * called unless there is room for at least one sample (4
++	 * bytes) in the DMA buffer.
++	 */
++	ssize_t (*trans)(struct at32_dac *dac, const char __user *ubuf,
++			 size_t ucount);
++
++	struct sound_settings dsp_settings;
++	struct dma_request_cyclic req;
++
++	struct clk *mck;
++	struct clk *sample_clk;
++	struct platform_device *pdev;
++	int busy;
++	int playing;
++	int dev_dsp;
++};
++static struct at32_dac *the_dac;
++
++static inline unsigned int abdac_get_head(struct at32_dac *dac)
++{
++	return dac->dma.head & ((DMA_BUFFER_SIZE / 4) - 1);
++}
++
++static inline unsigned int abdac_get_tail(struct at32_dac *dac)
++{
++	return dac->dma.tail & ((DMA_BUFFER_SIZE / 4) - 1);
++}
++
++static inline unsigned int abdac_dma_space(struct at32_dac *dac)
++{
++	unsigned int space;
++
++	space = ((dac->dma.tail - dac->dma.head - 1)
++		 & ((DMA_BUFFER_SIZE / 4) - 1));
++	return space;
++}
++
++static void abdac_update_dma_tail(struct at32_dac *dac)
++{
++	dma_addr_t dma_addr;
++	unsigned int new_tail;
++
++	if (dac->playing) {
++		dma_addr = dma_get_current_pos(dac->req.req.dmac,
++					       dac->req.req.channel);
++		new_tail = (dma_addr - dac->req.buffer_start) / 4;
++		if (new_tail >= dac->dma.head
++		    && (dac->dma.tail < dac->dma.head
++			|| dac->dma.tail > new_tail))
++			dev_notice(&dac->pdev->dev, "DMA underrun detected!\n");
++		dac->dma.tail = new_tail;
++		dev_dbg(&dac->pdev->dev, "update tail: 0x%x - 0x%x = %u\n",
++			dma_addr, dac->req.buffer_start, dac->dma.tail);
++	}
++}
++
++static int abdac_start(struct at32_dac *dac)
++{
++	int ret;
++
++	if (dac->playing)
++		return 0;
++
++	memset(dac->dma.buf, 0, DMA_BUFFER_SIZE);
++
++	clk_enable(dac->sample_clk);
++
++	ret = dma_prepare_request_cyclic(dac->req.req.dmac, &dac->req);
++	if (ret)
++		goto out_stop_clock;
++
++	dev_dbg(&dac->pdev->dev, "starting DMA...\n");
++	ret = dma_start_request(dac->req.req.dmac, dac->req.req.channel);
++	if (ret)
++		goto out_stop_request;
++
++	dac_writel(dac, CTRL, DAC_BIT(EN));
++	dac->playing = 1;
++
++	return 0;
++
++out_stop_request:
++	dma_stop_request(dac->req.req.dmac,
++			 dac->req.req.channel);
++out_stop_clock:
++	clk_disable(dac->sample_clk);
++	return ret;
++}
++
++static int abdac_stop(struct at32_dac *dac)
++{
++	if (dac->playing) {
++		dma_stop_request(dac->req.req.dmac, dac->req.req.channel);
++		dac_writel(dac, DATA, 0);
++		dac_writel(dac, CTRL, 0);
++		dac->playing = 0;
++		clk_disable(dac->sample_clk);
++	}
++
++	return 0;
++}
++
++static int abdac_dma_prepare(struct at32_dac *dac)
++{
++	dac->dma.buf = dma_alloc_coherent(&dac->pdev->dev, DMA_BUFFER_SIZE,
++					  &dac->req.buffer_start, GFP_KERNEL);
++	if (!dac->dma.buf)
++		return -ENOMEM;
++
++	dac->dma.head = dac->dma.tail = 0;
++	dac->req.periods = DMA_BUFFER_SIZE / DMA_PERIOD_SIZE;
++	dac->req.buffer_size = DMA_BUFFER_SIZE;
++
++	return 0;
++}
++
++static void abdac_dma_cleanup(struct at32_dac *dac)
++{
++	if (dac->dma.buf)
++		dma_free_coherent(&dac->pdev->dev, DMA_BUFFER_SIZE,
++				  dac->dma.buf, dac->req.buffer_start);
++	dac->dma.buf = NULL;
++}
++
++static void abdac_dma_block_complete(struct dma_request *req)
++{
++	struct dma_request_cyclic *creq = to_dma_request_cyclic(req);
++	struct at32_dac *dac = container_of(creq, struct at32_dac, req);
++
++	wake_up(&dac->write_wait);
++}
++
++static void abdac_dma_error(struct dma_request *req)
++{
++	struct dma_request_cyclic *creq = to_dma_request_cyclic(req);
++	struct at32_dac *dac = container_of(creq, struct at32_dac, req);
++
++	dev_err(&dac->pdev->dev, "DMA error\n");
++}
++
++static irqreturn_t abdac_interrupt(int irq, void *dev_id)
++{
++	struct at32_dac *dac = dev_id;
++	u32 status;
++
++	status = dac_readl(dac, INT_STATUS);
++	if (status & DAC_BIT(UNDERRUN)) {
++		dev_err(&dac->pdev->dev, "Underrun detected!\n");
++		dac_writel(dac, INT_CLR, DAC_BIT(UNDERRUN));
++	} else {
++		dev_err(&dac->pdev->dev, "Spurious interrupt (status=0x%x)\n",
++			status);
++		dac_writel(dac, INT_CLR, status);
++	}
++
++	return IRQ_HANDLED;
++}
++
++static ssize_t trans_s16be(struct at32_dac *dac, const char __user *ubuf,
++			   size_t ucount)
++{
++	ssize_t ret;
++
++	if (dac->dsp_settings.channels == 2) {
++		const u32 __user *up = (const u32 __user *)ubuf;
++		u32 sample;
++
++		for (ret = 0; ret < (ssize_t)(ucount - 3); ret += 4) {
++			if (!abdac_dma_space(dac))
++				break;
++
++			if (unlikely(__get_user(sample, up++))) {
++				if (ret == 0)
++					ret = -EFAULT;
++				break;
++			}
++			dac->dma.buf[abdac_get_head(dac)] = sample;
++			dac->dma.head++;
++		}
++	} else {
++		const u16 __user *up = (const u16 __user *)ubuf;
++		u16 sample;
++
++		for (ret = 0; ret < (ssize_t)(ucount - 1); ret += 2) {
++			if (!abdac_dma_space(dac))
++				break;
++
++			if (unlikely(__get_user(sample, up++))) {
++				if (ret == 0)
++					ret = -EFAULT;
++				break;
++			}
++			dac->dma.buf[abdac_get_head(dac)]
++				= (sample << 16) | sample;
++			dac->dma.head++;
++		}
++	}
++
++	return ret;
++}
++
++static ssize_t trans_s16le(struct at32_dac *dac, const char __user *ubuf,
++			   size_t ucount)
++{
++	ssize_t ret;
++
++	if (dac->dsp_settings.channels == 2) {
++		const u32 __user *up = (const u32 __user *)ubuf;
++		u32 sample;
++
++		for (ret = 0; ret < (ssize_t)(ucount - 3); ret += 4) {
++			if (!abdac_dma_space(dac))
++				break;
++
++			if (unlikely(__get_user(sample, up++))) {
++				if (ret == 0)
++					ret = -EFAULT;
++				break;
++			}
++			/* Swap bytes in each halfword */
++			dac->dma.buf[abdac_get_head(dac)] = swahb32(sample);
++			dac->dma.head++;
++		}
++	} else {
++		const u16 __user *up = (const u16 __user *)ubuf;
++		u16 sample;
++
++		for (ret = 0; ret < (ssize_t)(ucount - 1); ret += 2) {
++			if (!abdac_dma_space(dac))
++				break;
++
++			if (unlikely(__get_user(sample, up++))) {
++				if (ret == 0)
++					ret = -EFAULT;
++				break;
++			}
++			sample = swab16(sample);
++			dac->dma.buf[abdac_get_head(dac)]
++				= (sample << 16) | sample;
++			dac->dma.head++;
++		}
++	}
++
++	return ret;
++}
++
++static ssize_t abdac_dma_translate_from_user(struct at32_dac *dac,
++					       const char __user *buffer,
++					       size_t count)
++{
++	/* At least one buffer must be available at this point */
++	dev_dbg(&dac->pdev->dev, "copying %zu bytes from user...\n", count);
++
++	return dac->trans(dac, buffer, count);
++}
++
++static int abdac_set_format(struct at32_dac *dac, int format)
++{
++	unsigned int order;
++
++	switch (format) {
++	case AFMT_S16_BE:
++		order = 1;
++		dac->trans = trans_s16be;
++		break;
++	case AFMT_S16_LE:
++		order = 1;
++		dac->trans = trans_s16le;
++		break;
++	default:
++		dev_dbg(&dac->pdev->dev, "unsupported format: %d\n", format);
++		return -EINVAL;
++	}
++
++	if (dac->dsp_settings.channels == 2)
++		order++;
++
++	dac->dsp_settings.input_order = order;
++	dac->dsp_settings.format = format;
++	return 0;
++}
++
++static int abdac_set_sample_rate(struct at32_dac *dac, unsigned long rate)
++{
++	unsigned long new_rate;
++	int ret;
++
++	ret = clk_set_rate(dac->sample_clk, 256 * rate);
++	if (ret < 0)
++		return ret;
++
++	/* TODO: mplayer seems to have a problem with this */
++#if 0
++	new_rate = clk_get_rate(dac->sample_clk);
++	dac->dsp_settings.sample_rate = new_rate / 256;
++#else
++	dac->dsp_settings.sample_rate = rate;
++#endif
++
++	return 0;
++}
++
++static ssize_t abdac_dsp_write(struct file *file,
++				 const char __user *buffer,
++				 size_t count, loff_t *ppos)
++{
++	struct at32_dac *dac = file->private_data;
++	DECLARE_WAITQUEUE(wait, current);
++	unsigned int avail;
++	ssize_t copied;
++	ssize_t ret;
++
++	/* Avoid address space checking in the translation functions */
++	if (!access_ok(buffer, count, VERIFY_READ))
++		return -EFAULT;
++
++	down(&dac->sem);
++
++	if (!dac->dma.buf) {
++		ret = abdac_dma_prepare(dac);
++		if (ret)
++			goto out;
++	}
++
++	add_wait_queue(&dac->write_wait, &wait);
++	ret = 0;
++	while (count > 0) {
++		do {
++			abdac_update_dma_tail(dac);
++			avail = abdac_dma_space(dac);
++			set_current_state(TASK_INTERRUPTIBLE);
++			if (avail >= DMA_WRITE_THRESHOLD)
++				break;
++
++			if (file->f_flags & O_NONBLOCK) {
++				if (!ret)
++					ret = -EAGAIN;
++				goto out;
++			}
++
++			pr_debug("Going to wait (avail = %u, count = %zu)\n",
++				 avail, count);
++
++			up(&dac->sem);
++			schedule();
++			if (signal_pending(current)) {
++				if (!ret)
++					ret = -ERESTARTSYS;
++				goto out_nosem;
++			}
++			down(&dac->sem);
++		} while (1);
++
++		copied = abdac_dma_translate_from_user(dac, buffer, count);
++		if (copied < 0) {
++			if (!ret)
++				ret = -EFAULT;
++			goto out;
++		}
++
++		abdac_start(dac);
++
++		count -= copied;
++		ret += copied;
++	}
++
++out:
++	up(&dac->sem);
++out_nosem:
++	remove_wait_queue(&dac->write_wait, &wait);
++	set_current_state(TASK_RUNNING);
++	return ret;
++}
++
++static int abdac_dsp_ioctl(struct inode *inode, struct file *file,
++			     unsigned int cmd, unsigned long arg)
++{
++	struct at32_dac *dac = file->private_data;
++	int __user *up = (int __user *)arg;
++	struct audio_buf_info abinfo;
++	int val, ret;
++
++	switch (cmd) {
++	case OSS_GETVERSION:
++		return put_user(SOUND_VERSION, up);
++
++	case SNDCTL_DSP_SPEED:
++		if (get_user(val, up))
++			return -EFAULT;
++		if (val >= 0) {
++			abdac_stop(dac);
++			ret = abdac_set_sample_rate(dac, val);
++			if (ret)
++				return ret;
++		}
++		return put_user(dac->dsp_settings.sample_rate, up);
++
++	case SNDCTL_DSP_STEREO:
++		if (get_user(val, up))
++			return -EFAULT;
++		abdac_stop(dac);
++		if (val && dac->dsp_settings.channels == 1)
++			dac->dsp_settings.input_order++;
++		else if (!val && dac->dsp_settings.channels != 1)
++			dac->dsp_settings.input_order--;
++		dac->dsp_settings.channels = val ? 2 : 1;
++		return 0;
++
++	case SNDCTL_DSP_CHANNELS:
++		if (get_user(val, up))
++			return -EFAULT;
++
++		if (val) {
++			if (val < 0 || val > 2)
++				return -EINVAL;
++
++			abdac_stop(dac);
++			dac->dsp_settings.input_order
++				+= val - dac->dsp_settings.channels;
++			dac->dsp_settings.channels = val;
++		}
++		return put_user(val, (int *)arg);
++
++	case SNDCTL_DSP_GETFMTS:
++		return put_user(AFMT_S16_BE | AFMT_S16_BE, up);
++
++	case SNDCTL_DSP_SETFMT:
++		if (get_user(val, up))
++			return -EFAULT;
++
++		if (val == AFMT_QUERY) {
++			val = dac->dsp_settings.format;
++		} else {
++			ret = abdac_set_format(dac, val);
++			if (ret)
++				return ret;
++		}
++		return put_user(val, up);
++
++	case SNDCTL_DSP_GETOSPACE:
++		abdac_update_dma_tail(dac);
++		abinfo.fragsize = ((1 << dac->dsp_settings.input_order)
++				   * (DMA_PERIOD_SIZE / 4));
++		abinfo.bytes = (abdac_dma_space(dac)
++				<< dac->dsp_settings.input_order);
++		abinfo.fragstotal = ((DMA_BUFFER_SIZE * 4)
++				     >> (DMA_PERIOD_SHIFT
++					 + dac->dsp_settings.input_order));
++		abinfo.fragments = ((abinfo.bytes
++				     >> dac->dsp_settings.input_order)
++				    / (DMA_PERIOD_SIZE / 4));
++		pr_debug("fragments=%d  fragstotal=%d  fragsize=%d bytes=%d\n",
++			 abinfo.fragments, abinfo.fragstotal, abinfo.fragsize,
++			 abinfo.bytes);
++		return copy_to_user(up, &abinfo, sizeof(abinfo)) ? -EFAULT : 0;
++
++	default:
++		dev_dbg(&dac->pdev->dev, "Unimplemented ioctl cmd: 0x%x\n", cmd);
++		return -EINVAL;
++	}
++}
++
++static int abdac_dsp_open(struct inode *inode, struct file *file)
++{
++	struct at32_dac *dac = the_dac;
++	int ret;
++
++	if (file->f_mode & FMODE_READ)
++		return -ENXIO;
++
++	down(&dac->sem);
++	ret = -EBUSY;
++	if (dac->busy)
++		goto out;
++
++	dac->dma.head = dac->dma.tail = 0;
++
++	/* FIXME: What are the correct defaults?  */
++	dac->dsp_settings.channels = 2;
++	abdac_set_format(dac, AFMT_S16_BE);
++	ret = abdac_set_sample_rate(dac, 8000);
++	if (ret)
++		goto out;
++
++	file->private_data = dac;
++	dac->busy = 1;
++
++	ret = 0;
++
++out:
++	up(&dac->sem);
++	return ret;
++}
++
++static int abdac_dsp_release(struct inode *inode, struct file *file)
++{
++	struct at32_dac *dac = file->private_data;
++
++	down(&dac->sem);
++
++	abdac_stop(dac);
++	abdac_dma_cleanup(dac);
++	dac->busy = 0;
++
++	up(&dac->sem);
++
++	return 0;
++}
++
++static struct file_operations abdac_dsp_fops = {
++	.owner		= THIS_MODULE,
++	.llseek		= no_llseek,
++	.write		= abdac_dsp_write,
++	.ioctl		= abdac_dsp_ioctl,
++	.open		= abdac_dsp_open,
++	.release	= abdac_dsp_release,
++};
++
++static int __init abdac_probe(struct platform_device *pdev)
++{
++	struct at32_dac *dac;
++	struct resource *regs;
++	struct clk *mck;
++	struct clk *sample_clk;
++	int irq;
++	int ret;
++
++	if (the_dac)
++		return -EBUSY;
++
++	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!regs)
++		return -ENXIO;
++	irq = platform_get_irq(pdev, 0);
++	if (irq < 0)
++		return irq;
++
++	mck = clk_get(&pdev->dev, "pclk");
++	if (IS_ERR(mck))
++		return PTR_ERR(mck);
++	sample_clk = clk_get(&pdev->dev, "sample_clk");
++	if (IS_ERR(sample_clk)) {
++		ret = PTR_ERR(sample_clk);
++		goto out_put_mck;
++	}
++	clk_enable(mck);
++
++	ret = -ENOMEM;
++	dac = kzalloc(sizeof(struct at32_dac), GFP_KERNEL);
++	if (!dac)
++		goto out_disable_clk;
++
++	spin_lock_init(&dac->lock);
++	init_MUTEX(&dac->sem);
++	init_waitqueue_head(&dac->write_wait);
++	dac->pdev = pdev;
++	dac->mck = mck;
++	dac->sample_clk = sample_clk;
++
++	dac->regs = ioremap(regs->start, regs->end - regs->start + 1);
++	if (!dac->regs)
++		goto out_free_dac;
++
++	ret = request_irq(irq, abdac_interrupt, 0, "dac", dac);
++	if (ret)
++		goto out_unmap_regs;
++
++	/* FIXME */
++	dac->req.req.dmac = find_dma_controller(0);
++	if (!dac->req.req.dmac)
++		goto out_free_irq;
++
++	ret = dma_alloc_channel(dac->req.req.dmac);
++	if (ret < 0)
++		goto out_free_irq;
++
++	dac->req.req.channel = ret;
++	dac->req.req.block_complete = abdac_dma_block_complete;
++	dac->req.req.error = abdac_dma_error;
++	dac->req.data_reg = regs->start + DAC_DATA;
++	dac->req.periph_id = 2; /* FIXME */
++	dac->req.direction = DMA_DIR_MEM_TO_PERIPH;
++	dac->req.width = DMA_WIDTH_32BIT;
++
++	/* Make sure the DAC is silent and disabled */
++	dac_writel(dac, DATA, 0);
++	dac_writel(dac, CTRL, 0);
++
++	ret = register_sound_dsp(&abdac_dsp_fops, -1);
++	if (ret < 0)
++		goto out_free_dma;
++	dac->dev_dsp = ret;
++
++	/* TODO: Register mixer */
++
++	the_dac = dac;
++	platform_set_drvdata(pdev, dac);
++
++	return 0;
++
++out_free_dma:
++	dma_release_channel(dac->req.req.dmac, dac->req.req.channel);
++out_free_irq:
++	free_irq(irq, dac);
++out_unmap_regs:
++	iounmap(dac->regs);
++out_free_dac:
++	kfree(dac);
++out_disable_clk:
++	clk_disable(mck);
++	clk_put(sample_clk);
++out_put_mck:
++	clk_put(mck);
++	return ret;
++}
++
++static int __exit abdac_remove(struct platform_device *pdev)
++{
++	struct at32_dac *dac;
++
++	dac = platform_get_drvdata(pdev);
++	if (dac) {
++		unregister_sound_dsp(dac->dev_dsp);
++		dma_release_channel(dac->req.req.dmac, dac->req.req.channel);
++		free_irq(platform_get_irq(pdev, 0), dac);
++		iounmap(dac->regs);
++		clk_disable(dac->mck);
++		clk_put(dac->sample_clk);
++		clk_put(dac->mck);
++		kfree(dac);
++		platform_set_drvdata(pdev, NULL);
++		the_dac = NULL;
++	}
++
++	return 0;
++}
++
++static struct platform_driver abdac_driver = {
++	.remove		= __exit_p(abdac_remove),
++	.driver		= {
++		.name	= "abdac",
++	},
++};
++
++static int __init abdac_init(void)
++{
++	return platform_driver_probe(&abdac_driver, abdac_probe);
++}
++module_init(abdac_init);
++
++static void __exit abdac_exit(void)
++{
++	platform_driver_unregister(&abdac_driver);
++}
++module_exit(abdac_exit);
++
++MODULE_AUTHOR("Haavard Skinnemoen <hskinnemoen@atmel.com>");
++MODULE_DESCRIPTION("Sound Driver for the Atmel AT32 ABDAC");
++MODULE_LICENSE("GPL");
+diff --git a/sound/oss/at32_abdac.h b/sound/oss/at32_abdac.h
+new file mode 100644
+index 0000000..3c88e25
+--- /dev/null
++++ b/sound/oss/at32_abdac.h
+@@ -0,0 +1,59 @@
++/*
++ * Register definitions for the Atmel AT32 on-chip DAC.
++ *
++ * Copyright (C) 2006 Atmel Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++#ifndef __SOUND_OSS_AT32_ABDAC_H__
++#define __SOUND_OSS_AT32_ABDAC_H__
++
++/* DAC register offsets */
++#define DAC_DATA                                0x0000
++#define DAC_CTRL                                0x0008
++#define DAC_INT_MASK                            0x000c
++#define DAC_INT_EN                              0x0010
++#define DAC_INT_DIS                             0x0014
++#define DAC_INT_CLR                             0x0018
++#define DAC_INT_STATUS                          0x001c
++#define DAC_PDC_DATA                            0x0020
++
++/* Bitfields in CTRL */
++#define DAC_SWAP_OFFSET                         30
++#define DAC_SWAP_SIZE                           1
++#define DAC_EN_OFFSET                           31
++#define DAC_EN_SIZE                             1
++
++/* Bitfields in INT_MASK/INT_EN/INT_DIS/INT_STATUS/INT_CLR */
++#define DAC_UNDERRUN_OFFSET                     28
++#define DAC_UNDERRUN_SIZE                       1
++#define DAC_TX_READY_OFFSET                     29
++#define DAC_TX_READY_SIZE                       1
++#define DAC_TX_BUFFER_EMPTY_OFFSET              30
++#define DAC_TX_BUFFER_EMPTY_SIZE                1
++#define DAC_CHANNEL_TX_END_OFFSET               31
++#define DAC_CHANNEL_TX_END_SIZE                 1
++
++/* Bit manipulation macros */
++#define DAC_BIT(name)					\
++	(1 << DAC_##name##_OFFSET)
++#define DAC_BF(name, value)				\
++	(((value) & ((1 << DAC_##name##_SIZE) - 1))	\
++	 << DAC_##name##_OFFSET)
++#define DAC_BFEXT(name, value)				\
++	(((value) >> DAC_##name##_OFFSET)		\
++	 & ((1 << DAC_##name##_SIZE) - 1))
++#define DAC_BFINS(name, value, old)			\
++	(((old) & ~(((1 << DAC_##name##_SIZE) - 1)	\
++		    << DAC_##name##_OFFSET))		\
++	 | DAC_BF(name,value))
++
++/* Register access macros */
++#define dac_readl(port, reg)				\
++	__raw_readl((port)->regs + DAC_##reg)
++#define dac_writel(port, reg, value)			\
++	__raw_writel((value), (port)->regs + DAC_##reg)
++
++#endif /* __SOUND_OSS_AT32_ABDAC_H__ */
 diff --git a/sound/spi/Kconfig b/sound/spi/Kconfig
 new file mode 100644
 index 0000000..0d08c29

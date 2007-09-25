@@ -114,7 +114,7 @@ index c958fd4..c7560e5 100644
  /*
   * The next two functions should go away as the boot loader is
   * supposed to initialize the macb address registers with a valid
-@@ -317,6 +361,10 @@ static int __init atstk1002_init(void)
+@@ -321,6 +365,10 @@ static int __init atstk1002_init(void)
  #endif
  #endif
  
