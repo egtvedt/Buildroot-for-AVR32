@@ -1,4 +1,4 @@
-menu "Board Support Options"
+menu "Target options"
 
 source "project/Config.in"
 
