@@ -73,6 +73,7 @@ $(STAGING_DIR)/lib/libjpeg.a: $(JPEG_DIR)/.libs/libjpeg.a
 	touch -c $(STAGING_DIR)/lib/libjpeg.a
 
 $(TARGET_DIR)/usr/lib/libjpeg.so: $(STAGING_DIR)/lib/libjpeg.a
+	mkdir -p $(TARGET_DIR)/usr/lib
 	cp -dpf $(STAGING_DIR)/lib/libjpeg.so* $(TARGET_DIR)/usr/lib/
 	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libjpeg.so*
 	touch -c $(TARGET_DIR)/usr/lib/libjpeg.so
