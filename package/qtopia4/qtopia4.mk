@@ -215,10 +215,11 @@ endif
 	);
 	touch $@
 
-$(QTOPIA4_TARGET_DIR)/lib/libQtCore.so.$(QTOPIA4_VERSION): $(QTOPIA4_TARGET_DIR)/.configured
+$(QTOPIA4_TARGET_DIR)/.compiled: $(QTOPIA4_TARGET_DIR)/.configured
 	$(TARGET_CONFIGURE_OPTS) $(MAKE) -C $(QTOPIA4_TARGET_DIR) sub-src
+	touch $@
 
-$(TARGET_DIR)/usr/lib/libQtCore.so.$(QTOPIA4_VERSION): $(QTOPIA4_TARGET_DIR)/lib/libQtCore.so.$(QTOPIA4_VERSION)
+$(TARGET_DIR)/.installed: $(QTOPIA4_TARGET_DIR)/.compiled
 	mkdir -p $(TARGET_DIR)/usr/lib/fonts
 	touch $(TARGET_DIR)/usr/lib/fonts/fontdir
 	cp -dpf $(STAGING_DIR)/usr/lib/fonts/helvetica*.qpf $(TARGET_DIR)/usr/lib/fonts
@@ -236,6 +237,7 @@ $(TARGET_DIR)/usr/lib/libQtCore.so.$(QTOPIA4_VERSION): $(QTOPIA4_TARGET_DIR)/lib
 	# Remove Svg libraries, not needed
 	-rm $(TARGET_DIR)/usr/lib/libQtSvg*
 	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libQt*.so.$(QTOPIA4_VERSION)
+	touch $@
 
 #################################
 #
@@ -310,15 +312,15 @@ endif
 	);
 	touch $@
 
-$(QTOPIA4_HOST_DIR)/lib/libQtCore.so.$(QTOPIA4_VERSION): $(QTOPIA4_HOST_DIR)/.configured
+$(QTOPIA4_HOST_DIR)/.compiled: $(QTOPIA4_HOST_DIR)/.configured
 	$(TARGET_CONFIGURE_OPTS) $(MAKE) -C $(QTOPIA4_HOST_DIR)
+	touch $@
 
-$(STAGING_DIR)/usr/lib/libQtCore.so.$(QTOPIA4_VERSION): $(QTOPIA4_HOST_DIR)/lib/libQtCore.so.$(QTOPIA4_VERSION)
+$(STAGING_DIR)/.installed: $(QTOPIA4_HOST_DIR)/.compiled
 	$(TARGET_CONFIGURE_OPTS) $(MAKE) -C $(QTOPIA4_HOST_DIR) install
+	touch $@
 
-qtopia4: uclibc zlib $(QTOPIA4_DEP_LIBS) \
-		$(STAGING_DIR)/usr/lib/libQtCore.so.$(QTOPIA4_VERSION) \
-		$(TARGET_DIR)/usr/lib/libQtCore.so.$(QTOPIA4_VERSION)
+qtopia4: uclibc zlib $(QTOPIA4_DEP_LIBS) $(STAGING_DIR)/.installed $(TARGET_DIR)/.installed
 
 qtopia4-clean:
 	-$(MAKE) -C $(QTOPIA4_HOST_DIR) clean
