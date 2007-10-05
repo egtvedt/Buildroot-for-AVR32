@@ -3,12 +3,12 @@
 # mpfr
 #
 #############################################################
-MPFR_VERSION:=2.2.1
+MPFR_VERSION:=2.3.0
 MPFR_PATCH:=patches
 MPFR_PATCH_FILE:=mpfr-$(MPFR_VERSION).patch
 MPFR_SOURCE:=mpfr-$(MPFR_VERSION).tar.bz2
 MPFR_CAT:=$(BZCAT)
-MPFR_SITE:=http://www.mpfr.org/mpfr-$(MPFR_VERSION)/
+MPFR_SITE:=http://www.mpfr.org/mpfr-$(MPFR_VERSION)
 MPFR_DIR:=$(TOOL_BUILD_DIR)/mpfr-$(MPFR_VERSION)
 MPFR_TARGET_DIR:=$(BUILD_DIR)/mpfr-$(MPFR_VERSION)
 MPFR_BINARY:=libmpfr$(LIBTGTEXT)
