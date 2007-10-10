@@ -98,6 +98,9 @@ $(TARGET_DIR)/$(SAMBA_TARGET_BINARY): $(SAMBA_DIR)/$(SAMBA_BINARY)
 	for file in $(SAMBA_TARGETS_y) ; do \
 		$(STRIP) --strip-unneeded $(TARGET_DIR)/$$file; \
 	done
+ifeq ($(strip $(BR2_PACKAGE_SAMBA_SWAT)),y)
+	cp -dpfr $(SAMBA_DIR)/../swat $(TARGET_DIR)/usr/
+endif
 	$(INSTALL) -m 0755 package/samba/S91smb $(TARGET_DIR)/etc/init.d
 	@if [ ! -f $(TARGET_DIR)/etc/samba/smb.conf ] ; then \
 		$(INSTALL) -m 0755 -D package/samba/simple.conf $(TARGET_DIR)/etc/samba/smb.conf; \
