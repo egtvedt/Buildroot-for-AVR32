@@ -1,0 +1,13 @@
+# This is a sample file for setup of JFFS2 partitions, please note that you
+# _must_ have a "root" mount name. The script will allway assume to find a
+# root partition.
+#
+# The system as of today only support one partition in a sub directory. Which
+# means you can not have a partition for /var and another for /var/lib. Feel
+# free to modify the make-part-images.sh script (-:
+#
+# Each mount name _must_ be unique.
+#
+# <mount point>		<mount name>	<page size>	<erase size>	<cleanmarkers>	<device file>	<pad size>
+/			root		0x1000		0x10000		1		1		0x0
+/usr			usr		0x420		0x2100		0		0		0x0

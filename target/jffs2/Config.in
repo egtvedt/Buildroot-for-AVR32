@@ -1,4 +1,4 @@
-config BR2_TARGET_ROOTFS_JFFS2
+menuconfig BR2_TARGET_ROOTFS_JFFS2
 	bool "jffs2 root filesystem"
 	default n
 	select BR2_HOST_FAKEROOT
@@ -6,100 +6,113 @@ config BR2_TARGET_ROOTFS_JFFS2
 	help
 	  Build a jffs2 root filesystem
 
+if BR2_TARGET_ROOTFS_JFFS2
+
+config BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP
+	bool "Read partition setup from file"
+	default n
+	help
+	  Read partition table setup from a file and split the root filesystem
+	  accordingly.
+
+	  Sample setup file: target/jffs2/jffs2_partitions.txt.sample
+
+	  If you plan to have a huge file system for your target you should
+	  answer n to this option.
+
+config BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP_FILE
+	string "Partition setup file"
+	default "$(BR2_BOARD_PATH)/jffs2_partitions.txt"
+	depends on BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP
+	help
+	  Path to a file which holds the partition setup.
+
+if !BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP
 
 choice
 	prompt "Memory Type"
 	default BR2_TARGET_ROOTFS_JFFS2_FLASH
-	depends on BR2_TARGET_ROOTFS_JFFS2
 
 config BR2_TARGET_ROOTFS_JFFS2_FLASH
-	bool "Parallel flash with 4 kB pagesize"
-	depends on BR2_TARGET_ROOTFS_JFFS2
+	bool "Parallel flash (NOR flash)"
 
 config BR2_TARGET_ROOTFS_JFFS2_DATAFLASH
-	bool "AT45 dataflash with 1056 byte pagesize"
-	depends on BR2_TARGET_ROOTFS_JFFS2
+	bool "AT45 DataFlash (serial flash)"
 	select BR2_TARGET_ROOTFS_JFFS2_NOCLEANMARKER
 
 endchoice
 
-
 config BR2_TARGET_ROOTFS_JFFS2_PAGESIZE
 	hex "Page Size"
-	depends on BR2_TARGET_ROOTFS_JFFS2_FLASH
-	default 0x1000
-	help
-	  Set to pagesize of memory (Dataflash is 0x210 or 0x420)
-
-config BR2_TARGET_ROOTFS_JFFS2_PAGESIZE
-	hex "Page Size"
-	depends on BR2_TARGET_ROOTFS_JFFS2_DATAFLASH
-	default 0x420
+	default 0x420  if BR2_TARGET_ROOTFS_JFFS2_DATAFLASH
+	default 0x1000 if BR2_TARGET_ROOTFS_JFFS2_FLASH
 	help
 	  Set to pagesize of memory (Dataflash is 0x210 or 0x420)
 
 config BR2_TARGET_ROOTFS_JFFS2_EBSIZE
 	hex "Erase block size"
-	depends on BR2_TARGET_ROOTFS_JFFS2_FLASH
-	default 0x20000
-
-config BR2_TARGET_ROOTFS_JFFS2_EBSIZE
-	hex "Erase block size"
-	depends on BR2_TARGET_ROOTFS_JFFS2_DATAFLASH
-	default 0x2100
+	default 0x2100  if BR2_TARGET_ROOTFS_JFFS2_DATAFLASH
+	default 0x10000 if BR2_TARGET_ROOTFS_JFFS2_FLASH
 
 config BR2_TARGET_ROOTFS_JFFS2_NOCLEANMARKER
-	bool	"Do not use Cleanmarker"
-	depends on BR2_TARGET_ROOTFS_JFFS2
+	bool "Do not use Cleanmarker"
 	default n
 	help
-	  Do not use cleanmarkers if using NAND flash or Dataflash where
-	  the pagesize is not a power of 2
-
-config BR2_JFFS2_TARGET_SREC
-	bool "RootFS in SREC file formet"
-	depends on BR2_TARGET_ROOTFS_JFFS2
-	default n
+	  Do not use cleanmarkers when makeing the JFFS2 file system. This is
+	  appropriate for NAND flash and DataFlash where the pagesize is not a
+	  power of 2.
 
 config BR2_TARGET_ROOTFS_JFFS2_PAD
 	bool "Pad output"
-	depends on BR2_TARGET_ROOTFS_JFFS2
+	help
+	  Pad the output image with 0xFF in unused space.
 
 config BR2_TARGET_ROOTFS_JFFS2_PADSIZE
 	hex "Pad output size (0x0 = to end of EB)"
-	depends on BR2_TARGET_ROOTFS_JFFS2_PAD
 	default 0x0
+	depends on BR2_TARGET_ROOTFS_JFFS2_PAD
 	help
-	  Set to 0x0 to pad to end of erase block.
+	  Pad the image up to a given size, if set to 0x0 the image is padded
+	  to the end of the final erase block.
+
+endif # !BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP
+
+config BR2_JFFS2_TARGET_SREC
+	bool "Generate SREC file format"
+	default n
+	help
+	  Generate S-records file format for the target.
 
 choice
 	prompt "Endianess"
-	default BR2_TARGET_ROOTFS_JFFS2_LE
-	depends on BR2_TARGET_ROOTFS_JFFS2
+	default BR2_TARGET_ROOTFS_JFFS2_LE if BR2_ENDIAN = "LITTLE"
+	default BR2_TARGET_ROOTFS_JFFS2_BE if BR2_ENDIAN = "BIG"
+	help
+	  Select the endianess layout of the flash image, this should normally
+	  match your architecture endianess.
 
 config BR2_TARGET_ROOTFS_JFFS2_LE
 	bool "little-endian"
-	depends on 	BR2_TARGET_ROOTFS_JFFS2
 
 config BR2_TARGET_ROOTFS_JFFS2_BE
 	bool "big-endian"
-	depends on 	BR2_TARGET_ROOTFS_JFFS2
 
 endchoice
 
 config BR2_TARGET_ROOTFS_JFFS2_SQUASH
 	bool "Make all files be owned by root"
-	depends on 	BR2_TARGET_ROOTFS_JFFS2
 
 config BR2_TARGET_ROOTFS_JFFS2_OUTPUT
-	string "Output File"
-	depends on BR2_TARGET_ROOTFS_JFFS2
+	string "Output file(s)"
 	default "$(IMAGE).jffs2"
+	help
+	  Name of the output file, if partition setup is enable a
+	  -<partition name> will be appended to the end of the file name.
 
 config BR2_TARGET_ROOTFS_JFFS2_COPYTO
-	string "also copy the image to..."
-	depends on 	BR2_TARGET_ROOTFS_JFFS2
+	string "also copy the image(s) to..."
 	default ""
 	help
-	  Copies the resulting image to a secondary location.
+	  Copies the resulting image(s) to a secondary location.
 
+endif # BR2_TARGET_ROOTFS_JFFS2
