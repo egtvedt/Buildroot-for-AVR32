@@ -3,7 +3,7 @@
 # fakeroot
 #
 #############################################################
-FAKEROOT_VERSION:=1.7.1
+FAKEROOT_VERSION:=1.8.1
 FAKEROOT_SOURCE:=fakeroot_$(FAKEROOT_VERSION).tar.gz
 FAKEROOT_SITE:=http://ftp.debian.org/debian/pool/main/f/fakeroot
 FAKEROOT_CAT:=$(ZCAT)
@@ -35,11 +35,10 @@ $(FAKEROOT_SOURCE_DIR)/.unpacked: $(DL_DIR)/$(FAKEROOT_SOURCE)
 $(FAKEROOT_DIR1)/.configured: $(FAKEROOT_SOURCE_DIR)/.unpacked
 	mkdir -p $(FAKEROOT_DIR1)
 	(cd $(FAKEROOT_DIR1); rm -rf config.cache; \
-		CC="$(HOSTCC)" \
 		$(FAKEROOT_SOURCE_DIR)/configure \
 		--prefix=/usr \
 		$(DISABLE_NLS) \
-	);
+	)
 	touch $@
 
 $(FAKEROOT_DIR1)/faked: $(FAKEROOT_DIR1)/.configured
@@ -51,6 +50,8 @@ $(STAGING_DIR)/usr/bin/fakeroot: $(FAKEROOT_DIR1)/faked
 	$(SED) 's,^PREFIX=.*,PREFIX=$(STAGING_DIR)/usr,g' $(STAGING_DIR)/usr/bin/fakeroot
 	$(SED) 's,^BINDIR=.*,BINDIR=$(STAGING_DIR)/usr/bin,g' $(STAGING_DIR)/usr/bin/fakeroot
 	$(SED) 's,^PATHS=.*,PATHS=$(FAKEROOT_DIR1)/.libs:/lib:/usr/lib,g' $(STAGING_DIR)/usr/bin/fakeroot
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" \
+		$(STAGING_DIR)/usr/lib/libfakeroot.la
 	touch -c $@
 
 host-fakeroot: uclibc $(STAGING_DIR)/usr/bin/fakeroot
@@ -85,10 +86,10 @@ $(FAKEROOT_DIR2)/.configured: $(FAKEROOT_SOURCE_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		$(DISABLE_NLS) \
-	);
+	)
 	touch $@
 
 $(FAKEROOT_DIR2)/faked: $(FAKEROOT_DIR2)/.configured
@@ -97,10 +98,18 @@ $(FAKEROOT_DIR2)/faked: $(FAKEROOT_DIR2)/.configured
 
 $(TARGET_DIR)/usr/bin/fakeroot: $(FAKEROOT_DIR2)/faked
 	$(MAKE) DESTDIR=$(TARGET_DIR) -C $(FAKEROOT_DIR2) install
-	-mv $(TARGET_DIR)/usr/bin/$(ARCH)-linux-faked $(TARGET_DIR)/usr/bin/faked
-	-mv $(TARGET_DIR)/usr/bin/$(ARCH)-linux-fakeroot $(TARGET_DIR)/usr/bin/fakeroot
-	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
-		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
+	-mv $(TARGET_DIR)/usr/bin/$(ARCH)-linux-faked \
+		$(TARGET_DIR)/usr/bin/faked
+	-mv $(TARGET_DIR)/usr/bin/$(ARCH)-linux-fakeroot \
+		$(TARGET_DIR)/usr/bin/fakeroot
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/info
+endif
+ifneq ($(BR2_HAVE_MANPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/man
+endif
+	rm -rf $(TARGET_DIR)/share/locale
+	rm -rf $(TARGET_DIR)/usr/share/doc
 	touch -c $@
 
 fakeroot: uclibc $(TARGET_DIR)/usr/bin/fakeroot
