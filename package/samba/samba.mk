@@ -34,6 +34,8 @@ $(SAMBA_DIR)/.configured: $(SAMBA_DIR)/.unpacked
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
+		--prefix=/usr \
+		--localstatedir=/var \
 		--with-lockdir=/var/cache/samba \
 		--with-piddir=/var/run \
 		--with-privatedir=/etc/samba \
