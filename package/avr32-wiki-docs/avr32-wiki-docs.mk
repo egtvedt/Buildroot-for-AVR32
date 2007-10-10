@@ -16,14 +16,15 @@ $(AVR32_WIKI_DOCS_DIR)/.unpacked: $(DL_DIR)/$(AVR32_WIKI_DOCS_SOURCE)
 	$(AVR32_WIKI_DOCS_CAT) $(DL_DIR)/$(AVR32_WIKI_DOCS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	touch $@
 
-$(TARGET_DIR)/www/wiki: $(AVR32_WIKI_DOCS_DIR)/.unpacked
+$(TARGET_DIR)/www/wiki/index.html: $(AVR32_WIKI_DOCS_DIR)/.unpacked
 	mkdir -p $(TARGET_DIR)/www
 	cp -dpfr $(AVR32_WIKI_DOCS_DIR)/docs $(TARGET_DIR)/www/wiki
 ifeq ($(BR2_PACKAGE_AVR32_WIKI_DOCS_ROOT_INDEX_FILE),y)
 	cp -dpfr package/avr32-wiki-docs/index.html $(TARGET_DIR)/www/
 endif
+	touch $@
 
-avr32-wiki-docs: busybox $(TARGET_DIR)/www/wiki
+avr32-wiki-docs: busybox $(TARGET_DIR)/www/wiki/index.html
 
 avr32-wiki-docs-clean:
 	rm -rf $(TARGET_DIR)/www/wiki
