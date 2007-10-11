@@ -32,8 +32,7 @@ $(MTD_HOST_DIR)/.unpacked: $(DL_DIR)/$(MTD_SOURCE)
 		package/mtd/mtd-utils mtd-utils-$(MTD_VERSION)-host\*.patch
 	touch $@
 
-
-$(MTD_HOST_DIR)/mkfs.jffs2: $(MTD_HOST_DIR)/.unpacked
+$(MKFS_JFFS2): $(MTD_HOST_DIR)/.unpacked
 	CC="$(HOSTCC)" CROSS= CFLAGS=-I$(LINUX_HEADERS_DIR)/include \
 		$(MAKE) LINUXDIR=$(LINUX_DIR) \
 		BUILDDIR=$(MTD_HOST_DIR) \
