@@ -15,7 +15,7 @@
 #
 ######################################################################
 
-QTOPIA4_VERSION:=4.3.1
+QTOPIA4_VERSION:=4.3.2
 QTOPIA4_CAT:=$(ZCAT)
 
 BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME:=$(strip $(subst ",, $(BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME)))
