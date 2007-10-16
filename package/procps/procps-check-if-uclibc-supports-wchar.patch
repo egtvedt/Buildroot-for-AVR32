@@ -1,0 +1,39 @@
+diff -rup procps-3.2.7-orig/proc/escape.c procps-3.2.7/proc/escape.c
+--- procps-3.2.7-orig/proc/escape.c	2005-01-05 21:50:26.000000000 +0100
++++ procps-3.2.7/proc/escape.c	2007-10-16 12:47:26.000000000 +0200
+@@ -15,7 +15,7 @@
+ #include "escape.h"
+ #include "readproc.h"
+ 
+-#if (__GNU_LIBRARY__ >= 6)
++#if (__UCLIBC_HAS_WCHAR__)
+ # include <wchar.h>
+ # include <wctype.h>
+ # include <stdlib.h>  /* MB_CUR_MAX */
+@@ -23,7 +23,7 @@
+ # include <langinfo.h>
+ #endif
+ 
+-#if (__GNU_LIBRARY__ >= 6)
++#if (__UCLIBC_HAS_WCHAR__)
+ static int escape_str_utf8(char *restrict dst, const char *restrict src, int bufsize, int *maxcells){
+   int my_cells = 0;
+   int my_bytes = 0;
+@@ -106,7 +106,7 @@ static int escape_str_utf8(char *restric
+   return my_bytes;        // bytes of text, excluding the NUL
+ }
+ 
+-#endif /* __GNU_LIBRARY__  */
++#endif /* (__UCLIBC_HAS_WCHAR__) */
+ 
+ /* sanitize a string via one-way mangle */
+ int escape_str(char *restrict dst, const char *restrict src, int bufsize, int *maxcells){
+@@ -123,7 +123,7 @@ int escape_str(char *restrict dst, const
+   "********************************"
+   "********************************";
+   
+-#if (__GNU_LIBRARY__ >= 6)
++#if (__UCLIBC_HAS_WCHAR__)
+   static int utf_init=0;
+   
+   if(utf_init==0){
