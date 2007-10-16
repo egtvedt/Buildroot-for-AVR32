@@ -160,7 +160,7 @@ $(GCC_BUILD_DIR1)/.configured: $(GCC_DIR)/.patched
 		--target=$(REAL_GNU_TARGET_NAME) \
 		--enable-languages=c \
 		$(BR2_CONFIGURE_DEVEL_SYSROOT) \
-		--disable-__cxa_atexit \
+		--enable-__cxa_atexit \
 		--enable-target-optspace \
 		--with-gnu-ld \
 		--disable-shared \
@@ -221,7 +221,7 @@ $(GCC_BUILD_DIR2)/.configured: $(GCC_DIR)/.patched $(GCC_STAGING_PREREQ)
 		--enable-languages=$(GCC_TARGET_LANGUAGES) \
 		$(BR2_CONFIGURE_STAGING_SYSROOT) \
 		$(BR2_CONFIGURE_BUILD_TOOLS) \
-		--disable-__cxa_atexit \
+		--enable-__cxa_atexit \
 		--enable-target-optspace \
 		--with-gnu-ld \
 		$(GCC_SHARED_LIBGCC) \
@@ -357,7 +357,7 @@ $(GCC_BUILD_DIR3)/.configured: $(GCC_BUILD_DIR3)/.prepared
 		--target=$(REAL_GNU_TARGET_NAME) \
 		--enable-languages=$(GCC_TARGET_LANGUAGES) \
 		--with-gxx-include-dir=/usr/include/c++ \
-		--disable-__cxa_atexit \
+		--enable-__cxa_atexit \
 		--with-gnu-ld \
 		$(GCC_SHARED_LIBGCC) \
 		$(GCC_WITH_TARGET_GMP) \
