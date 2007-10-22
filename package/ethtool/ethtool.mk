@@ -27,17 +27,18 @@ $(ETHTOOL_DIR)/.configured: $(ETHTOOL_DIR)/.unpacked
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--sysconfdir=/etc \
-	);
+	)
 	touch $@
 
 $(ETHTOOL_DIR)/ethtool: $(ETHTOOL_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(ETHTOOL_DIR)
 
-$(ETHTOOL_DIR)/.installed: $(ETHTOOL_DIR)/ethtool
-	cp $(ETHTOOL_DIR)/ethtool $(TARGET_DIR)/usr/sbin
-	touch $@
+$(TARGET_DIR)/usr/bin/ethtool: $(ETHTOOL_DIR)/ethtool
+	cp -dpf $(ETHTOOL_DIR)/ethtool $(TARGET_DIR)/usr/sbin/ethtool
+	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/sbin/ethtool
+	touch -c $@
 
-ethtool:	uclibc $(ETHTOOL_DIR)/.installed
+ethtool: uclibc $(TARGET_DIR)/usr/bin/ethtool
 
 ethtool-source: $(DL_DIR)/$(ETHTOOL_SOURCE)
 
