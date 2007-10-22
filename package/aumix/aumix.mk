@@ -15,7 +15,7 @@ $(DL_DIR)/$(AUMIX_SOURCE):
 
 $(AUMIX_DIR)/.unpacked: $(DL_DIR)/$(AUMIX_SOURCE)
 	$(AUMIX_CAT) $(DL_DIR)/$(AUMIX_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	touch $(AUMIX_DIR)/.unpacked
+	touch $@
 
 $(AUMIX_DIR)/.configured: $(AUMIX_DIR)/.unpacked
 	(cd $(AUMIX_DIR); rm -rf config.cache; \
@@ -35,17 +35,18 @@ $(AUMIX_DIR)/.configured: $(AUMIX_DIR)/.unpacked
 		--without-gpm \
 		--without-sysmouse \
 		$(DISABLE_NLS) \
-	);
-	touch $(AUMIX_DIR)/.configured
+	)
+	touch $@
 
 $(AUMIX_DIR)/src/aumix: $(AUMIX_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(AUMIX_DIR)
 
-$(AUMIX_DIR)/.installed: $(AUMIX_DIR)/src/aumix
+$(TARGET_DIR)/usr/bin/aumix: $(AUMIX_DIR)/src/aumix
 	$(MAKE) -C $(AUMIX_DIR) DESTDIR=$(TARGET_DIR) install
-	touch $(AUMIX_DIR)/.installed
+	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/aumix
+	touch -c $@
 
-aumix: uclibc ncurses $(AUMIX_DIR)/.installed
+aumix: uclibc ncurses $(TARGET_DIR)/usr/bin/aumix
 
 aumix-source: $(DL_DIR)/$(AUMIX_SOURCE)
 
