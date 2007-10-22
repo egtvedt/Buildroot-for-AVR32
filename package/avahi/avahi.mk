@@ -10,7 +10,7 @@
 # either version 2.1 of the License, or (at your option) any 
 # later version.
 
-AVAHI_VERSION:=0.6.19
+AVAHI_VERSION:=0.6.21
 AVAHI_DIR:=$(BUILD_DIR)/avahi-$(AVAHI_VERSION)
 AVAHI_SITE:=http://www.avahi.org/download/
 AVAHI_SOURCE:=avahi-$(AVAHI_VERSION).tar.gz
@@ -41,10 +41,10 @@ avahi-source: $(DL_DIR)/$(AVAHI_SOURCE)
 $(AVAHI_DIR)/.unpacked: $(DL_DIR)/$(AVAHI_SOURCE)
 	$(AVAHI_CAT) $(DL_DIR)/$(AVAHI_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(AVAHI_DIR) package/avahi/ \*.patch
-	touch $(AVAHI_DIR)/.unpacked
+	touch $@
 
 $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXPAT_DEP)
-	(cd $(AVAHI_DIR) && rm -rf config.cache && autoconf)
+	(cd $(AVAHI_DIR) && rm -rf config.cache)
 	(cd $(AVAHI_DIR) && \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
@@ -140,25 +140,26 @@ $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXPAT_DEP)
 		--with-autoipd-user=default \
 		--with-autoipd-group=default \
 	);
-	touch $(AVAHI_DIR)/.configured
+	touch $@
 
 $(AVAHI_DIR)/.compiled: $(AVAHI_DIR)/.configured
 	$(MAKE) -C $(AVAHI_DIR)
-	touch $(AVAHI_DIR)/.compiled
+	touch $@
 
 $(STAGING_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.compiled
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR)/avahi-autoipd install
 	touch -c $@
 
 $(TARGET_DIR)/usr/sbin/avahi-autoipd: $(STAGING_DIR)/usr/sbin/avahi-autoipd
-	cp $^ $@
 	mkdir -p $(TARGET_DIR)/etc/avahi
+	mkdir -p $(TARGET_DIR)/usr/share/udhcpc
 	mkdir -p $(TARGET_DIR)/var/lib
 	ln -sf /tmp/avahi-autoipd $(TARGET_DIR)/var/lib/avahi-autoipd
 	cp -af $(STAGING_DIR)/etc/avahi/avahi-autoipd.action $(TARGET_DIR)/etc/avahi/
 	cp -af $(BASE_DIR)/package/avahi/busybox-udhcpc-default.script $(TARGET_DIR)/usr/share/udhcpc/default.script
 	cp -af $(BASE_DIR)/package/avahi/S05avahi-setup.sh $(TARGET_DIR)/etc/init.d/
 	chmod 0755 $(TARGET_DIR)/usr/share/udhcpc/default.script
+	cp $^ $@
 	$(STRIP) --strip-unneeded $@
 
 $(STAGING_DIR)/usr/lib/libavahi-common.so: $(AVAHI_DIR)/.compiled
