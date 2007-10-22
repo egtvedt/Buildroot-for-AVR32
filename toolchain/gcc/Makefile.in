@@ -65,7 +65,6 @@ endif
 
 # AVR32 GCC configuration
 ifeq ($(strip $(BR2_avr32)),y)
-EXTRA_GCC_CONFIG_OPTIONS+=--disable-libmudflap
 SOFT_FLOAT_CONFIG_OPTION:=
 endif
 
@@ -88,7 +87,6 @@ endif # BR2_PREFER_IMA=y
 
 # AVR32 target GCC configuration
 ifeq ($(strip $(BR2_avr32)),y)
-EXTRA_TARGET_GCC_CONFIG_OPTIONS+=--disable-libmudflap
 SOFT_FLOAT_CONFIG_OPTION:=
 endif
 
