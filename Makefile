@@ -240,9 +240,7 @@ $(TARGET_DIR):
 bsp:	$(TARGET_DIR)/etc/issue	$(TARGET_DIR)/etc/hostname
 
 $(TARGET_DIR)/etc/issue:	$(TARGET_DIR) .config
-	echo ""			>  $(TARGET_DIR)/etc/issue
-	echo "" 		>> $(TARGET_DIR)/etc/issue
-	echo "$(BANNER)"	>> $(TARGET_DIR)/etc/issue
+	echo "$(BANNER)" > $(TARGET_DIR)/etc/issue
 
 $(TARGET_DIR)/etc/hostname:	$(TARGET_DIR) .config
 	echo "$(TARGET_HOSTNAME)" > $(TARGET_DIR)/etc/hostname
