@@ -25,7 +25,6 @@ $(DROPBEAR_DIR)/.unpacked: $(DL_DIR)/$(DROPBEAR_SOURCE)
 
 $(DROPBEAR_DIR)/.configured: $(DROPBEAR_DIR)/.unpacked
 	(cd $(DROPBEAR_DIR); rm -rf config.cache; \
-		autoconf; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
