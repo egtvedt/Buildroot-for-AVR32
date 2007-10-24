@@ -168,7 +168,7 @@ UCLIBC_HAS_GLOB=y
 #
 SHARED_LIB_LOADER_PREFIX="/lib"
 RUNTIME_PREFIX="/"
-DEVEL_PREFIX="/usr"
+DEVEL_PREFIX="/usr/"
 
 #
 # Security options
@@ -183,7 +183,7 @@ UCLIBC_BUILD_NOEXECSTACK=y
 #
 # uClibc development/debugging options
 #
-CROSS_COMPILER_PREFIX="/home/avr32/buildroot/build_avr32/staging_dir/usr/bin/avr32-linux-uclibc-"
+CROSS_COMPILER_PREFIX="/home/avr32/buildroot/build_avr32_nofpu/staging_dir/usr/bin/avr32-linux-uclibc-"
 UCLIBC_EXTRA_CFLAGS=""
 # DODEBUG is not set
 # DODEBUG_PT is not set
