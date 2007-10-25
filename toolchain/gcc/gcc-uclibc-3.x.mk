@@ -366,8 +366,6 @@ $(GCC_BUILD_DIR3)/.configured: $(GCC_BUILD_DIR3)/.prepared
 		--with-gxx-include-dir=/usr/include/c++ \
 		--enable-__cxa_atexit \
 		--with-gnu-as \
-		--with-gmp=$(STAGING_DIR)/usr \
-		--with-mpfr=$(STAGING_DIR)/usr \
 		$(GCC_SHARED_LIBGCC) \
 		$(GCC_WITH_TARGET_GMP) \
 		$(GCC_WITH_TARGET_MPFR) \
