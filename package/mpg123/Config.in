@@ -10,4 +10,4 @@ config BR2_PACKAGE_MPG123
 config BR2_PACKAGE_MPG123_ALSA
 	bool
 	default y
-	depends on BR2_PACKAGE_ALSA_LIB
+	depends on BR2_PACKAGE_MPG123 && BR2_PACKAGE_ALSA_LIB
