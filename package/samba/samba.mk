@@ -30,6 +30,7 @@ $(SAMBA_DIR)/.configured: $(SAMBA_DIR)/.unpacked
 		samba_cv_HAVE_GETTIMEOFDAY_TZ=yes \
 		samba_cv_USE_SETREUID=yes \
 		samba_cv_HAVE_KERNEL_OPLOCKS_LINUX=yes \
+		samba_cv_HAVE_IFACE_IFCONF=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
