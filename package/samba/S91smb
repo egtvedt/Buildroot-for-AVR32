@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # Stolen from RedHat FC5.
 #
@@ -10,66 +10,91 @@
 mkdir -p /var/cache/samba
 mkdir -p /var/log/samba
 
-RETVAL=0
-
 start() {
 	echo -n "Starting SMB services: "
-	smbd -D
-	RETVAL=$?
-	echo "done"
+	if ! smbd -D; then
+		echo "failed"
+		RETVAL=1
+	else
+		echo "done"
+		RETVAL=0
+	fi
 
 	echo -n "Starting NMB services: "
-	nmbd -D
-	RETVAL2=$?
-	echo "done"
+	if ! nmbd -D; then
+		echo "failed"
+		RETVAL2=1
+	else
+		echo "done"
+		RETVAL2=0
+	fi
 
-	[ $RETVAL -eq 0 -a $RETVAL2 -eq 0 ] && touch /var/lock/subsys/smb || \
-	   RETVAL=1
+	if [ $RETVAL -eq 0 -a $RETVAL2 -eq 0 ]; then
+		RETVAL=0
+	else
+		RETVAL=1
+	fi
 	return $RETVAL
-}	
+}
 
 stop() {
 	echo -n "Shutting down SMB services: "
-	kill -9 `pidof smbd`
-	RETVAL=$?
+	if ! kill -9 `pidof smbd`; then
+		echo "failed"
+		RETVAL=1
+	else
+		echo "done"
+		RETVAL=0
+	fi
 	rm -f /var/run/smbd.pid
-	echo "done"
 
 	echo -n "Shutting down NMB services: "
-	kill -9 `pidof nmbd`
-	RETVAL2=$?
+	if ! kill -9 `pidof nmbd`; then
+		echo "failed"
+		RETVAL2=1
+	else
+		echo "done"
+		RETVAL2=0
+	fi
 	rm -f /var/run/nmbd.pid
 
-	[ $RETVAL -eq 0 -a $RETVAL2 -eq 0 ] && rm -f /var/lock/subsys/smb
-	echo "done"
+	if [ $RETVAL -eq 0 -a $RETVAL2 -eq 0 ]; then
+		RETVAL=0
+	else
+		RETVAL=1
+	fi
 	return $RETVAL
-}	
+}
 
 restart() {
 	stop
 	start
-}	
+}
 
 reload() {
         echo -n "Reloading smb.conf file: "
-	kill -HUP `pidof smbd`
-	RETVAL=$?
-	echo "done"
+	if ! kill -HUP `pidof smbd`; then
+		echo "failed"
+		RETVAL=1
+	else
+		echo "done"
+		RETVAL=0
+	fi
 	return $RETVAL
-}	
+}
 
 case "$1" in
   start)
-  	start
+	start
 	;;
   stop)
-  	stop
+	stop
 	;;
   restart)
-  	restart
+	restart
 	;;
   reload)
-  	reload
+	reload
 	;;
   *)
 	echo "Usage: $0 {start|stop|restart|reload}"
