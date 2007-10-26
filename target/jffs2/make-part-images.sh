@@ -452,5 +452,3 @@ for partition in ${sub_partitions}; do
 done
 
 cleanup_end
-
-return 0
