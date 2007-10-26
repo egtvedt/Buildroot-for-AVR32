@@ -1,0 +1,29 @@
+#
+# NOTE! Don't add files that are generated in specific
+# subdirectories here. Add them in the ".gitignore" file
+# in that subdirectory instead.
+#
+# Normal rules
+#
+*.o
+*.a
+*.so
+*.os
+*.oS
+.config*
+
+#
+# Generated files
+#
+package/config/.depend
+package/config/zconf.hash.c
+
+#
+# Generated directories
+#
+binaries
+build_*
+include
+project_build_*
+src/dl
+toolchain_build_*
