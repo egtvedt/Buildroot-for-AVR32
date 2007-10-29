@@ -200,10 +200,10 @@ world: $(DL_DIR) $(BUILD_DIR) $(PROJECT_BUILD_DIR) \
 	$(BINARIES_DIR) $(STAGING_DIR) $(TARGET_DIR) bsp $(TARGETS)
 dirs: $(DL_DIR) $(BUILD_DIR) $(PROJECT_BUILD_DIR) $(STAGING_DIR)
 
-.PHONY: all world dirs clean dirclean distclean source bsp $(TARGETS) \
-	$(TARGETS_CLEAN) $(TARGETS_DIRCLEAN) $(TARGETS_SOURCE) \
-	$(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR) $(STAGING_DIR) \
-	$(PROJECT_BUILD_DIR) $(BINARIES_DIR)
+.PHONY: all world dirs binclean clean dirclean distclean rootclean \
+	stagingclean source bsp $(TARGETS) $(TARGETS_CLEAN) \
+	$(TARGETS_DIRCLEAN) $(TARGETS_SOURCE) $(DL_DIR) $(BUILD_DIR) \
+	$(TOOL_BUILD_DIR) $(STAGING_DIR) $(PROJECT_BUILD_DIR) $(BINARIES_DIR)
 
 #############################################################
 #
@@ -259,6 +259,9 @@ _source-check: .config.check
 # Cleanup and misc junk
 #
 #############################################################
+binclean:
+	rm -rf $(BINARIES_DIR)
+
 clean: $(TARGETS_CLEAN)
 	rm -rf $(STAGING_DIR) $(TARGET_DIR) $(IMAGE)
 
@@ -273,6 +276,13 @@ endif
 	$(LINUX_KERNEL) $(IMAGE) $(BASE_DIR)/include \
 		.config.cmd
 	$(MAKE) -C $(CONFIG) clean
+
+rootclean: binclean
+	rm -rf $(PROJECT_BUILD_DIR)/root
+	rm -rf $(PROJECT_BUILD_DIR)/.*
+
+stagingclean: rootclean
+	rm -rf $(STAGING_DIR)
 
 sourceball:
 	rm -rf $(BUILD_DIR) $(PROJECT_BUILD_DIR)  $(BINARIES_DIR)
@@ -374,8 +384,11 @@ endif # ifeq ($(strip $(BR2_HAVE_DOT_CONFIG)),y)
 
 help:
 	@echo 'Cleaning:'
+	@echo '  binclean               - delete binaries directory created by build'
 	@echo '  clean                  - delete temporary files created by build'
 	@echo '  distclean              - delete all non-source files (including .config)'
+	@echo '  rootclean              - delete binaires and <project>/root directory created by build'
+	@echo '  stagingclean           - delete binaires, <project>/root and staging_dir directory created by build'
 	@echo
 	@echo 'Build:'
 	@echo '  all                    - make world'
