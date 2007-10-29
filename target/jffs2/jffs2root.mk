@@ -89,7 +89,6 @@ endif
 		>> $(STAGING_DIR)/_fakeroot.$(notdir $(JFFS2_TARGET))
 	chmod a+x $(STAGING_DIR)/_fakeroot.$(notdir $(JFFS2_TARGET))
 	$(STAGING_DIR)/usr/bin/fakeroot -- $(STAGING_DIR)/_fakeroot.$(notdir $(JFFS2_TARGET))
-	exit 255
 	-@rm -f $(STAGING_DIR)/_fakeroot.$(notdir $(JFFS2_TARGET))
 	@ls -l $(JFFS2_TARGET)
 ifeq ($(BR2_JFFS2_TARGET_SREC),y)
@@ -104,7 +103,7 @@ $(JFFS2_TARGET_MULTI):
 		echo "Please specify BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP_FILE"; \
 		echo "in menuconfig, or else JFFS2 partitions can not be used.";	 \
 		echo;									 \
-		exit 1;								 \
+		exit 1;									 \
 	fi;
 	target/jffs2/make-part-images.sh $(JFFS2_TARGET_MULTI) \
 		$(TARGET_DIR) $(STAGING_DIR) \
@@ -132,10 +131,18 @@ endif
 jffs2root-source: mtd-host-source
 
 jffs2root-clean: mtd-host-clean
+ifneq ($(JFFS2_TARGET),)
 	-rm -f $(JFFS2_TARGET)
+else
+	-rm -f $(JFFS2_TARGET_MULTI)-*
+endif
 
 jffs2root-dirclean: mtd-host-dirclean
+ifneq ($(JFFS2_TARGET),)
 	-rm -f $(JFFS2_TARGET)
+else
+	-rm -f $(JFFS2_TARGET_MULTI)-*
+endif
 
 #############################################################
 #
