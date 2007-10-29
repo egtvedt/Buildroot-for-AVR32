@@ -13,6 +13,11 @@
 .config*
 
 #
+# Editor generated files
+#
+*.swp
+
+#
 # Generated files
 #
 package/config/.depend
