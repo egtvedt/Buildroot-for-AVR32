@@ -6,6 +6,8 @@ echo ""
 echo "Checking build system dependencies:"
 export LC_ALL=C
 
+source_dir="`pwd`/toolchain/dependencies/src"
+
 #############################################################
 #
 # check build system 'environment'
@@ -285,9 +287,95 @@ fi
 
 #############################################################
 #
+# check build system 'curses' library
+#
+#############################################################
+curses_missing=0
+
+echo -n "curses installed:			"
+if ! ${HOSTCC} -Wall -DUSE_CURSES_HEADER -o /dev/null \
+		${source_dir}/curses.c -lcurses 2> /dev/null; then
+	if ! ${HOSTCC} -Wall -DUSE_NCURSES_HEADER -o /dev/null \
+			${source_dir}/curses.c -lncurses 2> /dev/null; then
+		curses_missing=1
+	else
+		curses_missing=0
+	fi
+fi
+
+if [ ${curses_missing} -ne 0 ]; then
+	echo "     FALSE"
+	echo
+	echo "WARNING: missing curses library."
+	echo "         Consider installing the development package for curses or ncurses"
+	echo "         on your build system. Packages in Buildroot may fail to build"
+	echo "         when a curses library is not installed."
+	echo
+else
+	echo "	Ok"
+fi
+
+#############################################################
+#
+# check build system for 'zlib' library
+#
+#############################################################
+zlib_missing=0
+
+echo -n "zlib installed:				"
+if ! ${HOSTCC} -Wall -DUSE_CURSES_HEADER -o /dev/null \
+		${source_dir}/zlib.c -lz 2> /dev/null; then
+	zlib_missing=1
+fi
+
+if [ ${zlib_missing} -ne 0 ]; then
+	echo "     FALSE"
+	echo
+	echo "WARNING: missing zlib library."
+	echo "         Consider installing the development package for zlib"
+	echo "         on your build system. Packages in Buildroot may fail to build"
+	echo "         when a zlib library is not installed."
+	echo
+else
+	echo "	Ok"
+fi
+
+
+#############################################################
+#
+# check build system for 'lzo' library
+#
+#############################################################
+lzo_missing=0
+
+echo -n "lzo installed:				"
+if ! ${HOSTCC} -Wall -DUSE_LZO1_HEADER -o /dev/null \
+		${source_dir}/lzo.c -llzo 2> /dev/null; then
+	if ! ${HOSTCC} -Wall -DUSE_LZO2_HEADER -o /dev/null \
+			${source_dir}/lzo.c -llzo2 2> /dev/null; then
+		lzo_missing=1
+	else
+		lzo_missing=0
+	fi
+fi
+
+if [ ${lzo_missing} -ne 0 ]; then
+	echo "     FALSE"
+	echo
+	echo "WARNING: missing lzo library."
+	echo "         Consider installing the development package for lzo"
+	echo "         on your build system. Packages in Buildroot may fail to build"
+	echo "         when a lzo library is not installed."
+	echo
+else
+	echo "	Ok"
+fi
+
+
+#############################################################
+#
 # All done
 #
 #############################################################
 echo "Build system dependencies:			Ok"
 echo ""
-
