@@ -61,20 +61,16 @@ config BR2_TARGET_U_BOOT_NETMASK
 config BR2_TARGET_U_BOOT_ETH0ADDR
 	string "Ethernet 0 address"
 	depends on BR2_TARGET_U_BOOT
-	default "04:25:fe:ed:00:18"
 	help
-	  Target board MAC address for interface 0, must be changed for
-	  production units. You should have a MAC address range provided by the
-	  company who made you MAC hardware.
+	  Target board MAC address for interface 0. You should have a MAC
+	  address range provided by the company who made you MAC hardware.
 
 config BR2_TARGET_U_BOOT_ETH1ADDR
 	string "Ethernet 1 address"
 	depends on BR2_TARGET_U_BOOT
-	default "8e:ed:2a:98:8b:2e"
 	help
-	  Target board MAC address for interface 1, must be changed for
-	  production units. You should have a MAC address range provided by the
-	  company who made you MAC hardware.
+	  Target board MAC address for interface 1. You should have a MAC
+	  address range provided by the company who made you MAC hardware.
 
 config BR2_TARGET_U_BOOT_BOOTARGS
 	string "Boot arguments"
