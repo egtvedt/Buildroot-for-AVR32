@@ -29,7 +29,7 @@ diff --git a/arch/avr32/boards/atstk1000/Kconfig b/arch/avr32/boards/atstk1000/K
 index 718578f..d99d4bd 100644
 --- a/arch/avr32/boards/atstk1000/Kconfig
 +++ b/arch/avr32/boards/atstk1000/Kconfig
-@@ -50,6 +50,22 @@ config BOARD_ATSTK1002_SPI1
+@@ -52,6 +52,22 @@ config BOARD_ATSTK100X_SPI1
  	  GPIO lines and accessed through the J1 jumper block.  Say "y"
  	  here to configure that SPI controller.
  
@@ -49,14 +49,14 @@ index 718578f..d99d4bd 100644
 +	  SW6: middle button
 +	  SW7: left button
 +
- config BOARD_ATSTK1002_J2_LED
+ config BOARD_ATSTK1000_J2_LED
  	bool
- 	default BOARD_ATSTK1002_J2_LED8 || BOARD_ATSTK1002_J2_RGB
+ 	default BOARD_ATSTK1000_J2_LED8 || BOARD_ATSTK1000_J2_RGB
 diff --git a/arch/avr32/boards/atstk1000/atstk1002.c b/arch/avr32/boards/atstk1000/atstk1002.c
 index c958fd4..c7560e5 100644
 --- a/arch/avr32/boards/atstk1000/atstk1002.c
 +++ b/arch/avr32/boards/atstk1000/atstk1002.c
-@@ -17,6 +17,7 @@
+@@ -16,6 +16,7 @@
  #include <linux/types.h>
  #include <linux/spi/spi.h>
  #include <linux/spi/at73c213.h>
@@ -64,8 +64,8 @@ index c958fd4..c7560e5 100644
  
  #include <video/atmel_lcdc.h>
  
-@@ -91,6 +92,49 @@ static struct mci_platform_data __initdata mci0_data = {
- 	.wp_pin		= GPIO_PIN_NONE,
+@@ -100,6 +101,49 @@ static struct mci_platform_data __initdata mci0_data = {
+ 	.cs		= 4,
  };
  
 +#ifdef CONFIG_BOARD_ATSTK1002_GPIO_MOUSE
@@ -114,9 +114,9 @@ index c958fd4..c7560e5 100644
  /*
   * The next two functions should go away as the boot loader is
   * supposed to initialize the macb address registers with a valid
-@@ -321,6 +365,10 @@ static int __init atstk1002_init(void)
- #endif
- #endif
+@@ -269,6 +313,10 @@ static int __init atstk1002_init(void)
+ 	atstk1000_setup_j2_leds();
+ 	atstk1002_setup_extdac();
  
 +#ifdef CONFIG_BOARD_ATSTK1002_GPIO_MOUSE
 +	add_device_gpio_mouse0();
