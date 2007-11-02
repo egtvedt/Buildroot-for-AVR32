@@ -72,7 +72,9 @@ $(JFFS2_TARGET):
 	@rm -rf $(TARGET_DIR)/usr/man
 	@rm -rf $(TARGET_DIR)/usr/share/man
 	@rm -rf $(TARGET_DIR)/usr/info
-	@rmdir -p --ignore-fail-on-non-empty $(TARGET_DIR)/usr/share
+	@if [ -d $(TARGET_DIR)/usr/share ]; then \
+		rmdir -p --ignore-fail-on-non-empty $(TARGET_DIR)/usr/share; \
+	fi
 	-$(STAGING_DIR)/bin/ldconfig -r $(TARGET_DIR) 2>/dev/null
 	# Use fakeroot to pretend all target binaries are owned by root
 	rm -f $(STAGING_DIR)/_fakeroot.$(notdir $(JFFS2_TARGET))
