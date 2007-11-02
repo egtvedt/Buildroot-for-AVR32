@@ -279,7 +279,12 @@ endif
 
 rootclean: binclean
 	rm -rf $(PROJECT_BUILD_DIR)/root
-	rm -rf $(PROJECT_BUILD_DIR)/.*
+	@for dotfile in $(PROJECT_BUILD_DIR)/.*; do	\
+		if [ -f $${dotfile} ]; then		\
+			echo "rm -f $${dotfile}";	\
+			rm -f $${dotfile};		\
+		fi;					\
+	done
 
 stagingclean: rootclean
 	rm -rf $(STAGING_DIR)
