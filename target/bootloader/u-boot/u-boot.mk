@@ -3,11 +3,11 @@
 # U-Boot
 #
 #############################################################
-U_BOOT_VERSION:=1.2.0
-U_BOOT_SOURCE:=u-boot-$(U_BOOT_VERSION).tar.bz2
+U_BOOT_VERSION:=1.3.0-rc3
+U_BOOT_SOURCE:=u-boot-$(U_BOOT_VERSION).tar.gz
 U_BOOT_SITE:=ftp://ftp.denx.de/pub/u-boot
 U_BOOT_DIR:=$(PROJECT_BUILD_DIR)/u-boot-$(U_BOOT_VERSION)
-U_BOOT_CAT:=$(BZCAT)
+U_BOOT_CAT:=$(ZCAT)
 U_BOOT_BIN:=u-boot.bin
 U_BOOT_TOOLS_BIN:=mkimage
 
@@ -63,39 +63,39 @@ $(U_BOOT_DIR)/.header_modified: $(U_BOOT_DIR)/.configured
 	@echo "/* Add a wrapper around the values Buildroot sets. */" >> $(U_BOOT_INC_CONF_FILE)
 	@echo "#ifndef __BR2_ADDED_CONFIG_H" >> $(U_BOOT_INC_CONF_FILE)
 	@echo "#define __BR2_ADDED_CONFIG_H" >> $(U_BOOT_INC_CONF_FILE)
-ifneq ($(BR2_PROJECT),"")
+ifneq ($(strip $(BR2_PROJECT)),"")
 	@echo "#define CONFIG_HOSTNAME" >> $(U_BOOT_INC_CONF_FILE)
 	$(SED) 's,^#define.*CONFIG_HOSTNAME.*,#define CONFIG_HOSTNAME	$(subst ",,$(BR2_PROJECT)),' $(U_BOOT_INC_CONF_FILE)
 endif
-ifneq ($(BR2_TARGET_U_BOOT_SERVERIP),)
+ifneq ($(strip $(BR2_TARGET_U_BOOT_SERVERIP)),"")
 	@echo "#define CONFIG_SERVERIP" >> $(U_BOOT_INC_CONF_FILE)
 	$(SED) 's,^#define.*CONFIG_SERVERIP.*,#define CONFIG_SERVERIP	$(subst ",,$(BR2_TARGET_U_BOOT_SERVERIP)),' $(U_BOOT_INC_CONF_FILE)
 endif
-ifneq ($(BR2_TARGET_U_BOOT_IPADDR),)
+ifneq ($(strip $(BR2_TARGET_U_BOOT_IPADDR)),"")
 	@echo "#define CONFIG_IPADDR" >> $(U_BOOT_INC_CONF_FILE)
 	$(SED) 's,^#define.*CONFIG_IPADDR.*,#define CONFIG_IPADDR	$(subst ",,$(BR2_TARGET_U_BOOT_IPADDR)),' $(U_BOOT_INC_CONF_FILE)
-endif
-ifneq ($(BR2_TARGET_U_BOOT_GATEWAY),)
+ifneq ($(strip $(BR2_TARGET_U_BOOT_GATEWAY)),"")
 	@echo "#define CONFIG_GATEWAYIP" >> $(U_BOOT_INC_CONF_FILE)
 	$(SED) 's,^#define.*CONFIG_GATEWAYIP.*,#define CONFIG_GATEWAYIP	$(subst ",,$(BR2_TARGET_U_BOOT_GATEWAY)),' $(U_BOOT_INC_CONF_FILE)
 endif
-ifneq ($(BR2_TARGET_U_BOOT_NETMASK),)
+ifneq ($(strip $(BR2_TARGET_U_BOOT_NETMASK)),"")
 	@echo "#define CONFIG_NETMASK" >> $(U_BOOT_INC_CONF_FILE)
 	$(SED) 's,^#define.*CONFIG_NETMASK.*,#define CONFIG_NETMASK	$(subst ",,$(BR2_TARGET_U_BOOT_NETMASK)),' $(U_BOOT_INC_CONF_FILE)
 endif
-ifneq ($(BR2_TARGET_U_BOOT_ETH0ADDR),)
+endif # end BR2_TARGET_U_BOOT_IPADDR
+ifneq ($(strip $(BR2_TARGET_U_BOOT_ETH0ADDR)),"")
 	@echo "#define CONFIG_ETHADDR" >> $(U_BOOT_INC_CONF_FILE)
 	$(SED) 's,^#define.*CONFIG_ETHADDR.*,#define CONFIG_ETHADDR	$(subst ",,$(BR2_TARGET_U_BOOT_ETH0ADDR)),' $(U_BOOT_INC_CONF_FILE)
 endif
-ifneq ($(BR2_TARGET_U_BOOT_ETH1ADDR),)
+ifneq ($(strip $(BR2_TARGET_U_BOOT_ETH1ADDR)),"")
 	@echo "#define CONFIG_ETH1ADDR" >> $(U_BOOT_INC_CONF_FILE)
 	$(SED) 's,^#define.*CONFIG_ETH1ADDR.*,#define CONFIG_ETH1ADDR	$(subst ",,$(BR2_TARGET_U_BOOT_ETH1ADDR)),' $(U_BOOT_INC_CONF_FILE)
 endif
-ifneq ($(BR2_TARGET_U_BOOT_BOOTARGS),)
+ifneq ($(strip $(BR2_TARGET_U_BOOT_BOOTARGS)),"")
 	@echo "#undef CONFIG_BOOTARGS" >> $(U_BOOT_INC_CONF_FILE)
 	@echo '#define CONFIG_BOOTARGS $(BR2_TARGET_U_BOOT_BOOTARGS)' >> $(U_BOOT_INC_CONF_FILE)
 endif
-ifneq ($(BR2_TARGET_U_BOOT_BOOTCMD),)
+ifneq ($(strip $(BR2_TARGET_U_BOOT_BOOTCMD)),"")
 	@echo "#undef CONFIG_BOOTCOMMAND" >> $(U_BOOT_INC_CONF_FILE)
 	@echo '#define CONFIG_BOOTCOMMAND $(BR2_TARGET_U_BOOT_BOOTCMD)' >> $(U_BOOT_INC_CONF_FILE)
 endif
