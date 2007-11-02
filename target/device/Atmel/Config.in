@@ -22,6 +22,7 @@ config BR2_BOARD_NAME
 	default	"at91sam9xeek"		if	BR2_TARGET_AT91SAM9XEEK
 	default	"atstk1002"		if	BR2_TARGET_AVR32_ATSTK1002
 	default	"atngw100"		if	BR2_TARGET_AVR32_ATNGW100
+	default "atngw100-base"		if	BR2_TARGET_AVR32_ATNGW100_BASE
 
 config BR2_TARGET_AT91_ADVANCED_INFO
 	bool "Remove work in progress"
