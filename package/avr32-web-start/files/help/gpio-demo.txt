@@ -1,0 +1,19 @@
+1 AVR32 GPIO demo help
+
+The GPIO demo requires a LED to be wired to the AT32AP7000 device. This will
+be different from board to board.
+
+The demo is based on the gpio_leds driver in the kernel, expecting to find a
+/sys/class/leds directory with defined LEDs. The default kernel configuration
+will take care of this.
+
+
+2 Setup for AVR32 boards
+
+2.1 ATSTK1002
+
+Connect J2 on GPIO to J20 RGB.
+
+2.2 ATNGW100
+
+No connectiong is needed since LED A is directly wired to the device.

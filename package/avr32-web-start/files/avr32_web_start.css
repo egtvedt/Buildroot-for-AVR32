@@ -1,0 +1,124 @@
+#header {
+	float: left;
+	width: 742px;
+	height: 80px;
+	line-height: 55px;
+	vertical-align: middle;
+	background: url(/images/header_short.jpg) no-repeat;
+	text-align: center;
+	font-size: 28px;
+	font-weight: bold;
+	color: white;
+	border: 1px solid #ffffff;
+}
+
+#left_outer {
+	float: left;
+	width: 150px;
+}
+
+#content_outer {
+	padding: 0px;
+	margin-top: 0px;
+	margin-left: 10px;
+	float: left;
+	width: 586px;
+}
+
+body {
+	margin: 5px;
+	height: 100%;
+	padding: 0px;
+	font-family: Arial, Helvetica, Sans Serif;
+	font-size: 11px;
+	color: #333333;
+	background: #ffffff;
+}
+
+#moduletabletail {
+	background: url(/images/subtail_bg.png) no-repeat;
+}
+
+table.moduletable {
+	width: 100%;
+	padding: 0px;
+	margin-bottom: 5px;
+	border-spacing: 0px;
+	border-collapse: collapse;
+}
+
+table.moduletable th {
+	color: #000000;
+	background: url(/images/subhead_bg.png) no-repeat;
+	text-align: left;
+	padding-top: 5px;
+	padding-left: 10px;
+	height: 26px;
+	font-size: 11px;
+	font-weight: bold;
+	text-transform: none;
+}
+
+table.moduletable td {
+	background: #ffcf00;
+	margin: 0px;
+	padding: 0px;
+	padding-left: 1px;
+	font-size: 11px;
+	font-weight: normal;
+}
+
+input {
+	font-family: Arial, Helvetica, Sans Serif;
+	font-size: 11px;
+	background: #ffcf00;
+	margin: 0px;
+	padding: 3px;
+	width: 120px;
+}
+
+input:hover {
+	border-bottom-color: #c43c03;
+	border-right-color: #c43c03;
+	border-top-color: #ff6600;
+	border-left-color: #ff6600;
+}
+
+img {
+	border: 0px;
+}
+
+img:hover {
+	background: #ffcf00;
+}
+
+a.mainlevel:link, a.mainlevel:visited {
+	display: block;
+	background: url(/images/menu_bg.png) no-repeat;
+	vertical-align: middle;
+	font-size: 11px;
+	color: #000000;
+	text-align: left;
+	padding-top: 4px;
+	padding-left: 8px;
+	height: 17px !important;
+	height: 21px;
+	text-decoration: none;
+	font-weight: normal;
+}
+
+a.mainlevel:hover {
+	background-position: 0px -21px;
+	text-decoration: none;
+	color: #333333;
+}
+
+a:link, a:visited {
+	color: #ff6600; text-decoration: none;
+	font-weight: bold;
+}
+
+a:hover {
+	color: #c43c03;	text-decoration: none;
+	font-weight: bold;
+}
