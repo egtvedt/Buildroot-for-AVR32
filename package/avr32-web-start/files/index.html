@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>%BOARDNAME% - web server</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<link href="/avr32_web_start.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+
+<div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr><td colspan="2" class="outline">
+		<div id="header">%BOARDNAME%</div>
+	</td></tr>
+	<tr valign="top"><td style="width: 150px;">
+		<div id="left_outer">
+			<table cellpadding="0" cellspacing="0" class="moduletable">
+			<tr><th valign="top">External links</th></tr>
+			<tr><td><a href="http://buildroot.uclibc.org/" class="mainlevel">Buildroot</a></td></tr>
+			<tr><td><a href="http://www.atmel.no/buildroot" class="mainlevel">Buildroot for AVR32</a></td></tr>
+			<tr><td><a href="http://www.atmel.com/" class="mainlevel">Atmel.com</a></td></tr>
+			<tr><td><a href="http://www.atmel.com/AVR32" class="mainlevel">Atmel.com/AVR32</a></td></tr>
+			<tr><td><a href="http://www.avrfreaks.net/" class="mainlevel">AVRfreaks</a></td></tr>
+			<tr><td><a href="http://www.avrfreaks.net/wiki" class="mainlevel">AVRfreaks/wiki</a></td></tr>
+			<tr><td><a href="http://avr32linux.org/" class="mainlevel" >AVR32Linux.org</a></td></tr>
+			<tr><td>&nbsp;</td></tr>
+			</table>
+		</div>
+	</td><td>
+		<div id="content_outer">
+
+<table>
+
+<tr><td>
+<a href="/cgi-bin/webif.sh"><img src="/images/find.png" width="64" height="64" alt="status" /></a>
+</td><td>
+<p><a href="/cgi-bin/webif.sh">Web Status Console</a></p>
+<p>
+A page containing information about the current system version and network
+information. Here you can see DHCP clients connected to the network and WLAN
+information if avaliable. Default login is root/root or admin/admin.
+</p>
+</td></tr>
+
+<tr><td>
+<a href="/wiki"><img src="/images/help.png" width="64" height="64" alt="wiki" /></a>
+</td><td>
+<p><a href="/wiki">AVR32 wiki documentation</a></p>
+<p>
+A wiki snapshot of the official AVR32 documentation available from <a
+href="http://www.atmel.com/">atmel.com</a>. The wiki contains information about
+all AVR32 kits from Atmel.
+</p>
+</td></tr>
+
+<!-- %SWAT_ENABLED_BEGIN% -->
+<tr><td>
+<a href="http://samba.example.net:901/">
+<img src="/images/folder.png" width="64" height="64" alt="swat" />
+</a>
+</td><td>
+<p><a href="http://samba.example.net:901/">Samba Web Administration Tool (SWAT)</a></p>
+<p>
+SWAT can be used to configure the network file sharing on this system. By
+default a netdisk folder is shared.
+</p>
+</td></tr>
+<!-- %SWAT_ENABLED_END% -->
+
+<!-- %GPIO_ENABLED_BEGIN% -->
+<tr><td>
+<img src="/images/games.png" width="64" height="64" alt="gpio" />
+</td><td>
+<table><tr><td>
+<p>
+<b>GPIO demo</b>
+</p>
+Click the buttons to the right. Two demos showing how to toggle a GPIO pin and
+stream random data to a GPIO on the development board. Result can be observed
+by a blinking LED if the wiring is correct. Source code for <a
+href="/src/gpio.sh">Toggle LED</a> and
+<a href="/src/gpio-trigger.sh">Change LED trigger</a>.
+</td><td>
+<div>
+<form method="post" action="/cgi-bin/gpio.sh">
+<div><input type="submit" name="ToggleLED" value="Toggle LED" /></div>
+</form>
+<br />
+<form method="post" action="/cgi-bin/gpio-trigger.sh">
+<div><input type="submit" name="TriggerLED" value="Change LED trigger" /></div>
+</form>
+</div>
+</td></tr></table>
+</td></tr>
+<!-- %GPIO_ENABLED_END% -->
+
+</table>
+
+<p style="font-size: 9px; text-align: right; padding-top: 20px;">Icons by: <a href="http://fasticon.com/">FastIcon.com</a></p>
+
+		</div>
+	</td></tr>
+	</table>
+</div>
+
+</body>
+</html>

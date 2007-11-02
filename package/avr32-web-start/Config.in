@@ -1,0 +1,14 @@
+config BR2_PACKAGE_AVR32_WEB_START
+	bool "avr32-web-start"
+	default n
+	help
+	  This package adds a welcome web homepage, i.e. /www/index.html,
+	  intended for use on Atmel AVR32 target boards.
+
+config BR2_PACKAGE_AVR32_WEB_START_GPIO
+	bool "add gpio demo to avr32-web-start"
+	depends on BR2_PACKAGE_AVR32_WEB_START
+	default n
+	help
+	  Enable a GPIO demo which is usually used for toggling a LED on the
+	  board. Normally added for demonstration purposes.

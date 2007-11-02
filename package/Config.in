@@ -2,6 +2,7 @@ menu "Package Selection for the target"
 
 if BR2_avr32
 comment "AVR32 stuff"
+source "package/avr32-web-start/Config.in"
 source "package/avr32-wiki-docs/Config.in"
 endif
 
