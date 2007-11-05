@@ -150,7 +150,7 @@ $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/modules.dep: $(LINUX26_DIR)/.config
 	rm -rf $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)
 	rm -f $(TARGET_DIR)/sbin/cardmgr
 # Make Linux depend on modules only if enabled in the .config.
-ifneq ($(strip $(shell grep -c CONFIG_MODULES=y $(LINUX_DIR)/.config)),0)
+ifneq ($(strip $(shell grep -c "CONFIG_MODULES=y" $(LINUX26_KCONFIG))),0)
 	$(TARGET_CONFIGURE_OPTS) \
 		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) \
 		DEPMOD=$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26 \
