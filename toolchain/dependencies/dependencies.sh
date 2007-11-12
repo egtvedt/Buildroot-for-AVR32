@@ -343,29 +343,26 @@ fi
 
 #############################################################
 #
-# check build system for 'lzo' library
+# check build system for 'lzo2' library
 #
 #############################################################
-lzo_missing=0
+lzo2_missing=0
 
-echo -n "lzo installed:				"
-if ! ${HOSTCC} -Wall -DUSE_LZO1_HEADER -o /dev/null \
-		${source_dir}/lzo.c -llzo 2> /dev/null; then
-	if ! ${HOSTCC} -Wall -DUSE_LZO2_HEADER -o /dev/null \
-			${source_dir}/lzo.c -llzo2 2> /dev/null; then
-		lzo_missing=1
-	else
-		lzo_missing=0
-	fi
+echo -n "lzo2 installed:				"
+if ! ${HOSTCC} -Wall -DUSE_LZO2_HEADER -o /dev/null \
+		${source_dir}/lzo.c -llzo2 2> /dev/null; then
+	lzo2_missing=1
+else
+	lzo2_missing=0
 fi
 
-if [ ${lzo_missing} -ne 0 ]; then
+if [ ${lzo2_missing} -ne 0 ]; then
 	echo "     FALSE"
 	echo
-	echo "WARNING: missing lzo library."
-	echo "         Consider installing the development package for lzo"
+	echo "WARNING: missing lzo2 library."
+	echo "         Consider installing the development package for lzo2"
 	echo "         on your build system. Packages in Buildroot may fail to build"
-	echo "         when a lzo library is not installed."
+	echo "         when a lzo2 library is not installed."
 	echo
 else
 	echo "	Ok"
