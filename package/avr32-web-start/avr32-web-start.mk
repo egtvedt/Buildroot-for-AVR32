@@ -21,6 +21,7 @@ ifneq ($(strip $(BR2_PACKAGE_AVR32_WEB_START_GPIO)),y)
 	$(SED) 's/<!-- \%GPIO_ENABLED_END\%/GPIO_DISABLED/' $(TARGET_DIR)/www/$(AVR32_WEB_START_TARGET)
 else
 	mkdir -p $(TARGET_DIR)/www/src
+	cp -rdpf $(AVR32_WEB_START_SOURCE)/help $(TARGET_DIR)/www/
 	cp -rdpf $(AVR32_WEB_START_SOURCE)/cgi-bin $(TARGET_DIR)/www/
 	ln -sf ../cgi-bin/gpio.sh $(TARGET_DIR)/www/src/gpio.sh
 	ln -sf ../cgi-bin/gpio-trigger.sh $(TARGET_DIR)/www/src/gpio-trigger.sh
