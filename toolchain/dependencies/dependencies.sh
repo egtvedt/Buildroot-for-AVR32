@@ -13,87 +13,87 @@ source_dir="`pwd`/toolchain/dependencies/src"
 # check build system 'environment'
 #
 #############################################################
-if test -n "$CC" ; then
-	echo "CC clean:						FALSE"
-	/bin/echo -e "\n\nYou must run 'unset CC' so buildroot can run with";
-	/bin/echo -e "a clean environment on your build machine\n";
-	exit 1;
-fi;
+if test -n "$CC"; then
+	echo "CC clean:					FALSE"
+	/bin/echo -e "\n\nYou must run 'unset CC' so buildroot can run with"
+	/bin/echo -e "a clean environment on your build machine\n"
+	exit 1
+fi
 echo "CC clean:					Ok"
 
 
-if test -n "$CXX" ; then
+if test -n "$CXX"; then
 	echo "CXX clean:					FALSE"
-	/bin/echo -e "\n\nYou must run 'unset CXX' so buildroot can run with";
-	/bin/echo -e "a clean environment on your build machine\n";
-	exit 1;
-fi;
+	/bin/echo -e "\n\nYou must run 'unset CXX' so buildroot can run with"
+	/bin/echo -e "a clean environment on your build machine\n"
+	exit 1
+fi
 echo "CXX clean:					Ok"
 
 
-if test -n "$CPP" ; then
+if test -n "$CPP"; then
 	echo "CPP clean:					FALSE"
-	/bin/echo -e "\n\nYou must run 'unset CPP' so buildroot can run with";
-	/bin/echo -e "a clean environment on your build machine\n";
-	exit 1;
-fi;
+	/bin/echo -e "\n\nYou must run 'unset CPP' so buildroot can run with"
+	/bin/echo -e "a clean environment on your build machine\n"
+	exit 1
+fi
 echo "CPP clean:					Ok"
 
 
-if test -n "$CFLAGS" ; then
+if test -n "$CFLAGS"; then
 	echo "CFLAGS clean:					FALSE"
-	/bin/echo -e "\n\nYou must run 'unset CFLAGS' so buildroot can run with";
-	/bin/echo -e "a clean environment on your build machine\n";
-	exit 1;
-fi;
+	/bin/echo -e "\n\nYou must run 'unset CFLAGS' so buildroot can run with"
+	/bin/echo -e "a clean environment on your build machine\n"
+	exit 1
+fi
 echo "CFLAGS clean:					Ok"
 
-if test -n "$INCLUDES" ; then
+if test -n "$INCLUDES"; then
 	echo "INCLUDES clean:					FALSE"
 	/bin/echo -e "WARNING: INCLUDES contains:\n\t'$INCLUDES'"
 else
 	echo "INCLUDES clean:					Ok"
 fi
 
-if test -n "$CXXFLAGS" ; then
+if test -n "$CXXFLAGS"; then
 	echo "CXXFLAGS clean:					FALSE"
-	/bin/echo -e "\n\nYou must run 'unset CXXFLAGS' so buildroot can run with";
-	/bin/echo -e "a clean environment on your build machine\n";
-	exit 1;
-fi;
+	/bin/echo -e "\n\nYou must run 'unset CXXFLAGS' so buildroot can run with"
+	/bin/echo -e "a clean environment on your build machine\n"
+	exit 1
+fi
 echo "CXXFLAGS clean:					Ok"
 
-if test -n "$GREP_OPTIONS" ; then
-        echo "GREP_OPTIONS clean:                               FALSE"
-        /bin/echo -e "\n\nYou must run 'unset GREP_OPTIONS' so buildroot can run with";
-        /bin/echo -e "a clean environment on your build machine\n";
-        exit 1;
-fi;
+if test -n "$GREP_OPTIONS"; then
+        echo "GREP_OPTIONS clean:				FALSE"
+        /bin/echo -e "\n\nYou must run 'unset GREP_OPTIONS' so buildroot can run with"
+        /bin/echo -e "a clean environment on your build machine\n"
+        exit 1
+fi
 
-if test -n "$CROSS_COMPILE" ; then
-        echo "CROSS_COMPILE clean:                               FALSE"
-        /bin/echo -e "\n\nYou must run 'unset CROSS_COMPILE' so buildroot can run with";
-        /bin/echo -e "a clean environment on your build machine\n";
-        exit 1;
-fi;
+if test -n "$CROSS_COMPILE"; then
+        echo "CROSS_COMPILE clean:				FALSE"
+        /bin/echo -e "\n\nYou must run 'unset CROSS_COMPILE' so buildroot can run with"
+        /bin/echo -e "a clean environment on your build machine\n"
+        exit 1
+fi
 
-if test -n "$ARCH" ; then
-        echo "ARCH clean:                               FALSE"
-        /bin/echo -e "\n\nYou must run 'unset ARCH' so buildroot can run with";
-        /bin/echo -e "a clean environment on your build machine\n";
-        exit 1;
-fi;
+if test -n "$ARCH"; then
+        echo "ARCH clean:					FALSE"
+        /bin/echo -e "\n\nYou must run 'unset ARCH' so buildroot can run with"
+        /bin/echo -e "a clean environment on your build machine\n"
+        exit 1
+fi
 
 
 echo "WORKS" | grep "WORKS" >/dev/null 2>&1
-if test $? != 0 ; then
-	echo "grep works:				FALSE"
+if test $? != 0; then
+	echo "grep works:					FALSE"
 	exit 1
 fi
 
 # sanity check for CWD in LD_LIBRARY_PATH
 # try not to rely on egrep..
-if test -n "$LD_LIBRARY_PATH" ; then
+if test -n "$LD_LIBRARY_PATH"; then
 	/bin/echo TRiGGER_start"$LD_LIBRARY_PATH"TRiGGER_end | /bin/grep ':.:' >/dev/null 2>&1 ||
 	/bin/echo TRiGGER_start"$LD_LIBRARY_PATH"TRiGGER_end | /bin/grep 'TRiGGER_start:' >/dev/null 2>&1 ||
 	/bin/echo TRiGGER_start"$LD_LIBRARY_PATH"TRiGGER_end | /bin/grep ':TRiGGER_end' >/dev/null 2>&1 ||
@@ -102,11 +102,11 @@ if test -n "$LD_LIBRARY_PATH" ; then
 		echo "LD_LIBRARY_PATH sane:				FALSE"
 		echo "You seem to have the current working directory in your"
 		echo "LD_LIBRARY_PATH environment variable. This doesn't work."
-		exit 1;
+		exit 1
 	else
 		echo "LD_LIBRARY_PATH sane:				Ok"
 	fi
-fi;
+fi
 
 
 
@@ -115,11 +115,11 @@ fi;
 # check build system 'which'
 #
 #############################################################
-if ! which which > /dev/null ; then
-	echo "which installed:		    FALSE"
-	/bin/echo -e "\n\nYou must install 'which' on your build machine\n";
-	exit 1;
-fi;
+if ! which which > /dev/null; then
+	echo "which installed:				FALSE"
+	/bin/echo -e "\n\nYou must install 'which' on your build machine\n"
+	exit 1
+fi
 echo "which installed:				Ok"
 
 
@@ -131,7 +131,7 @@ echo "which installed:				Ok"
 #############################################################
 SED=$(toolchain/dependencies/check-host-sed.sh)
 
-if [ -z "$SED" ] ; then
+if [ -z "$SED" ]; then
 	XSED=$HOST_SED_DIR/bin/sed
 	echo "sed works:					No, using buildroot version instead"
 else
@@ -148,23 +148,23 @@ fi
 #
 #############################################################
 MAKE=$(which make 2> /dev/null)
-if [ -z "$MAKE" ] ; then
-	echo "make installed:		    FALSE"
-	/bin/echo -e "\n\nYou must install 'make' on your build machine\n";
-	exit 1;
-fi;
+if [ -z "$MAKE" ]; then
+	echo "make installed:					FALSE"
+	/bin/echo -e "\n\nYou must install 'make' on your build machine\n"
+	exit 1
+fi
 MAKE_VERSION=$($MAKE --version 2>&1 | $XSED -e 's/^.* \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q')
-if [ -z "$MAKE_VERSION" ] ; then
-	echo "make installed:		    FALSE"
-	/bin/echo -e "\n\nYou must install 'make' on your build machine\n";
-	exit 1;
-fi;
+if [ -z "$MAKE_VERSION" ]; then
+	echo "make installed:					FALSE"
+	/bin/echo -e "\n\nYou must install 'make' on your build machine\n"
+	exit 1
+fi
 MAKE_MAJOR=$(echo $MAKE_VERSION | $XSED -e "s/\..*//g")
 MAKE_MINOR=$(echo $MAKE_VERSION | $XSED -e "s/^$MAKE_MAJOR\.//g" -e "s/\..*//g" -e "s/[a-zA-Z].*//g")
-if [ $MAKE_MAJOR -lt 3 ] || [ $MAKE_MAJOR -eq 3 -a $MAKE_MINOR -lt 80 ] ; then
+if [ $MAKE_MAJOR -lt 3 ] || [ $MAKE_MAJOR -eq 3 -a $MAKE_MINOR -lt 80 ]; then
 	echo "You have make '$MAKE_VERSION' installed.  GNU make >=3.80 is required"
-	exit 1;
-fi;
+	exit 1
+fi
 echo "GNU make version '$MAKE_VERSION':			Ok"
 
 
@@ -175,60 +175,59 @@ echo "GNU make version '$MAKE_VERSION':			Ok"
 #
 #############################################################
 COMPILER=$(which $HOSTCC 2> /dev/null)
-if [ -z "$COMPILER" ] ; then
+if [ -z "$COMPILER" ]; then
 	COMPILER=$(which cc 2> /dev/null)
-fi;
+fi
 # If it is not executable, it does not work.
-if [ ! -x "$COMPILER" ] ; then
+if [ ! -x "$COMPILER" ]; then
 	COMPILER=""
 fi
-if [ -z "$COMPILER" ] ; then
-	echo "C Compiler installed:		    FALSE"
-	/bin/echo -e "\n\nYou must install 'gcc' on your build machine\n";
-	exit 1;
-fi;
+if [ -z "$COMPILER" ]; then
+	echo "C Compiler installed:				FALSE"
+	/bin/echo -e "\n\nYou must install 'gcc' on your build machine\n"
+	exit 1
+fi
 
 COMPILER_VERSION=$($COMPILER --version 2>&1 | $XSED -e 's/^.*(.CC) \([0-9\.]\)/\1/g' -e "s/[-\ ].*//g" -e '1q')
-if [ -z "$COMPILER_VERSION" ] ; then
-	echo "gcc installed:		    FALSE"
-	/bin/echo -e "\n\nYou must install 'gcc' on your build machine\n";
-	exit 1;
-fi;
+if [ -z "$COMPILER_VERSION" ]; then
+	echo "gcc installed:					FALSE"
+	/bin/echo -e "\n\nYou must install 'gcc' on your build machine\n"
+	exit 1
+fi
 COMPILER_MAJOR=$(echo $COMPILER_VERSION | $XSED -e "s/\..*//g")
 COMPILER_MINOR=$(echo $COMPILER_VERSION | $XSED -e "s/^$COMPILER_MAJOR\.//g" -e "s/\..*//g")
-if [ $COMPILER_MAJOR -lt 3 -o $COMPILER_MAJOR -eq 2 -a $COMPILER_MINOR -lt 95 ] ; then
+if [ $COMPILER_MAJOR -lt 3 -o $COMPILER_MAJOR -eq 2 -a $COMPILER_MINOR -lt 95 ]; then
 	echo "You have gcc '$COMPILER_VERSION' installed.  gcc >= 2.95 is required"
-	exit 1;
-fi;
+	exit 1
+fi
 echo "C compiler '$COMPILER'"
 echo "C compiler version '$COMPILER_VERSION':			Ok"
 
 
 # check for host CXX
 CXXCOMPILER=$(which $HOSTCXX 2> /dev/null)
-if [ -z "$CXXCOMPILER" ] ; then
+if [ -z "$CXXCOMPILER" ]; then
 	CXXCOMPILER=$(which c++ 2> /dev/null)
 fi
 # If it is not executable, it does not work.
-if [ ! -x "$CXXCOMPILER" ] ; then
+if [ ! -x "$CXXCOMPILER" ]; then
 	CXXCOMPILER=""
 fi
-if [ -z "$CXXCOMPILER" ] ; then
-	echo "C++ Compiler installed:		    FALSE"
+if [ -z "$CXXCOMPILER" ]; then
+	echo "C++ Compiler installed:				FALSE"
 	/bin/echo -e "\nYou may have to install 'g++' on your build machine\n"
 	#exit 1
-fi
-if [ ! -z "$CXXCOMPILER" ] ; then
+else
 	CXXCOMPILER_VERSION=$($CXXCOMPILER --version 2>&1 | $XSED -e 's/^.*(.CC) \([0-9\.]\)/\1/g' -e "s/[-\ ].*//g" -e '1q')
-	if [ -z "$CXXCOMPILER_VERSION" ] ; then
-		echo "c++ installed:		    FALSE"
+	if [ -z "$CXXCOMPILER_VERSION" ]; then
+		echo "c++ installed:					FALSE"
 		/bin/echo -e "\nYou may have to install 'g++' on your build machine\n"
 		#exit 1
 	fi
 
 	CXXCOMPILER_MAJOR=$(echo $CXXCOMPILER_VERSION | $XSED -e "s/\..*//g")
 	CXXCOMPILER_MINOR=$(echo $CXXCOMPILER_VERSION | $XSED -e "s/^$CXXCOMPILER_MAJOR\.//g" -e "s/\..*//g")
-	if [ $CXXCOMPILER_MAJOR -lt 3 -o $CXXCOMPILER_MAJOR -eq 2 -a $CXXCOMPILER_MINOR -lt 95 ] ; then
+	if [ $CXXCOMPILER_MAJOR -lt 3 -o $CXXCOMPILER_MAJOR -eq 2 -a $CXXCOMPILER_MINOR -lt 95 ]; then
 		echo "You have g++ '$CXXCOMPILER_VERSION' installed.  g++ >= 2.95 is required"
 		exit 1
 	fi
@@ -236,16 +235,30 @@ if [ ! -z "$CXXCOMPILER" ] ; then
 	echo "C++ compiler version '$CXXCOMPILER_VERSION':			Ok"
 fi
 
+
+#############################################################
+#
+# check build system 'patch'
+#
+#############################################################
+if ! which patch > /dev/null; then
+	echo "patch installed:				FALSE"
+	/bin/echo -e "\n\nYou must install 'patch' on your build machine\n"
+	exit 1
+fi
+echo "patch installed:				Ok"
+
+
 #############################################################
 #
 # check build system 'bison'
 #
 #############################################################
-if ! which bison > /dev/null ; then
-	echo "bison installed:		    FALSE"
-	/bin/echo -e "\n\nYou must install 'bison' on your build machine\n";
-	exit 1;
-fi;
+if ! which bison > /dev/null; then
+	echo "bison installed:				FALSE"
+	/bin/echo -e "\n\nYou must install 'bison' on your build machine\n"
+	exit 1
+fi
 echo "bison installed:				Ok"
 
 
@@ -254,11 +267,11 @@ echo "bison installed:				Ok"
 # check build system 'flex'
 #
 #############################################################
-if ! which flex > /dev/null ; then
-	echo "flex installed:		    FALSE"
-	/bin/echo -e "\n\nYou must install 'flex' on your build machine\n";
-	exit 1;
-fi;
+if ! which flex > /dev/null; then
+	echo "flex installed:					FALSE"
+	/bin/echo -e "\n\nYou must install 'flex' on your build machine\n"
+	exit 1
+fi
 echo "flex installed:					Ok"
 
 
@@ -267,16 +280,16 @@ echo "flex installed:					Ok"
 # check build system 'gettext'
 #
 #############################################################
-if ! which msgfmt > /dev/null ; then \
-	echo "gettext installed:		    FALSE"
-	/bin/echo -e "\n\nYou must install 'gettext' on your build machine\n"; \
-	exit 1; \
-fi;
+if ! which msgfmt > /dev/null; then
+	echo "gettext installed:				FALSE"
+	/bin/echo -e "\n\nYou must install 'gettext' on your build machine\n"
+	exit 1
+fi
 echo "gettext installed:				Ok"
 
 
-if ! which makeinfo > /dev/null ; then \
-	echo "makeinfo installed:		    FALSE"
+if ! which makeinfo > /dev/null; then
+	echo "makeinfo installed:				FALSE"
 	/bin/echo -e "\n\nMost likely some packages will fail to build their documentation"
 	echo "Either install 'makeinfo' on your host or fix the respective packages."
 	echo "Makeinfo can usually be found in the texinfo package for your host."
@@ -292,7 +305,7 @@ fi
 #############################################################
 curses_missing=0
 
-echo -n "curses installed:			"
+echo -n "curses installed:				"
 if ! ${HOSTCC} -Wall -DUSE_CURSES_HEADER -o /dev/null \
 		${source_dir}/curses.c -lcurses 2> /dev/null; then
 	if ! ${HOSTCC} -Wall -DUSE_NCURSES_HEADER -o /dev/null \
@@ -304,7 +317,7 @@ if ! ${HOSTCC} -Wall -DUSE_CURSES_HEADER -o /dev/null \
 fi
 
 if [ ${curses_missing} -ne 0 ]; then
-	echo "     FALSE"
+	echo "FALSE"
 	echo
 	echo "WARNING: missing curses library."
 	echo "         Consider installing the development package for curses or ncurses"
@@ -312,7 +325,7 @@ if [ ${curses_missing} -ne 0 ]; then
 	echo "         when a curses library is not installed."
 	echo
 else
-	echo "	Ok"
+	echo "Ok"
 fi
 
 #############################################################
@@ -322,14 +335,14 @@ fi
 #############################################################
 zlib_missing=0
 
-echo -n "zlib installed:				"
+echo -n "zlib installed:					"
 if ! ${HOSTCC} -Wall -DUSE_CURSES_HEADER -o /dev/null \
 		${source_dir}/zlib.c -lz 2> /dev/null; then
 	zlib_missing=1
 fi
 
 if [ ${zlib_missing} -ne 0 ]; then
-	echo "     FALSE"
+	echo "FALSE"
 	echo
 	echo "WARNING: missing zlib library."
 	echo "         Consider installing the development package for zlib"
@@ -337,7 +350,7 @@ if [ ${zlib_missing} -ne 0 ]; then
 	echo "         when a zlib library is not installed."
 	echo
 else
-	echo "	Ok"
+	echo "Ok"
 fi
 
 
@@ -348,7 +361,7 @@ fi
 #############################################################
 lzo2_missing=0
 
-echo -n "lzo2 installed:				"
+echo -n "lzo2 installed:					"
 if ! ${HOSTCC} -Wall -DUSE_LZO2_HEADER -o /dev/null \
 		${source_dir}/lzo.c -llzo2 2> /dev/null; then
 	lzo2_missing=1
@@ -357,7 +370,7 @@ else
 fi
 
 if [ ${lzo2_missing} -ne 0 ]; then
-	echo "     FALSE"
+	echo "FALSE"
 	echo
 	echo "WARNING: missing lzo2 library."
 	echo "         Consider installing the development package for lzo2"
@@ -365,7 +378,7 @@ if [ ${lzo2_missing} -ne 0 ]; then
 	echo "         when a lzo2 library is not installed."
 	echo
 else
-	echo "	Ok"
+	echo "Ok"
 fi
 
 
