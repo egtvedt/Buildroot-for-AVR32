@@ -3,11 +3,11 @@
 # U-Boot
 #
 #############################################################
-U_BOOT_VERSION:=1.3.0-rc3
-U_BOOT_SOURCE:=u-boot-$(U_BOOT_VERSION).tar.gz
+U_BOOT_VERSION:=1.3.0
+U_BOOT_SOURCE:=u-boot-$(U_BOOT_VERSION).tar.bz2
 U_BOOT_SITE:=ftp://ftp.denx.de/pub/u-boot
 U_BOOT_DIR:=$(PROJECT_BUILD_DIR)/u-boot-$(U_BOOT_VERSION)
-U_BOOT_CAT:=$(ZCAT)
+U_BOOT_CAT:=$(BZCAT)
 U_BOOT_BIN:=u-boot.bin
 U_BOOT_TOOLS_BIN:=mkimage
 
