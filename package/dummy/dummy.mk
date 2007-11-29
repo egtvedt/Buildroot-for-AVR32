@@ -14,8 +14,10 @@ DUMMY_SITE=http://www.example.net/dummy/source
 DUMMY_DIR=$(BUILD_DIR)/dummy-$(DUMMY_VERSION)
 # Which decompression to use, BZCAT or ZCAT.
 DUMMY_CAT:=$(BZCAT)
+# Target binary for the package.
+DUMMY_BINARY:=dummy
 # Not really needed, but often handy define.
-DUMMY_BIN:=usr/bin/dummy
+DUMMY_TARGET_BINARY:=usr/bin/$(DUMMY_BINARY)
 
 # The download rule. Main purpose is to download the source package.
 $(DL_DIR)/$(DUMMY_SOURCE):
@@ -47,7 +49,7 @@ $(DUMMY_DIR)/.configured: $(DUMMY_DIR)/.unpacked
 	)
 	touch $@
 
-$(DUMMY_DIR)/dummy: $(DUMMY_DIR)/.configured
+$(DUMMY_DIR)/$(DUMMY_BINARY): $(DUMMY_DIR)/.configured
 	$(MAKE) -C $(DUMMY_DIR)
 
 # The installing rule. Main purpose is to install the binary into the target
@@ -56,14 +58,14 @@ $(DUMMY_DIR)/dummy: $(DUMMY_DIR)/.configured
 #
 # Only the files needed to run the application should be installed to the
 # target root directory, to not waste valuable flash space.
-$(TARGET_DIR)/$(DUMMY_BIN): $(DUMMY_DIR)/dummy
-	cp -dpf $(DUMMY_DIR)/dummy $(TARGET_DIR)/$(DUMMY_BIN)
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/$(DUMMY_BIN)
+$(TARGET_DIR)/$(DUMMY_TARGET_BINARY): $(DUMMY_DIR)/$(DUMMY_BINARY)
+	cp -dpf $(DUMMY_DIR)/dummy $@
+	$(STRIP) --strip-unneeded $@
 
 # Main rule which shows which other packages must be installed before the dummy
 # package is installed. This to ensure that all depending libraries are
 # installed.
-dummy:	uclibc $(TARGET_DIR)/$(DUMMY_BIN)
+dummy:	uclibc $(TARGET_DIR)/$(DUMMY_TARGET_BINARY)
 
 # Source download rule. Main purpose to download the source package. Since some
 # people would like to work offline, it is mandotory to implement a rule which
