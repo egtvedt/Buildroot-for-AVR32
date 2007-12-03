@@ -381,7 +381,7 @@ BR2_TARGET_U_BOOT_IPADDR=""
 BR2_TARGET_U_BOOT_ETH0ADDR=""
 BR2_TARGET_U_BOOT_ETH1ADDR=""
 BR2_TARGET_U_BOOT_BOOTARGS="console=ttyS0 root=/dev/mtdblock1 rootfstype=jffs2 g_serial.use_acm=1"
-BR2_TARGET_U_BOOT_BOOTCMD="fsload 0x90250000 /boot/uImage; bootm"
+BR2_TARGET_U_BOOT_BOOTCMD="fsload 0x90300000 /boot/uImage; bootm"
 
 #
 # Linux Options
