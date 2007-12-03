@@ -3,9 +3,9 @@
 # samba
 #
 #############################################################
-SAMBA_VERSION:=3.0.26a
+SAMBA_VERSION:=3.0.27a
 SAMBA_SOURCE:=samba-$(SAMBA_VERSION).tar.gz
-SAMBA_SITE:=ftp://us4.samba.org/pub/samba/stable
+SAMBA_SITE:=http://samba.org/samba/ftp/stable
 SAMBA_DIR:=$(BUILD_DIR)/samba-$(SAMBA_VERSION)/source
 SAMBA_CAT:=$(ZCAT)
 SAMBA_BINARY:=bin/smbd
