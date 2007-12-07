@@ -1,0 +1,17 @@
+---
+ testcases/kernel/syscalls/times/times03.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: ltp-full-20071130/testcases/kernel/syscalls/times/times03.c
+===================================================================
+--- ltp-full-20071130.orig/testcases/kernel/syscalls/times/times03.c	2007-12-07 11:36:23.000000000 +0100
++++ ltp-full-20071130/testcases/kernel/syscalls/times/times03.c	2007-12-07 11:36:27.000000000 +0100
+@@ -58,7 +58,7 @@ char *TCID = "times03";
+ int TST_TOTAL = 1;
+ extern int Tst_count;
+ int exp_enos[]={0};
+-int timeout;		/* Did we timeout in alarm() ? */
++volatile int timeout;		/* Did we timeout in alarm() ? */
+ 
+ void work(void);
+ void sighandler(int signal, siginfo_t *info, void *uc);

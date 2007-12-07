@@ -1,0 +1,19 @@
+---
+ testcases/kernel/syscalls/Makefile |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+Index: ltp-full-20071130/testcases/kernel/syscalls/Makefile
+===================================================================
+--- ltp-full-20071130.orig/testcases/kernel/syscalls/Makefile	2007-12-06 14:45:00.000000000 +0100
++++ ltp-full-20071130/testcases/kernel/syscalls/Makefile	2007-12-06 14:45:15.000000000 +0100
+@@ -25,8 +25,8 @@ EXCLUDE_DIR=epoll
+ #
+ # Commented this out since there are directories here we don't want built by default
+ #
+-SUBDIR = `ls */Makefile | sed "s/Makefile//g" | grep -v epoll` 
+-UCLINUX_SUBDIR = `ls */Makefile | sed "s/Makefile//g" | grep -vE "^fork|epoll|capget|capset|chmod|chown|llseek|nftw|clone|profil|getcontext"`
++SUBDIR = `ls */Makefile | sed "s/Makefile//g" | grep -vE "^epoll|remap_file_pages"`
++UCLINUX_SUBDIR = `ls */Makefile | sed "s/Makefile//g" | grep -vE "^fork|epoll|capget|capset|chmod|chown|llseek|nftw|clone|profil|getcontext|remap_file_pages"`
+ 
+ all:
+ 	@set -e; for i in lib $(SUBDIR); do \
