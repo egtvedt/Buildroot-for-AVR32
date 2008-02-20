@@ -1,9 +1,32 @@
 config BR2_PACKAGE_MPLAYER
 	bool "mplayer"
 	default n
-	select BR2_PACKAGE_LIBMAD
 	help
 	  MPlayer is a movie player which runs on many systems and supports
 	  many different file formats.
 
 	  http://www.mplayerhq.hu/
+
+choice
+	prompt "faad library"
+	default BR2_PACKAGE_MPLAYER_FAAD_INTERNAL_FIXED
+	depends on BR2_PACKAGE_MPLAYER
+	help
+	  Selects the library type for AAC decoding using libfaad.
+
+config BR2_PACKAGE_MPLAYER_FAAD_INTERNAL_FLOAT
+	bool "internal floating point libfaad"
+config BR2_PACKAGE_MPLAYER_FAAD_INTERNAL_FIXED
+	bool "internal fixed point libfaad"
+config BR2_PACKAGE_MPLAYER_FAAD_EXTERNAL
+	bool "external libfaad"
+	select BR2_PACKAGE_FAAD2
+endchoice
+
+config BR2_PACKAGE_MPLAYER_LIBMAD
+	bool "use libmad for mp3 decoding"
+	default y
+	depends on BR2_PACKAGE_MPLAYER
+	select BR2_PACKAGE_LIBMAD
+	help
+	  Use libmad for decoding mp3.

@@ -17,6 +17,21 @@ else
 MPLAYER_ENDIAN:=--disable-big-endian
 endif
 
+ifeq ($(strip $(BR2_PACKAGE_LIBMAD)),y)
+MPLAYER_DEP_LIBS:=libmad
+MPLAYER_LIB_MAD:=--enable-mad
+endif
+ifeq ($(strip $(BR2_PACKAGE_FAAD2)),y)
+MPLAYER_DEP_LIBS+=faad2
+MPLAYER_LIB_FAAD:=--enable-faad-external --disable-faad-internal
+else
+ifeq ($(strip $(BR2_PACKAGE_MPLAYER_FAAD_INTERNAL_FIXED)),y)
+MPLAYER_LIB_FAAD:=--enable-faad-fixed
+else
+MPLAYER_LIB_FAAD:=--enable-faad
+endif
+endif
+
 $(DL_DIR)/$(MPLAYER_SOURCE):
 	$(WGET) -P $(DL_DIR) $(MPLAYER_SITE)/$(MPLAYER_SOURCE)
 
@@ -39,25 +54,24 @@ $(MPLAYER_DIR)/.configured: $(MPLAYER_DIR)/.unpacked
 		--as=$(TARGET_CROSS)as \
 		--with-extraincdir=$(STAGING_DIR)/include \
 		--with-extralibdir=$(STAGING_DIR)/lib \
-		--enable-mad \
+		$(MPLAYER_LIB_MAD) \
+		$(MPLAYER_LIB_FAAD) \
 		--enable-fbdev \
 		$(MPLAYER_ENDIAN) \
 		--disable-mpdvdkit \
 		--disable-tv \
 		--enable-dynamic-plugins \
-	);
+	)
 	@touch $@
 
 $(MPLAYER_DIR)/$(MPLAYER_BINARY): $(MPLAYER_DIR)/.configured
 	$(MAKE) -C $(MPLAYER_DIR)
-	@touch -c $@
 
 $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY): $(MPLAYER_DIR)/$(MPLAYER_BINARY)
 	$(INSTALL) -m 0755 -D $(MPLAYER_DIR)/$(MPLAYER_BINARY) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
 	-$(STRIP) --strip-unneeded $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
-	@touch -c $@
 
-mplayer: uclibc libmad $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
+mplayer: uclibc $(MPLAYER_DEP_LIBS) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
 
 mplayer-clean:
 	rm -f $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
