@@ -1,0 +1,24 @@
+config BR2_PACKAGE_FAAD2
+	bool "faad2"
+	default n
+	help
+	  FAAD2 is an open source MPEG-4 and MPEG-2 AAC decoder, it is licensed
+	  under the GPLv2 license.  Features:
+
+	    * Portable
+	    * Reasonably fast
+	    * LC, Main, LTP, SBR, PS support
+	    * DRM support through DreaM
+
+	  Source packages are available in the downloads section. No binary
+	  distributions are available here, because they require a patent
+	  license.
+
+	  http://www.audiocoding.com/faad2.html
+
+config BR2_PACKAGE_FAAD2_PLAYER
+	bool "faad AAC decoder"
+	default n
+	depends on BR2_PACKAGE_FAAD2
+	help
+	  Install the faad AAC decoder.
