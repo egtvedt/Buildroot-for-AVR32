@@ -46,7 +46,6 @@ source "toolchain/ccache/Config.in.2"
 source "package/cvs/Config.in"
 source "package/distcc/Config.in"
 source "package/dmalloc/Config.in"
-source "package/expat/Config.in"
 source "package/fakeroot/Config.in"
 source "package/gettext/Config.in"
 source "package/gmp/Config.in"
@@ -57,7 +56,6 @@ source "package/mpatrol/Config.in"
 source "package/pkgconfig/Config.in"
 source "package/readline/Config.in"
 source "package/valgrind/Config.in"
-source "package/xerces/Config.in"
 
 comment "Other stuff"
 source "package/at/Config.in"
@@ -65,9 +63,7 @@ source "package/berkeleydb/Config.in"
 source "package/bsdiff/Config.in"
 source "package/customize/Config.in"
 source "package/dash/Config.in"
-source "package/fconfig/Config.in"
 source "package/file/Config.in"
-source "package/fis/Config.in"
 source "package/kexec/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/less/Config.in"
@@ -80,8 +76,6 @@ source "package/libgcrypt/Config.in"
 source "package/libgpg-error/Config.in"
 source "package/liblockfile/Config.in"
 source "package/libsysfs/Config.in"
-source "package/libxml2/Config.in"
-source "package/libxslt/Config.in"
 source "package/lockfile-progs/Config.in"
 source "package/lsof/Config.in"
 source "package/ltp-testsuite/Config.in"
@@ -90,10 +84,6 @@ source "package/ltt/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/module-init-tools/Config.in"
 source "package/modutils/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
-# busybox has an editor..
-source "package/nano/Config.in"
 endif
 source "package/portage/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
@@ -114,14 +104,26 @@ if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/tinylogin/Config.in"
 endif
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
-# busybox has an editor..
-source "package/uemacs/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/util-linux/Config.in"
 endif
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/which/Config.in"
+endif
+
+if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
+# busybox has an editor
+
+menuconfig BR2_TEXTEDIT_SUPPORT
+	bool "Text editors"
+	default y
+	help
+	  Support for text editors
+
+if BR2_TEXTEDIT_SUPPORT
+source "package/nano/Config.in"
+source "package/uemacs/Config.in"
+endif
+
 endif
 
 menuconfig BR2_NETWORK_SUPPORT
@@ -229,6 +231,8 @@ source "package/dbus-glib/Config.in"
 source "package/dm/Config.in"
 source "package/dmraid/Config.in"
 source "package/e2fsprogs/Config.in"
+source "package/fconfig/Config.in"
+source "package/fis/Config.in"
 source "package/fuse/Config.in"
 source "package/gadgetfs-test/Config.in"
 source "package/hal/Config.in"
@@ -417,6 +421,20 @@ source "package/python/Config.in"
 source "package/ruby/Config.in"
 source "package/tcl/Config.in"
 source "package/php/Config.in"
+endif
+
+menuconfig BR2_XML_SUPPORT
+	bool "XML handling"
+	default y
+	help
+	  Support for XML handling
+
+if BR2_XML_SUPPORT
+source "package/expat/Config.in"
+source "package/ezxml/Config.in"
+source "package/libxml2/Config.in"
+source "package/libxslt/Config.in"
+source "package/xerces/Config.in"
 endif
 
 menuconfig BR2_GAMES
