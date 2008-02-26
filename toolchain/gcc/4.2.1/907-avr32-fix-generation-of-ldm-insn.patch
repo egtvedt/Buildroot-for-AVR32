@@ -1,0 +1,200 @@
+Index: a/gcc/config/avr32/avr32.md
+===================================================================
+--- a/gcc/config/avr32/avr32.md	(revision 32518)
++++ b/gcc/config/avr32/avr32.md	(working copy)
+@@ -360,7 +360,8 @@
+ (define_insn "*movqi_internal"
+   [(set (match_operand:QI 0 "nonimmediate_operand" "=r,r,m,r")
+ 	(match_operand:QI 1 "general_operand"  "rKs08,m,r,i"))]
+-  ""
++  "register_operand (operands[0], QImode)
++   || register_operand (operands[1], QImode)"
+   "@
+    mov\t%0, %1
+    ld.ub\t%0, %1
+@@ -395,7 +396,8 @@
+ (define_insn "*movhi_internal"
+   [(set (match_operand:HI 0 "nonimmediate_operand" "=r,r,m,r")
+ 	(match_operand:HI 1 "general_operand"  "rKs08,m,r,i"))]
+-  ""
++  "register_operand (operands[0], HImode)
++   || register_operand (operands[1], HImode)"
+   "@
+    mov\t%0, %1
+    ld.sh\t%0, %1
+@@ -431,7 +433,7 @@
+        not check if the immediate is legitimate. Don't know if
+        this is a bug? */
+     if ( reload_in_progress
+-         && avr32_arch->arch_type != ARCH_TYPE_AVR32_UC
++         && avr32_imm_in_const_pool
+          && GET_CODE(operands[1]) == CONST_INT
+          && !avr32_const_ok_for_constraint_p(INTVAL(operands[1]), 'K', "Ks21") ){
+         operands[1] = force_const_mem(SImode, operands[1]);
+@@ -450,7 +452,8 @@
+ (define_insn "mov<mode>_internal"
+   [(set (match_operand:MOVM 0 "nonimmediate_operand"     "=r,   r,   r,r,m,r")
+ 	(match_operand:MOVM 1 "general_operand"          "rKs08,Ks21,n,m,r,W"))]
+-  ""
++  "register_operand (operands[0], <MODE>mode)
++   || register_operand (operands[1], <MODE>mode)"
+   {
+     switch (which_alternative) {
+       case 0:
+@@ -566,7 +569,8 @@
+ (define_insn_and_split "*movdi_internal"
+   [(set (match_operand:DI 0 "nonimmediate_operand"     "=r,r,   r,   r,r,r,m")
+ 	(match_operand:DI 1 "general_operand"          "r, Ks08,Ks21,G,n,m,r"))]
+-  ""
++  "register_operand (operands[0], DImode)
++   || register_operand (operands[1], DImode)"
+   {
+     switch (which_alternative ){
+     case 0:
+@@ -622,7 +626,6 @@
+ 	(match_operand:TI 1 "nonimmediate_operand" ""))]
+   ""
+   {
+-
+     /* One of the ops has to be in a register.  */
+     if (GET_CODE (operands[0]) != REG)
+       operands[1] = force_reg (TImode, operands[1]);
+@@ -645,19 +648,21 @@
+ 
+ 
+ (define_insn_and_split "*movti_internal"
+-  [(set (match_operand:TI 0 "avr32_movti_dst_operand"  "=r,r,<RKu00,r,r")
+-	(match_operand:TI 1 "avr32_movti_src_operand"  " r,RKu00>,r,n,m"))]
+-  ""
++  [(set (match_operand:TI 0 "avr32_movti_dst_operand"  "=r,&r,    r,    <RKu00,r,r")
++	(match_operand:TI 1 "avr32_movti_src_operand"  " r,RKu00>,RKu00,r,     n,T"))]
++  "(register_operand (operands[0], TImode)
++    || register_operand (operands[1], TImode))"
+   {
+     switch (which_alternative ){
+     case 0:
+-    case 3:
++    case 2:
++    case 4:
+         return "#";
+     case 1:
+         return "ldm\t%p1, %0";
+-    case 2:
++    case 3:
+         return "stm\t%p0, %1";
+-    case 4:
++    case 5:
+         return "ld.d\t%U0, pc[%1 - .]\;ld.d\t%B0, pc[%1 - . + 8]";
+     }
+   }
+@@ -665,9 +670,17 @@
+   "reload_completed &&
+    (REG_P (operands[0]) &&
+    (REG_P (operands[1]) 
++    /* If this is a load from the constant pool we split it into
++       two double loads. */
+     || (GET_CODE (operands[1]) == MEM
+         && GET_CODE (XEXP (operands[1], 0)) == SYMBOL_REF
+         && CONSTANT_POOL_ADDRESS_P (XEXP (operands[1], 0)))               
++    /* If this is a load where the pointer register is a part
++       of the register list, we must split it into two double
++       loads in order for it to be exception safe. */
++    || (GET_CODE (operands[1]) == MEM
++        && register_operand (XEXP (operands[1], 0), SImode)
++        && reg_overlap_mentioned_p (operands[0], XEXP (operands[1], 0)))               
+     || GET_CODE (operands[1]) == CONST_INT
+     || GET_CODE (operands[1]) == CONST_DOUBLE))"
+   [(set (match_dup 0) (match_dup 1))
+@@ -697,11 +710,35 @@
+       operands[3] = force_const_mem (DImode, split_const[1]); 
+       operands[1] = force_const_mem (DImode, split_const[0]); 
+    } else {
+-      internal_error("Illegal operand[1] for movdi split!");
+-    }
++      rtx ptr_reg = XEXP (operands[1], 0);
++      operands[1] = gen_rtx_MEM (DImode, 
++                                 gen_rtx_PLUS ( SImode,
++                                                ptr_reg,
++                                                GEN_INT (8) ));
++      operands[3] = gen_rtx_MEM (DImode,
++                                 ptr_reg);
++              
++      /* Check if the first load will clobber the pointer.
++         If so, we must switch the order of the operations. */
++      if ( reg_overlap_mentioned_p (operands[0], ptr_reg) )
++        {
++          /* We need to switch the order of the operations
++             so that the pointer register does not get clobbered
++             after the first double word load. */
++          rtx tmp;
++          tmp = operands[0];
++          operands[0] = operands[2];
++          operands[2] = tmp;
++          tmp = operands[1];
++          operands[1] = operands[3];
++          operands[3] = tmp;
++        }
++
++
++   }
+   }
+-  [(set_attr "length" "*,4,4,*,8")
+-   (set_attr "type" "*,load4,store4,*,load4")])
++  [(set_attr "length" "*,*,4,4,*,8")
++   (set_attr "type" "*,*,load4,store4,*,load4")])
+ 
+ 
+ ;;== float - 32 bits ==========================================================
+@@ -721,7 +758,9 @@
+ (define_insn "*movsf_internal"
+   [(set (match_operand:SF 0 "nonimmediate_operand"     "=r,r,r,r,m")
+ 	(match_operand:SF 1 "general_operand"          "r, G,F,m,r"))]
+-  "TARGET_SOFT_FLOAT"
++  "TARGET_SOFT_FLOAT
++   && (register_operand (operands[0], SFmode)
++       || register_operand (operands[1], SFmode))"
+   {
+     switch (which_alternative) {
+       case 0:
+@@ -778,7 +817,9 @@
+ (define_insn_and_split "*movdf_internal"
+   [(set (match_operand:DF 0 "nonimmediate_operand"     "=r,r,r,r,m")
+ 	(match_operand:DF 1 "general_operand"          " r,G,F,m,r"))]
+-  "TARGET_SOFT_FLOAT"
++  "TARGET_SOFT_FLOAT
++   && (register_operand (operands[0], DFmode)
++       || register_operand (operands[1], DFmode))"
+   {
+     switch (which_alternative ){
+     case 0:
+@@ -3994,7 +4035,9 @@
+ ;;-----------------------------------------------------------------------------
+ ;; Changing
+ ;;   mul     rd, rx, ry
+-;;   add     rd2, rd
++;;   add     rd2, rd  
++;; or
++;;   add     rd2, rd, rd2  
+ ;; to
+ ;;   mac     rd2, rx, ry
+ ;;=============================================================================
+@@ -4012,6 +4055,19 @@
+ 		 (match_dup 3)))]
+   "")
+ 
++(define_peephole2
++  [(set (match_operand:SI 0 "register_operand" "")
++        (mult:SI (match_operand:SI 1 "register_operand" "")
++                (match_operand:SI 2 "register_operand" "")))
++   (set (match_operand:SI 3 "register_operand" "")
++        (plus:SI (match_dup 0)
++                 (match_dup 3)))]
++  "peep2_reg_dead_p(2, operands[0])"
++  [(set (match_dup 3)
++	(plus:SI (mult:SI (match_dup 1)
++			  (match_dup 2))
++		 (match_dup 3)))]
++  "")
+ 
+ 
+ ;;=============================================================================
