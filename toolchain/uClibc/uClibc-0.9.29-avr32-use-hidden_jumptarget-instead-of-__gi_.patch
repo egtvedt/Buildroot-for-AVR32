@@ -1,0 +1,67 @@
+From 774de76c3a8c29d547cf83ac229e77b303e90f10 Mon Sep 17 00:00:00 2001
+From: Hans-Christian Egtvedt <hcegtvedt@atmel.com>
+Date: Mon, 18 Feb 2008 09:14:10 +0100
+Subject: [PATCH 1/1] Use HIDDEN_JUMPTARGET define instead of __gi_ directly in AVR32 files
+
+This patch uses the HIDDEN_JUMPTARGET instead of the __gi_ prefix in AVR32
+assembler files. This is done to follow the code style in uClibc.
+
+Signed-off-by: Hans-Christian Egtvedt <hcegtvedt@atmel.com>
+---
+ libc/string/avr32/bcopy.S              |    2 +-
+ libc/string/avr32/memmove.S            |    2 +-
+ libc/sysdeps/linux/avr32/bsd-_setjmp.S |    2 +-
+ libc/sysdeps/linux/avr32/bsd-setjmp.S  |    2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/libc/string/avr32/bcopy.S b/libc/string/avr32/bcopy.S
+index 87c1e04..bdd5218 100644
+--- a/libc/string/avr32/bcopy.S
++++ b/libc/string/avr32/bcopy.S
+@@ -19,7 +19,7 @@ bcopy:
+ 	eor	r11, r12
+ 	eor	r12, r11
+ 	eor	r11, r12
+-	rjmp	__GI_memmove
++	rjmp	HIDDEN_JUMPTARGET(memmove)
+ 
+ 	.size	bcopy, . - bcopy
+ 
+diff --git a/libc/string/avr32/memmove.S b/libc/string/avr32/memmove.S
+index 98287c5..535f4a2 100644
+--- a/libc/string/avr32/memmove.S
++++ b/libc/string/avr32/memmove.S
+@@ -15,7 +15,7 @@
+ 	.type	memmove, @function
+ memmove:
+ 	cp.w	src, dst
+-	brge	__GI_memcpy
++	brge	HIDDEN_JUMPTARGET(memcpy)
+ 
+ 	add	dst, len
+ 	add	src, len
+diff --git a/libc/sysdeps/linux/avr32/bsd-_setjmp.S b/libc/sysdeps/linux/avr32/bsd-_setjmp.S
+index be66a10..f23e73b 100644
+--- a/libc/sysdeps/linux/avr32/bsd-_setjmp.S
++++ b/libc/sysdeps/linux/avr32/bsd-_setjmp.S
+@@ -12,5 +12,5 @@
+ 	.align	1
+ _setjmp:
+ 	mov	r11, 0
+-	bral	__GI___sigsetjmp
++	bral	HIDDEN_JUMPTARGET(__sigsetjmp)
+ 	.size	_setjmp, . - _setjmp
+diff --git a/libc/sysdeps/linux/avr32/bsd-setjmp.S b/libc/sysdeps/linux/avr32/bsd-setjmp.S
+index 4635eeb..5247ec3 100644
+--- a/libc/sysdeps/linux/avr32/bsd-setjmp.S
++++ b/libc/sysdeps/linux/avr32/bsd-setjmp.S
+@@ -12,5 +12,5 @@
+ 	.align	1
+ setjmp:
+ 	mov	r11, 1
+-	bral	__GI___sigsetjmp
++	bral	HIDDEN_JUMPTARGET(__sigsetjmp)
+ 	.size	setjmp, . - setjmp
+-- 
+1.5.2.5
+
