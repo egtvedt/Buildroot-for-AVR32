@@ -30,12 +30,13 @@ $(ALSA_LIB_DIR)/.configured: $(ALSA_LIB_DIR)/.unpacked
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
+		--with-versioned=no \
 		--sysconfdir=/etc \
 		--enable-shared \
 		--enable-static \
 		--disable-docs \
 		$(DISABLE_NLS) \
-	);
+	)
 	@touch $@
 
 $(ALSA_LIB_DIR)/src/.libs/$(ALSA_LIB_BINARY): $(ALSA_LIB_DIR)/.configured
