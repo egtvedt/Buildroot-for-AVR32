@@ -1,0 +1,3389 @@
+Index: faad2/configure.in
+===================================================================
+--- faad2.orig/configure.in	2008-02-20 09:34:21.000000000 +0100
++++ faad2/configure.in	2008-02-20 09:36:41.000000000 +0100
+@@ -153,6 +153,12 @@
+   AC_DEFINE(DRM_PS, 1, [Define if you want support for Digital Radio Mondiale (DRM) parametric stereo])
+ fi
+ 
++AC_CANONICAL_HOST
++AM_CONDITIONAL(TARGET_ARCH_AVR32, [test $host_cpu = avr32])
++if test $host_cpu = avr32; then
++   AM_PROG_AS
++fi
++
+ AC_CONFIG_FILES(libfaad/Makefile)
+ AC_CONFIG_FILES(common/Makefile)
+ AC_CONFIG_FILES(common/mp4ff/Makefile)
+Index: faad2/include/neaacdec.h
+===================================================================
+--- faad2.orig/include/neaacdec.h	2008-02-20 09:34:21.000000000 +0100
++++ faad2/include/neaacdec.h	2008-02-20 09:36:41.000000000 +0100
+@@ -195,6 +195,9 @@
+ 
+     /* PS: 0: off, 1: on */
+     unsigned char ps;
++
++  int spec_data[52];
++
+ } NeAACDecFrameInfo;
+ 
+ char* NEAACDECAPI NeAACDecGetErrorMessage(unsigned char errcode);
+Index: faad2/libfaad/common.h
+===================================================================
+--- faad2.orig/libfaad/common.h	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/common.h	2008-02-20 09:36:41.000000000 +0100
+@@ -77,6 +77,14 @@
+ #define FIXED_POINT
+ #endif
+ 
++#ifdef __avr32__
++
++/* adds ~28 kb to avr32 binary size, but is a few percent faster */
++#define BIG_IQ_TABLE
++#define FIXED_POINT
++
++#endif
++
+ #define ERROR_RESILIENCE
+ 
+ 
+@@ -85,9 +93,15 @@
+ /* Allow decoding of SSR profile AAC */
+ //#define SSR_DEC
+ /* Allow decoding of LTP profile AAC */
++/* no forward fft for avr32 yet (easy to add though), otherwise
++   unoptimized too */
++#if !defined (__avr32__)
+ #define LTP_DEC
++#endif
+ /* Allow decoding of LD profile AAC */
++#if !defined (__avr32__)
+ #define LD_DEC
++#endif
+ /* Allow decoding of Digital Radio Mondiale (DRM) */
+ //#define DRM
+ //#define DRM_PS
+@@ -102,8 +116,9 @@
+ #endif
+ #endif
+ 
++#if !defined (__avr32__)
+ #define ALLOW_SMALL_FRAMELENGTH
+-
++#endif
+ 
+ // Define LC_ONLY_DECODER if you want a pure AAC LC decoder (independant of SBR_DEC and PS_DEC)
+ //#define LC_ONLY_DECODER
+@@ -426,7 +441,57 @@
+ void faad_free(void *b);
+ 
+ //#define PROFILE
++
++#if defined(__GNUC__) && defined(__avr32__)
++/* overlap-add loop in assembler? */
++#define OLA_OPT
++/* windowing & short window ola in filtbank.c with 32x16 mul? */
++#define OPT_16_WMUL
++#define SBR_OPT
++#define SPEC_DATA_OPT
++
++#endif
++
++/* export spectral data to main program? */
++#define SPEC_DATA
++
++
+ #ifdef PROFILE
++
++#if defined(__GNUC__) && defined(__avr32__)
++
++#ifndef PERF_COUNT_DEV__
++#define PERF_COUNT_DEV__
++  FILE *perf_counter;
++#endif
++
++
++  static uint32_t faad_get_ts(){
++    uint32_t counter = 0;
++    if (perf_counter != NULL){
++      fread(&counter, 4, 1, perf_counter);
++    }
++    return counter;
++  }
++
++  static inline uint32_t get_count(uint32_t count){
++
++    uint32_t tmp;
++    tmp = faad_get_ts();
++    if (tmp < count)
++      count = (((uint64_t) 1) << 32) - 1  - count + tmp;
++    else
++      count = tmp - count;
++
++    /* try to compensate for the cycles wasted reading the performance
++       counter device file: subtract 950 cycles from the count */
++
++    return count - 950;
++  }
++
++
++
++#else
+ static int64_t faad_get_ts()
+ {
+     __asm
+@@ -434,7 +499,8 @@
+         rdtsc
+     }
+ }
+-#endif
++#endif  // ifdef AVR32
++#endif  // ifdef PROFILE
+ 
+ #ifndef M_PI
+ #define M_PI 3.14159265358979323846
+Index: faad2/libfaad/decoder.c
+===================================================================
+--- faad2.orig/libfaad/decoder.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/decoder.c	2008-02-20 09:36:41.000000000 +0100
+@@ -151,6 +151,22 @@
+ 
+     hDecoder->drc = drc_init(REAL_CONST(1.0), REAL_CONST(1.0));
+ 
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    perf_counter = fopen("/dev/perfcnt", "r");
++    if (perf_counter == NULL){
++      fprintf(stderr,
++	      "can't open performance counter device file '/dev/perfcnt'");
++      fprintf(stderr, ", profiling will not work\n");
++    } else {
++      fprintf(stderr, "profiling with avr32 performance counters enabled!\n");
++    }
++
++
++#endif
++#endif
++
++
+     return hDecoder;
+ }
+ 
+@@ -446,16 +462,11 @@
+ {
+     uint8_t i;
+ 
++    uint64_t fb_cycles = 0;
++
+     if (hDecoder == NULL)
+         return;
+ 
+-#ifdef PROFILE
+-    printf("AAC decoder total:  %I64d cycles\n", hDecoder->cycles);
+-    printf("requant:            %I64d cycles\n", hDecoder->requant_cycles);
+-    printf("spectral_data:      %I64d cycles\n", hDecoder->spectral_cycles);
+-    printf("scalefactors:       %I64d cycles\n", hDecoder->scalefac_cycles);
+-    printf("output:             %I64d cycles\n", hDecoder->output_cycles);
+-#endif
+ 
+     for (i = 0; i < MAX_CHANNELS; i++)
+     {
+@@ -478,7 +489,8 @@
+         ssr_filter_bank_end(hDecoder->fb);
+     else
+ #endif
+-        filter_bank_end(hDecoder->fb);
++
++    fb_cycles = filter_bank_end(hDecoder->fb);
+ 
+     drc_end(hDecoder->drc);
+ 
+@@ -492,6 +504,63 @@
+     }
+ #endif
+ 
++
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++
++    printf("total separately counted cycles:\n");
++    printf("                    %10jd kcycles\n",
++	   (intmax_t) (hDecoder->requant_cycles +
++		       hDecoder->reconst_other_cycles +
++		       hDecoder->spectral_cycles +
++		       hDecoder->scalefac_cycles +
++		       hDecoder->ics_cycles -
++		       hDecoder->spectral_cycles -
++		       hDecoder->scalefac_cycles +
++		       hDecoder->init_cycles +
++		       hDecoder->output_cycles +
++		       hDecoder->fb2_cycles) / 1000);
++
++    printf("AAC decoder total:  %10jd kcycles\n",
++	   (intmax_t) hDecoder->cycles / 1000);
++    printf("requant:            %10jd kcycles\n",
++	   (intmax_t) hDecoder->requant_cycles / 1000);
++    printf("reconst. other (tns, pns, m/s / is...)\n");
++    printf("                    %10jd kcycles\n",
++	   (intmax_t) hDecoder->reconst_other_cycles / 1000);
++    printf("spectral_data:      %10jd kcycles\n",
++	   (intmax_t) hDecoder->spectral_cycles / 1000);
++    printf("scalefactors:       %10jd kcycles\n",
++	   (intmax_t) hDecoder->scalefac_cycles / 1000);
++    printf("output:             %10jd kcycles\n",
++	   (intmax_t) hDecoder->output_cycles / 1000);
++    printf("ics, other than spec.data:\n");
++    printf("                    %10jd kcycles\n",
++	   (intmax_t) (hDecoder->ics_cycles -
++	   hDecoder->spectral_cycles -
++	   hDecoder->scalefac_cycles) / 1000)
++    printf("init in CPE:        %10jd kcycles\n",
++	   (intmax_t) hDecoder->init_cycles / 1000);
++    printf("filterbank:         %10jd kcycles\n",
++	   (intmax_t) fb_cycles / 1000);
++
++    printf("\n\n");
++
++#else
++
++    printf("AAC decoder total:  %I64d cycles\n", hDecoder->cycles);
++    printf("requant:            %I64d cycles\n", hDecoder->requant_cycles);
++    printf("spectral_data:      %I64d cycles\n", hDecoder->spectral_cycles);
++    printf("scalefactors:       %I64d cycles\n", hDecoder->scalefac_cycles);
++    printf("output:             %I64d cycles\n", hDecoder->output_cycles);
++#endif
++#endif
++
++
++
++
++
++
+     if (hDecoder) faad_free(hDecoder);
+ }
+ 
+@@ -785,8 +854,8 @@
+ 
+     frame_len = hDecoder->frameLength;
+ 
+-
+     memset(hInfo, 0, sizeof(NeAACDecFrameInfo));
++
+     memset(hDecoder->internal_channel, 0, MAX_CHANNELS*sizeof(hDecoder->internal_channel[0]));
+ 
+ #ifdef USE_TIME_LIMIT
+@@ -936,6 +1005,7 @@
+     }
+ #endif
+ 
++
+     /* Make a channel configuration based on either a PCE or a channelConfiguration */
+     create_channel_config(hDecoder, hInfo);
+ 
+@@ -1041,7 +1111,6 @@
+     }
+ #endif
+ 
+-
+     sample_buffer = output_to_PCM(hDecoder, hDecoder->time_out, sample_buffer,
+         output_channels, frame_len, hDecoder->config.outputFormat);
+ 
+@@ -1074,9 +1143,14 @@
+ #endif
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->cycles += get_count(count);
++#else
+     count = faad_get_ts() - count;
+     hDecoder->cycles += count;
+ #endif
++#endif
++
+ 
+     return sample_buffer;
+ 
+Index: faad2/libfaad/filtbank.c
+===================================================================
+--- faad2.orig/libfaad/filtbank.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/filtbank.c	2008-02-20 09:36:41.000000000 +0100
+@@ -47,6 +47,9 @@
+ #include "mdct.h"
+ 
+ 
++#include "opt/asmfuncs.h"
++
++
+ fb_info *filter_bank_init(uint16_t frame_len)
+ {
+     uint16_t nshort = frame_len/8;
+@@ -54,6 +57,10 @@
+     uint16_t frame_len_ld = frame_len/2;
+ #endif
+ 
++#ifdef OPT_16_WMUL
++    int i;
++#endif
++
+     fb_info *fb = (fb_info*)faad_malloc(sizeof(fb_info));
+     memset(fb, 0, sizeof(fb_info));
+ 
+@@ -93,13 +100,23 @@
+     return fb;
+ }
+ 
+-void filter_bank_end(fb_info *fb)
++uint64_t filter_bank_end(fb_info *fb)
+ {
++  uint64_t cycles = 0;
+     if (fb != NULL)
+     {
++
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++
++      printf("FB:                 %10jd kcycles\n",
++	     (intmax_t) fb->cycles / 1000);
++      cycles = fb->cycles;
++
++#else
+         printf("FB:                 %I64d cycles\n", fb->cycles);
+ #endif
++#endif
+ 
+         faad_mdct_end(fb->mdct256);
+         faad_mdct_end(fb->mdct2048);
+@@ -109,6 +126,8 @@
+ 
+         faad_free(fb);
+     }
++    return cycles;
++
+ }
+ 
+ static INLINE void imdct_long(fb_info *fb, real_t *in_data, real_t *out_data, uint16_t len)
+@@ -167,8 +186,17 @@
+                   real_t *time_out, real_t *overlap,
+                   uint8_t object_type, uint16_t frame_len)
+ {
++
++#ifdef PROFILE
++    int64_t count = faad_get_ts();
++#endif
++
+     int16_t i;
+-    ALIGN real_t transf_buf[2*1024] = {0};
++    // not initializing to zero saves some cycles and should work fine:
++    // the whole trans_buf is written to by imdct anyway
++    // ALIGN real_t transf_buf[2*1024] = {0};
++
++    ALIGN real_t transf_buf[2*1024];
+ 
+     const real_t *window_long = NULL;
+     const real_t *window_long_prev = NULL;
+@@ -181,9 +209,6 @@
+ 
+     uint16_t nflat_ls = (nlong-nshort)/2;
+ 
+-#ifdef PROFILE
+-    int64_t count = faad_get_ts();
+-#endif
+ 
+     /* select windows of current frame and previous frame (Sine or KBD) */
+ #ifdef LD_DEC
+@@ -219,21 +244,40 @@
+         imdct_long(fb, freq_in, transf_buf, 2*nlong);
+ 
+         /* add second half output of previous frame to windowed output of current frame */
++
++
++#ifdef OLA_OPT
++	ola_avr32(time_out, overlap, transf_buf, window_long_prev, nlong);
++#else
+         for (i = 0; i < nlong; i+=4)
+         {
++
+             time_out[i]   = overlap[i]   + MUL_F(transf_buf[i],window_long_prev[i]);
+             time_out[i+1] = overlap[i+1] + MUL_F(transf_buf[i+1],window_long_prev[i+1]);
+             time_out[i+2] = overlap[i+2] + MUL_F(transf_buf[i+2],window_long_prev[i+2]);
+             time_out[i+3] = overlap[i+3] + MUL_F(transf_buf[i+3],window_long_prev[i+3]);
+         }
++#endif
++
+ 
+         /* window the second half and save as overlap for next frame */
+         for (i = 0; i < nlong; i+=4)
+         {
++#ifdef OPT_16_WMUL
++            overlap[i]   = MUL_32_16(transf_buf[nlong+i],
++				     window_long[nlong-1-i]);
++            overlap[i+1] = MUL_32_16(transf_buf[nlong+i+1],
++				     window_long[nlong-2-i]);
++            overlap[i+2] = MUL_32_16(transf_buf[nlong+i+2],
++				     window_long[nlong-3-i]);
++            overlap[i+3] = MUL_32_16(transf_buf[nlong+i+3],
++				     window_long[nlong-4-i]);
++#else
+             overlap[i]   = MUL_F(transf_buf[nlong+i],window_long[nlong-1-i]);
+             overlap[i+1] = MUL_F(transf_buf[nlong+i+1],window_long[nlong-2-i]);
+             overlap[i+2] = MUL_F(transf_buf[nlong+i+2],window_long[nlong-3-i]);
+             overlap[i+3] = MUL_F(transf_buf[nlong+i+3],window_long[nlong-4-i]);
++#endif
+         }
+         break;
+ 
+@@ -242,20 +286,34 @@
+         imdct_long(fb, freq_in, transf_buf, 2*nlong);
+ 
+         /* add second half output of previous frame to windowed output of current frame */
++#ifdef OLA_OPT
++	ola_avr32(time_out, overlap, transf_buf, window_long_prev, nlong);
++#else
+         for (i = 0; i < nlong; i+=4)
+         {
+-            time_out[i]   = overlap[i]   + MUL_F(transf_buf[i],window_long_prev[i]);
+-            time_out[i+1] = overlap[i+1] + MUL_F(transf_buf[i+1],window_long_prev[i+1]);
+-            time_out[i+2] = overlap[i+2] + MUL_F(transf_buf[i+2],window_long_prev[i+2]);
+-            time_out[i+3] = overlap[i+3] + MUL_F(transf_buf[i+3],window_long_prev[i+3]);
++	    time_out[i]   = overlap[i]   + MUL_F(transf_buf[i],
++						 window_long_prev[i]);
++            time_out[i+1] = overlap[i+1] + MUL_F(transf_buf[i+1],
++						 window_long_prev[i+1]);
++            time_out[i+2] = overlap[i+2] + MUL_F(transf_buf[i+2],
++						 window_long_prev[i+2]);
++            time_out[i+3] = overlap[i+3] + MUL_F(transf_buf[i+3],
++						 window_long_prev[i+3]);
+         }
++#endif
+ 
+         /* window the second half and save as overlap for next frame */
+         /* construct second half window using padding with 1's and 0's */
+         for (i = 0; i < nflat_ls; i++)
+             overlap[i] = transf_buf[nlong+i];
+         for (i = 0; i < nshort; i++)
+-            overlap[nflat_ls+i] = MUL_F(transf_buf[nlong+nflat_ls+i],window_short[nshort-i-1]);
++#ifdef OPT_16_WMUL
++	  overlap[nflat_ls+i] = MUL_32_16(transf_buf[nlong+nflat_ls+i],
++					  window_short[nshort-i-1]);
++#else
++	  overlap[nflat_ls+i] = MUL_F(transf_buf[nlong+nflat_ls+i],
++				      window_short[nshort-i-1]);
++#endif
+         for (i = 0; i < nflat_ls; i++)
+             overlap[nflat_ls+nshort+i] = 0;
+         break;
+@@ -276,23 +334,79 @@
+             time_out[i] = overlap[i];
+         for(i = 0; i < nshort; i++)
+         {
+-            time_out[nflat_ls+         i] = overlap[nflat_ls+         i] + MUL_F(transf_buf[nshort*0+i],window_short_prev[i]);
+-            time_out[nflat_ls+1*nshort+i] = overlap[nflat_ls+nshort*1+i] + MUL_F(transf_buf[nshort*1+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*2+i],window_short[i]);
+-            time_out[nflat_ls+2*nshort+i] = overlap[nflat_ls+nshort*2+i] + MUL_F(transf_buf[nshort*3+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*4+i],window_short[i]);
+-            time_out[nflat_ls+3*nshort+i] = overlap[nflat_ls+nshort*3+i] + MUL_F(transf_buf[nshort*5+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*6+i],window_short[i]);
++#ifdef OPT_16_WMUL
++            time_out[nflat_ls+         i] = overlap[nflat_ls+         i] +
++	      MUL_32_16(transf_buf[nshort*0+i],window_short_prev[i]);
++            time_out[nflat_ls+1*nshort+i] = overlap[nflat_ls+nshort*1+i] +
++	      MUL_32_16(transf_buf[nshort*1+i],window_short[nshort-1-i]) +
++	      MUL_32_16(transf_buf[nshort*2+i],window_short[i]);
++            time_out[nflat_ls+2*nshort+i] = overlap[nflat_ls+nshort*2+i] +
++	      MUL_32_16(transf_buf[nshort*3+i],window_short[nshort-1-i]) +
++	      MUL_32_16(transf_buf[nshort*4+i],window_short[i]);
++            time_out[nflat_ls+3*nshort+i] = overlap[nflat_ls+nshort*3+i] +
++	      MUL_32_16(transf_buf[nshort*5+i],window_short[nshort-1-i]) +
++	      MUL_32_16(transf_buf[nshort*6+i],window_short[i]);
++            if (i < trans)
++                time_out[nflat_ls+4*nshort+i] = overlap[nflat_ls+nshort*4+i] +
++		  MUL_32_16(transf_buf[nshort*7+i],window_short[nshort-1-i]) +
++		  MUL_32_16(transf_buf[nshort*8+i],window_short[i]);
++#else
++            time_out[nflat_ls+         i] = overlap[nflat_ls+         i] +
++	      MUL_F(transf_buf[nshort*0+i],window_short_prev[i]);
++            time_out[nflat_ls+1*nshort+i] = overlap[nflat_ls+nshort*1+i] +
++	      MUL_F(transf_buf[nshort*1+i],window_short[nshort-1-i]) +
++	      MUL_F(transf_buf[nshort*2+i],window_short[i]);
++            time_out[nflat_ls+2*nshort+i] = overlap[nflat_ls+nshort*2+i] +
++	      MUL_F(transf_buf[nshort*3+i],window_short[nshort-1-i]) +
++	      MUL_F(transf_buf[nshort*4+i],window_short[i]);
++            time_out[nflat_ls+3*nshort+i] = overlap[nflat_ls+nshort*3+i] +
++	      MUL_F(transf_buf[nshort*5+i],window_short[nshort-1-i]) +
++	      MUL_F(transf_buf[nshort*6+i],window_short[i]);
+             if (i < trans)
+-                time_out[nflat_ls+4*nshort+i] = overlap[nflat_ls+nshort*4+i] + MUL_F(transf_buf[nshort*7+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*8+i],window_short[i]);
++                time_out[nflat_ls+4*nshort+i] = overlap[nflat_ls+nshort*4+i] +
++		  MUL_F(transf_buf[nshort*7+i],window_short[nshort-1-i]) +
++		  MUL_F(transf_buf[nshort*8+i],window_short[i]);
++#endif
+         }
+ 
+         /* window the second half and save as overlap for next frame */
+         for(i = 0; i < nshort; i++)
+         {
++#ifdef OPT_16_WMUL
++            if (i >= trans)
++	      overlap[nflat_ls+4*nshort+i-nlong] =
++		MUL_32_16(transf_buf[nshort*7+i],window_short[nshort-1-i]) +
++		MUL_32_16(transf_buf[nshort*8+i],window_short[i]);
++            overlap[nflat_ls+5*nshort+i-nlong] =
++	      MUL_32_16(transf_buf[nshort*9+i],window_short[nshort-1-i]) +
++	      MUL_32_16(transf_buf[nshort*10+i],window_short[i]);
++            overlap[nflat_ls+6*nshort+i-nlong] =
++	      MUL_32_16(transf_buf[nshort*11+i],window_short[nshort-1-i]) +
++	      MUL_32_16(transf_buf[nshort*12+i],window_short[i]);
++            overlap[nflat_ls+7*nshort+i-nlong] =
++	      MUL_32_16(transf_buf[nshort*13+i],window_short[nshort-1-i]) +
++	      MUL_32_16(transf_buf[nshort*14+i],window_short[i]);
++            overlap[nflat_ls+8*nshort+i-nlong] =
++	      MUL_32_16(transf_buf[nshort*15+i],window_short[nshort-1-i]);
++
++#else
+             if (i >= trans)
+-                overlap[nflat_ls+4*nshort+i-nlong] = MUL_F(transf_buf[nshort*7+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*8+i],window_short[i]);
+-            overlap[nflat_ls+5*nshort+i-nlong] = MUL_F(transf_buf[nshort*9+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*10+i],window_short[i]);
+-            overlap[nflat_ls+6*nshort+i-nlong] = MUL_F(transf_buf[nshort*11+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*12+i],window_short[i]);
+-            overlap[nflat_ls+7*nshort+i-nlong] = MUL_F(transf_buf[nshort*13+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*14+i],window_short[i]);
+-            overlap[nflat_ls+8*nshort+i-nlong] = MUL_F(transf_buf[nshort*15+i],window_short[nshort-1-i]);
++	      overlap[nflat_ls+4*nshort+i-nlong] =
++		MUL_F(transf_buf[nshort*7+i],window_short[nshort-1-i]) +
++		MUL_F(transf_buf[nshort*8+i],window_short[i]);
++            overlap[nflat_ls+5*nshort+i-nlong] =
++	      MUL_F(transf_buf[nshort*9+i],window_short[nshort-1-i]) +
++	      MUL_F(transf_buf[nshort*10+i],window_short[i]);
++            overlap[nflat_ls+6*nshort+i-nlong] =
++	      MUL_F(transf_buf[nshort*11+i],window_short[nshort-1-i]) +
++	      MUL_F(transf_buf[nshort*12+i],window_short[i]);
++            overlap[nflat_ls+7*nshort+i-nlong] =
++	      MUL_F(transf_buf[nshort*13+i],window_short[nshort-1-i]) +
++	      MUL_F(transf_buf[nshort*14+i],window_short[i]);
++            overlap[nflat_ls+8*nshort+i-nlong] =
++	      MUL_F(transf_buf[nshort*15+i],window_short[nshort-1-i]);
++#endif
++
+         }
+         for (i = 0; i < nflat_ls; i++)
+             overlap[nflat_ls+nshort+i] = 0;
+@@ -306,14 +420,31 @@
+         /* construct first half window using padding with 1's and 0's */
+         for (i = 0; i < nflat_ls; i++)
+             time_out[i] = overlap[i];
++#ifdef OLA_OPT
++	ola_avr32(&time_out[nflat_ls], &overlap[nflat_ls],
++		  &transf_buf[nflat_ls], window_short_prev, nshort);
++#else
+         for (i = 0; i < nshort; i++)
+-            time_out[nflat_ls+i] = overlap[nflat_ls+i] + MUL_F(transf_buf[nflat_ls+i],window_short_prev[i]);
++#ifdef OPT_16_WMUL
++            time_out[nflat_ls+i] = overlap[nflat_ls+i] +
++	      MUL_32_16(transf_buf[nflat_ls+i],window_short_prev[i]);
++
++#else
++            time_out[nflat_ls+i] = overlap[nflat_ls+i] +
++	      MUL_F(transf_buf[nflat_ls+i],window_short_prev[i]);
++#endif
++#endif
+         for (i = 0; i < nflat_ls; i++)
+-            time_out[nflat_ls+nshort+i] = overlap[nflat_ls+nshort+i] + transf_buf[nflat_ls+nshort+i];
++            time_out[nflat_ls+nshort+i] = overlap[nflat_ls+nshort+i] +
++	      transf_buf[nflat_ls+nshort+i];
+ 
+         /* window the second half and save as overlap for next frame */
+         for (i = 0; i < nlong; i++)
++#ifdef OPT_16_WMUL
++            overlap[i] = MUL_32_16(transf_buf[nlong+i],window_long[nlong-1-i]);
++#else
+             overlap[i] = MUL_F(transf_buf[nlong+i],window_long[nlong-1-i]);
++#endif
+ 		break;
+     }
+ 
+@@ -327,9 +458,13 @@
+ 
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    fb->cycles += get_count(count);
++#else
+     count = faad_get_ts() - count;
+     fb->cycles += count;
+ #endif
++#endif
+ }
+ 
+ 
+Index: faad2/libfaad/filtbank.h
+===================================================================
+--- faad2.orig/libfaad/filtbank.h	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/filtbank.h	2008-02-20 09:36:41.000000000 +0100
+@@ -37,7 +37,7 @@
+ 
+ 
+ fb_info *filter_bank_init(uint16_t frame_len);
+-void filter_bank_end(fb_info *fb);
++uint64_t filter_bank_end(fb_info *fb);
+ 
+ #ifdef LTP_DEC
+ void filter_bank_ltp(fb_info *fb,
+Index: faad2/libfaad/fixed.h
+===================================================================
+--- faad2.orig/libfaad/fixed.h	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/fixed.h	2008-02-20 09:36:41.000000000 +0100
+@@ -28,6 +28,9 @@
+ ** $Id: fixed.h,v 1.32 2007/11/01 12:33:30 menno Exp $
+ **/
+ 
++// MUL_F 32x16, or 32x32?
++#define MULT_32x16
++
+ #ifndef __FIXED_H__
+ #define __FIXED_H__
+ 
+@@ -39,7 +42,6 @@
+ #include <cmnintrin.h>
+ #endif
+ 
+-
+ #define COEF_BITS 28
+ #define COEF_PRECISION (1 << COEF_BITS)
+ #define REAL_BITS 14 // MAXIMUM OF 14 FOR FIXED POINT SBR
+@@ -152,7 +154,7 @@
+     *y1 = MUL_F(x1, c1) + MUL_F(x2, c2);
+     *y2 = MUL_F(x2, c1) - MUL_F(x1, c2);
+ }
+-#endif
++#endif /* 1 */
+ 
+ #elif defined(__GNUC__) && defined (__arm__)
+ 
+@@ -230,6 +232,194 @@
+     *y2 = yt2 << (FRAC_SIZE-FRAC_BITS);
+ }
+ 
++
++#elif defined(__GNUC__) && defined (__avr32__)
++
++
++#define AVR32_MUL(A, B, SCALEBITS) \
++({ \
++  int32_t __result; \
++  asm volatile("muls.d	r0, %1, %2\n\t" \
++	       "lsr	r0, %3\n\t" \
++	       "or	%0, r0, r1 << %4\n\t" \
++	       : "=r" (__result) \
++	       : "r" (A), "r" (B),"Ku05" (SCALEBITS),"Ku05" (32 - SCALEBITS) \
++	       : "r0", "r1" \
++	       ); \
++  __result; \
++})
++
++
++
++
++static INLINE real_t MUL_C(real_t A, real_t B)
++{
++  return AVR32_MUL(A, B, COEF_BITS);
++}
++
++
++static INLINE real_t MUL_F(real_t A, real_t B){
++  int32_t result;
++
++#ifdef MULT_32x16
++
++  /*
++   * Multiply can be done as 32x16 -bit operation? Speeds up the decoding
++   * (HEv2) by about 2.5%, quality stays about the same (according to
++   * listening and diff signal (practically zero), no conformance tests
++   * done for HE/HEv2 yet though!).
++   *
++   */
++
++  asm ("mulwh.d	r0, %1, %2:t\n\t"
++       "lsl     %0, r1, %3\n\t"
++       : "=r" (result)
++       : "r" (A), "r" (B), "Ku05" (32 - FRAC_BITS)
++       : "r0", "r1"
++       );
++
++#else
++  asm ("muls.d	r0, %1, %2\n\t"
++       "lsl     %0, r1, %3\n\t"
++       : "=r" (result)
++       : "r" (A), "r" (B), "Ku05" (32 - FRAC_BITS)
++       : "r0", "r1"
++       );
++#endif
++
++  return result;
++
++}
++
++
++
++
++static INLINE real_t MUL_32_16(real_t A, real_t B){
++  int32_t result;
++
++  asm ("mulwh.d	r0, %1, %2:t\n\t"
++       "lsl	%0, r1, %3\n\t"
++       : "=r" (result)
++       : "r" (A), "r" (B), "Ku05" (32 - FRAC_BITS)
++       : "r0", "r1"
++       );
++  return result;
++
++}
++
++
++static INLINE real_t MUL_R(real_t A, real_t B){
++  int32_t result;
++
++  /*
++   * Ku05 = constant modifier, unsigned integer with 5 bits.
++   * See gcc/config/avr32/avr32.h
++   *
++   */
++
++  asm ("muls.d	r0, %1, %2\n\t"
++       "lsr	r0, %3\n\t"
++       "or	%0, r0, r1 << %4\n\t"
++       : "=r" (result)
++       : "r" (A), "r" (B), "Ku05" (REAL_BITS), "Ku05" (32 - REAL_BITS)
++       : "r0", "r1"
++       );
++
++  return result;
++
++}
++
++
++static INLINE real_t MUL_Q2(real_t A, real_t B){
++  int32_t result;
++
++  asm ("muls.d	r0, %1, %2\n\t"
++       "lsr	r0, %3\n\t"
++       "or	%0, r0, r1 << %4\n\t"
++       : "=r" (result)
++       : "r" (A), "r" (B), "Ku05" (Q2_BITS), "Ku05" (32 - Q2_BITS)
++       : "r0", "r1"
++       );
++
++  return result;
++
++}
++
++
++// not used (at least not in LC/HE/HEv2 decoding)
++static INLINE real_t MUL_SHIFT6(real_t A, real_t B){
++  return (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (6-1))) >> 6);
++}
++
++// not used (at least not in LC/HE/HEv2 decoding)
++static INLINE real_t MUL_SHIFT23(real_t A, real_t B){
++  return (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (23-1))) >> 23);
++}
++
++
++
++static INLINE void ComplexMult(real_t *y1, real_t *y2,
++			       real_t x1, real_t x2, real_t c1, real_t c2){
++
++
++  real_t r1, r2;
++
++#if 1
++
++  // volatile needed here so that the order of the blocks is not
++  // changed by the compiler optimizations and c1 negated before
++  // it should be!
++
++  asm volatile ("muls.d	r0, %1, %2\n\t"
++       "macs.d  r0, %3, %4\n\t"
++       "lsl	%0, r1, 1\n\t"
++
++       : "=r" (r1)
++       : "r" (x1), "r" (c1), "r" (x2), "r" (c2)
++       : "r0", "r1"
++       );
++  *y1 = r1;
++
++  asm volatile ("muls.d	r0, %3, %2\n\t"
++       "neg     %1\n\t"
++       "macs.d  r0, %1, %4\n\t"
++       "lsl	%0, r1, 1\n\t"
++
++       : "=r" (r2)
++       : "r" (x1), "r" (c1), "r" (x2), "r" (c2)
++       : "r0", "r1"
++       );
++  *y2 = r2;
++#else
++
++
++  asm ("muls.d	r0, %1, %2\n\t"
++       "macs.d  r0, %3, %4\n\t"
++       "lsl	%0, r1, 1\n\t"
++
++
++       "muls.d	r0, %3, %2\n\t"
++       "neg     %1\n\t"
++       "macs.d  r0, %1, %4\n\t"
++       "lsl	%0, r1, 1\n\t"
++
++       : "=&r" (r1), "=&r" (r2)
++       : "r" (x1), "r" (c1), "r" (x2), "r" (c2)
++       : "r0", "r1"
++       );
++  *y1 = r1;
++  *y2 = r2;
++  return;
++
++#endif
++
++}
++
++
++
++
++
++
+ #else
+ 
+   /* multiply with real shift */
+Index: faad2/libfaad/Makefile.am
+===================================================================
+--- faad2.orig/libfaad/Makefile.am	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/Makefile.am	2008-02-20 09:36:41.000000000 +0100
+@@ -5,7 +5,7 @@
+ 
+ libfaad_la_LDFLAGS = -lm
+ 
+-libfaad_la_SOURCES = bits.c cfft.c decoder.c drc.c \
++libfaad_la_SOURCES = bits.c decoder.c drc.c \
+ drm_dec.c error.c filtbank.c \
+ ic_predict.c is.c lt_predict.c mdct.c mp4.c ms.c output.c pns.c \
+ ps_dec.c ps_syntax.c \
+@@ -13,7 +13,7 @@
+ rvlc.c ssr.c ssr_fb.c ssr_ipqf.c common.c \
+ sbr_dct.c sbr_e_nf.c sbr_fbt.c sbr_hfadj.c sbr_hfgen.c \
+ sbr_huff.c sbr_qmf.c sbr_syntax.c sbr_tf_grid.c sbr_dec.c \
+-analysis.h bits.h cfft.h cfft_tab.h common.h \
++analysis.h bits.h common.h \
+ decoder.h drc.h drm_dec.h error.h fixed.h filtbank.h \
+ huffman.h ic_predict.h iq_table.h is.h kbd_win.h lt_predict.h \
+ mdct.h mdct_tab.h mp4.h ms.h output.h pns.h ps_dec.h ps_tables.h \
+@@ -25,4 +25,12 @@
+ sbr_qmf_c.h codebook/hcb.h \
+ codebook/hcb_1.h codebook/hcb_2.h codebook/hcb_3.h codebook/hcb_4.h \
+ codebook/hcb_5.h codebook/hcb_6.h codebook/hcb_7.h codebook/hcb_8.h \
+-codebook/hcb_9.h codebook/hcb_10.h codebook/hcb_11.h codebook/hcb_sf.h
+\ No newline at end of file
++codebook/hcb_9.h codebook/hcb_10.h codebook/hcb_11.h codebook/hcb_sf.h
++
++if TARGET_ARCH_AVR32
++libfaad_la_SOURCES += opt/fft.c opt/bit_rev.s opt/fft.h opt/asmfuncs.h \
++opt/fft_avr32.s opt/ola.s
++else
++libfaad_la_SOURCES += cfft.c cfft.h cfft_tab.h
++endif
++
+Index: faad2/libfaad/mdct.c
+===================================================================
+--- faad2.orig/libfaad/mdct.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/mdct.c	2008-02-20 09:36:41.000000000 +0100
+@@ -54,7 +54,12 @@
+ #include <assert.h>
+ #endif
+ 
++#if defined(__GNUC__) && defined(__avr32__)
++#include "opt/fft.h"
++#else
+ #include "cfft.h"
++#endif
++
+ #include "mdct.h"
+ #include "mdct_tab.h"
+ 
+@@ -94,11 +99,23 @@
+     }
+ 
+     /* initialise fft */
++#if defined (__GNUC__) && defined (__avr32__)
++    // no need to initialize whole fft struct, only n
++    mdct->cfft = (cfft_info*)faad_malloc(sizeof(cfft_info));
++    mdct->cfft->n = N/4;
++#else
+     mdct->cfft = cffti(N/4);
++#endif
+ 
+ #ifdef PROFILE
+     mdct->cycles = 0;
+     mdct->fft_cycles = 0;
++    mdct->pre_fft_cycles = 0;
++    mdct->post_fft_cycles = 0;
++#if defined(__GNUC__) && defined(__avr32__)
++    mdct->invocations = 0;
++    mdct->fft_invocations = 0;
++#endif
+ #endif
+ 
+     return mdct;
+@@ -109,13 +126,35 @@
+     if (mdct != NULL)
+     {
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++
++        printf("\n\tCFFT[%.4d]:         %10jd cycles, %d invocations\n",
++	       mdct->N/4, (intmax_t) mdct->fft_cycles / 1000,
++	       mdct->fft_invocations);
++        printf("\tMDCT[%.4d]:         %10jd cycles, %d invocations\n",
++	       mdct->N, (intmax_t) mdct->cycles / 1000, mdct->invocations);
++        printf("\t\tPRE-FFT m[%.4d]:    %10jd cycles\n", mdct->N,
++	       (intmax_t) mdct->pre_fft_cycles / 1000);
++        printf("\t\tPST-FFT m[%.4d]:    %10jd cycles\n", mdct->N,
++	       (intmax_t) mdct->post_fft_cycles / 1000);
++
++#else
++
+         printf("MDCT[%.4d]:         %I64d cycles\n", mdct->N, mdct->cycles);
+-        printf("CFFT[%.4d]:         %I64d cycles\n", mdct->N/4, mdct->fft_cycles);
++        printf("CFFT[%.4d]:         %I64d cycles\n", mdct->N/4,
++	       mdct->fft_cycles);
+ #endif
++#endif
++
+ 
++#if defined(__GNUC__) && defined(__avr32__)
++	free(mdct->cfft);
++#else
+         cfftu(mdct->cfft);
++#endif
+ 
+         faad_free(mdct);
++
+     }
+ }
+ 
+@@ -138,7 +177,10 @@
+     uint16_t N8 = N >> 3;
+ 
+ #ifdef PROFILE
+-    int64_t count1, count2 = faad_get_ts();
++    // pre, fft, post, mdct
++    int64_t count_pre_fft, count_fft, count_post_fft,
++      count_total = faad_get_ts();
++    count_pre_fft = count_total;
+ #endif
+ 
+ #ifdef ALLOW_SMALL_FRAMELENGTH
+@@ -162,15 +204,26 @@
+     }
+ 
+ #ifdef PROFILE
+-    count1 = faad_get_ts();
++    count_fft = faad_get_ts();
++    count_pre_fft = get_count(count_pre_fft);
+ #endif
+ 
+     /* complex IFFT, any non-scaling FFT can be used here */
++#if defined(__GNUC__) && defined(__avr32__)
++    ifft((int32_t *) Z1, mdct->cfft->n);
++#else
+     cfftb(mdct->cfft, Z1);
++#endif
++
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    count_post_fft = faad_get_ts();
++    count_fft = get_count(count_fft);
++#else
+     count1 = faad_get_ts() - count1;
+ #endif
++#endif
+ 
+     /* post-IFFT complex multiplication */
+     for (k = 0; k < N4; k++)
+@@ -221,9 +274,25 @@
+     }
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    count_total = get_count(count_total);
++    count_post_fft = get_count(count_post_fft);
++    mdct->invocations++;
++    mdct->fft_invocations++;
++
++    mdct->pre_fft_cycles += count_pre_fft;
++    mdct->post_fft_cycles += count_post_fft;
++
++    mdct->fft_cycles += count_fft;
++    mdct->cycles += (count_total - count_fft);
++    //mdct->cycles += count_total;
++
++#else
+     count2 = faad_get_ts() - count2;
+     mdct->fft_cycles += count1;
+     mdct->cycles += (count2 - count1);
++
++#endif
+ #endif
+ }
+ 
+@@ -283,6 +352,7 @@
+     }
+ 
+     /* complex FFT, any non-scaling FFT can be used here  */
++
+     cfftf(mdct->cfft, Z1);
+ 
+     /* post-FFT complex multiplication */
+Index: faad2/libfaad/opt/asmfuncs.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ faad2/libfaad/opt/asmfuncs.h	2008-02-20 09:36:41.000000000 +0100
+@@ -0,0 +1,23 @@
++/*
++ *
++ * Function prototypes for AVR32 assembly functions used in
++ * optimized FAAD2 decoder.
++ *
++ */
++
++
++// bit reversal of n values in data
++extern int bit_rev_avr32(int32_t *data, int n, int bits);
++// bit reversal of n complex values in data
++extern int bit_rev_cmplx_avr32(int32_t *data, int n, int bits);
++
++// fft
++// extern int fft_avr32(int32_t *data, int n, int isign, int *cos_table);
++
++// ifft
++extern int ifft_avr32(int32_t *data, int n, int *cos_table);
++
++// windowing, overlap & add
++extern int ola_avr32(int32_t *out, int32_t *overlap, int32_t *in,
++		     const int32_t *wincoef, int32_t length);
++
+Index: faad2/libfaad/opt/bit_rev.s
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ faad2/libfaad/opt/bit_rev.s	2008-02-20 09:36:41.000000000 +0100
+@@ -0,0 +1,112 @@
++
++	// bit reversal of table order in assembler for AVR32.
++	// 28.9.06 IV
++
++	// 29.9.06: Added bit reversing for tables of complex
++	// numbers (one element consists of two 32-bit numbers,
++	// real and complex part).
++
++	// 2.10.96: bugfixes.
++
++	.globl	bit_rev_avr32
++	.type	bit_rev_avr32, @function
++
++	.globl	bit_rev_cmplx_avr32
++	.type	bit_rev_cmplx_avr32, @function
++
++	.text
++
++bit_rev_avr32:
++
++	pushm		r0-r3, r4-r7, lr
++
++//	input:
++//	r12:	pointer to data (32-bit integers)
++//	r11:	number of data elements
++//	r10:	number of bits to reverse
++
++
++	rsub		r10, r10, 32
++
++	mov		r5, 0
++	mov		r1, 1
++
++Loop_s:
++	mov		r6, r5
++	brev		r6
++	lsr		r6, r6, r10
++	cp.w		r5, r6
++	brpl		no_change
++swap:
++	ld.w		r2, r12[r5 << 2]
++	ld.w		r3, r12[r6 << 2]
++	st.w		r12[r6 << 2], r2
++	st.w		r12[r5 << 2], r3
++
++no_change:
++	add		r5, r1
++	cp.w		r5, r11
++	brmi		Loop_s
++
++end:
++	popm		r0-r3, r4-r7, pc
++
++
++
++bit_rev_cmplx_avr32:
++
++	pushm		r0-r3, r4-r7, lr
++
++//	input:
++//	r12:	pointer to data (32-bit integers)
++//	r11:	number of data elements
++//	r10:	number of bits to reverse
++
++
++	rsub		r10, r10, 32
++
++	mov		r5, 0
++	mov		r1, 1
++
++Loop_s_c:
++	mov		r6, r5
++	brev		r6
++	lsr		r6, r6, r10
++
++	// data already swapped, or no swap needed?
++	cp.w		r5, r6
++	brpl		no_change_c
++
++
++swap_c:
++
++	// real part
++	ld.w		r2, r12[r5 << 3]
++	ld.w		r3, r12[r6 << 3]
++	st.w		r12[r6 << 3], r2
++	st.w		r12[r5 << 3], r3
++
++	// complex part
++	mov		r4, r5
++	lsl		r4, 3
++	sub		r4, -4
++	ld.w		r2, r12[r4]
++
++	mov		r7, r6
++	lsl		r7, 3
++	sub		r7, -4
++	ld.w		r3, r12[r7]
++
++	st.w		r12[r7], r2
++	st.w		r12[r4], r3
++
++
++no_change_c:
++	add		r5, r1
++	cp.w		r5, r11
++	brmi		Loop_s_c
++
++end_c:
++	popm		r0-r3, r4-r7, pc
++
++
+Index: faad2/libfaad/opt/fft_avr32.s
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ faad2/libfaad/opt/fft_avr32.s	2008-02-20 09:36:41.000000000 +0100
+@@ -0,0 +1,480 @@
++
++/*
++ *
++ *  Complex inverse FFT routine in assembler for AVR32.
++ *  Simple radix-2 algorithm with special loops for 2- and
++ *  4-point butterflies.
++ *
++ *  Works only for N between 2 and 2048, and power of two.
++ *
++ *
++ */
++
++	.globl	ifft_avr32
++	.type	ifft_avr32, @function
++	.text
++
++ifft_avr32:
++
++
++//	input:
++
++//	r12:	pointer to complex data (32-bit integers)
++//	r11:	number of data elements
++//	r10:	pointer to cosine table
++
++//	registers:
++
++//	r9	i, current butterfly size
++//	r8	j, index to 1st element of current butterfly
++//	r7	cosine table step size
++
++
++//	stack offsets:
++//
++//	sp[0]	n
++//	sp[4]	n / 4
++//	sp[8]	tmp
++
++
++	pushm		r0-r3, r4-r7, lr
++	sub		sp, 16
++
++
++	// if (2048 % n != 0), exit
++//	mov		r1, 2048
++//	divs		r2, r1, r11
++//	cp.w		r3, 0
++//	brne		fft_err
++
++
++	// store cos table size (n/4) to stack:
++
++	lsr		r3, r11, 2
++	stdsp		sp[4], r3
++
++
++	mov		r9, 2		// i = 2 = r9 = current butterfly size
++	mov		r7, r11		// r7 = n
++
++	stdsp		sp[0], r11
++
++Loop_outer_ifft:
++
++	// index to first element in butterfly = r8 = j = 0
++	mov		r8, 0
++
++	// table step size = n / i, i = 2, 4, 8, 16...-> can be done with shift
++	lsr		r7, 1
++
++	// handle small butterflies separately
++	mov		r5, 4
++	cp.w		r5, r9
++	breq		bfly4
++	lsr		r5, 1
++	cp.w		r5, r9
++	breq		bfly2
++
++Loop_middle_ifft:
++
++	// twiddle_index = 0, k = r11 = 0
++	mov		r11, 0
++	mov		r6, r11
++
++	// no need to fetch twiddle factors for the 1st element,
++	// as they are 1 and 0
++
++	rjmp		no_first_multiply
++
++Loop_inner_ifft:
++
++	// if (twiddle_index <= (n/4))
++	lddsp		r5, sp[4]
++	cp.w		r5, r6
++	brmi		reverse_table
++
++	// twiddle_real (r4) = cos_t[twiddle_index]
++	// twiddle_imag (r5) = cos_t[table_size - twiddle_index]
++
++	ld.w		r4, r10[r6 << 2]
++	sub		r3, r5, r6
++	ld.w		r5, r10[r3 << 2]
++
++	rjmp		butterfly_multiply
++
++	// else
++reverse_table:
++
++
++	// twiddle_real (r4) = -cos_t[2*table_size - twiddle_index]
++	// twiddle_imag (r5) = cos_t[twiddle_index - table_size]
++
++	lsl		r3, r5, 1
++	sub		r3, r6
++	ld.w		r4, r10[r3 << 2]
++	neg		r4
++
++	sub		r3, r6, r5
++	ld.w		r5, r10[r3 << 2]
++
++
++	rjmp		butterfly_multiply
++
++no_first_multiply:
++
++	// data_index = 2 * (j + k) + i, k = 0
++
++	lsl		lr, r8, 1
++	add		r1, lr, r9
++
++	// r2 = real part of current input
++	ld.w		r2, r12[r1 << 2]
++	sub		r1, -1
++
++	// r0 = imag part of current input
++	ld.w		r0, r12[r1 << 2]
++
++	stdsp		sp[8], r2
++
++	rjmp		butterfly_add
++
++
++butterfly_multiply:
++
++	// data_index = 2 * (j + k) + i
++
++	// r11 = k
++	mov		lr, r11
++	// r8 = j
++	add		lr, r8
++	lsl		lr, 1
++	add		r1, lr, r9
++
++
++	// r2 = real part of current data
++	ld.w		r2, r12[r1 << 2]
++	sub		r1, -1
++	// r3 = imag part of current data
++	ld.w		r3, r12[r1 << 2]
++
++	mulnwh.d	r0, r3, r5:b
++	macwh.d		r0, r2, r4:b
++
++	lsl		r1, 1
++	stdsp		sp[8], r1
++
++	mulwh.d		r0, r2, r5:b
++	macwh.d		r0, r3, r4:b
++
++	lsl		r0, r1, 1
++
++butterfly_add:
++
++	// butterfly add, imag part:
++
++	// add imag part of multiplied lower part of butterfly (r0)
++	// to imag part of upper part of butterfly (r2), store to r5:
++
++	sub		r1, lr, -1
++
++	ld.w		r2, r12[r1 << 2]
++	add		r5, r2, r0
++
++	// subtract imag part of upper part of the butterfly (r2)
++	// from the multiplied lower part of the butterfly (r0),
++	// store to r4
++
++	sub		r4, r2, r0
++
++	// store results: r1 =
++	st.w		r12[r1 << 2], r5
++	add		r1, r9
++	st.w		r12[r1 << 2], r4
++
++
++	// butterfly add, real part:
++
++	// lr = data_index - i
++
++	lddsp		r0, sp[8]	// real part of multiplied butterfly lp
++
++	mov		r1, lr
++	ld.w		r2, r12[r1 << 2]
++
++	// add real part of multiplied lower part of butterfly (r0)
++	// to real part of upper part of butterfly (r2), store to r5:
++
++	add		r5, r0, r2
++
++	// subtract the multiplied lower part of the butterfly (r0) from
++	// the real part of upper part of the butterfly (r2)
++	// store to r4
++
++	sub		r4, r2, r0
++
++	st.w		r12[r1 << 2], r5
++	add		r1, r9
++	st.w		r12[r1 << 2], r4
++
++
++	// twiddle_index += step_size
++	add		r6, r7
++
++
++
++// inner loop end:
++	// k++
++	sub		r11, -1
++	// k < (i/2)?
++	mov		r1, r9
++	asr		r1, 1
++	cp.w		r11, r1
++	brmi		Loop_inner_ifft
++
++// middle loop end:
++	// j = j + i
++	add		r8, r9
++
++	// j < n ?
++	lddsp		r1, sp[0]
++	cp.w		r8, r1
++
++	brmi		Loop_middle_ifft
++
++// outer loop end:
++
++ifft_outer_loop_end:
++	// i = i * 2
++	lsl		r9, 1
++	// while (i <= n)
++
++	lddsp		r1, sp[0]
++	cp.w		r1, r9
++	brpl		Loop_outer_ifft
++
++	mov		r12, 1
++
++fft_end:
++
++	sub		sp, -16
++	popm		r0-r3, r4-r7, pc
++
++
++fft_err:
++	mov		r12, -1
++	rjmp		fft_end
++
++
++
++
++// butterfly for 4 elements, multipliers 1+0i and 0+i
++
++bfly4:
++	lddsp	r6, sp[0]	// n to r6
++
++bfly4_loop:
++
++// middle loop
++
++Loop_inner_ifft_b4:
++
++
++	// data_index = 2 * (j + k) + i, k = 0
++
++	lsl		lr, r8, 1	// r8 = j
++	add		r1, lr, r9	// r9 = i
++
++	// r2 = real part of lower butterfly element
++	ld.w		r2, r12[r1 << 2]
++	sub		r1, -1
++
++	// r0 = imag part of lower butterfly element
++	ld.w		r0, r12[r1 << 2]
++
++
++	// butterfly add, imag part:
++	// add imag part of lower part of butterfly (r0)
++	// to imag part of upper part of butterfly (r3), store to r5:
++
++	sub		r1, lr, -1
++
++	ld.w		r3, r12[r1 << 2]
++	add		r5, r3, r0
++
++	// subtract imag part of upper part of the butterfly (r2)
++	// from the multiplied lower part of the butterfly (r0),
++	// store to r4
++
++	sub		r4, r3, r0
++
++	// store results: r1 =
++	st.w		r12[r1 << 2], r5
++	add		r1, r9
++	st.w		r12[r1 << 2], r4
++
++
++	// butterfly add, real part:
++
++	// lr = data_index - i
++
++	mov		r1, lr
++	ld.w		r3, r12[r1 << 2]
++
++	// add real part of lower part of butterfly (r2)
++	// to real part of upper part of butterfly (r3), store to r5:
++
++	add		r5, r3, r2
++
++	// subtract the lower part of the butterfly (r2) from
++	// the real part of upper part of the butterfly (r3)
++	// store to r4
++
++	sub		r4, r3, r2
++
++	st.w		r12[r1 << 2], r5
++	add		r1, r9
++	st.w		r12[r1 << 2], r4
++
++
++// second element:
++	// data_index = 2 * (j + k) + i, k = 1 => add 2 to lr
++
++	sub		lr, -2
++	add		r1, lr, r9
++
++	// r2 = real part of lower butterfly element
++	ld.w		r0, r12[r1 << 2]
++	sub		r1, -1
++	// r0 = imag part of lower butterfly element
++	ld.w		r2, r12[r1 << 2]
++
++	// multiply by i (swap r2 & r0, negate r2)
++	neg		r2
++
++	// butterfly add, imag part:
++	// add imag part of lower part of butterfly (r0)
++	// to imag part of upper part of butterfly (r3), store to r5:
++
++	sub		r1, lr, -1
++
++	ld.w		r3, r12[r1 << 2]
++	add		r5, r3, r0
++
++	// subtract imag part of upper part of the butterfly (r2)
++	// from the multiplied lower part of the butterfly (r0),
++	// store to r4
++
++	sub		r4, r3, r0
++
++	// store results: r1 =
++	st.w		r12[r1 << 2], r5
++	add		r1, r9
++	st.w		r12[r1 << 2], r4
++
++
++	// butterfly add, real part:
++
++	// lr = data_index - i
++
++	mov		r1, lr
++	ld.w		r3, r12[r1 << 2]
++
++	// add real part of lower part of butterfly (r2)
++	// to real part of upper part of butterfly (r3), store to r5:
++
++	add		r5, r3, r2
++
++	// subtract the lower part of the butterfly (r2) from
++	// the real part of upper part of the butterfly (r3)
++	// store to r4
++
++	sub		r4, r3, r2
++
++	st.w		r12[r1 << 2], r5
++	add		r1, r9
++	st.w		r12[r1 << 2], r4
++
++
++	// middle loop end:
++	// j = j + i
++	add		r8, r9
++	// j < n ?
++	cp.w		r8, r6
++	brmi		bfly4_loop
++	rjmp		ifft_outer_loop_end
++
++
++
++
++
++
++
++// butterfly for 2 elements, multiplier 1+0i
++
++
++bfly2:
++	lddsp	r6, sp[0]	// n to r6
++	mov	lr, 0
++
++
++bfly2_loop:
++	// middle loop
++Loop_inner_ifft_b2:
++	// data_index = 2 * (j + k) + i, k = 0
++	add		r1, lr, r9	// r9 = i
++
++	// r2 = real part of lower butterfly element
++	ld.w		r2, r12[r1 << 2]
++	sub		r1, -1
++	// r0 = imag part of lower butterfly element
++	ld.w		r0, r12[r1 << 2]
++
++	// butterfly add, imag part:
++	// add imag part of lower part of butterfly (r0)
++	// to imag part of upper part of butterfly (r3), store to r5:
++
++	sub		r11, lr, -1
++	// r3 = imag part of upper butterfly
++	ld.w		r3, r12[r11 << 2]
++	add		r5, r3, r0
++
++	// subtract imag part of upper part of the butterfly (r2)
++	// from the multiplied lower part of the butterfly (r0),
++	// store to r4
++
++	sub		r4, r3, r0
++
++	// store results: r1 =
++	st.w		r12[r11 << 2], r5
++	add		r11, r9
++	st.w		r12[r11 << 2], r4
++
++
++	// butterfly add, real part:
++	// lr = data_index - i
++
++	ld.w		r3, r12[lr << 2]
++
++	// add real part of lower part of butterfly (r2)
++	// to real part of upper part of butterfly (r3), store to r5:
++
++	add		r5, r3, r2
++
++	// subtract the lower part of the butterfly (r2) from
++	// the real part of upper part of the butterfly (r3)
++	// store to r4
++
++	sub		r4, r3, r2
++
++	st.w		r12[lr << 2], r5
++	add		lr, r9
++	st.w		r12[lr << 2], r4
++
++	sub		lr, -2
++// middle loop end:
++	// j = j + i
++	add		r8, r9
++	// j < n ?
++	cp.w		r8, r6
++	brmi		bfly2_loop
++	rjmp		ifft_outer_loop_end
+Index: faad2/libfaad/opt/fft.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ faad2/libfaad/opt/fft.c	2008-02-20 09:36:41.000000000 +0100
+@@ -0,0 +1,75 @@
++/*
++ * fft.c
++ *
++ */
++
++
++#include "fft.h"
++
++#include "../common.h"
++#include "asmfuncs.h"
++
++
++
++/*
++ * Complex non-scaling inverse FFT of length n (power of two)
++ *
++ * Now with fixed tables (no init) needed, so n must be 64 or 512
++ *
++ */
++
++void ifft (int32_t * data, int n){
++
++  if (n==512){
++    bit_rev_cmplx_avr32(data, 512, 9);
++    ifft_avr32(data, n, cos_t_512);
++  } else if (n == 64){
++    bit_rev_cmplx_avr32(data, 64, 6);
++    ifft_avr32(data, n, cos_t_64);
++  } else{
++
++    // fixme: support for other lengths needed for ld profile,
++    // and short frame versions
++
++    printf("transform length %d not supported!\n", n);
++    exit(-188);
++  }
++}
++
++
++
++/*
++ * cos(PI * n / 1024), n = 0...512
++ *
++ * Q15
++ *
++ */
++
++real_t cos_t_512[129] = {
++
++32767, 32765, 32757, 32745, 32728, 32705, 32678, 32646,
++32609, 32567, 32521, 32469, 32412, 32351, 32285, 32213,
++32137, 32057, 31971, 31880, 31785, 31685, 31580, 31470,
++31356, 31237, 31113, 30985, 30852, 30714, 30571, 30424,
++30273, 30117, 29956, 29791, 29621, 29447, 29268, 29085,
++28898, 28706, 28510, 28310, 28105, 27896, 27683, 27466,
++27245, 27019, 26790, 26556, 26319, 26077, 25832, 25582,
++25329, 25072, 24811, 24547, 24279, 24007, 23731, 23452,
++23170, 22884, 22594, 22301, 22005, 21705, 21403, 21096,
++20787, 20475, 20159, 19841, 19519, 19195, 18868, 18537,
++18204, 17869, 17530, 17189, 16846, 16499, 16151, 15800,
++15446, 15090, 14732, 14372, 14010, 13645, 13279, 12910,
++12539, 12167, 11793, 11417, 11039, 10659, 10278,  9896,
++ 9512,  9126,  8739,  8351,  7962,  7571,  7179,  6786,
++ 6393,  5998,  5602,  5205,  4808,  4410,  4011,  3612,
++ 3212,  2811,  2410,  2009,  1608,  1206,   804,   402,
++    0};
++
++real_t cos_t_64[17] = {
++32767, 32609, 32137, 31356, 30273, 28898, 27245, 25329,
++23170, 20787, 18204, 15446, 12539,  9512,  6393,  3212,
++0};
++
++
++
++
+Index: faad2/libfaad/opt/fft.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ faad2/libfaad/opt/fft.h	2008-02-20 09:36:41.000000000 +0100
+@@ -0,0 +1,11 @@
++
++#include "../common.h"
++
++
++void ifft(int32_t *data, int n);
++
++real_t cos_t_512[129];
++real_t cos_t_64[17];
++
++
++
+Index: faad2/libfaad/opt/ola.s
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ faad2/libfaad/opt/ola.s	2008-02-20 09:36:41.000000000 +0100
+@@ -0,0 +1,63 @@
++
++/*
++ *
++ * Overlap-add with windowing, for processing the spectral data.
++ * Multiplies the input data (@r10) with window coefficients (@r9),
++ * and adds to data from previous window (@r11).
++ *
++ * Window coefficients are 32 bits, but to save some cycles only
++ * 16 MSB's are used.
++ *
++ */
++
++
++	.globl	ola_avr32
++	.type	ola_avr32, @function
++
++
++	.text
++
++
++	// overlap-add, multiplies input data with window
++	// coefficients and adds to data from previous frame
++
++	//	input:
++	//	r12:	pointer to output (32-bit integers)
++	//	r11:	pointer to overlap data
++	//	r10:	pointer to input data
++	//	r9:	pointer to window coefs
++	//	r8:	length	(length % 2 must be 0)
++
++
++ola_avr32:
++
++	pushm		r0-r3, r4-r7, lr
++
++	cp.w		r8, 0
++	breq		ola_end
++
++ola_loop:
++
++	ldm     r10++, r3, r4	// load 2 input data (first word to high reg)
++	ldm     r9++, r5, r6	// load 2 window coefs
++	ldm	r11++, r7, lr	// load 2 overlap data
++
++	mulwh.d	r0, r4, r6:t
++	lsl	r2, r1, 1
++
++	mulwh.d	r0, r3, r5:t
++	lsl	r0, r1, 1
++
++	add	r2, r2, lr
++	add	r0, r0, r7
++
++	stm	r12, r2, r0	// store 2 values
++	sub	r12, -8
++
++	sub	r8, 2
++	cp.w	r8, 0
++	brne	ola_loop
++
++ola_end:
++	popm		r0-r3, r4-r7, pc
++
+Index: faad2/libfaad/output.c
+===================================================================
+--- faad2.orig/libfaad/output.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/output.c	2008-02-20 09:36:41.000000000 +0100
+@@ -83,7 +83,7 @@
+     if (sample <= min)         \
+         sample = min;          \
+ }
+-#endif
++#endif  // HAS_LRINTF
+ 
+ #define CONV(a,b) ((a<<1)|(b&0x1))
+ 
+@@ -430,9 +430,14 @@
+     }
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->output_cycles += get_count(count);
++
++#else
+     count = faad_get_ts() - count;
+     hDecoder->output_cycles += count;
+ #endif
++#endif
+ 
+     return sample_buffer;
+ }
+@@ -475,6 +480,10 @@
+     int16_t *short_sample_buffer = (int16_t*)sample_buffer;
+     int32_t *int_sample_buffer = (int32_t*)sample_buffer;
+ 
++#ifdef PROFILE
++    uint64_t count = faad_get_ts();
++#endif
++
+     /* Copy output to a standard PCM buffer */
+     for (ch = 0; ch < channels; ch++)
+     {
+@@ -554,6 +563,17 @@
+         }
+     }
+ 
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->output_cycles += get_count(count);
++
++#else
++    count = faad_get_ts() - count;
++    hDecoder->output_cycles += count;
++#endif
++#endif
++
++
+     return sample_buffer;
+ }
+ 
+Index: faad2/libfaad/pns.c
+===================================================================
+--- faad2.orig/libfaad/pns.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/pns.c	2008-02-20 09:36:41.000000000 +0100
+@@ -160,6 +160,13 @@
+                 uint8_t channel_pair, uint8_t object_type,
+                 /* RNG states */ uint32_t *__r1, uint32_t *__r2)
+ {
++
++
++#if 0
++  printf("Skipping pns decoding...\n");
++  return;
++#endif
++
+     uint8_t g, sfb, b;
+     uint16_t size, offs;
+ 
+@@ -190,6 +197,11 @@
+             {
+                 if (is_noise(ics_left, g, sfb))
+                 {
++#if 0
++		  // fixme: for debug. remove
++		  printf("pns active!\n");
++#endif
++
+ #ifdef LTP_DEC
+                     /* Simultaneous use of LTP and PNS is not prevented in the
+                        syntax. If both LTP, and PNS are enabled on the same
+@@ -232,6 +244,10 @@
+                 {
+                     if (is_noise(ics_right, g, sfb))
+                     {
++
++#if 0
++		      printf("pns active!\n");
++#endif
+                         if (((ics_left->ms_mask_present == 1) &&
+                             (ics_left->ms_used[g][sfb])) ||
+                             (ics_left->ms_mask_present == 2))
+Index: faad2/libfaad/ps_dec.c
+===================================================================
+--- faad2.orig/libfaad/ps_dec.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/ps_dec.c	2008-02-20 09:36:41.000000000 +0100
+@@ -1049,13 +1049,26 @@
+     }
+ 
+     /* clear the energy values */
++
++
++#if 1
++
++    // Looping makes ps_decorrelation 2-3% faster than memset,
++    // weird. On a separate test code, memset is faster
++    // (AVR32 & GCC 4.2.1-atmel.1.0.3)
++    // Anyway, the effect on total decoding time is very small.
++
+     for (n = 0; n < 32; n++)
+     {
+         for (bk = 0; bk < 34; bk++)
+         {
+             P[n][bk] = 0;
++	    //G_TransientRatio[n][bk] = 0;
+         }
+     }
++#else
++    memset(P, 0, 32*34*sizeof(real_t));
++#endif
+ 
+     /* calculate the energy in each parameter band b(k) */
+     for (gr = 0; gr < ps->num_groups; gr++)
+@@ -1859,6 +1872,17 @@
+     /* free hybrid filterbank structures */
+     hybrid_free(ps->hyb);
+ 
++#ifdef PROFILE
++
++        printf("PS setup:           %10jd kcycles\n", (intmax_t) ps->setup_cycles / 1000);
++	printf("PS hyb.anal.:       %10jd kcycles\n", (intmax_t) ps->hybrid_analysis_cycles / 1000);
++	printf("PS decorrelation:   %10jd kcycles\n", (intmax_t) ps->decorrelation_cycles / 1000);
++	printf("PS mix, phase:      %10jd kcycles\n", (intmax_t) ps->mix_phase_cycles / 1000);
++	printf("PS hyb. synth.:     %10jd kcycles\n", (intmax_t) ps->hybrid_analysis_cycles / 1000);
++
++#endif
++
++
+     faad_free(ps);
+ }
+ 
+@@ -1958,6 +1982,11 @@
+ /* main Parametric Stereo decoding function */
+ uint8_t ps_decode(ps_info *ps, qmf_t X_left[38][64], qmf_t X_right[38][64])
+ {
++
++#ifdef PROFILE
++  uint32_t count = faad_get_ts();
++#endif
++
+     qmf_t X_hybrid_left[32][32] = {{0}};
+     qmf_t X_hybrid_right[32][32] = {{0}};
+ 
+@@ -1982,18 +2011,43 @@
+         ps->decay_cutoff = 3;
+     }
+ 
++#ifdef PROFILE
++    ps->setup_cycles += get_count(count);
++    count = faad_get_ts();
++#endif
++
++
+     /* Perform further analysis on the lowest subbands to get a higher
+      * frequency resolution
+      */
+     hybrid_analysis((hyb_info*)ps->hyb, X_left, X_hybrid_left,
+         ps->use34hybrid_bands);
+ 
++
++#ifdef PROFILE
++    ps->hybrid_analysis_cycles += get_count(count);
++    count = faad_get_ts();
++#endif
++
++
+     /* decorrelate mono signal */
+     ps_decorrelate(ps, X_left, X_right, X_hybrid_left, X_hybrid_right);
+ 
++
++#ifdef PROFILE
++    ps->decorrelation_cycles += get_count(count);
++    count = faad_get_ts();
++#endif
++
+     /* apply mixing and phase parameters */
+     ps_mix_phase(ps, X_left, X_right, X_hybrid_left, X_hybrid_right);
+ 
++
++#ifdef PROFILE
++    ps->mix_phase_cycles += get_count(count);
++    count = faad_get_ts();
++#endif
++
+     /* hybrid synthesis, to rebuild the SBR QMF matrices */
+     hybrid_synthesis((hyb_info*)ps->hyb, X_left, X_hybrid_left,
+         ps->use34hybrid_bands);
+@@ -2001,6 +2055,12 @@
+     hybrid_synthesis((hyb_info*)ps->hyb, X_right, X_hybrid_right,
+         ps->use34hybrid_bands);
+ 
++
++#ifdef PROFILE
++    ps->hybrid_synthesis_cycles += get_count(count);
++    count = faad_get_ts();
++#endif
++
+     return 0;
+ }
+ 
+Index: faad2/libfaad/ps_dec.h
+===================================================================
+--- faad2.orig/libfaad/ps_dec.h	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/ps_dec.h	2008-02-20 09:36:41.000000000 +0100
+@@ -132,6 +132,15 @@
+     complex_t ipd_prev[20][2];
+     complex_t opd_prev[20][2];
+ 
++#ifdef PROFILE
++  uint64_t setup_cycles;
++  uint64_t hybrid_analysis_cycles;
++  uint64_t decorrelation_cycles;
++  uint64_t mix_phase_cycles;
++  uint64_t hybrid_synthesis_cycles;
++
++#endif
++
+ } ps_info;
+ 
+ /* ps_syntax.c */
+Index: faad2/libfaad/sbr_dct.c
+===================================================================
+--- faad2.orig/libfaad/sbr_dct.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/sbr_dct.c	2008-02-20 09:36:41.000000000 +0100
+@@ -1895,6 +1895,9 @@
+ // FFT decimation in frequency
+ // 4*16*2+16=128+16=144 multiplications
+ // 6*16*2+10*8+4*16*2=192+80+128=400 additions
++
++// todo: get rid of muls with 0 & 1 & -1 in all stages?
++
+ static void fft_dif(real_t * Real, real_t * Imag)
+ {
+     real_t w_real, w_imag; // For faster access
+@@ -1905,6 +1908,29 @@
+     // 4*16*2=64*2=128 multiplications
+     // 6*16*2=96*2=192 additions
+ 	// Stage 1 of 32 point FFT decimation in frequency
++
++    /*
++    point1_real = Real[0];
++    point1_imag = Imag[0];
++    point2_real = Real[16];
++    point2_imag = Imag[16];
++
++    w_real = w_array_real[i]; // 1
++    w_imag = w_array_imag[i]; // 0
++
++    // temp1 = x[i] - x[i2]
++    point1_real -= point2_real;
++    point1_imag -= point2_imag;
++
++    // x[i1] = x[i] + x[i2]
++    Real[0] += point2_real;
++    Imag[0] += point2_imag;
++
++    // x[i2] = (x[i] - x[i2]) * w
++    Real[16] = point1_real;
++    Imag[16] = point1_imag;
++
++    */
+     for (i = 0; i < 16; i++)
+     {
+         point1_real = Real[i];
+@@ -1928,6 +1954,50 @@
+         Real[i2] = (MUL_F(point1_real,w_real) - MUL_F(point1_imag,w_imag));
+         Imag[i2] = (MUL_F(point1_real,w_imag) + MUL_F(point1_imag,w_real));
+      }
++
++    /*
++    point1_real = Real[8];
++    point1_imag = Imag[8];
++
++    point2_real = Real[24];
++    point2_imag = Imag[24];
++
++    // temp1 = x[i] - x[i2]
++    point1_real -= point2_real;
++    point1_imag -= point2_imag;
++
++    // x[i1] = x[i] + x[i2]
++    Real[8] += point2_real;
++    Imag[8] += point2_imag;
++
++    // x[i2] = (x[i] - x[i2]) * w
++    Real[24] = point1_imag;
++    Imag[24] = -point1_real;
++
++    for (i = 8; i < 16; i++)
++    {
++        point1_real = Real[i];
++        point1_imag = Imag[i];
++        i2 = i+16;
++        point2_real = Real[i2];
++        point2_imag = Imag[i2];
++
++        w_real = w_array_real[i];
++        w_imag = w_array_imag[i];
++
++        // temp1 = x[i] - x[i2]
++        point1_real -= point2_real;
++        point1_imag -= point2_imag;
++
++        // x[i1] = x[i] + x[i2]
++        Real[i] += point2_real;
++        Imag[i] += point2_imag;
++
++        // x[i2] = (x[i] - x[i2]) * w
++        Real[i2] = (MUL_F(point1_real,w_real) - MUL_F(point1_imag,w_imag));
++        Imag[i2] = (MUL_F(point1_real,w_imag) + MUL_F(point1_imag,w_real));
++	}*/
++
+     // Stage 2 of 32 point FFT decimation in frequency
+     for (j = 0, w_index = 0; j < 8; j++, w_index += 2)
+     {
+Index: faad2/libfaad/sbr_dec.c
+===================================================================
+--- faad2.orig/libfaad/sbr_dec.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/sbr_dec.c	2008-02-20 09:36:41.000000000 +0100
+@@ -165,6 +165,18 @@
+             if (sbr->Q_temp_prev[1][j]) faad_free(sbr->Q_temp_prev[1][j]);
+         }
+ 
++
++#ifdef PROFILE
++        printf("SBR decoding:       %10jd kcycles\n", (intmax_t) sbr->cycles / 1000);
++	printf("QMF synthesis:      %10jd kcycles\n", (intmax_t) sbr->qmf_cycles / 1000);
++	printf("QMF analysis:       %10jd kcycles\n", (intmax_t) sbr->qmf_analysis_cycles / 1000);
++	printf("HF generation:      %10jd kcycles\n", (intmax_t) sbr->hf_gen_cycles / 1000);
++	printf("HF adjust:          %10jd kcycles\n", (intmax_t) sbr->hf_adjust_cycles / 1000);
++	printf("PS decoding:        %10jd kcycles\n", (intmax_t) sbr->ps_cycles / 1000);
++
++#endif
++
++
+ #ifdef PS_DEC
+         if (sbr->ps != NULL) 
+             ps_free(sbr->ps);
+@@ -301,6 +313,9 @@
+ {
+     int16_t k, l;
+     uint8_t ret = 0;
++#ifdef PROFILE
++    uint32_t count;
++#endif
+ 
+ #ifdef SBR_LOW_POWER
+     ALIGN real_t deg[64];
+@@ -341,13 +356,22 @@
+ #if 1
+         /* insert high frequencies here */
+         /* hf generation using patching */
++#ifdef PROFILE
++      count = faad_get_ts();
++#endif
++
+         hf_generation(sbr, sbr->Xsbr[ch], sbr->Xsbr[ch]
++
+ #ifdef SBR_LOW_POWER
+             ,deg
+ #endif
+             ,ch);
+ #endif
+ 
++#ifdef PROFILE
++	sbr->hf_gen_cycles += get_count(count);
++#endif
++
+ #if 0 //def SBR_LOW_POWER
+         for (l = sbr->t_E[ch][0]; l < sbr->t_E[ch][sbr->L_E[ch]]; l++)
+         {
+@@ -358,6 +382,10 @@
+         }
+ #endif
+ 
++#ifdef PROFILE
++      count = faad_get_ts();
++#endif
++
+ #if 1
+         /* hf adjustment */
+         ret = hf_adjustment(sbr, sbr->Xsbr[ch]
+@@ -366,6 +394,11 @@
+ #endif
+             ,ch);
+ #endif
++
++#ifdef PROFILE
++	sbr->hf_adjust_cycles += get_count(count);
++#endif
++
+         if (ret > 0)
+         {
+             dont_process = 1;
+@@ -448,6 +481,11 @@
+ uint8_t sbrDecodeCoupleFrame(sbr_info *sbr, real_t *left_chan, real_t *right_chan,
+                              const uint8_t just_seeked, const uint8_t downSampledSBR)
+ {
++
++#ifdef PROFILE
++    uint32_t count = faad_get_ts();
++#endif
++
+     uint8_t dont_process = 0;
+     uint8_t ret = 0;
+     ALIGN qmf_t X[MAX_NTSR][64];
+@@ -525,6 +563,11 @@
+     }
+ #endif
+ 
++#ifdef PROFILE
++    sbr->cycles += get_count(count);
++#endif
++
++
+     return 0;
+ }
+ 
+@@ -535,6 +578,10 @@
+     uint8_t ret = 0;
+     ALIGN qmf_t X[MAX_NTSR][64];
+ 
++#ifdef PROFILE
++    uint32_t count = faad_get_ts();
++#endif
++
+     if (sbr == NULL)
+         return 20;
+ 
+@@ -542,6 +589,7 @@
+     if (sbr->id_aac != ID_SCE && sbr->id_aac != ID_LFE)
+         return 21;
+ 
++
+     if (sbr->ret || (sbr->header_count == 0))
+     {
+         /* don't process just upsample */
+@@ -577,10 +625,16 @@
+         if (ret) return ret;
+     }
+ 
++
+     sbr_save_matrix(sbr, 0);
+ 
+     sbr->frame++;
+ 
++#ifdef PROFILE
++    sbr->cycles += get_count(count);
++#endif
++
++
+ //#define POST_QMF_PRINT
+ #ifdef POST_QMF_PRINT
+     {
+@@ -605,6 +659,11 @@
+     ALIGN qmf_t X_left[38][64] = {{0}};
+     ALIGN qmf_t X_right[38][64] = {{0}}; /* must set this to 0 */
+ 
++#ifdef PROFILE
++    uint32_t count1 = faad_get_ts();
++    uint32_t count2;
++#endif
++
+     if (sbr == NULL)
+         return 20;
+ 
+@@ -647,6 +706,10 @@
+     }
+ 
+     /* perform parametric stereo */
++#ifdef PROFILE
++    count2 = faad_get_ts();
++#endif
++
+ #ifdef DRM_PS
+     if (sbr->Is_DRM_SBR)
+     {
+@@ -660,6 +723,10 @@
+     }
+ #endif
+ 
++#ifdef PROFILE
++    count2 = get_count(count2);
++#endif
++
+     /* subband synthesis */
+     if (downSampledSBR)
+     {
+@@ -683,6 +750,13 @@
+ 
+     sbr->frame++;
+ 
++#ifdef PROFILE
++    /* subtract cycles used in ps decoding (count2) and cycles
++       used in reading the cycle counters (2500)... */
++    sbr->cycles += get_count(count1) - count2;
++    sbr->ps_cycles += count2;
++#endif
++
+     return 0;
+ }
+ #endif
+Index: faad2/libfaad/sbr_dec.h
+===================================================================
+--- faad2.orig/libfaad/sbr_dec.h	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/sbr_dec.h	2008-02-20 09:36:41.000000000 +0100
+@@ -226,6 +226,16 @@
+     uint8_t bs_num_rel_1[2];
+     uint8_t bs_df_env[2][9];
+     uint8_t bs_df_noise[2][3];
++
++#ifdef PROFILE
++  uint64_t cycles;
++  uint64_t qmf_cycles;  // qmf synthesis
++  uint64_t qmf_analysis_cycles;
++  uint64_t ps_cycles;
++  uint64_t hf_gen_cycles;
++  uint64_t hf_adjust_cycles;
++#endif
++
+ } sbr_info;
+ 
+ sbr_info *sbrDecodeInit(uint16_t framelength, uint8_t id_aac,
+Index: faad2/libfaad/sbr_hfadj.c
+===================================================================
+--- faad2.orig/libfaad/sbr_hfadj.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/sbr_hfadj.c	2008-02-20 09:36:41.000000000 +0100
+@@ -52,6 +52,42 @@
+ static void hf_assembly(sbr_info *sbr, sbr_hfadj_info *adj, qmf_t Xsbr[MAX_NTSRHFG][64], uint8_t ch);
+ 
+ 
++
++#ifdef SBR_LOW_POWER // from ps_dec
++#ifdef FIXED_POINT
++#define step(shift) \
++    if ((0x40000000l >> shift) + root <= value)       \
++    {                                                 \
++        value -= (0x40000000l >> shift) + root;       \
++        root = (root >> 1) | (0x40000000l >> shift);  \
++    } else {                                          \
++        root = root >> 1;                             \
++    }
++
++/* fixed point square root approximation */
++static real_t SBR_SQRT_Q2(real_t value)
++{
++    real_t root = 0;
++
++    step( 0); step( 2); step( 4); step( 6);
++    step( 8); step(10); step(12); step(14);
++    step(16); step(18); step(20); step(22);
++    step(24); step(26); step(28); step(30);
++
++    if (root < value)
++        ++root;
++
++    root <<= (REAL_BITS/2);
++
++    return root;
++}
++#else
++#define SBR_SQRT_Q2(A) sqrt(A)
++#endif
++#endif  // #if 0
++
++
++
+ uint8_t hf_adjustment(sbr_info *sbr, qmf_t Xsbr[MAX_NTSRHFG][64]
+ #ifdef SBR_LOW_POWER
+                       ,real_t *deg /* aliasing degree */
+@@ -1746,3 +1782,5 @@
+ }
+ 
+ #endif
++
++
+Index: faad2/libfaad/sbr_hfgen.c
+===================================================================
+--- faad2.orig/libfaad/sbr_hfgen.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/sbr_hfgen.c	2008-02-20 09:36:41.000000000 +0100
+@@ -205,8 +205,9 @@
+     uint8_t offset = sbr->tHFAdj;
+ #ifdef FIXED_POINT
+     const real_t rel = FRAC_CONST(0.999999); // 1 / (1 + 1e-6f);
+-    uint32_t maxi = 0;
++    uint32_t mask = 0;
+     uint32_t pow2, exp;
++
+ #else
+     const real_t rel = 1 / (1 + 1e-6f);
+ #endif
+Index: faad2/libfaad/sbr_qmf.c
+===================================================================
+--- faad2.orig/libfaad/sbr_qmf.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/sbr_qmf.c	2008-02-20 09:36:41.000000000 +0100
+@@ -34,6 +34,7 @@
+ #ifdef SBR_DEC
+ 
+ 
++
+ #include <stdlib.h>
+ #include <string.h>
+ #include "sbr_dct.h"
+@@ -41,6 +42,108 @@
+ #include "sbr_qmf_c.h"
+ #include "sbr_syntax.h"
+ 
++
++
++#ifdef SBR_OPT
++
++static INLINE real_t qmf_out_loop(real_t *qmf_pointer, real_t qmf_index,
++				  real_t *qmc_pointer, real_t qmc_index){
++  real_t result;
++
++  real_t qmf = (real_t) &qmf_pointer[qmf_index];
++  real_t qmc = (real_t) &qmc_pointer[qmc_index];
++
++  // todo: use more regs and/or no fixed regs?
++
++  // asm volatile("ld.w    r3, %1\n\t"     // r3 = 1st multiplier
++  asm         ("ld.w    r3, %1\n\t"     // r3 = 1st multiplier
++
++               "ld.w    r8, %2\n\t"     // r8 = 1st multiplicand
++
++	       "sub    %1, -4*192\n\t"
++	       "sub    %2, -4*64\n\t"
++
++	       "muls.d  r0, r3, r8\n\t"
++
++	       "ld.w    r3, %1\n\t"     // r3 = 2nd multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 2nd multiplicand
++	       "sub    %1, -4*64\n\t"
++	       "sub    %2, -4*64\n\t"
++
++
++	       "macs.d  r0, r3, r8\n\t"
++
++	       "ld.w    r3, %1\n\t"     // r3 = 3rd multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 3rd multiplicand
++	       "sub    %1, -4*192\n\t"
++	       "sub    %2, -4*64\n\t"
++
++	       "macs.d  r0, r3, r8\n\t"
++
++	       "ld.w    r3, %1\n\t"     // r3 = 4th multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 4th multiplicand
++	       "sub    %1, -4*64\n\t"
++	       "sub    %2, -4*64\n\t"
++
++	       "macs.d  r0, r3, r8\n\t"
++
++
++	       "ld.w    r3, %1\n\t"     // r3 = 5st multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 5st multiplicand
++	       "sub    %1, -4*192\n\t"
++	       "sub    %2, -4*64\n\t"
++
++	       "macs.d  r0, r3, r8\n\t"
++
++	       "ld.w    r3, %1\n\t"     // r3 = 6nd multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 6nd multiplicand
++	       "sub    %1, -4*64\n\t"
++	       "sub    %2, -4*64\n\t"
++
++	       "macs.d  r0, r3, r8\n\t"
++
++	       "ld.w    r3, %1\n\t"     // r3 = 7rd multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 7rd multiplicand
++	       "sub    %1, -4*192\n\t"
++	       "sub    %2, -4*64\n\t"
++
++	       "macs.d  r0, r3, r8\n\t"
++
++	       "ld.w    r3, %1\n\t"     // r3 = 8th multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 8th multiplicand
++	       "sub    %1, -4*64\n\t"
++	       "sub    %2, -4*64\n\t"
++
++	       "macs.d  r0, r3, r8\n\t"
++
++	       "ld.w    r3, %1\n\t"     // r3 = 9rd multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 9rd multiplicand
++	       "sub    %1, -4*192\n\t"
++	       "sub    %2, -4*64\n\t"
++
++	       "macs.d  r0, r3, r8\n\t"
++
++	       "ld.w    r3, %1\n\t"     // r3 = 10th multiplier
++	       "ld.w    r8, %2\n\t"     // r8 = 10th multiplicand
++
++	       "macs.d  r0, r3, r8\n\t"
++
++	       "lsr	r0, 31\n\t"
++	       "or	%0, r0, r1 << 1\n\t"
++	       //"lsl     %0, r1, %3\n\t"
++
++	       : "=r" (result)
++	       : "r" (qmf), "r" (qmc)
++	       : "r0", "r1", "r3", "r8"
++	       );
++
++
++  return result;
++
++}
++
++#endif // SBR_OPT
++
+ qmfa_info *qmfa_init(uint8_t channels)
+ {
+     qmfa_info *qmfa = (qmfa_info*)faad_malloc(sizeof(qmfa_info));
+@@ -78,6 +181,11 @@
+     uint32_t in = 0;
+     uint8_t l;
+ 
++#ifdef PROFILE
++    uint32_t count = faad_get_ts();
++#endif
++
++
+     /* qmf subsample l */
+     for (l = 0; l < sbr->numTimeSlotsRate; l++)
+     {
+@@ -185,6 +293,11 @@
+         }
+ #endif
+     }
++
++#ifdef PROFILE
++    sbr->qmf_analysis_cycles += get_count(count);
++#endif
++
+ }
+ 
+ static const complex_t qmf32_pre_twiddle[] =
+@@ -257,6 +370,11 @@
+     int32_t n, k, out = 0;
+     uint8_t l;
+ 
++
++#ifdef PROFILE
++    uint32_t count = faad_get_ts();
++#endif
++
+     /* qmf subsample l */
+     for (l = 0; l < sbr->numTimeSlotsRate; l++)
+     {
+@@ -276,6 +394,7 @@
+ #endif
+         }
+ 
++
+         /* even n samples */
+         DCT2_16_unscaled(x, x);
+         /* odd n samples */
+@@ -299,6 +418,19 @@
+         /* calculate 32 output samples and window */
+         for (k = 0; k < 32; k++)
+         {
++#ifdef SBR_OPT
++	  output[out++] = MUL_32_16(qmfs->v[qmfs->v_index + k], qmf_c[2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 96 + k], qmf_c[64 + 2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 128 + k], qmf_c[128 + 2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 224 + k], qmf_c[192 + 2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 256 + k], qmf_c[256 + 2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 352 + k], qmf_c[320 + 2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 384 + k], qmf_c[384 + 2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 480 + k], qmf_c[448 + 2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 512 + k], qmf_c[512 + 2*k]) +
++                MUL_32_16(qmfs->v[qmfs->v_index + 608 + k], qmf_c[576 + 2*k]);
++
++#else
+             output[out++] = MUL_F(qmfs->v[qmfs->v_index + k], qmf_c[2*k]) +
+                 MUL_F(qmfs->v[qmfs->v_index + 96 + k], qmf_c[64 + 2*k]) +
+                 MUL_F(qmfs->v[qmfs->v_index + 128 + k], qmf_c[128 + 2*k]) +
+@@ -309,6 +441,7 @@
+                 MUL_F(qmfs->v[qmfs->v_index + 480 + k], qmf_c[448 + 2*k]) +
+                 MUL_F(qmfs->v[qmfs->v_index + 512 + k], qmf_c[512 + 2*k]) +
+                 MUL_F(qmfs->v[qmfs->v_index + 608 + k], qmf_c[576 + 2*k]);
++#endif
+         }
+ 
+         /* update the ringbuffer index */
+@@ -316,6 +449,12 @@
+         if (qmfs->v_index < 0)
+             qmfs->v_index = (640-64);
+     }
++
++
++#ifdef PROFILE
++    sbr->qmf_cycles += get_count(count);
++#endif
++
+ }
+ 
+ void sbr_qmf_synthesis_64(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHFG][64],
+@@ -326,6 +465,10 @@
+     int32_t n, k, out = 0;
+     uint8_t l;
+ 
++#ifdef PROFILE
++    uint32_t count = faad_get_ts();
++#endif
++
+ 
+     /* qmf subsample l */
+     for (l = 0; l < sbr->numTimeSlotsRate; l++)
+@@ -346,6 +489,8 @@
+ #endif
+         }
+ 
++
++
+         /* even n samples */
+         DCT2_32_unscaled(x, x);
+         /* odd n samples */
+@@ -369,6 +514,12 @@
+         /* calculate 64 output samples and window */
+         for (k = 0; k < 64; k++)
+         {
++#ifdef SBR_OPT
++	    output[out++] =
++	        qmf_out_loop(qmfs->v, qmfs->v_index+k, (real_t *) qmf_c, k);
++
++#else
++
+             output[out++] = MUL_F(qmfs->v[qmfs->v_index + k], qmf_c[k]) +
+                 MUL_F(qmfs->v[qmfs->v_index + 192 + k], qmf_c[64 + k]) +
+                 MUL_F(qmfs->v[qmfs->v_index + 256 + k], qmf_c[128 + k]) +
+@@ -379,6 +530,7 @@
+                 MUL_F(qmfs->v[qmfs->v_index + 768 + 192 + k], qmf_c[384 + 64 + k]) +
+                 MUL_F(qmfs->v[qmfs->v_index + 1024 + k], qmf_c[512 + k]) +
+                 MUL_F(qmfs->v[qmfs->v_index + 1024 + 192 + k], qmf_c[512 + 64 + k]);
++#endif
+         }
+ 
+         /* update the ringbuffer index */
+@@ -386,6 +538,12 @@
+         if (qmfs->v_index < 0)
+             qmfs->v_index = (1280-128);
+     }
++
++
++#ifdef PROFILE
++    sbr->qmf_cycles += get_count(count);
++#endif
++
+ }
+ #else
+ void sbr_qmf_synthesis_32(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHFG][64],
+@@ -398,6 +556,10 @@
+     int32_t n, k, out = 0;
+     uint8_t l;
+ 
++#ifdef PROFILE
++    uint32_t count = faad_get_ts();
++#endif
++
+ 
+     /* qmf subsample l */
+     for (l = 0; l < sbr->numTimeSlotsRate; l++)
+@@ -452,6 +614,10 @@
+         if (qmfs->v_index < 0)
+             qmfs->v_index = (640 - 64);
+     }
++#ifdef PROFILE
++    sbr->qmf_cycles += get_count(count);
++#endif
++
+ }
+ 
+ void sbr_qmf_synthesis_64(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHFG][64],
+@@ -481,6 +647,10 @@
+     int32_t n, k, out = 0;
+     uint8_t l;
+ 
++#ifdef PROFILE
++    uint32_t count = faad_get_ts();
++#endif
++
+ 
+     /* qmf subsample l */
+     for (l = 0; l < sbr->numTimeSlotsRate; l++)
+@@ -630,7 +800,12 @@
+         if (qmfs->v_index < 0)
+             qmfs->v_index = (1280 - 128);
+     }
++#ifdef PROFILE
++    sbr->qmf_cycles += get_count(count);
++#endif
++
+ }
+ #endif
+ 
+ #endif
++
+Index: faad2/libfaad/specrec.c
+===================================================================
+--- faad2.orig/libfaad/specrec.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/specrec.c	2008-02-20 09:36:41.000000000 +0100
+@@ -437,9 +437,9 @@
+  */
+ #ifndef BIG_IQ_TABLE
+     static const real_t errcorr[] = {
+-        REAL_CONST(0), REAL_CONST(1.0/8.0), REAL_CONST(2.0/8.0), REAL_CONST(3.0/8.0),
+-        REAL_CONST(4.0/8.0),  REAL_CONST(5.0/8.0), REAL_CONST(6.0/8.0), REAL_CONST(7.0/8.0),
+-        REAL_CONST(0)
++    REAL_CONST(0), REAL_CONST(1.0/8.0), REAL_CONST(2.0/8.0),
++    REAL_CONST(3.0/8.0), REAL_CONST(4.0/8.0), REAL_CONST(5.0/8.0),
++    REAL_CONST(6.0/8.0), REAL_CONST(7.0/8.0), REAL_CONST(0)
+     };
+     real_t x1, x2;
+ #endif
+@@ -621,10 +621,14 @@
+ #ifndef FIXED_POINT
+                     wb = wa + bin;
+ 
+-                    spec_data[wb+0] = iquant(quant_data[k+0], tab, &error) * scf;
+-                    spec_data[wb+1] = iquant(quant_data[k+1], tab, &error) * scf;                        
+-                    spec_data[wb+2] = iquant(quant_data[k+2], tab, &error) * scf;                        
+-                    spec_data[wb+3] = iquant(quant_data[k+3], tab, &error) * scf;
++                    spec_data[wb+0] =
++		      iquant(quant_data[k+0], tab, &error) * scf;
++                    spec_data[wb+1] =
++		      iquant(quant_data[k+1], tab, &error) * scf;
++                    spec_data[wb+2] =
++		      iquant(quant_data[k+2], tab, &error) * scf;
++                    spec_data[wb+3] =
++		      iquant(quant_data[k+3], tab, &error) * scf;
+                         
+ #else
+                     real_t iq0 = iquant(quant_data[k+0], tab, &error);
+@@ -648,10 +652,14 @@
+                     }
+                     if (frac != 0)
+                     {
+-                        spec_data[wb+0] = MUL_C(spec_data[wb+0],pow2_table[frac]);
+-                        spec_data[wb+1] = MUL_C(spec_data[wb+1],pow2_table[frac]);
+-                        spec_data[wb+2] = MUL_C(spec_data[wb+2],pow2_table[frac]);
+-                        spec_data[wb+3] = MUL_C(spec_data[wb+3],pow2_table[frac]);
++		      spec_data[wb+0] = MUL_C(spec_data[wb+0],
++					      pow2_table[frac]);
++		      spec_data[wb+1] = MUL_C(spec_data[wb+1],
++					      pow2_table[frac]);
++		      spec_data[wb+2] = MUL_C(spec_data[wb+2],
++					      pow2_table[frac]);
++		      spec_data[wb+3] = MUL_C(spec_data[wb+3],
++					      pow2_table[frac]);
+                     }
+ 
+ //#define SCFS_PRINT
+@@ -945,14 +953,20 @@
+         return retval;
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->requant_cycles += get_count(count);
++#else
+     count = faad_get_ts() - count;
+     hDecoder->requant_cycles += count;
+ #endif
++#endif
+ 
+ 
+     /* pns decoding */
+-    pns_decode(ics, NULL, spec_coef, NULL, hDecoder->frameLength, 0, hDecoder->object_type,
+-        &(hDecoder->__r1), &(hDecoder->__r2));
++    if (ics->noise_used){
++      pns_decode(ics, NULL, spec_coef, NULL, hDecoder->frameLength, 0,
++		 hDecoder->object_type, &(hDecoder->__r1), &(hDecoder->__r2));
++    }
+ 
+ #ifdef MAIN_DEC
+     /* MAIN object type prediction */
+@@ -993,8 +1007,11 @@
+ #endif
+ 
+     /* tns decoding */
+-    tns_decode_frame(ics, &(ics->tns), hDecoder->sf_index, hDecoder->object_type,
+-        spec_coef, hDecoder->frameLength);
++    if(ics->tns_data_present){
++      tns_decode_frame(ics, &(ics->tns), hDecoder->sf_index,
++		       hDecoder->object_type, spec_coef,
++		       hDecoder->frameLength);
++    }
+ 
+     /* drc decoding */
+     if (hDecoder->drc->present)
+@@ -1003,6 +1020,14 @@
+             drc_decode(hDecoder->drc, spec_coef);
+     }
+ 
++
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->reconst_other_cycles += get_count(count);
++    count = faad_get_ts();
++#endif
++#endif
++
+     /* filter bank */
+ #ifdef SSR_DEC
+     if (hDecoder->object_type != SSR)
+@@ -1124,21 +1149,31 @@
+         return retval;
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->requant_cycles += get_count(count);
++    count = faad_get_ts();
++#else
+     count = faad_get_ts() - count;
+     hDecoder->requant_cycles += count;
+ #endif
++#endif
+ 
+ 
+     /* pns decoding */
+-    if (ics1->ms_mask_present)
+-    {
+-        pns_decode(ics1, ics2, spec_coef1, spec_coef2, hDecoder->frameLength, 1, hDecoder->object_type,
+-            &(hDecoder->__r1), &(hDecoder->__r2));
++
++    if (ics1->noise_used || ics2->noise_used){
++      if (ics1->ms_mask_present){
++	pns_decode(ics1, ics2, spec_coef1, spec_coef2, hDecoder->frameLength,
++		   1, hDecoder->object_type, &(hDecoder->__r1),
++		   &(hDecoder->__r2));
+     } else {
+-        pns_decode(ics1, NULL, spec_coef1, NULL, hDecoder->frameLength, 0, hDecoder->object_type,
+-            &(hDecoder->__r1), &(hDecoder->__r2));
+-        pns_decode(ics2, NULL, spec_coef2, NULL, hDecoder->frameLength, 0, hDecoder->object_type,
+-            &(hDecoder->__r1), &(hDecoder->__r2));
++        pns_decode(ics1, NULL, spec_coef1, NULL, hDecoder->frameLength, 0,
++		   hDecoder->object_type, &(hDecoder->__r1),
++		   &(hDecoder->__r2));
++        pns_decode(ics2, NULL, spec_coef2, NULL, hDecoder->frameLength, 0,
++		   hDecoder->object_type, &(hDecoder->__r1),
++		   &(hDecoder->__r2));
++      }
+     }
+ 
+     /* mid/side decoding */
+@@ -1161,6 +1196,7 @@
+ #endif
+ 
+     /* intensity stereo decoding */
++    if (ics1->is_used || ics2->is_used)
+     is_decode(ics1, ics2, spec_coef1, spec_coef2, hDecoder->frameLength);
+ 
+ #if 0
+@@ -1232,10 +1268,16 @@
+ #endif
+ 
+     /* tns decoding */
+-    tns_decode_frame(ics1, &(ics1->tns), hDecoder->sf_index, hDecoder->object_type,
+-        spec_coef1, hDecoder->frameLength);
+-    tns_decode_frame(ics2, &(ics2->tns), hDecoder->sf_index, hDecoder->object_type,
+-        spec_coef2, hDecoder->frameLength);
++    if (ics1->tns_data_present){
++      tns_decode_frame(ics1, &(ics1->tns), hDecoder->sf_index,
++		       hDecoder->object_type, spec_coef1,
++		       hDecoder->frameLength);
++    }
++    if (ics2->tns_data_present){
++      tns_decode_frame(ics2, &(ics2->tns), hDecoder->sf_index,
++		       hDecoder->object_type, spec_coef2,
++		       hDecoder->frameLength);
++    }
+ 
+     /* drc decoding */
+     if (hDecoder->drc->present)
+@@ -1246,6 +1288,14 @@
+             drc_decode(hDecoder->drc, spec_coef2);
+     }
+ 
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->reconst_other_cycles += get_count(count);
++    count = faad_get_ts();
++#endif
++#endif
++
++
+     /* filter bank */
+ #ifdef SSR_DEC
+     if (hDecoder->object_type != SSR)
+@@ -1259,6 +1309,7 @@
+             hDecoder->window_shape_prev[cpe->paired_channel], spec_coef2,
+             hDecoder->time_out[cpe->paired_channel], hDecoder->fb_intermed[cpe->paired_channel],
+             hDecoder->object_type, hDecoder->frameLength);
++
+ #ifdef SSR_DEC
+     } else {
+         ssr_decode(&(ics1->ssr), hDecoder->fb, ics1->window_sequence, ics1->window_shape,
+@@ -1323,5 +1374,12 @@
+     }
+ #endif
+ 
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->fb2_cycles += get_count(count);
++#endif
++#endif
++
++
+     return 0;
+ }
+Index: faad2/libfaad/structs.h
+===================================================================
+--- faad2.orig/libfaad/structs.h	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/structs.h	2008-02-20 09:36:41.000000000 +0100
+@@ -61,9 +61,14 @@
+ #ifdef PROFILE
+     int64_t cycles;
+     int64_t fft_cycles;
++    int64_t pre_fft_cycles;
++    int64_t post_fft_cycles;
++    int invocations;
++    int fft_invocations;
+ #endif
+ } mdct_info;
+ 
++
+ typedef struct
+ {
+     const real_t *long_window[2];
+@@ -371,6 +376,11 @@
+ 
+     /* PS: 0: off, 1: on */
+     /*uint8_t*/ unsigned char ps;
++#ifdef SPEC_DATA
++
++  int spec_data[52];
++#endif
++
+ } NeAACDecFrameInfo;
+ 
+ typedef struct
+@@ -470,12 +480,48 @@
+     NeAACDecConfiguration config;
+ 
+ #ifdef PROFILE
++
++#if defined (__GNUC__) && defined (__avr32__)
++
++  /* additional profiling stuff for avr32 profiling iv */
++
++  uint64_t cycles;
++  uint64_t spectral_cycles;
++  uint64_t output_cycles;
++  uint64_t scalefac_cycles;
++  uint64_t requant_cycles;
++
++  int sbr_invocations;
++  int ps_invocations;
++
++  uint64_t sbr_cycles;
++  uint64_t ps_cycles;
++
++  uint64_t ics_cycles;
++  uint64_t sce_cycles;
++  uint64_t cpe_cycles;
++
++  uint64_t raw_data_block_cycles;
++  uint64_t memset_cycles;
++  uint64_t foo_cycles;
++  uint64_t reconst_other_cycles;
++  uint64_t fb2_cycles;
++  uint64_t rcp_cycles;
++  uint64_t init_cycles;
++
++
++#else
+     int64_t cycles;
+     int64_t spectral_cycles;
+     int64_t output_cycles;
+     int64_t scalefac_cycles;
+     int64_t requant_cycles;
+ #endif
++
++
++
++
++#endif
+ 	const unsigned char *cmes;
+ } NeAACDecStruct, *NeAACDecHandle;
+ 
+Index: faad2/libfaad/syntax.c
+===================================================================
+--- faad2.orig/libfaad/syntax.c	2008-02-20 09:34:22.000000000 +0100
++++ faad2/libfaad/syntax.c	2008-02-20 09:36:41.000000000 +0100
+@@ -53,7 +53,6 @@
+ #include "sbr_syntax.h"
+ #endif
+ 
+-
+ /* static function declarations */
+ static void decode_sce_lfe(NeAACDecHandle hDecoder, NeAACDecFrameInfo *hInfo, bitfile *ld,
+                            uint8_t id_syn_ele);
+@@ -104,6 +103,11 @@
+ #endif
+ 
+ 
++#ifdef SPEC_DATA
++int *spec_data;
++#endif
++
++
+ /* Table 4.4.1 */
+ int8_t GASpecificConfig(bitfile *ld, mp4AudioSpecificConfig *mp4ASC,
+                         program_config *pce_out)
+@@ -412,6 +416,9 @@
+ 
+     hDecoder->fr_channels += 2;
+     hDecoder->fr_ch_ele++;
++
++
++
+ }
+ 
+ void raw_data_block(NeAACDecHandle hDecoder, NeAACDecFrameInfo *hInfo,
+@@ -420,6 +427,17 @@
+     uint8_t id_syn_ele;
+     uint8_t ele_this_frame = 0;
+ 
++#ifdef PROFILE
++    uint64_t count = faad_get_ts();
++#endif
++
++
++#ifdef SPEC_DATA
++
++    if (hInfo->spec_data != NULL)
++      spec_data = hInfo->spec_data;
++#endif
++
+     hDecoder->fr_channels = 0;
+     hDecoder->fr_ch_ele = 0;
+     hDecoder->first_syn_ele = 25;
+@@ -579,6 +597,16 @@
+         faad_byte_align(ld);
+     }
+ 
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->raw_data_block_cycles += get_count(count);
++#else
++    count = faad_get_ts() - count;
++    hDecoder->raw_data_block_cycles += count;
++#endif
++#endif
++
++
+     return;
+ }
+ 
+@@ -587,6 +615,14 @@
+ static uint8_t single_lfe_channel_element(NeAACDecHandle hDecoder, bitfile *ld,
+                                           uint8_t channel, uint8_t *tag)
+ {
++
++
++#ifdef PROFILE
++  uint32_t count = faad_get_ts();
++  uint32_t count2;
++  uint32_t count3 = count;
++#endif
++
+     uint8_t retval = 0;
+     element sce = {0};
+     ic_stream *ics = &(sce.ics1);
+@@ -599,6 +635,16 @@
+     sce.channel = channel;
+     sce.paired_channel = -1;
+ 
++
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->init_cycles += get_count(count3);
++#else
++    count3 = faad_get_ts() - count3;
++    hDecoder->init_cycles += count;
++#endif
++#endif
++
+     retval = individual_channel_stream(hDecoder, &sce, ld, ics, 0, spec_data);
+     if (retval > 0)
+         return retval;
+@@ -634,13 +680,30 @@
+ static uint8_t channel_pair_element(NeAACDecHandle hDecoder, bitfile *ld,
+                                     uint8_t channels, uint8_t *tag)
+ {
++
++#ifdef PROFILE
++  uint32_t count = faad_get_ts();
++  uint32_t count2;
++  uint32_t count3 = count;
++#endif
++
++  // initializing to zero takes some time and is needed only when
++  // the scalefactor codebook is 'zero book'
++
++#ifdef SPEC_DATA_OPT
++  ALIGN int16_t spec_data1[1024];
++  ALIGN int16_t spec_data2[1024];
++#else
+     ALIGN int16_t spec_data1[1024] = {0};
+     ALIGN int16_t spec_data2[1024] = {0};
++#endif
++
+     element cpe = {0};
+     ic_stream *ics1 = &(cpe.ics1);
+     ic_stream *ics2 = &(cpe.ics2);
+     uint8_t result;
+ 
++
+     cpe.channel        = channels;
+     cpe.paired_channel = channels+1;
+ 
+@@ -701,6 +764,18 @@
+         ics1->ms_mask_present = 0;
+     }
+ 
++
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->init_cycles += get_count(count3);
++#else
++    count3 = faad_get_ts() - count3;
++    hDecoder->init_cycles += count;
++#endif
++#endif
++
++
++
+     if ((result = individual_channel_stream(hDecoder, &cpe, ld, ics1,
+         0, spec_data1)) > 0)
+     {
+@@ -750,6 +825,10 @@
+     }
+ #endif
+ 
++#ifdef PROFILE
++    count2 = faad_get_ts();
++#endif
++
+     /* noiseless coding is done, spectral reconstruction is done now */
+     if ((result = reconstruct_channel_pair(hDecoder, ics1, ics2, &cpe,
+         spec_data1, spec_data2)) > 0)
+@@ -757,6 +836,68 @@
+         return result;
+     }
+ 
++#ifdef SPEC_DATA
++
++  /*
++   * Output spectral data so that the player using this decoder library
++   * can output fancy graphics without having to do FFT.
++   *
++   */
++
++
++  // fixme: short & transition windows, mono & multichannel?
++
++
++    if (ics1->window_sequence == ONLY_LONG_SEQUENCE){
++      int sfb, i;
++      unsigned long avg;
++
++      for (sfb = 0; sfb < ics1->max_sfb; sfb++){
++	avg = 0;
++	for (i = ics1->swb_offset[sfb]; i < ics1->swb_offset[sfb+1]; i++)
++	  avg += abs(spec_data1[i]);
++	avg = avg / (ics1->swb_offset[sfb+1] - ics1->swb_offset[sfb]);
++	if (spec_data != NULL)
++	  spec_data[sfb] = avg;
++	else
++	  printf("eka: ei natsaa, spec_data == null\n");
++      }
++    }
++
++    if (ics2->window_sequence == ONLY_LONG_SEQUENCE){
++      int sfb, i;
++      unsigned long avg;
++
++      for (sfb = 0; sfb < ics2->max_sfb; sfb++){
++	avg = 0;
++	for (i = ics2->swb_offset[sfb]; i < ics2->swb_offset[sfb+1]; i++)
++	  avg += abs(spec_data2[i]);
++	avg = avg / (ics2->swb_offset[sfb+1] - ics2->swb_offset[sfb]);
++
++	if (spec_data != NULL){
++	  if (avg > spec_data[sfb]) // pick the channel with more power
++	    spec_data[sfb] = avg;   // other option would be to average between
++	                            // channels, but this might look better?
++	} else {
++	  printf("toka: ei natsaa, spec_data == null\n");
++
++	}
++      }
++    }
++
++#endif
++
++
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->cpe_cycles += get_count(count);
++    hDecoder->rcp_cycles += get_count(count2);
++#else
++    count = faad_get_ts() - count;
++    hDecoder->cpe_cycles += count;
++#endif
++#endif
++
+     return 0;
+ }
+ 
+@@ -1588,6 +1729,11 @@
+                                          bitfile *ld, ic_stream *ics, uint8_t scal_flag,
+                                          int16_t *spec_data)
+ {
++
++#ifdef PROFILE
++    uint32_t count = faad_get_ts();
++#endif
++
+     uint8_t result;
+ 
+     result = side_info(hDecoder, ele, ld, ics, scal_flag);
+@@ -1640,6 +1786,16 @@
+         }
+     }
+ 
++#ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->ics_cycles += get_count(count);
++#else
++    count = faad_get_ts() - count;
++    hDecoder->ics_cycles += count;
++#endif
++#endif
++
++
+     return 0;
+ }
+ 
+@@ -1914,9 +2070,13 @@
+ #endif
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->scalefac_cycles += get_count(count);
++#else
+     count = faad_get_ts() - count;
+     hDecoder->scalefac_cycles += count;
+ #endif
++#endif
+ 
+     return ret;
+ }
+@@ -2077,6 +2237,31 @@
+     int64_t count = faad_get_ts();
+ #endif
+ 
++#ifdef SPEC_DATA_OPT
++
++    /*
++     * Spectral data not zeroed at the init, do it here for
++     * the upper part of spectrum which is not coded (= is zero),
++     * and later in this function for zero codebook sections.
++     * Saves some cycles when compared to zeroing out the whole
++     * spectral data array at the beginning.
++     *
++     */
++
++    if (ics->window_sequence != EIGHT_SHORT_SEQUENCE){
++      i = ics->num_sec[0] - 1;           // last section
++
++      k = ics->sect_sfb_offset[0][ics->sect_end[0][i]];
++      memset(&spectral_data[k], 0, 2*(1024-k));
++
++    } else {
++      // for short windows, zero out everything
++      // fixme: zero out just what needs to be zeroed, worth the effort?
++      memset(spectral_data, 0, 2*1024);
++    }
++
++#endif
++
+     for(g = 0; g < ics->num_window_groups; g++)
+     {
+         p = groups*nshort;
+@@ -2107,8 +2292,28 @@
+ #ifdef SFBO_PRINT
+                 printf("%d\n", ics->sect_sfb_offset[g][ics->sect_start[g][i]]);
+ #endif
++
++
++#ifdef SPEC_DATA_OPT
++
++		/*
++		 * zero out spectral data for these codebooks, cause
++		 * the array is no longer initialized to zero!
++		 *
++		 */
++
++		for (k = ics->sect_sfb_offset[g][ics->sect_start[g][i]];
++                     k < ics->sect_sfb_offset[g][ics->sect_end[g][i]]; k++) {
++		  spectral_data[p++] = 0;
++		}
++
++#else
++
+                 p += (ics->sect_sfb_offset[g][ics->sect_end[g][i]] -
+                     ics->sect_sfb_offset[g][ics->sect_start[g][i]]);
++
++#endif
++
+                 break;
+             default:
+ #ifdef SFBO_PRINT
+@@ -2137,9 +2342,13 @@
+     }
+ 
+ #ifdef PROFILE
++#if defined(__GNUC__) && defined(__avr32__)
++    hDecoder->spectral_cycles += get_count(count);
++#else
+     count = faad_get_ts() - count;
+     hDecoder->spectral_cycles += count;
+ #endif
++#endif
+ 
+     return 0;
+ }
