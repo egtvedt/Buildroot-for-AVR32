@@ -17,6 +17,10 @@ else
 ALSA_LIB_ABI:=
 endif
 
+ifeq ($(BR2_SOFT_FLOAT),y)
+	SOFT_FLOAT=--with-softfloat
+endif
+
 $(DL_DIR)/$(ALSA_LIB_SOURCE):
 	$(WGET) -P $(DL_DIR) $(ALSA_LIB_SITE)/$(ALSA_LIB_SOURCE)
 
@@ -31,7 +35,7 @@ $(ALSA_LIB_DIR)/.configured: $(ALSA_LIB_DIR)/.unpacked
 		$(TARGET_CONFIGURE_ARGS) \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS) $(ALSA_LIB_ABI)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS) -lm" \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -41,6 +45,8 @@ $(ALSA_LIB_DIR)/.configured: $(ALSA_LIB_DIR)/.unpacked
 		--enable-shared \
 		--enable-static \
 		--disable-docs \
+		--with-alsa-devdir=/dev \
+		$(SOFT_FLOAT) \
 		$(DISABLE_NLS) \
 	)
 	touch $@
