@@ -293,7 +293,6 @@ source "package/libogg/Config.in"
 source "package/libsndfile/Config.in"
 source "package/libvorbis/Config.in"
 source "package/madplay/Config.in"
-source "package/libsndfile/Config.in"
 source "package/mpg123/Config.in"
 source "package/speex/Config.in"
 endif
