@@ -357,7 +357,7 @@ endif
 	touch $@
 
 cross_compiler:=$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc
-cross_compiler gcc: gcc-config $(GCC_BUILD_DIR2)/.installed $(GCC_BUILD_DIR2)/.libs_installed \
+cross_compiler gcc: gcc-config $(GCC_BUILD_DIR2)/.installed $(PROJECT_BUILD_DIR)/.gcc_libs_installed \
 	$(GCC_TARGETS)
 
 gcc-source: $(DL_DIR)/$(GCC_SOURCE)
