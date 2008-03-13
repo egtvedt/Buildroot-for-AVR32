@@ -29,6 +29,7 @@ package/config/zconf.hash.c
 binaries
 build_*
 include
+package/config/buildroot-config
 project_build_*
 src/dl
 toolchain_build_*
