@@ -16,8 +16,8 @@ reading from a terminal.
 
 Patch:
 
-*** a/builtins/read.def	Tue Sep 19 08:45:48 2006
---- b/builtins/read.def	Thu May 24 16:03:30 2007
+*** ../bash-3.2-patched/builtins/read.def	Tue Sep 19 08:45:48 2006
+--- bash-3.2/builtins/read.def	Thu May 24 16:03:30 2007
 ***************
 *** 128,133 ****
   {
@@ -109,8 +109,8 @@ Patch:
 ! 	    }
   	  else
   	    goto add_char;
-*** a/patchlevel.h	Thu Apr 13 08:31:04 2006
---- b/patchlevel.h	Mon Oct 16 14:22:54 2006
+*** ../bash-3.2/patchlevel.h	Thu Apr 13 08:31:04 2006
+--- bash-3.2/patchlevel.h	Mon Oct 16 14:22:54 2006
 ***************
 *** 26,30 ****
      looks for to find the patch level (for the sccs version string). */

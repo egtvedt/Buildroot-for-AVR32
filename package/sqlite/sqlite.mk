@@ -4,10 +4,10 @@
 #
 #############################################################
 
-SQLITE_VERSION=3.3.17
-SQLITE_SOURCE=sqlite-$(SQLITE_VERSION).tar.gz
-SQLITE_SITE=http://www.sqlite.org
-SQLITE_DIR=$(BUILD_DIR)/sqlite-$(SQLITE_VERSION)
+SQLITE_VERSION:=3.5.4
+SQLITE_SOURCE:=sqlite-$(SQLITE_VERSION).tar.gz
+SQLITE_SITE:=http://www.sqlite.org
+SQLITE_DIR:=$(BUILD_DIR)/sqlite-$(SQLITE_VERSION)
 SQLITE_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(SQLITE_SOURCE):
@@ -34,12 +34,12 @@ $(SQLITE_DIR)/.configured: $(SQLITE_DIR)/.unpacked
 		--exec-prefix=/usr \
 		--bindir=/usr/bin \
 		--sbindir=/usr/sbin \
-		--libdir=/lib \
+		--libdir=/usr/lib \
 		--libexecdir=/usr/lib \
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
+		--includedir=/usr/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
 		--enable-shared \
@@ -48,7 +48,7 @@ $(SQLITE_DIR)/.configured: $(SQLITE_DIR)/.unpacked
 		--enable-tempstore \
 		--enable-threadsafe \
 		--enable-releasemode \
-	);
+	)
 	touch $(SQLITE_DIR)/.configured
 
 $(SQLITE_DIR)/sqlite3: $(SQLITE_DIR)/.configured
@@ -56,20 +56,21 @@ $(SQLITE_DIR)/sqlite3: $(SQLITE_DIR)/.configured
 
 $(STAGING_DIR)/usr/bin/sqlite3: $(SQLITE_DIR)/sqlite3
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(SQLITE_DIR) install
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libsqlite3.la
 
 $(TARGET_DIR)/usr/bin/sqlite3: $(STAGING_DIR)/usr/bin/sqlite3
 	cp -a $(STAGING_DIR)/usr/bin/sqlite3 $(TARGET_DIR)/usr/bin
-	cp -a $(STAGING_DIR)/lib/libsqlite3*.so* $(TARGET_DIR)/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libsqlite3.so*
+	cp -a $(STAGING_DIR)/usr/lib/libsqlite3*.so* $(TARGET_DIR)/usr/lib/
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libsqlite3.so*
 
-sqlite:	uclibc readline-target ncurses $(TARGET_DIR)/usr/bin/sqlite3
+sqlite: uclibc readline-target ncurses $(TARGET_DIR)/usr/bin/sqlite3
 
 sqlite-source: $(DL_DIR)/$(SQLITE_SOURCE)
 
 sqlite-clean:
-	@if [ -d $(SQLITE_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(SQLITE_DIR) clean ; \
-	fi;
+	@if [ -d $(SQLITE_DIR)/Makefile ]; then \
+		$(MAKE) -C $(SQLITE_DIR) clean; \
+	fi
 
 sqlite-dirclean:
 	rm -rf $(SQLITE_DIR)

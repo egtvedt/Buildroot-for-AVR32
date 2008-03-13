@@ -112,7 +112,7 @@ $(METACITY_DIR)/.configured: $(METACITY_DIR)/.unpacked
 		--disable-sm \
 		--disable-nls \
 		--disable-startup-notification \
-	);
+	)
 	touch $(METACITY_DIR)/.configured
 
 $(METACITY_DIR)/.compiled: $(METACITY_DIR)/.configured
@@ -120,12 +120,12 @@ $(METACITY_DIR)/.compiled: $(METACITY_DIR)/.configured
 	touch $(METACITY_DIR)/.compiled
 
 $(STAGING_DIR)/lib/*metacity*.so: $(METACITY_DIR)/.compiled
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(METACITY_DIR) install;
+	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(METACITY_DIR) install
 	touch -c $(STAGING_DIR)/lib/*metacity*.so
 
 $(TARGET_DIR)/lib/*metacity*.so: $(STAGING_DIR)/lib/*metacity*.so
 	cp -dpf $(STAGING_DIR)/lib/*metacity*.so* $(TARGET_DIR)/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/*metacity*.so
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/*metacity*.so
 	cp -dpf $(STAGING_DIR)/bin/*metacity* $(TARGET_DIR)/bin/
 	mkdir -p $(TARGET_DIR)/usr/share/metacity/icons
 	cp -dpf $(STAGING_DIR)/usr/share/metacity/icons/* $(TARGET_DIR)/usr/share/metacity/icons/
@@ -135,7 +135,7 @@ $(TARGET_DIR)/lib/*metacity*.so: $(STAGING_DIR)/lib/*metacity*.so
 	cp -a $(STAGING_DIR)/usr/share/themes/Clearlooks \
 		$(TARGET_DIR)/usr/share/themes/
 	(cd $(TARGET_DIR)/usr/share/themes; rm -rf Atlanta; ln -s Clearlooks Atlanta)
-	cp -a package/metacity/Xsession $(TARGET_DIR)/etc/X11/
+	cp package/metacity/Xsession $(TARGET_DIR)/etc/X11/
 
 metacity: uclibc zlib $(XSERVER) libgtk2 $(TARGET_DIR)/lib/*metacity*.so
 

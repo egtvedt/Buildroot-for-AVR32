@@ -44,10 +44,10 @@ $(STUNNEL_DIR)/.configured: $(STUNNEL_DIR)/.unpacked
 		--infodir=/usr/info \
 		--with-random=/dev/urandom \
 		--disable-libwrap \
-		--with-ssl=$(STAGING_DIR) \
+		--with-ssl=$(STAGING_DIR)/usr/ \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
+	)
 	touch $(STUNNEL_DIR)/.configured
 
 $(STUNNEL_DIR)/src/stunnel: $(STUNNEL_DIR)/.configured
@@ -55,20 +55,20 @@ $(STUNNEL_DIR)/src/stunnel: $(STUNNEL_DIR)/.configured
 
 $(TARGET_DIR)/usr/bin/stunnel: $(STUNNEL_DIR)/src/stunnel
 	install -c $(STUNNEL_DIR)/src/stunnel $(TARGET_DIR)/usr/bin/stunnel
-	$(STRIP) $(TARGET_DIR)/usr/bin/stunnel > /dev/null 2>&1
+	$(STRIPCMD) $(TARGET_DIR)/usr/bin/stunnel > /dev/null 2>&1
 ifeq ($(strip $(BR2_CROSS_TOOLCHAIN_TARGET_UTILS)),y)
 	mkdir -p $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/target_utils
 	install -c $(TARGET_DIR)/usr/bin/stunnel \
 		$(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/target_utils/stunnel
 endif
 
-stunnel: uclibc $(TARGET_DIR)/usr/bin/stunnel 
+stunnel: uclibc $(TARGET_DIR)/usr/bin/stunnel
 
-stunnel-clean: 
+stunnel-clean:
 	$(MAKE) -C $(STUNNEL_DIR) clean
 
-stunnel-dirclean: 
-	rm -rf $(STUNNEL_DIR) 
+stunnel-dirclean:
+	rm -rf $(STUNNEL_DIR)
 
 
 #############################################################

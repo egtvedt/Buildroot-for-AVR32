@@ -40,7 +40,7 @@ $(PCMCIA_DIR)/.patched: $(PCMCIA_DIR)/.unpacked
 	touch $(PCMCIA_DIR)/.patched
 
 $(PCMCIA_DIR)/.configured: $(PCMCIA_DIR)/.patched
-	( cd $(PCMCIA_DIR) ; ./Configure --kernel=$(LINUX_SOURCE_DIR) --noprompt \
+	( cd $(PCMCIA_DIR); ./Configure --kernel=$(LINUX26_DIR) --noprompt \
 		--rcdir=/etc --arch=$(ARCH) --trust --srctree --nocardbus \
 		--sysv --kcc=$(KERNEL_CROSS)gcc --ucc=$(TARGET_CC) --ld=$(TARGET_CROSS)ld \
 		--target=$(TARGET_DIR))
@@ -51,26 +51,26 @@ $(PCMCIA_DIR)/.configured: $(PCMCIA_DIR)/.patched
 
 $(PCMCIA_DIR)/cardmgr/cardmgr: $(PCMCIA_DIR)/.configured
 	$(MAKE) -C $(PCMCIA_DIR) -i all
-	-A=`find $(PCMCIA_DIR) -type f -perm +111` ; \
+	-A=`find $(PCMCIA_DIR) -type f -perm +111`; \
 	for fo in $$A; do \
 		file $$fo | grep "ELF" | grep "executable" > /dev/null 2>&1; \
-		if [ $$? = 0 ] ; then \
-			$(STRIP) $$fo; \
+		if [ $$? = 0 ]; then \
+			$(STRIPCMD) $$fo; \
 		fi; \
 	done
 	touch -c $(PCMCIA_DIR)/cardmgr/cardmgr
 
 $(TARGET_DIR)/sbin/cardmgr: $(PCMCIA_DIR)/cardmgr/cardmgr
-	rm -rf $(TARGET_DIR)/etc/pcmcia;
+	rm -rf $(TARGET_DIR)/etc/pcmcia
 	$(MAKE) -i -C $(PCMCIA_DIR) install
-	rm -rf $(TARGET_DIR)/usr/man;
-	rm -rf $(TARGET_DIR)/usr/share/man;
-	rm -rf $(TARGET_DIR)/usr/X11R6/man;
-	rm -rf $(TARGET_DIR)/etc/rc.d;
-	rm -rf $(TARGET_DIR)/etc/rc?.d;
-	rm -f $(TARGET_DIR)/etc/init.d/pcmcia*;
+	rm -rf $(TARGET_DIR)/usr/man
+	rm -rf $(TARGET_DIR)/usr/share/man
+	rm -rf $(TARGET_DIR)/usr/X11R6/man
+	rm -rf $(TARGET_DIR)/etc/rc.d
+	rm -rf $(TARGET_DIR)/etc/rc?.d
+	rm -f $(TARGET_DIR)/etc/init.d/pcmcia*
 	rm -f $(TARGET_DIR)/sbin/dump_cis $(TARGET_DIR)/sbin/pack_cis
-	rm -f $(TARGET_DIR)/usr/share/pnp.ids $(TARGET_DIR)/sbin/lspnp $(TARGET_DIR)/sbin/setpnp;
+	rm -f $(TARGET_DIR)/usr/share/pnp.ids $(TARGET_DIR)/sbin/lspnp $(TARGET_DIR)/sbin/setpnp
 	rm -f $(TARGET_DIR)/sbin/pcinitrd
 	rm -f $(TARGET_DIR)/sbin/probe
 	rm -f $(TARGET_DIR)/sbin/ide_info
@@ -88,11 +88,11 @@ $(TARGET_DIR)/sbin/cardmgr: $(PCMCIA_DIR)/cardmgr/cardmgr
 
 # use busybox depmod.pl so we need the sources unpacked
 $(PCMCIA_DIR)/.modules.dep: $(BUSYBOX_DIR)/.configured $(TARGET_DIR)/lib/modules
-	[ -d $(TARGET_DIR)/lib/modules/$(LINUX_VERSION) ] && \
+	[ -d $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION) ] && \
 	$(BUSYBOX_DIR)/examples/depmod.pl \
-		-b $(TARGET_DIR)/lib/modules/$(LINUX_VERSION)/ \
-		-F $(LINUX_DIR)/System.map \
-		> $(TARGET_DIR)/lib/modules/$(LINUX_VERSION)/modules.dep
+		-b $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/ \
+		-F $(LINUX26_DIR)/System.map \
+		> $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/modules.dep
 	touch $(PCMCIA_DIR)/.modules.dep
 
 pcmcia: uclibc linux26 $(TARGET_DIR)/sbin/cardmgr $(PCMCIA_DIR)/.modules.dep

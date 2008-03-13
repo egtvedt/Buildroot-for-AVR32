@@ -26,24 +26,25 @@ $(NETKITBASE_DIR)/.unpacked: $(DL_DIR)/$(NETKITBASE_SOURCE)
 	touch $(NETKITBASE_DIR)/.unpacked
 
 $(NETKITBASE_DIR)/.configured: $(NETKITBASE_DIR)/.unpacked
-	(cd $(NETKITBASE_DIR); PATH=$(TARGET_PATH) CC=$(TARGET_CC) \
-		./configure --installroot=$(TARGET_DIR) --with-c-compiler=$(TARGET_CC) \
+	(cd $(NETKITBASE_DIR); rm -f config.cache; \
+	 PATH=$(TARGET_PATH) CC=$(TARGET_CC) \
+	./configure --installroot=$(TARGET_DIR) --with-c-compiler=$(TARGET_CC) \
 	)
 	touch $(NETKITBASE_DIR)/.configured
 
 $(NETKITBASE_DIR)/$(NETKITBASE_BINARY): $(NETKITBASE_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(NETKITBASE_DIR)
-	$(STRIP) $(NETKITBASE_DIR)/$(NETKITBASE_BINARY)
+	$(STRIPCMD) $(NETKITBASE_DIR)/$(NETKITBASE_BINARY)
 
 $(TARGET_DIR)/$(NETKITBASE_TARGET_BINARY): $(NETKITBASE_DIR)/$(NETKITBASE_BINARY)
 	# Only install a few selected items...
 	mkdir -p $(TARGET_DIR)/usr/sbin
 	cp $(NETKITBASE_DIR)/$(NETKITBASE_BINARY) $(TARGET_DIR)/$(NETKITBASE_TARGET_BINARY)
-	@if [ ! -f $(TARGET_DIR)/etc/inetd.conf ] ; then \
+	@if [ ! -f $(TARGET_DIR)/etc/inetd.conf ]; then \
 		mkdir -p $(TARGET_DIR)/etc; \
 		cp $(NETKITBASE_DIR)/etc.sample/inetd.conf $(TARGET_DIR)/etc/; \
 		$(SED) "s/^\([a-z]\)/#\1/;" $(TARGET_DIR)/etc/inetd.conf; \
-	fi;
+	fi
 	touch -c $(TARGET_DIR)/$(NETKITBASE_TARGET_BINARY)
 
 netkitbase: uclibc $(TARGET_DIR)/$(NETKITBASE_TARGET_BINARY)

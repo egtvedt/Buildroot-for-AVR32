@@ -26,7 +26,7 @@
 # TARGETS
 # http://microcom.port5.com/m102.tar.gz
 MICROCOM_VERSION:=1.02
-MICROCOM_SITE:=http://microcom.port5.com/
+MICROCOM_SITE:=http://buildroot.uclibc.org/downloads/buildroot-sources/
 MICROCOM_SOURCE:=m102.tar.gz
 MICROCOM_DIR:=$(BUILD_DIR)/microcom-$(MICROCOM_VERSION)
 
@@ -47,26 +47,26 @@ $(MICROCOM_DIR)/.configured: $(MICROCOM_DIR)/.unpacked
 
 $(MICROCOM_DIR)/microcom: $(MICROCOM_DIR)/.configured
 ifeq ($(BR2_PREFER_IMA),y)
-	(cd $(MICROCOM_DIR) ; \
+	(cd $(MICROCOM_DIR); \
 	 $(TARGET_CC) $(TARGET_CFLAGS) $(CFLAGS_COMBINE) \
 	 	$(CFLAGS_WHOLE_PROGRAM) -o $@ $(wildcard $(MICROCOM_DIR)/*.c); \
 	)
 else
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(MICROCOM_DIR)
 endif
-	$(STRIP) -s $@
+	$(STRIPCMD) $(STRIP_STRIP_ALL) $@
 
 $(TARGET_DIR)/usr/bin/microcom: $(MICROCOM_DIR)/microcom
 	install -c $(MICROCOM_DIR)/microcom $(TARGET_DIR)/usr/bin/microcom
 
-microcom-clean: 
+microcom-clean:
 	rm -f $(MICROCOM_DIR)/*.o $(MICROCOM_DIR)/microcom \
 		$(TARGET_DIR)/usr/bin/microcom
 
-microcom-dirclean: 
-	rm -rf $(MICROCOM_DIR) 
+microcom-dirclean:
+	rm -rf $(MICROCOM_DIR)
 
-microcom: uclibc $(TARGET_DIR)/usr/bin/microcom 
+microcom: uclibc $(TARGET_DIR)/usr/bin/microcom
 
 #############################################################
 #

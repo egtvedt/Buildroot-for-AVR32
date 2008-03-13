@@ -6,13 +6,13 @@
 MODULE_INIT_TOOLS_VERSION=3.2.2
 MODULE_INIT_TOOLS_SOURCE=module-init-tools-$(MODULE_INIT_TOOLS_VERSION).tar.bz2
 MODULE_INIT_TOOLS_CAT:=$(BZCAT)
-MODULE_INIT_TOOLS_SITE=http://ftp.kernel.org/pub/linux/utils/kernel/module-init-tools/
+MODULE_INIT_TOOLS_SITE=$(BR2_KERNEL_MIRROR)/linux/utils/kernel/module-init-tools/
 MODULE_INIT_TOOLS_DIR=$(BUILD_DIR)/module-init-tools-$(MODULE_INIT_TOOLS_VERSION)
 MODULE_INIT_TOOLS_DIR2=$(TOOL_BUILD_DIR)/module-init-tools-$(MODULE_INIT_TOOLS_VERSION)
 MODULE_INIT_TOOLS_BINARY=depmod
 MODULE_INIT_TOOLS_TARGET_BINARY=$(TARGET_DIR)/sbin/$(MODULE_INIT_TOOLS_BINARY)
 
-STRIPPROG=$(STRIP)
+STRIPPROG=$(STRIPCMD)
 
 $(DL_DIR)/$(MODULE_INIT_TOOLS_SOURCE):
 	$(WGET) -P $(DL_DIR) $(MODULE_INIT_TOOLS_SITE)/$(MODULE_INIT_TOOLS_SOURCE)
@@ -24,7 +24,7 @@ $(MODULE_INIT_TOOLS_DIR)/.unpacked: $(DL_DIR)/$(MODULE_INIT_TOOLS_SOURCE)
 	touch $(MODULE_INIT_TOOLS_DIR)/.unpacked
 
 $(MODULE_INIT_TOOLS_DIR)/.configured: $(MODULE_INIT_TOOLS_DIR)/.unpacked
-	(cd $(MODULE_INIT_TOOLS_DIR); \
+	(cd $(MODULE_INIT_TOOLS_DIR); rm -f config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		INSTALL=$(MODULE_INIT_TOOLS_DIR)/install-sh \
@@ -35,8 +35,8 @@ $(MODULE_INIT_TOOLS_DIR)/.configured: $(MODULE_INIT_TOOLS_DIR)/.unpacked
 		--prefix=/ \
 		--sysconfdir=/etc \
 		--program-transform-name='' \
-	);
-	touch $(MODULE_INIT_TOOLS_DIR)/.configured;
+	)
+	touch $(MODULE_INIT_TOOLS_DIR)/.configured
 
 $(MODULE_INIT_TOOLS_DIR)/$(MODULE_INIT_TOOLS_BINARY): $(MODULE_INIT_TOOLS_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(MODULE_INIT_TOOLS_DIR)
@@ -61,8 +61,6 @@ endif
 	touch -c $(MODULE_INIT_TOOLS_TARGET_BINARY)
 
 module-init-tools: uclibc $(MODULE_INIT_TOOLS_TARGET_BINARY)
-
-module-init-tools-source: $(DL_DIR)/$(MODULE_INIT_TOOLS_SOURCE)
 
 module-init-tools-clean:
 	$(MAKE) prefix=$(TARGET_DIR)/usr -C $(MODULE_INIT_TOOLS_DIR) uninstall
@@ -89,8 +87,8 @@ $(MODULE_INIT_TOOLS_DIR2)/.configured: $(MODULE_INIT_TOOLS_DIR2)/.source
 		--build=$(GNU_HOST_NAME) \
 		--sysconfdir=/etc \
 		--program-transform-name='' \
-	);
-	touch $(MODULE_INIT_TOOLS_DIR2)/.configured;
+	)
+	touch $(MODULE_INIT_TOOLS_DIR2)/.configured
 
 $(MODULE_INIT_TOOLS_DIR2)/$(MODULE_INIT_TOOLS_BINARY): $(MODULE_INIT_TOOLS_DIR2)/.configured
 	$(MAKE) -C $(MODULE_INIT_TOOLS_DIR2)
@@ -110,6 +108,10 @@ cross-depmod26-clean:
 
 cross-depmod26-dirclean:
 	rm -rf $(MODULE_INIT_TOOLS_DIR2)
+
+ifeq ($(strip $(CONFIG_BR2_PACKAGE_LINUX)),y)
+HOST_SOURCE+=module-init-tools-source
+endif
 
 #############################################################
 #

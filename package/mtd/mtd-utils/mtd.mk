@@ -13,11 +13,12 @@ MTD_NAME:=mtd-utils-$(MTD_VERSION)
 
 #############################################################
 #
-# Build mkfs.jffs2 for use on the local host system if
+# Build mkfs.jffs2 and sumtool for use on the local host system if
 # needed by target/jffs2root.
 #
 #############################################################
 MKFS_JFFS2 := $(MTD_HOST_DIR)/mkfs.jffs2
+SUMTOOL := $(MTD_HOST_DIR)/sumtool
 
 $(DL_DIR)/$(MTD_SOURCE):
 	$(WGET) -P $(DL_DIR) $(MTD_SITE)/$(MTD_SOURCE)
@@ -38,7 +39,13 @@ $(MKFS_JFFS2): $(MTD_HOST_DIR)/.unpacked
 		BUILDDIR=$(MTD_HOST_DIR) \
 		-C $(MTD_HOST_DIR) mkfs.jffs2
 
-mtd-host: $(MKFS_JFFS2)
+$(SUMTOOL): $(MTD_HOST_DIR)/.unpacked
+	CC="$(HOSTCC)" CROSS= CFLAGS=-I$(LINUX_HEADERS_DIR)/include \
+		$(MAKE) LINUXDIR=$(LINUX_DIR) \
+		BUILDDIR=$(MTD_HOST_DIR) \
+		-C $(MTD_HOST_DIR) sumtool
+
+mtd-host: $(MKFS_JFFS2) $(SUMTOOL)
 
 mtd-host-source: $(DL_DIR)/$(MTD_SOURCE)
 
@@ -95,8 +102,8 @@ $(MTD_BUILD_TARGETS): $(MTD_DIR)/.unpacked
 MTD_TARGETS := $(addprefix $(TARGET_DIR)/usr/sbin/, $(MTD_TARGETS_y))
 
 $(MTD_TARGETS): $(TARGET_DIR)/usr/sbin/% : $(MTD_DIR)/%
-	cp -af $< $@
-	$(STRIP) --strip-unneeded $@
+	cp -f $< $@
+	$(STRIPCMD) $@
 
 mtd: zlib $(MTD_TARGETS)
 

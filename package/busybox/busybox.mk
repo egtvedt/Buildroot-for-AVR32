@@ -5,7 +5,7 @@
 #############################################################
 
 
-ifeq ($(strip $(BR2_PACKAGE_BUSYBOX_SNAPSHOT)),y)
+ifeq ($(BR2_PACKAGE_BUSYBOX_SNAPSHOT),y)
 # Be aware that this changes daily....
 BUSYBOX_DIR:=$(PROJECT_BUILD_DIR)/busybox
 BUSYBOX_SOURCE:=busybox-snapshot.tar.bz2
@@ -28,8 +28,6 @@ endif
 $(DL_DIR)/$(BUSYBOX_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(BUSYBOX_SITE)/$(BUSYBOX_SOURCE)
 
-busybox-source: $(DL_DIR)/$(BUSYBOX_SOURCE) $(BUSYBOX_CONFIG_FILE) dependencies
-
 $(BUSYBOX_DIR)/.unpacked: $(DL_DIR)/$(BUSYBOX_SOURCE)
 	$(BUSYBOX_UNZIP) $(DL_DIR)/$(BUSYBOX_SOURCE) | tar -C $(PROJECT_BUILD_DIR) $(TAR_OPTIONS) -
 ifeq ($(BR2_PACKAGE_SYSKLOGD),y)
@@ -37,7 +35,7 @@ ifeq ($(BR2_PACKAGE_SYSKLOGD),y)
 	$(SED) "/#include.*busybox\.h/a#define CONFIG_SYSLOGD" $(BUSYBOX_DIR)/init/init.c
 endif
 	# Allow busybox patches.
-ifeq ($(strip $(BR2_PACKAGE_BUSYBOX_SNAPSHOT)),y)
+ifeq ($(BR2_PACKAGE_BUSYBOX_SNAPSHOT),y)
 	toolchain/patch-kernel.sh $(BUSYBOX_DIR) package/busybox busybox.\*.patch
 else
 	toolchain/patch-kernel.sh $(BUSYBOX_DIR) package/busybox busybox-$(BUSYBOX_VERSION)-\*.patch
@@ -47,26 +45,26 @@ endif
 $(BUSYBOX_DIR)/.configured: $(BUSYBOX_DIR)/.unpacked $(BUSYBOX_CONFIG_FILE)
 	cp -f $(BUSYBOX_CONFIG_FILE) $(BUSYBOX_DIR)/.config
 	$(SED) s,^CONFIG_PREFIX=.*,CONFIG_PREFIX=\"$(TARGET_DIR)\", \
-		$(BUSYBOX_DIR)/.config ;
-ifeq ($(strip $(BR2_BUSYBOX_VERSION_1_0_1)),y)
+		$(BUSYBOX_DIR)/.config
+ifeq ($(BR2_BUSYBOX_VERSION_1_0_1),y)
 	$(SED) "s,^CROSS.*,CROSS=$(TARGET_CROSS)\n\PREFIX=$(TARGET_DIR),;" \
-		$(BUSYBOX_DIR)/Rules.mak ;
+		$(BUSYBOX_DIR)/Rules.mak
 endif
-ifeq ($(strip $(BR2_BUSYBOX_VERSION_1_1_3)),y)
+ifeq ($(BR2_BUSYBOX_VERSION_1_1_3),y)
 	$(SED) s,^PREFIX=.*,CONFIG_PREFIX=\"$(TARGET_DIR)\", \
-		$(BUSYBOX_DIR)/.config ;
+		$(BUSYBOX_DIR)/.config
 endif
-ifeq ($(strip $(BR2_BUSYBOX_VERSION_1_2_2_1)),y)
+ifeq ($(BR2_BUSYBOX_VERSION_1_2_2_1),y)
 	$(SED) s,^CROSS_COMPILER_PREFIX=.*,CROSS_COMPILER_PREFIX=\"$(TARGET_CROSS)\", \
-		$(BUSYBOX_DIR)/.config ;
+		$(BUSYBOX_DIR)/.config
 	$(SED) s,^PREFIX=.*,CROSS_COMPILER_PREFIX=\"$(TARGET_CROSS)\", \
-		$(BUSYBOX_DIR)/.config ;
+		$(BUSYBOX_DIR)/.config
 endif
-ifeq ($(strip $(BR2_PACKAGE_BUSYBOX_SNAPSHOT)),y)
+ifeq ($(BR2_PACKAGE_BUSYBOX_SNAPSHOT),y)
 	$(SED) s,^CROSS_COMPILER_PREFIX=.*,CROSS_COMPILER_PREFIX=\"$(TARGET_CROSS)\", \
-		$(BUSYBOX_DIR)/.config ;
+		$(BUSYBOX_DIR)/.config
 	$(SED) s,^PREFIX=.*,CROSS_COMPILER_PREFIX=\"$(TARGET_CROSS)\", \
-		$(BUSYBOX_DIR)/.config ;
+		$(BUSYBOX_DIR)/.config
 endif
 ifeq ($(BR2_LARGEFILE),y)
 	$(SED) "s/^.*CONFIG_LFS.*/CONFIG_LFS=y/;" $(BUSYBOX_DIR)/.config
@@ -108,7 +106,7 @@ ifeq ($(BR2_PREFER_IMA)$(BR2_PACKAGE_BUSYBOX_SNAPSHOT),yy)
 	rm -f $@
 	$(MAKE) CC=$(TARGET_CC) CROSS_COMPILE="$(TARGET_CROSS)" \
 		CROSS="$(TARGET_CROSS)" PREFIX="$(TARGET_DIR)" \
-		ARCH=$(KERNEL_ARCH) STRIP="$(STRIP)" \
+		ARCH=$(KERNEL_ARCH) STRIP="$(STRIPCMD)" \
 		EXTRA_CFLAGS="$(TARGET_CFLAGS)" -C $(BUSYBOX_DIR) \
 		-f scripts/Makefile.IMA
 endif
@@ -127,8 +125,16 @@ endif
 
 busybox: uclibc $(TARGET_DIR)/bin/busybox
 
+busybox-source: $(DL_DIR)/$(BUSYBOX_SOURCE)
+
+busybox-unpacked: $(BUSYBOX_DIR)/.unpacked
+
+busybox-config: $(BUSYBOX_DIR)/.configured
+
 busybox-menuconfig: host-sed $(PROJECT_BUILD_DIR) busybox-source $(BUSYBOX_DIR)/.configured
 	$(MAKE) __TARGET_ARCH=$(ARCH) -C $(BUSYBOX_DIR) menuconfig
+
+busybox-update:
 	cp -f $(BUSYBOX_DIR)/.config $(BUSYBOX_CONFIG_FILE)
 
 busybox-clean:
@@ -142,6 +148,6 @@ busybox-dirclean:
 # Toplevel Makefile options
 #
 #############################################################
-ifeq ($(strip $(BR2_PACKAGE_BUSYBOX)),y)
+ifeq ($(BR2_PACKAGE_BUSYBOX),y)
 TARGETS+=busybox
 endif

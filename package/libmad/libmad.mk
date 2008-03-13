@@ -16,10 +16,11 @@ $(DL_DIR)/$(LIBMAD_SOURCE):
 $(LIBMAD_DIR)/.unpacked: $(DL_DIR)/$(LIBMAD_SOURCE)
 	$(LIBMAD_CAT) $(DL_DIR)/$(LIBMAD_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(CONFIG_UPDATE) $(LIBMAD_DIR)
-	toolchain/patch-kernel.sh $(LIBMAD_DIR) package/libmad/ libmad-$(LIBMAD_VERSION)\*.patch\*
+	toolchain/patch-kernel.sh $(LIBMAD_DIR) package/libmad/ libmad-$(LIBMAD_VERSION)\*.patch
+	toolchain/patch-kernel.sh $(LIBMAD_DIR) package/libmad/ libmad-$(LIBMAD_VERSION)\*.patch.$(ARCH)
 	# Prevent automake from running.
 	(cd $(LIBMAD_DIR); touch -c config* aclocal.m4 Makefile*);
-	@touch $@
+	touch $@
 
 $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
 	(cd $(LIBMAD_DIR); rm -rf config.cache; \
@@ -34,12 +35,12 @@ $(LIBMAD_DIR)/.configured: $(LIBMAD_DIR)/.unpacked
 		--disable-debugging \
 		--enable-speed \
 		$(DISABLE_NLS) \
-	);
-	@touch $@
+	)
+	touch $@
 
 $(LIBMAD_DIR)/libmad.la: $(LIBMAD_DIR)/.configured
 	rm -f $@
-	$(MAKE) -C $(LIBMAD_DIR)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(LIBMAD_DIR)
 
 $(STAGING_DIR)/usr/lib/libmad.so.0: $(LIBMAD_DIR)/libmad.la
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(LIBMAD_DIR) install
@@ -47,7 +48,7 @@ $(STAGING_DIR)/usr/lib/libmad.so.0: $(LIBMAD_DIR)/libmad.la
 
 $(TARGET_DIR)/usr/lib/libmad.so.0: $(STAGING_DIR)/usr/lib/libmad.so.0
 	cp -dpf $(STAGING_DIR)/usr/lib/libmad.so.* $(TARGET_DIR)/usr/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libmad.so.*
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libmad.so.*
 
 $(TARGET_DIR)/usr/lib/libmad.a: $(STAGING_DIR)/usr/lib/libmad.so.0
 	mkdir -p $(TARGET_DIR)/usr/include
@@ -56,16 +57,16 @@ $(TARGET_DIR)/usr/lib/libmad.a: $(STAGING_DIR)/usr/lib/libmad.so.0
 	cp -dpf $(STAGING_DIR)/usr/lib/libmad.so $(TARGET_DIR)/usr/lib/
 	cp -dpf $(STAGING_DIR)/usr/lib/libmad.a $(TARGET_DIR)/usr/lib/
 
-libmad:	uclibc $(TARGET_DIR)/usr/lib/libmad.so.0
+libmad: uclibc $(TARGET_DIR)/usr/lib/libmad.so.0
 
 libmad-headers: $(TARGET_DIR)/usr/lib/libmad.a
 
 libmad-source: $(DL_DIR)/$(LIBMAD_SOURCE)
 
 libmad-clean:
-	@if [ -d $(LIBMAD_DIR)/Makefile ] ; then \
-		$(MAKE) -C $(LIBMAD_DIR) clean ; \
-	fi;
+	@if [ -d $(LIBMAD_DIR)/Makefile ]; then \
+		$(MAKE) -C $(LIBMAD_DIR) clean; \
+	fi
 	rm -f $(STAGING_DIR)/usr/lib/libmad.*
 	rm -f $(STAGING_DIR)/usr/include/mad.h
 	rm -f $(TARGET_DIR)/usr/lib/libmad.*

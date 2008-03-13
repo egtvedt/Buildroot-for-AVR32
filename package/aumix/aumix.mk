@@ -28,7 +28,7 @@ $(AUMIX_DIR)/.configured: $(AUMIX_DIR)/.unpacked
 		--prefix=/usr \
 		--sysconfdir=/etc \
 		--libdir=$(STAGING_DIR)/lib \
-		--includedir=$(STAGING_DIR)/include \
+		--includedir=$(STAGING_DIR)/usr/include \
 		--without-gtk \
 		--without-gtk1 \
 		--without-alsa \
@@ -43,8 +43,7 @@ $(AUMIX_DIR)/src/aumix: $(AUMIX_DIR)/.configured
 
 $(TARGET_DIR)/usr/bin/aumix: $(AUMIX_DIR)/src/aumix
 	$(MAKE) -C $(AUMIX_DIR) DESTDIR=$(TARGET_DIR) install
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/aumix
-	touch -c $@
+	touch $@
 
 aumix: uclibc ncurses $(TARGET_DIR)/usr/bin/aumix
 

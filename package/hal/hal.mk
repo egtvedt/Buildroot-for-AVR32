@@ -11,9 +11,9 @@ HAL_CAT:=$(ZCAT)
 HAL_BINARY:=hald/hald
 HAL_TARGET_BINARY:=usr/sbin/hald
 
-GLIB_CFLAGS:=-I$(STAGING_DIR)/include/glib-2.0 \
+GLIB_CFLAGS:=-I$(STAGING_DIR)/usr/include/glib-2.0 \
 	     -I$(STAGING_DIR)/lib/glib/include
-GLIB_LIBS:=$(STAGING_DIR)/lib/libglib-2.0.so	\
+GLIB_LIBS:=$(STAGING_DIR)/lib/libglib-2.0.so \
 	   $(STAGING_DIR)/lib/libgmodule-2.0.so \
 	   $(STAGING_DIR)/lib/libgobject-2.0.so \
 	   $(STAGING_DIR)/lib/libgthread-2.0.so
@@ -56,8 +56,8 @@ $(HAL_DIR)/.configured: $(HAL_DIR)/.unpacked /usr/bin/pkg-config
 		--disable-static \
 		--disable-acpi-acpid \
 		--disable-acpi-proc \
-	);
-	touch  $(HAL_DIR)/.configured
+	)
+	touch $(HAL_DIR)/.configured
 
 $(HAL_DIR)/hald/hald: $(HAL_DIR)/.configured
 	$(MAKE) STAGING_DIR="$(STAGING_DIR)" DESTDIR="$(TARGET_DIR)" DBUS_GLIB_LIBS="$(DBUS_GLIB_LIBS)" -C $(HAL_DIR)
@@ -69,23 +69,25 @@ $(TARGET_DIR)/$(HAL_TARGET_BINARY): $(HAL_DIR)/hald/hald
 	rm -rf $(TARGET_DIR)/usr/share/gtk-doc
 	rm -rf $(TARGET_DIR)/usr/share/hal/device-manager
 	rm -rf $(TARGET_DIR)/usr/lib/pkgconfig
-	rm -rf $(TARGET_DIR)/usr/include
+	# remove _everything_ in $(TARGET_DIR)/usr/include?
+	# rm -rf $(TARGET_DIR)/usr/include
 	rm -rf $(TARGET_DIR)/usr/lib/libhal*.so
 	rm -rf $(TARGET_DIR)/usr/lib/libhal*.la
 	rm -rf $(TARGET_DIR)/usr/lib/hal
 	rm -rf $(TARGET_DIR)/etc/PolicyKit
 	$(INSTALL) -m 0755 -D package/hal/S98haldaemon $(TARGET_DIR)/etc/init.d
 	rm -rf $(TARGET_DIR)/etc/rc.d
-	for file in hald-addon-acpi* hald-addon-cpufreq		\
-		    hald-addon-keyboard hald-addon-pmu		\
-		    hald-probe-pc-floppy hald-probe-printer	\
-		    hald-probe-serial hald-probe-smbios		\
-		    hal-storage-eject hal-storage-closetray	\
-		    hal-system-power-pmu hald-probe-input	\
-		    hald-probe-hiddev hald-addon-hid-ups; do	\
-		rm -f $(TARGET_DIR)/usr/libexec/$$file;		\
+	for file in hald-addon-acpi* hald-addon-cpufreq \
+		hald-addon-keyboard hald-addon-pmu \
+		hald-probe-pc-floppy hald-probe-printer \
+		hald-probe-serial hald-probe-smbios \
+		hal-storage-eject hal-storage-closetray \
+		hal-system-power-pmu hald-probe-input \
+		hald-probe-hiddev hald-addon-hid-ups; \
+	do \
+		rm -f $(TARGET_DIR)/usr/libexec/$$file; \
 	done
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libhal*
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libhal*
 
 hal: uclibc dbus-glib hwdata udev-volume_id $(TARGET_DIR)/$(HAL_TARGET_BINARY)
 

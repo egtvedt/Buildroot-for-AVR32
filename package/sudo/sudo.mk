@@ -18,7 +18,8 @@ sudo-source: $(DL_DIR)/$(SUDO_SOURCE) $(SUDO_CONFIG_FILE)
 $(SUDO_DIR)/.unpacked: $(DL_DIR)/$(SUDO_SOURCE)
 	$(SUDO_UNZIP) $(DL_DIR)/$(SUDO_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(SUDO_DIR) package/sudo sudo\*.patch
-	touch $(SUDO_DIR)/.unpacked
+	$(CONFIG_UPDATE) $(SUDO_DIR)
+	touch $@
 
 $(SUDO_DIR)/.configured: $(SUDO_DIR)/.unpacked $(SUDO_CONFIG_FILE)
 	(cd $(SUDO_DIR); rm -rf config.cache; \
@@ -47,19 +48,19 @@ $(SUDO_DIR)/.configured: $(SUDO_DIR)/.unpacked $(SUDO_CONFIG_FILE)
 		--without-interfaces \
 		--disable-authentication \
 		$(SUDO_EXTRA_CONFIG) \
-	);
+	)
 
-	touch $(SUDO_DIR)/.configured
+	touch $@
 
 $(SUDO_DIR)/sudo: $(SUDO_DIR)/.configured
 	$(MAKE) -C $(SUDO_DIR)
-	touch -c $(SUDO_DIR)/sudo
+	touch -c $@
 
 $(TARGET_DIR)/usr/bin/sudo: $(SUDO_DIR)/sudo
 	$(INSTALL) -m 4555 -D $(SUDO_DIR)/sudo $(TARGET_DIR)/usr/bin/sudo
 	$(INSTALL) -m 0555 -D $(SUDO_DIR)/visudo $(TARGET_DIR)/usr/sbin/visudo
 	$(INSTALL) -m 0440 -D $(SUDO_DIR)/sudoers $(TARGET_DIR)/etc/sudoers
-	$(STRIP) $(TARGET_DIR)/usr/bin/sudo $(TARGET_DIR)/usr/sbin/visudo
+	$(STRIPCMD) $(TARGET_DIR)/usr/bin/sudo $(TARGET_DIR)/usr/sbin/visudo
 	touch -c $(TARGET_DIR)/usr/bin/sudo
 
 sudo: uclibc $(TARGET_DIR)/usr/bin/sudo

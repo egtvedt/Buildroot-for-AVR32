@@ -6,7 +6,7 @@
 COREUTILS_VERSION:=6.9
 COREUTILS_SOURCE:=coreutils-$(COREUTILS_VERSION).tar.bz2
 #COREUTILS_SITE:=ftp://alpha.gnu.org/gnu/coreutils/
-COREUTILS_SITE:=http://ftp.gnu.org/pub/gnu/coreutils
+COREUTILS_SITE:=$(BR2_GNU_MIRROR)/gnu/coreutils
 COREUTILS_CAT:=$(BZCAT)
 COREUTILS_DIR:=$(BUILD_DIR)/coreutils-$(COREUTILS_VERSION)
 COREUTILS_BINARY:=src/vdir
@@ -22,6 +22,7 @@ coreutils-source: $(DL_DIR)/$(COREUTILS_SOURCE)
 $(COREUTILS_DIR)/.unpacked: $(DL_DIR)/$(COREUTILS_SOURCE)
 	$(COREUTILS_CAT) $(DL_DIR)/$(COREUTILS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(COREUTILS_DIR) package/coreutils/ coreutils\*.patch
+	$(CONFIG_UPDATE) $(COREUTILS_DIR)/build-aux
 	touch $@
 
 $(COREUTILS_DIR)/.configured: $(COREUTILS_DIR)/.unpacked
@@ -95,13 +96,13 @@ $(COREUTILS_DIR)/.configured: $(COREUTILS_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 		--disable-rpath \
 		--disable-dependency-tracking \
-	);
+	)
 	touch $@
 
 $(COREUTILS_DIR)/$(COREUTILS_BINARY): $(COREUTILS_DIR)/.configured
@@ -118,18 +119,26 @@ $(TARGET_DIR)/$(COREUTILS_TARGET_BINARY): $(COREUTILS_DIR)/$(COREUTILS_BINARY)
 	ln -fs test $(TARGET_DIR)/usr/bin/[
 	# gnu thinks chroot is in bin, debian thinks it's in sbin
 	mv $(TARGET_DIR)/usr/bin/chroot $(TARGET_DIR)/usr/sbin/chroot
-	$(STRIP) $(TARGET_DIR)/usr/sbin/chroot > /dev/null 2>&1
-	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
-		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
+	$(STRIPCMD) $(TARGET_DIR)/usr/sbin/chroot > /dev/null 2>&1
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/info
+endif
+ifneq ($(BR2_HAVE_MANPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/man
+endif
+	rm -rf $(TARGET_DIR)/share/locale
+	rm -rf $(TARGET_DIR)/usr/share/doc
 
-#If both coreutils and busybox are selected, make certain coreutils
-#wins the fight over who gets to have their utils actually installed
+# If both coreutils and busybox are selected, make certain coreutils
+# wins the fight over who gets to have their utils actually installed.
 ifeq ($(BR2_PACKAGE_BUSYBOX),y)
 coreutils: uclibc busybox $(TARGET_DIR)/$(COREUTILS_TARGET_BINARY)
 else
 coreutils: uclibc $(TARGET_DIR)/$(COREUTILS_TARGET_BINARY)
 endif
 
+# If both coreutils and busybox are selected, the corresponding applets
+# may need to be reinstated by the clean targets.
 coreutils-clean:
 	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(COREUTILS_DIR) uninstall
 	-$(MAKE) -C $(COREUTILS_DIR) clean

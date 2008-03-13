@@ -20,7 +20,7 @@ $(LIBCGICC_DIR)/.unpacked: $(DL_DIR)/$(LIBCGICC_SOURCE)
 	touch $(LIBCGICC_DIR)/.unpacked
 
 $(LIBCGICC_DIR)/.configured: $(LIBCGICC_DIR)/.unpacked
-	(cd $(LIBCGICC_DIR); \
+	(cd $(LIBCGICC_DIR); rm -f config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
@@ -39,7 +39,7 @@ $(LIBCGICC_DIR)/.configured: $(LIBCGICC_DIR)/.unpacked
 		--includedir=/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-	);
+	)
 	touch $(LIBCGICC_DIR)/.configured
 
 $(LIBCGICC_DIR)/.compiled: $(LIBCGICC_DIR)/.configured
@@ -60,7 +60,7 @@ libcgicc-clean:
 
 libcgicc-dirclean:
 	rm -rf $(LIBCGICC_DIR)
-	
+
 #############################################################
 #
 # Toplevel Makefile options

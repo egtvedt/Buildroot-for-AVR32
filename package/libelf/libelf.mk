@@ -3,7 +3,7 @@
 # libelf
 #
 #############################################################
-LIBELF_VERSION=0.8.9
+LIBELF_VERSION=0.8.10
 LIBELF_SOURCE=libelf-$(LIBELF_VERSION).tar.gz
 LIBELF_SITE=http://www.mr511.de/software/
 LIBELF_DIR=$(BUILD_DIR)/libelf-$(LIBELF_VERSION)
@@ -11,6 +11,10 @@ LIBELF_DIR=$(BUILD_DIR)/libelf-$(LIBELF_VERSION)
 LIBELF_ARCH:=$(ARCH)
 ifeq ("$(strip $(ARCH))","armeb")
 LIBELF_ARCH:=arm
+endif
+
+ifeq ($(BR2_LARGEFILE),y)
+LIBELF_CONFIG:=--enable-elf64
 endif
 
 $(DL_DIR)/$(LIBELF_SOURCE):
@@ -23,34 +27,41 @@ $(LIBELF_DIR)/.unpacked: $(DL_DIR)/$(LIBELF_SOURCE)
 	touch $@
 
 $(LIBELF_DIR)/.configured: $(LIBELF_DIR)/.unpacked
-	(cd $(LIBELF_DIR); \
+	(cd $(LIBELF_DIR); rm -f config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
+		CFLAGS="$(TARGET_CFLAGS)" \
 		libelf_cv_working_memmove=yes \
 		mr_cv_target_elf=yes \
+		libelf_64bit=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--sysconfdir=/etc \
-		$(DISABLE_NLS) \
 		--enable-shared \
-	);
+		--disable-debug \
+		--disable-sanity-checks \
+		$(LIBELF_CONFIG) \
+		$(DISABLE_NLS) \
+	)
 	touch $@
 
 $(LIBELF_DIR)/lib/libelf.so.$(LIBELF_VERSION): $(LIBELF_DIR)/.configured
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(LIBELF_DIR)
 
 $(STAGING_DIR)/usr/lib/libelf.a $(STAGING_DIR)/usr/lib/libelf.so.$(LIBELF_VERSION): $(LIBELF_DIR)/lib/libelf.so.$(LIBELF_VERSION)
-	$(MAKE1) $(TARGET_CONFIGURE_OPTS) \
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) \
 		instroot=$(STAGING_DIR) -C $(LIBELF_DIR) install
 
 ifeq ($(BR2_PACKAGE_LIBELF_HEADERS),y)
 $(TARGET_DIR)/usr/lib/libelf.so.$(LIBELF_VERSION): $(STAGING_DIR)/usr/lib/libelf.a
-	$(INSTALL) $(STAGING_DIR)/usr/lib/libelf* $(@D)
+	mkdir -p $(@D)
+	cp -dpf $(STAGING_DIR)/usr/lib/libelf* $(@D)
+	mkdir -p $(TARGET_DIR)/usr/include
 	cp -dpR $(STAGING_DIR)/usr/include/{gelf.h,libelf*} $(TARGET_DIR)/usr/include/
-	$(STRIP) $@
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
 
 libelf: uclibc $(TARGET_DIR)/usr/lib/libelf.so.$(LIBELF_VERSION)
 else

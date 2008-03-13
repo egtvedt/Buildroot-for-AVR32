@@ -6,519 +6,12 @@ config BR2_HAVE_DOT_CONFIG
 	bool
 	default y
 
-source "project/Config.in"
-
-choice
-	prompt "Target Architecture"
-	default BR2_i386
-	help
-	  Select the target architecture family to build for.
-
-config BR2_alpha
-	bool "alpha"
-config BR2_arm
-	bool "arm"
-config BR2_armeb
-	bool "armeb"
-config BR2_avr32
-	bool "avr32"
-config BR2_cris
-	bool "cris"
-config BR2_ia64
-	bool "ia64"
-config BR2_i386
-	bool "i386"
-config BR2_m68k
-	bool "m68k"
-config BR2_mips
-	bool "mips"
-config BR2_mipsel
-	bool "mipsel"
-config BR2_nios2
-	bool "nios2"
-config BR2_powerpc
-	bool "powerpc"
-config BR2_s390
-	bool "s390"
-config BR2_sh
-	bool "superh"
-config BR2_sh64
-	bool "superh64"
-config BR2_sparc
-	bool "sparc"
-config BR2_x86_64
-	bool "x86_64"
-endchoice
-
-#
-# Keep the variants separate, there's no need to clutter everything else.
-# sh is fairly "special" in this regard, as virtually everyone else has
-# things kept down to a _sensible_ number of target variants. No such
-# luck for sh..
-#
-choice
-	prompt "Target Architecture Variant"
-	depends BR2_arm || BR2_armeb
-	default BR2_generic_arm
-	help
-	  Specific CPU variant to use
-
-config BR2_generic_arm
-	bool "generic_arm"
-config BR2_arm610
-	bool "arm610"
-config BR2_arm710
-	bool "arm710"
-config BR2_arm720t
-	bool "arm720t"
-config BR2_arm920t
-	bool "arm920t"
-config BR2_arm922t
-	bool "arm922t"
-config BR2_arm926t
-	bool "arm926t"
-config BR2_arm1136jf_s
-	bool "arm1136jf_s"
-config BR2_arm1176jz_s
-	bool "arm1176jz-s"
-config BR2_arm1176jzf_s
-	bool "arm1176jzf-s"
-config BR2_sa110
-	bool "sa110"
-config BR2_sa1100
-	bool "sa1100"
-config BR2_xscale
-	bool "xscale"
-config BR2_iwmmxt
-	bool "iwmmxt"
-endchoice
-
-config BR2_ARM_TYPE
+config BR2_VERSION
 	string
-	default ARM610		if BR2_arm610
-	default ARM710		if BR2_arm710
-	default ARM720T		if BR2_arm720t
-	default ARM920T		if BR2_arm920t
-	default ARM922T		if BR2_arm922t
-	default ARM926T		if BR2_arm926t
-	default ARM1136JF_S 	if BR2_arm1136jf_s
-	default ARM1176JZ_S	if BR2_arm1176jz_s
-	default ARM1176JZF_S	if BR2_arm1176jzf_s
-	default ARM_SA110	if BR2_sa110
-	default ARM_SA1100	if BR2_sa1100
-	default ARM_XSCALE	if BR2_xscale
-	default ARM_IWMMXT	if BR2_iwmmxt
-	default GENERIC_ARM	if BR2_generic_arm
+	default "0.10.0-svn"
 
-choice
-	prompt "Target ABI"
-	depends BR2_arm || BR2_armeb
-	default BR2_ARM_OABI
-	help
-	  Application Binary Interface to use
-
-config BR2_ARM_OABI
-	bool "OABI"
-config BR2_ARM_EABI
-	bool "EABI"
-endchoice
-
-choice
-	prompt "Target Architecture Variant"
-	depends BR2_avr32
-config BR2_at32ap7000
-	bool "AT32AP7000"
-config BR2_at32ap7001
-	bool "AT32AP7001"
-config BR2_at32ap7002
-	bool "AT32AP7002"
-endchoice
-
-
-choice
-	prompt "Target Architecture Variant"
-	depends BR2_sh
-	default BR2_sh4
-	help
-	  Specific CPU variant to use
-
-config BR2_sh2a_nofpueb
-	bool "sh2a_nofpueb"
-config BR2_sh2eb
-	bool "sh2eb"
-config BR2_sh3
-	bool "sh3"
-config BR2_sh3eb
-	bool "sh3eb"
-config BR2_sh4
-	bool "sh4"
-config BR2_sh4eb
-	bool "sh4eb"
-endchoice
-
-#
-# gcc builds libstdc++ differently depending on the
-# host tuplet given to it, so let people choose
-#
-choice
-	prompt "Target Architecture Variant"
-	depends BR2_i386
-	default BR2_x86_i386
-	help
-	  Specific CPU variant to use
-
-config BR2_x86_i386
-	bool "i386"
-config BR2_x86_i486
-	bool "i486"
-config BR2_x86_i586
-	bool "i586"
-config BR2_x86_i686
-	bool "i686"
-config BR2_x86_pentiumpro
-	bool "pentium pro"
-config BR2_x86_pentium_mmx
-	bool "pentium MMX"
-config BR2_x86_pentium_m
-	bool "pentium mobile"
-config BR2_x86_pentium2
-	bool "pentium2"
-config BR2_x86_pentium3
-	bool "pentium3"
-config BR2_x86_pentium4
-	bool "pentium4"
-config BR2_x86_prescott
-	bool "prescott"
-config BR2_x86_nocona
-	bool "nocona"
-config BR2_x86_core2
-	bool "core2"
-config BR2_x86_k6
-	bool "k6"
-config BR2_x86_k6_2
-	bool "k6-2"
-config BR2_x86_athlon
-	bool "athlon"
-config BR2_x86_athlon_4
-	bool "athlon-4"
-config BR2_x86_opteron
-	bool "opteron"
-config BR2_x86_opteron_sse3
-	bool "opteron w/ SSE3"
-config BR2_x86_barcelona
-	bool "barcelona"
-config BR2_x86_geode
-	bool "geode"
-config BR2_x86_c3
-	bool "cyrix 3 (MMX + 3dNOW!)"
-config BR2_x86_winchip_c6
-	bool "IDT winchip C6 (i486 + slow MMX)"
-config BR2_x86_winchip2
-	bool "IDT winchip2 (i486 +MMX +SSE)"
-endchoice
-
-choice
-	prompt "Target Architecture Variant"
-	depends BR2_x86_64
-	default BR2_x86_64_core2
-	help
-	  Specific CPU variant to use
-
-config BR2_x86_64_barcelona
-	bool "barcelona"
-config BR2_x86_64_opteron_sse3
-	bool "opteron w/ sse3"
-config BR2_x86_64_opteron
-	bool "opteron"
-config BR2_x86_64_nocona
-	bool "nocona"
-config BR2_x86_64_core2
-	bool "core2"
-endchoice
-
-choice
-	prompt "Target Architecture Variant"
-	depends BR2_alpha
-	default BR2_alpha_21064
-	help
-	  Specific CPU variant to use
-
-config BR2_alpha_21064
-	bool "21064"
-config BR2_alpha_21164
-	bool "21164"
-config BR2_alpha_21164a
-	bool "21164a"
-config BR2_alpha_21164pc
-	bool "21164pc"
-config BR2_alpha_21264
-	bool "21264"
-config BR2_alpha_21264a
-	bool "21264a"
-endchoice
-
-choice
-	prompt "Target Architecture Variant"
-	depends BR2_s390
-	default BR2_s390_g5
-	help
-	  Specific CPU variant to use
-
-config BR2_s390_g5
-	bool "g5"
-config BR2_s390_g6
-	bool "g6"
-config BR2_s390_z900
-	bool "z900"
-config BR2_s390_z990
-	bool "z990"
-config BR2_s390_z9_109
-	bool "z9_109"
-endchoice
-
-choice
-	prompt "Target Architecture Variant"
-	depends BR2_ia64
-	default BR2_ia64_itanium2
-	help
-	  Specific CPU variant to use
-
-config BR2_ia64_itanium1
-	bool "itanium 1"
-config BR2_ia64_itanium2
-	bool "itanium 2"
-endchoice
-
-
-
-config BR2_ARCH
-	string
-	default "alpha"		if BR2_alpha
-	default "arm"		if BR2_arm
-	default "armeb"		if BR2_armeb
-	default "avr32"		if BR2_avr32
-	default "cris"		if BR2_cris
-	default "i386"		if BR2_x86_i386
-	default "i486"		if BR2_x86_i486
-	default "i586"		if BR2_x86_i586
-	default "i686"		if BR2_x86_i686
-	default "i686"		if BR2_x86_pentium4
-	default "i686"		if BR2_x86_nocona
-	default "i686"		if BR2_x86_core2
-	default "ia64"		if BR2_ia64
-	default "m68k"		if BR2_m68k
-	default "mips"		if BR2_mips
-	default "mipsel"	if BR2_mipsel
-	default "nios2"		if BR2_nios2
-	default "powerpc"	if BR2_powerpc
-	default "s390"		if BR2_s390
-	default "s390"		if BR2_s390x
-	default "sh2a_nofpueb"	if BR2_sh2a_nofpueb
-	default "sh2eb"		if BR2_sh2eb
-	default "sh3"		if BR2_sh3
-	default "sh3eb"		if BR2_sh3eb
-	default "sh4"		if BR2_sh4
-	default "sh4eb"		if BR2_sh4eb
-	default "sh64"		if BR2_sh64
-	default "sparc"		if BR2_sparc
-	default "x86_64"	if BR2_x86_64
-	default "x86_64"	if BR2_x86_64_nocona
-	default "x86_64"	if BR2_x86_64_core2
-	default "x86_64"	if BR2_x86_64_opteron
-	default "x86_64"	if BR2_x86_64_opteron_sse3
-	default "x86_64"	if BR2_x86_64_barcelona
-
-
-config BR2_ENDIAN
-	string
-	default "LITTLE" if BR2_arm || BR2_cris || BR2_i386 || BR2_mipsel || \
-	                    BR2_sh3 || BR2_sh4 || BR2_x86_64 || BR2_nios2 || \
-			    BR2_sh64
-	default "BIG"    if BR2_alpha || BR2_armeb || BR2_avr32 || BR2_m68k || BR2_mips || \
-	                    BR2_powerpc || BR2_sh2a_nofpueb || BR2_sh2eb || \
-	                    BR2_sh3eb || BR2_sh4eb || BR2_sparc
-
-config BR2_GCC_TARGET_TUNE
-	string
-	default i386		if BR2_x86_i386
-	default i486		if BR2_x86_i486
-	default i586		if BR2_x86_i586
-	default pentium-mmx	if BR2_x86_pentium_mmx
-	default i686		if BR2_x86_i686
-	default pentiumpro	if BR2_x86_pentiumpro
-	default pentium-m	if BR2_x86_pentium_m
-	default pentium2	if BR2_x86_pentium2
-	default pentium3	if BR2_x86_pentium3
-	default pentium4	if BR2_x86_pentium4
-	default prescott	if BR2_x86_prescott
-	default nocona		if BR2_x86_nocona
-	default core2		if BR2_x86_core2
-	default k8		if BR2_x86_opteron
-	default k8-sse3		if BR2_x86_opteron_sse3
-	default barcelona	if BR2_x86_barcelona
-	default k6		if BR2_x86_k6
-	default k6-2		if BR2_x86_k6_2
-	default athlon		if BR2_x86_athlon
-	default athlon-4	if BR2_x86_athlon_4
-	default winchip-c6	if BR2_x86_winchip_c6
-	default winchip2	if BR2_x86_winchip2
-	default c3		if BR2_x86_c3
-	default geode		if BR2_x86_geode
-	default nocona		if BR2_x86_64_nocona
-	default core2		if BR2_x86_64_core2
-	default k8		if BR2_x86_64_opteron
-	default k8-sse3		if BR2_x86_64_opteron_sse3
-	default barcelona	if BR2_x86_64_barcelona
-	default arm600		if BR2_arm600
-	default arm610		if BR2_arm610
-	default arm620		if BR2_arm620
-	default arm7tdmi	if BR2_arm7tdmi
-	default arm7tdmi	if BR2_arm720t
-	default arm7tdmi	if BR2_arm740t
-	default arm920		if BR2_arm920
-	default arm920t		if BR2_arm920t
-	default arm922t		if BR2_arm922t
-	default arm9tdmi	if BR2_arm926t
-	default arm1136j-s	if BR2_arm1136j_s
-	default arm1136jf-s	if BR2_arm1136jf_s
-	default arm1176jz-s	if BR2_arm1176jz_s
-	default arm1176jzf-s	if BR2_arm1176jzf_s
-	default strongarm110	if BR2_sa110
-	default strongarm1100	if BR2_sa1100
-	default xscale		if BR2_xscale
-	default iwmmxt		if BR2_iwmmxt
-	default v0		if BR2_cris_unknown
-	default v10		if BR2_cris_generic
-	default v3		if BR2_cris_etrax_4
-	default v8		if BR2_cris_etrax_100
-	default v10		if BR2_cris_etrax_100lx
-	default ev4		if BR2_alpha_21064
-	default ev5		if BR2_alpha_21164
-	default ev56		if BR2_alpha_21164a
-	default pca56		if BR2_alpha_21164pc
-	default ev6		if BR2_alpha_21264
-	default ev67		if BR2_alpha_21264a
-	default itanium		if BR2_ia64_itanium1
-	default itanium2	if BR2_ia64_itanium2
-	default 68000		if BR2_m68k_68000
-	default 68010		if BR2_m68k_68010
-	default 68020		if BR2_m68k_68020
-	default 68030		if BR2_m68k_68030
-	default 68040		if BR2_m68k_68040
-	default 68060		if BR2_m68k_68060
-	default mips1		if BR2_mips_1
-	default mips2		if BR2_mips_2
-	default mips3		if BR2_mips_3
-	default mips4		if BR2_mips_4
-	default mips32		if BR2_mips_32
-	default mips32r2	if BR2_mips_32r2
-	default mips64		if BR2_mips_64
-	default mips16		if BR2_mips_16
-	default 401		if BR2_powerpc_401
-	default 403		if BR2_powerpc_403
-	default 405		if BR2_powerpc_405
-	default 405fp		if BR2_powerpc_405fp
-	default 440		if BR2_powerpc_440
-	default 440fp		if BR2_powerpc_440fp
-	default 505		if BR2_powerpc_505
-	default 601		if BR2_powerpc_601
-	default 602		if BR2_powerpc_602
-	default 603		if BR2_powerpc_603
-	default 603e		if BR2_powerpc_603e
-	default 604		if BR2_powerpc_604
-	default 604e		if BR2_powerpc_604e
-	default 620		if BR2_powerpc_620
-	default 630		if BR2_powerpc_630
-	default 740		if BR2_powerpc_740
-	default 7400		if BR2_powerpc_7400
-	default 7450		if BR2_powerpc_7450
-	default 750		if BR2_powerpc_750
-	default 801		if BR2_powerpc_801
-	default 821		if BR2_powerpc_821
-	default 823		if BR2_powerpc_823
-	default 860		if BR2_powerpc_860
-	default 970		if BR2_powerpc_970
-	default 8540		if BR2_powerpc_8540
-	default cypress		if BR2_sparc_cypress
-	default supersparc	if BR2_sparc_supersparc
-	default hypersparc	if BR2_sparc_hypersparc
-	default f930		if BR2_sparc_f930
-	default f934		if BR2_sparc_f934
-	default sparclite86x	if BR2_sparc_sparclite86x
-	default tsc701		if BR2_sparc_tsc701
-	default ultrasparc	if BR2_sparc_ultrasparc
-	default ultrasparc3	if BR2_sparc_ultrasparc3
-	default niagara		if BR2_sparc_niagara
-	default g5		if BR2_s390_g5
-	default g6		if BR2_s390_g6
-	default z900		if BR2_s390_z900
-	default z990		if BR2_s390_z990
-	default z9-109		if BR2_s390_z9_109
-
-config BR2_GCC_TARGET_ARCH
-	string
-	default i386		if BR2_x86_i386
-	default i486		if BR2_x86_i486
-	default i586		if BR2_x86_i586
-	default pentium-mmx	if BR2_x86_pentium_mmx
-	default i686		if BR2_x86_i686
-	default pentiumpro	if BR2_x86_pentiumpro
-	default pentium-m	if BR2_x86_pentium_m
-	default pentium2	if BR2_x86_pentium2
-	default pentium3	if BR2_x86_pentium3
-	default pentium4	if BR2_x86_pentium4
-	default prescott	if BR2_x86_prescott
-	default nocona		if BR2_x86_nocona
-	default core2		if BR2_x86_core2
-	default k8		if BR2_x86_opteron
-	default k8-sse3		if BR2_x86_opteron_sse3
-	default barcelona	if BR2_x86_barcelona
-	default k6		if BR2_x86_k6
-	default k6-2		if BR2_x86_k6_2
-	default athlon		if BR2_x86_athlon
-	default athlon-4	if BR2_x86_athlon_4
-	default winchip-c6	if BR2_x86_winchip_c6
-	default winchip2	if BR2_x86_winchip2
-	default c3		if BR2_x86_c3
-	default geode		if BR2_x86_geode
-	default iwmmxt		if BR2_iwmmxt
-	default v0		if BR2_cris_unknown
-	default v10		if BR2_cris_generic
-	default v3		if BR2_cris_etrax_4
-	default v8		if BR2_cris_etrax_100
-	default v10		if BR2_cris_etrax_100lx
-	default 68000		if BR2_m68k_68000
-	default 68010		if BR2_m68k_68010
-	default 68020		if BR2_m68k_68020
-	default 68030		if BR2_m68k_68030
-	default 68040		if BR2_m68k_68040
-	default 68060		if BR2_m68k_68060
-	default g5		if BR2_s390_g5
-	default g6		if BR2_s390_g6
-	default z900		if BR2_s390_z900
-	default z990		if BR2_s390_z990
-	default z9-109		if BR2_s390_z9_109
-
-config BR2_GCC_TARGET_ABI
-	string
-	default apcs-gnu	if BR2_arm_dunno
-	default atpcs		if BR2_arm_dunno
-	default aapcs		if BR2_arm_dunno
-	default aapcs-linux	if BR2_arm_dunno
-	default iwmmxt		if BR2_iwmmxt
-	default 32		if BR2_mipsel && BR2_OABI
-	default n32		if BR2_mipsel && BR2_EABI
-	default o64		if BR2_mips && BR2_OABI
-	default 64		if BR2_mips && BR2_ABI64
-	default eabi		if BR2_mips && BR2_EABI
-	default mmixware	if BR2_mmix && BR2_ABI_native
-	default gnu		if BR2_mmix && !BR2_ABI_native
-	default altivec		if BR2_powerpc && BR2_ABI_altivec
-	default no-altivec	if BR2_powerpc && BR2_ABI_no-altivec
-	default spe		if BR2_powerpc && BR2_ABI_spe
-	default no-spe		if BR2_powerpc && BR2_ABI_no-spe
-	default ibmlongdouble	if BR2_powerpc && BR2_ABI_ibmlongdouble
-	default ieeelongdouble	if BR2_powerpc && BR2_ABI_ieeelongdouble
+source "target/Config.in.arch"
+source "target/device/Config.in"
 
 menu "Build options"
 
@@ -526,9 +19,17 @@ config BR2_WGET
 	string "Wget command"
 	default "wget --passive-ftp -nd"
 
-config BR2_SVN
-	string "Subversion (svn) checkout command"
+config BR2_SVN_CO
+	string "Subversion (svn) command to download source tree"
 	default "svn co"
+
+config BR2_SVN_UP
+	string "Subversion (svn) command to update source tree"
+	default "svn up"
+
+config BR2_GIT
+	string "Git command to download source tree"
+	default "git clone"
 
 config BR2_ZCAT
 	string "zcat command"
@@ -563,45 +64,13 @@ config BR2_DL_DIR
 	default "$(BASE_DIR)/dl"
 	help
 	  Directory to store all the source files that we need to fetch.
+	  If the Linux shell environment has defined the BUILDROOT_DL_DIR
+	  environment variable, then this overrides this configuration item.
 
-config BR2_SOURCEFORGE_MIRROR
-	string "Sourceforge mirror site"
-	default "easynews"
-	help
-	  Sourceforge has a system of mirror sites.  Some sites may be closer
-	  to your location, and sometimes mirror sites go down and are no longer
-	  available.  This option allows you to select your preferred Sourceforge
-	  mirror site.
+	  The default is $(BASE_DIR)/dl
 
-	  The list of mirrors is available here:
-	  http://prdownloads.sourceforge.net/index-sf.html?download
+source	"target/device/Config.in.mirrors"
 
-config BR2_ATMEL_MIRROR
-	depends BR2_TARGET_ATMEL && (BR2_avr32 || BR2_arm)
-	string "Atmel AVR32/AT91 download site"
-	default "ftp://at91dist:distrib@81.80.104.162/AT91_Third_Party_Design_Flow/Linux_Host/"
-	help
-	  Unofficial site for AVR32/AT91 Buildroot patches, or your local mirror.
-	  Atmel does not currently support buildroot, but this site makes
-	  available neccessary patches and prepatched packages useful
-	  to extend a buildroot for AVR32 or AT91 ARM based boards.
-	  Issues with contents of this server needs to be highlighted
-	  on the buildroot mailing list and
-	  should not be addressed directly to Atmel
-	  Atmel provides support for their AVR32 chips on 
-	  http://avr32linux.org/ or http://www.avrfreaks.net/
-	  Atmel provides support for AT91 chips on www.at91.com.
-	  Commercial AT91 Linux support is through www.timesys.com
-	  Community  AT91 Linux support is through http://maxim.org.za/AT91_26.html
-
-config BR2_AT91_PATCH_MIRROR
-	depends BR2_TARGET_ATMEL && BR2_arm
-	string "Atmel AT91 Linux Patch download site"
-	default "http://maxim.org.za/AT91RM9200/2.6/"
-	help
-	  Patches for the AT91 generated by the Linux community
-	  usually ends up here, courtesy of Andrew Victor
-	  
 config BR2_STAGING_DIR
 	string "Toolchain and header file location?"
 	default "$(BUILD_DIR)/staging_dir"
@@ -614,6 +83,14 @@ config BR2_STAGING_DIR
 
 	  Most people will leave this set to the default value of
 	  "$(BUILD_DIR)/staging_dir".
+
+config BR2_FPU_SUFFIX
+	bool "Add '_nofpu' suffix for softfloat toolchains"
+	default n
+	help
+	  If the toolchain is configured to use softfloat, then
+	  the "_nofpu" suffix will be added to the toolchain build
+	  directory name and to any rootfs image name
 
 config BR2_TOPDIR_PREFIX
 	string "Custom build dir prefix"
@@ -631,7 +108,20 @@ config BR2_TOPDIR_SUFFIX
 	  Add a custom string to the end of the build directories.
 
 	  build_ARCH -> build_ARCH_[SUFFIX]
-	  toolchain_build_ARCH -> toolchain_build_ARCH_[SUFFIX] 
+	  toolchain_build_ARCH -> toolchain_build_ARCH_[SUFFIX]
+
+config BR2_ROOTFS_PREFIX
+	string "Custom root fs prefix"
+	default "rootfs"
+	help
+	  Add a custom string to the beginning of the root file system name.
+
+config BR2_ROOTFS_SUFFIX
+	string "Custom root fs suffix"
+	default "$(DATE)" if BR2_TARGET_ATMEL
+	default "" if !BR2_TARGET_ATMEL
+	help
+	  Add a custom string to the end of the root file system name.
 
 config BR2_GNU_BUILD_SUFFIX
 	string "GNU build hostname suffix"
@@ -662,6 +152,7 @@ config BR2_GNU_TARGET_SUFFIX
 	  Default options are:
 	      linux-uclibcgnueabi for ARM EABI
 	      linux-uclibc for the rest
+	      gnuhurd-uclibc for the hurd
 
 config BR2_JLEVEL
 	int "Number of jobs to run simultaneously"
@@ -687,6 +178,145 @@ config BR2_DEPRECATED
 	help
 	  This option hides outdated/obsolete versions of packages.
 
+config BR2_RECENT
+	bool "Show packages that are of the latest major version"
+	default y
+	help
+	  This option show recent versions of packages.
+
+config BR2_ENABLE_DEBUG
+	bool "build packages with debugging symbols"
+	select BR2_PACKAGE_GDB_SERVER
+	default n
+	help
+	  Build packages with debugging symbols
+	  enabled
+
+if BR2_ENABLE_DEBUG
+choice
+	prompt "gcc debug level"
+	default BR2_DEBUG_2
+	help
+	  Set the debug level for gcc
+
+config BR2_DEBUG_1
+	bool "debug level 1"
+	help
+	  Debug level 1 produces minimal information, enough 
+	  for making backtraces in parts of the program that 
+	  you don't plan to debug. This includes descriptions 
+	  of functions and external variables, but no information
+	  about local variables and no line numbers.
+
+config BR2_DEBUG_2
+	bool "debug level 2"
+	help
+	  The default gcc debug level is 2
+
+config BR2_DEBUG_3
+	bool "debug level 3"
+	help
+	  Level 3 includes extra information, such as all the 
+	  macro definitions present in the program. Some debuggers
+	  support macro expansion when you use -g3.
+endchoice
+endif
+
+choice
+	prompt "strip"
+	default BR2_STRIP_strip
+	help
+	  Select whether to strip binaries and libraries for the target
+	  or not.
+	  strip   is the normal strip command
+	  sstrip  is a strip that discards more than the normal strip
+	  none    do not strip (only for debugging!)
+
+config BR2_STRIP_strip
+	bool "strip"
+	depends !BR2_ENABLE_DEBUG
+	help
+	  strip   is the normal strip command
+
+config BR2_STRIP_sstrip
+	bool "sstrip"
+	select BR2_PACKAGE_SSTRIP_HOST
+	depends !BR2_ENABLE_DEBUG
+	help
+	  sstrip  is a strip that discards more than the normal strip
+
+config BR2_STRIP_none
+	bool "none"
+	help
+	  none    do not strip (only for debugging!)
+endchoice
+
+choice
+	prompt "gcc optimization level"
+	default BR2_OPTIMIZE_0
+	help
+	  Set the optimization level for gcc
+
+config BR2_OPTIMIZE_0
+	bool "optimization level 0"
+	help
+	  Do not optimize. This is the default. 
+
+config BR2_OPTIMIZE_1
+	bool "optimization level 1"
+	help
+	  Optimize. Optimizing compilation takes somewhat more time, 
+	  and a lot more memory for a large function. With -O, the 
+	  compiler tries to reduce code size and execution time, 
+	  without performing any optimizations that take a great deal 
+	  of compilation time. -O turns on the following optimization 
+	  flags: -fdefer-pop -fdelayed-branch -fguess-branch-probability 
+	  -fcprop-registers -floop-optimize -fif-conversion 
+	  -fif-conversion2 -ftree-ccp -ftree-dce -ftree-dominator-opts 
+	  -ftree-dse -ftree-ter -ftree-lrs -ftree-sra -ftree-copyrename 
+	  -ftree-fre -ftree-ch -funit-at-a-time -fmerge-constants
+	  -O also turns on -fomit-frame-pointer on machines where doing 
+	  so does not interfere with debugging.
+
+config BR2_OPTIMIZE_2
+	bool "optimization level 2"
+	help
+	  Optimize even more. GCC performs nearly all supported optimizations
+	  that do not involve a space-speed tradeoff. The compiler does not 
+	  perform loop unrolling or function inlining when you specify -O2. 
+	  As compared to -O, this option increases both compilation time and 
+	  the performance of the generated code. -O2 turns on all optimization 
+	  flags specified by -O. It also turns on the following optimization 
+	  flags: -fthread-jumps -fcrossjumping -foptimize-sibling-calls 
+	  -fcse-follow-jumps -fcse-skip-blocks -fgcse  -fgcse-lm 
+	  -fexpensive-optimizations -fstrength-reduce -frerun-cse-after-loop  
+	  -frerun-loop-opt -fcaller-saves -fpeephole2 -fschedule-insns  
+	  -fschedule-insns2 -fsched-interblock -fsched-spec -fregmove 
+	  -fstrict-aliasing -fdelete-null-pointer-checks -freorder-blocks  
+	  -freorder-functions -falign-functions -falign-jumps -falign-loops  
+	  -falign-labels -ftree-vrp -ftree-pre
+	  Please note the warning under -fgcse about invoking -O2 on programs
+	  that use computed gotos.
+
+config BR2_OPTIMIZE_3
+	bool "optimization level 3"
+	help
+	  Optimize yet more. -O3 turns on all optimizations specified by -O2 
+	  and also turns on the -finline-functions, -funswitch-loops and 
+	  -fgcse-after-reload options.
+
+config BR2_OPTIMIZE_S
+	bool "optimize for size"
+	help
+	  Optimize for size. -Os enables all -O2 optimizations that do not 
+	  typically increase code size. It also performs further optimizations
+	  designed to reduce code size. -Os disables the following optimization 
+	  flags: -falign-functions -falign-jumps -falign-loops -falign-labels  
+	  -freorder-blocks -freorder-blocks-and-partition -fprefetch-loop-arrays
+	  -ftree-vect-loop-version
+     
+endchoice
+
 config BR2_PREFER_STATIC_LIB
 	bool "prefer static libraries"
 	default n
@@ -699,6 +329,31 @@ config BR2_PREFER_STATIC_LIB
 
 	  WARNING: This is highly experimental at the moment.
 
+config BR2_HAVE_MANPAGES
+	bool "manpages on the target"
+	default n
+	help
+	  Leave the manpages on the target.
+	  If you say n here, your target will not contain any
+	  manpage.
+
+config BR2_HAVE_INFOPAGES
+	bool "infopages on the target"
+	default n
+	help
+	  Leave the infopages on the target.
+	  If you say n here, your target will not contain any
+	  infopage.
+
+config BR2_HAVE_DEVFILES
+	bool "development files in target filesystem"
+	default n
+	help
+	  Install headers and static libraries in the
+	  target filesystem
+
+source package/gnuconfig/Config.in
+
 endmenu
 
 source "toolchain/Config.in"
@@ -706,5 +361,3 @@ source "toolchain/Config.in"
 source "package/Config.in"
 
 source "target/Config.in"
-
-

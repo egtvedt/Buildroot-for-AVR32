@@ -5,10 +5,11 @@ TN5250_SOURCE:=tn5250-$(TN5250_VERSION).tar.gz
 TN5250_CAT:=$(ZCAT)
 
 $(DL_DIR)/$(TN5250_SOURCE):
-	$(WGET) -P $(DL_DIR) $(TN5250_SITE)/$(TN5250_SOURCE) 
+	$(WGET) -P $(DL_DIR) $(TN5250_SITE)/$(TN5250_SOURCE)
 
 $(TN5250_DIR)/.dist: $(DL_DIR)/$(TN5250_SOURCE)
 	$(TN5250_CAT) $(DL_DIR)/$(TN5250_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	toolchain/patch-kernel.sh $(TN5250_DIR) package/tn5250 tn5250\*.patch
 	-touch $(TN5250_DIR)/.dist
 
 $(TN5250_DIR)/.configured: $(TN5250_DIR)/.dist
@@ -32,24 +33,24 @@ $(TN5250_DIR)/.configured: $(TN5250_DIR)/.dist
 		--infodir=/usr/info \
 		$(DISABLE_NLS) \
 		--with-slang --without-x --without-ssl \
-	);
+	)
 	touch $(TN5250_DIR)/.configured
 
-$(TN5250_DIR)/tn5250: $(TN5250_DIR)/.configured
-	$(MAKE) CC=$(TARGET_CC) -C $(TN5250_DIR)
+$(TN5250_DIR)/src/tn5250: $(TN5250_DIR)/.configured
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(TN5250_DIR)
 
-$(TARGET_DIR)/usr/bin/tn5250: $(TN5250_DIR)/tn5250
-	install -c $(TN5250_DIR)/tn5250 $(TARGET_DIR)/usr/bin/tn5250
+$(TARGET_DIR)/usr/bin/tn5250: $(TN5250_DIR)/src/tn5250
+	install -c $(TN5250_DIR)/src/tn5250 $(TARGET_DIR)/usr/bin/tn5250
 
 tn5250: uclibc slang $(TARGET_DIR)/usr/bin/tn5250
 
 tn5250-source: $(DL_DIR)/$(TN5250_SOURCE)
 
-tn5250-clean: 
+tn5250-clean:
 	$(MAKE) -C $(TN5250_DIR) clean
 
-tn5250-dirclean: 
-	rm -rf $(TN5250_DIR) 
+tn5250-dirclean:
+	rm -rf $(TN5250_DIR)
 
 
 

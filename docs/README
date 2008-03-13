@@ -1,6 +1,6 @@
 To build and use the buildroot stuff, do the following:
 
-1) run 'make'
+1) run 'make menuconfig'
 2) select the packages you wish to compile
 3) run 'make'
 4) wait while it compiles
@@ -31,6 +31,9 @@ More finegrained configuration:
 
 You can specify a config-file for uClibc:
 $ make UCLIBC_CONFIG_FILE=/my/uClibc.config
+
+And you can specify a config-file for busybox:
+$ make BUSYBOX_CONFIG_FILE=/my/busybox.config
 
 To use a non-standart host-compiler (if you do not have 'gcc'),
 make sure that the compiler is in your PATH and that the library paths are

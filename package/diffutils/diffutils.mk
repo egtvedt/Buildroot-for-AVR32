@@ -6,7 +6,7 @@
 DIFFUTILS_VERSION=2.8.7
 DIFFUTILS_SOURCE:=diffutils-$(DIFFUTILS_VERSION).tar.gz
 #DIFFUTILS_SITE:=ftp://alpha.gnu.org/gnu/diffutils/
-DIFFUTILS_SITE:=http://mirrors.ircam.fr/pub/gnu/alpha/gnu/diffutils
+DIFFUTILS_SITE:=$(BR2_GNU_MIRROR)/gnu/diffutils
 DIFFUTILS_CAT:=$(ZCAT)
 DIFFUTILS_DIR:=$(BUILD_DIR)/diffutils-$(DIFFUTILS_VERSION)
 DIFFUTILS_BINARY:=src/diff
@@ -20,7 +20,7 @@ diffutils-source: $(DL_DIR)/$(DIFFUTILS_SOURCE)
 $(DIFFUTILS_DIR)/.unpacked: $(DL_DIR)/$(DIFFUTILS_SOURCE)
 	$(DIFFUTILS_CAT) $(DL_DIR)/$(DIFFUTILS_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(CONFIG_UPDATE) $(DIFFUTILS_DIR)/config
-	touch $(DIFFUTILS_DIR)/.unpacked
+	touch $@
 
 $(DIFFUTILS_DIR)/.configured: $(DIFFUTILS_DIR)/.unpacked
 	(cd $(DIFFUTILS_DIR); rm -rf config.cache; \
@@ -92,22 +92,30 @@ $(DIFFUTILS_DIR)/.configured: $(DIFFUTILS_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
-	touch $(DIFFUTILS_DIR)/.configured
+	)
+	touch $@
 
 $(DIFFUTILS_DIR)/$(DIFFUTILS_BINARY): $(DIFFUTILS_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(DIFFUTILS_DIR)
 
 $(TARGET_DIR)/$(DIFFUTILS_TARGET_BINARY): $(DIFFUTILS_DIR)/$(DIFFUTILS_BINARY)
 	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(DIFFUTILS_DIR) install
-	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
-		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/info
+endif
+ifneq ($(BR2_HAVE_MANPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/man
+endif
+	rm -rf $(TARGET_DIR)/share/locale
+	rm -rf $(TARGET_DIR)/usr/share/doc
 
 diffutils: uclibc $(TARGET_DIR)/$(DIFFUTILS_TARGET_BINARY)
+
+diff-utils-unpacked: $(DIFFUTILS_DIR)/.unpacked
 
 diffutils-clean:
 	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(DIFFUTILS_DIR) uninstall

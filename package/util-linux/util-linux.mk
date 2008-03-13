@@ -5,7 +5,7 @@
 #############################################################
 UTIL-LINUX_VERSION:=2.12r
 UTIL-LINUX_SOURCE:=util-linux-$(UTIL-LINUX_VERSION).tar.bz2
-UTIL-LINUX_SITE:=http://www.kernel.org/pub/linux/utils/util-linux
+UTIL-LINUX_SITE:=$(BR2_KERNEL_MIRROR)/linux/utils/util-linux
 UTIL-LINUX_DIR:=$(BUILD_DIR)/util-linux-$(UTIL-LINUX_VERSION)
 UTIL-LINUX_CAT:=$(BZCAT)
 UTIL-LINUX_BINARY:=$(UTIL-LINUX_DIR)/misc-utils/chkdupexe
@@ -42,7 +42,7 @@ $(UTIL-LINUX_DIR)/.configured: $(UTIL-LINUX_DIR)/.unpacked
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 		ARCH=$(ARCH) \
-	);
+	)
 	$(SED) "s,^INSTALLSUID=.*,INSTALLSUID=\\$$\(INSTALL\) -m \\$$\(BINMODE\)," \
 		$(UTIL-LINUX_DIR)/MCONFIG
 	$(SED) "s,^USE_TTY_GROUP=.*,USE_TTY_GROUP=no," $(UTIL-LINUX_DIR)/MCONFIG
@@ -73,7 +73,7 @@ endif
 util-linux-source: $(DL_DIR)/$(UTIL-LINUX_SOURCE)
 
 util-linux-clean:
-	#There is no working 'uninstall' target.  Just skip it... 
+	#There is no working 'uninstall' target. Just skip it...
 	#$(MAKE) DESTDIR=$(TARGET_DIR) -C $(UTIL-LINUX_DIR) uninstall
 	-$(MAKE) -C $(UTIL-LINUX_DIR) clean
 

@@ -4,10 +4,10 @@
 #
 #############################################################
 #
-# This program is free software; you can redistribute it 
-# and/or modify it under the terms of the GNU Lesser General 
-# Public License as published by the Free Software Foundation; 
-# either version 2.1 of the License, or (at your option) any 
+# This program is free software; you can redistribute it
+# and/or modify it under the terms of the GNU Lesser General
+# Public License as published by the Free Software Foundation
+# either version 2.1 of the License, or (at your option) any
 # later version.
 
 AVAHI_VERSION:=0.6.21
@@ -22,15 +22,24 @@ ifeq ($(strip $(BR2_PACKAGE_AVAHI_AUTOIPD)),y)
 AVAHI_TARGETS+=$(TARGET_DIR)/usr/sbin/avahi-autoipd
 endif
 
+AVAHI_EXTRA_DEPS:=
+
 ifeq ($(strip $(BR2_PACKAGE_AVAHI_DAEMON)),y)
 AVAHI_TARGETS+=$(TARGET_DIR)/usr/sbin/avahi-daemon
 AVAHI_DISABLE_EXPAT:=
 # depend on the exact library file instead of expat so avahi isn't always
 # considered out-of-date
-AVAHI_EXPAT_DEP:=$(STAGING_DIR)/lib/libexpat.so.1
+AVAHI_EXTRA_DEPS+=$(STAGING_DIR)/usr/lib/libexpat.so.1
 else
 AVAHI_DISABLE_EXPAT:=--disable-expat
-AVAHI_EXPAT_DEP:=
+
+endif
+
+ifeq ($(strip $(BR2_PACKAGE_DBUS)),y)
+AVAHI_DISABLE_DBUS:=
+AVAHI_EXTRA_DEPS+=$(TARGET_DIR)/usr/bin/dbus-daemon
+else
+AVAHI_DISABLE_DBUS:=--disable-dbus
 endif
 
 $(DL_DIR)/$(AVAHI_SOURCE):
@@ -43,13 +52,11 @@ $(AVAHI_DIR)/.unpacked: $(DL_DIR)/$(AVAHI_SOURCE)
 	toolchain/patch-kernel.sh $(AVAHI_DIR) package/avahi/ \*.patch
 	touch $@
 
-$(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXPAT_DEP)
-	(cd $(AVAHI_DIR) && rm -rf config.cache)
+$(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXTRA_DEPS)
+	(cd $(AVAHI_DIR) && rm -rf config.cache && autoconf)
 	(cd $(AVAHI_DIR) && \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
-		LIBDAEMON_CFLAGS="-I$(STAGING_DIR)/include" \
-		LIBDAEMON_LIBS="-L$(STAGING_DIR)/lib -ldaemon" \
 		ac_cv_func_strtod=yes \
 		ac_fsusage_space=yes \
 		fu_cv_sys_stat_statfs2_bsize=yes \
@@ -108,24 +115,15 @@ $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXPAT_DEP)
 		--host=$(REAL_GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
-		--exec-prefix=/usr \
-		--bindir=/usr/bin \
-		--sbindir=/usr/sbin \
-		--libdir=/lib \
-		--libexecdir=/usr/lib \
 		--sysconfdir=/etc \
-		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 		--disable-glib \
 		--disable-qt3 \
 		--disable-qt4 \
 		--disable-gtk \
-		--disable-dbus \
+		$(AVAHI_DISABLE_DBUS) \
 		$(AVAHI_DISABLE_EXPAT) \
 		--disable-gdbm \
 		--disable-python \
@@ -139,57 +137,57 @@ $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXPAT_DEP)
 		--with-avahi-group=default \
 		--with-autoipd-user=default \
 		--with-autoipd-group=default \
-	);
+	)
 	touch $@
 
 $(AVAHI_DIR)/.compiled: $(AVAHI_DIR)/.configured
 	$(MAKE) -C $(AVAHI_DIR)
 	touch $@
 
-$(STAGING_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.compiled
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR)/avahi-autoipd install
-	touch -c $@
+$(AVAHI_DIR)/.installed: $(AVAHI_DIR)/.compiled
+	mkdir -p $(STAGING_DIR)/etc/avahi
+	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR) install
+	touch $@
 
-$(TARGET_DIR)/usr/sbin/avahi-autoipd: $(STAGING_DIR)/usr/sbin/avahi-autoipd
+$(TARGET_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.installed
 	mkdir -p $(TARGET_DIR)/etc/avahi
-	mkdir -p $(TARGET_DIR)/usr/share/udhcpc
+	mkdir -p $(TARGET_DIR)/etc/init.d
 	mkdir -p $(TARGET_DIR)/var/lib
-	ln -sf /tmp/avahi-autoipd $(TARGET_DIR)/var/lib/avahi-autoipd
+	mkdir -p $(TARGET_DIR)/usr/share/udhcpc
 	cp -af $(STAGING_DIR)/etc/avahi/avahi-autoipd.action $(TARGET_DIR)/etc/avahi/
 	cp -af $(BASE_DIR)/package/avahi/busybox-udhcpc-default.script $(TARGET_DIR)/usr/share/udhcpc/default.script
-	cp -af $(BASE_DIR)/package/avahi/S05avahi-setup.sh $(TARGET_DIR)/etc/init.d/
 	chmod 0755 $(TARGET_DIR)/usr/share/udhcpc/default.script
-	cp $^ $@
-	$(STRIP) --strip-unneeded $@
+	cp -af $(BASE_DIR)/package/avahi/S05avahi-setup.sh $(TARGET_DIR)/etc/init.d/
+	cp $(STAGING_DIR)/usr/sbin/avahi-autoipd $(TARGET_DIR)/usr/sbin/avahi-autoipd
+	ln -sf /tmp/avahi-autoipd $(TARGET_DIR)/var/lib/avahi-autoipd
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
 
-$(STAGING_DIR)/usr/lib/libavahi-common.so: $(AVAHI_DIR)/.compiled
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR)/avahi-common install
-	touch -c $@
-
-$(STAGING_DIR)/usr/lib/libavahi-core.so: $(AVAHI_DIR)/.compiled $(STAGING_DIR)/usr/lib/libavahi-common.so
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR)/avahi-core install
-	touch -c $@
-
-$(STAGING_DIR)/usr/sbin/avahi-daemon: $(AVAHI_DIR)/.compiled $(STAGING_DIR)/usr/lib/libavahi-core.so $(STAGING_DIR)/usr/lib/libavahi-common.so
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR)/avahi-daemon install
-	touch -c $@
-
-$(TARGET_DIR)/usr/sbin/avahi-daemon: $(STAGING_DIR)/usr/sbin/avahi-daemon
-	cp $^ $@
-	cp -dpf $(STAGING_DIR)/lib/libavahi-*.so* $(TARGET_DIR)/usr/lib/
+$(TARGET_DIR)/usr/sbin/avahi-daemon: $(AVAHI_DIR)/.installed
 	mkdir -p $(TARGET_DIR)/etc/avahi/services
+	cp -dpf $(STAGING_DIR)/usr/lib/libavahi-*.so* $(TARGET_DIR)/usr/lib/
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libavahi-*.so*
+	cp -af $(STAGING_DIR)/etc/avahi/avahi-daemon.conf $(TARGET_DIR)/etc/avahi/
 	cp -af $(BASE_DIR)/package/avahi/S50avahi-daemon $(TARGET_DIR)/etc/init.d/
-	$(STRIP) --strip-unneeded $@
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libavahi-*.so*
+ifeq ($(strip $(BR2_PACKAGE_DBUS)),y)
+	cp -dpf $(STAGING_DIR)/usr/bin/avahi-* $(TARGET_DIR)/usr/bin
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/avahi-*
+	cp -r $(STAGING_DIR)/etc/dbus-1/system.d/avahi-* \
+		$(TARGET_DIR)/etc/dbus-1/system.d/
+endif
+	cp $(STAGING_DIR)/usr/sbin/avahi-daemon \
+		 $(TARGET_DIR)/usr/sbin/avahi-daemon
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
 
 avahi: uclibc busybox libdaemon $(AVAHI_TARGETS)
 
 avahi-clean:
 	$(MAKE) -C $(AVAHI_DIR) distclean
-	rm -rf $(TARGET_DIR)/etc/avahi
-	rm -f $(TARGET_DIR)/var/lib/avahi-autoipd
-	rm -f $(TARGET_DIR)/etc/init.d/S*avahi*
-	rm -f $(TARGET_DIR)/usr/sbin/avahi-*
+	-rm -rf $(TARGET_DIR)/etc/avahi
+	-rm -f $(TARGET_DIR)/var/lib/avahi-autoipd
+	-rm -f $(TARGET_DIR)/etc/init.d/S*avahi*
+	-rm -f $(TARGET_DIR)/usr/sbin/avahi-*
+	-rm -f $(TARGET_DIR)/usr/bin/avahi-*
+	-rm -f $(TARGET_DIR)/usr/lib/libavahi-*
 
 avahi-dirclean:
 	rm -rf $(AVAHI_DIR)

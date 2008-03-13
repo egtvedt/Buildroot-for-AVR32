@@ -14,35 +14,25 @@ MPFR_TARGET_DIR:=$(BUILD_DIR)/mpfr-$(MPFR_VERSION)
 MPFR_BINARY:=libmpfr$(LIBTGTEXT)
 MPFR_HOST_BINARY:=libmpfr$(HOST_SHREXT)
 MPFR_LIBVERSION:=1.0.1
+#MPFR_SVN_CMD:=svn co svn://scm.gforge.inria.fr/svn/mpfr/branches/2.3 mpfr-2.3
 
-# No patch
-ifeq ($(MPFR_PATCH),)
-$(DL_DIR)/$(MPFR_SOURCE):
-	 $(WGET) -P $(DL_DIR) $(MPFR_SITE)/$(MPFR_SOURCE)
-
-libmpfr-source: $(DL_DIR)/$(MPFR_SOURCE)
-endif
 # need patch
 ifneq ($(MPFR_PATCH),)
+MPFR_PATCH_SOURCE:=$(DL_DIR)/$(MPFR_PATCH_FILE)
+
+$(MPFR_PATCH_SOURCE):
+	$(WGET) -O $@ $(MPFR_SITE)/$(MPFR_PATCH)
+endif
+
 $(DL_DIR)/$(MPFR_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(MPFR_SITE)/$(MPFR_SOURCE)
 
-$(DL_DIR)/$(MPFR_PATCH_FILE):
-	$(WGET) -O $@ $(MPFR_SITE)/$(MPFR_PATCH)
-
-libmpfr-source: $(DL_DIR)/$(MPFR_SOURCE) $(DL_DIR)/$(MPFR_PATCH_FILE)
-endif
-
-ifeq ($(MPFR_PATCH),)
-$(MPFR_DIR)/.unpacked: $(DL_DIR)/$(MPFR_SOURCE)
-else
-$(MPFR_DIR)/.unpacked: $(DL_DIR)/$(MPFR_SOURCE) $(DL_DIR)/$(MPFR_PATCH_FILE)
-endif
+$(MPFR_DIR)/.unpacked: $(DL_DIR)/$(MPFR_SOURCE) $(MPFR_PATCH_SOURCE)
 	$(MPFR_CAT) $(DL_DIR)/$(MPFR_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(MPFR_DIR) package/mpfr/ \*.patch
 	$(CONFIG_UPDATE) $(MPFR_DIR)
 ifneq ($(MPFR_PATCH),)
-	( cd $(MPFR_DIR) ; patch -p1 < $(DL_DIR)/$(MPFR_PATCH_FILE) ; )
+	( cd $(MPFR_DIR); patch -p1 -N -Z < $(MPFR_PATCH_SOURCE); )
 endif
 	touch $@
 
@@ -57,9 +47,9 @@ $(MPFR_TARGET_DIR)/.configured: $(MPFR_DIR)/.unpacked $(STAGING_DIR)/usr/lib/$(G
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		$(PREFERRED_LIB_FLAGS) \
-		--with-gmp=$(GMP_TARGET_DIR) \
+		--with-gmp-build=$(GMP_TARGET_DIR) \
 		$(DISABLE_NLS) \
-	);
+	)
 	touch $@
 
 $(MPFR_TARGET_DIR)/.libs/$(MPFR_BINARY): $(MPFR_TARGET_DIR)/.configured
@@ -67,8 +57,8 @@ $(MPFR_TARGET_DIR)/.libs/$(MPFR_BINARY): $(MPFR_TARGET_DIR)/.configured
 	$(MAKE) -C $(MPFR_TARGET_DIR)
 
 $(STAGING_DIR)/usr/lib/$(MPFR_BINARY): $(MPFR_TARGET_DIR)/.libs/$(MPFR_BINARY)
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(MPFR_TARGET_DIR) install;
-	$(STRIP) --strip-unneeded $(STAGING_DIR)/usr/lib/libmpfr$(LIBTGTEXT)*
+	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(MPFR_TARGET_DIR) install
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(STAGING_DIR)/usr/lib/libmpfr$(LIBTGTEXT)*
 
 $(TARGET_DIR)/usr/lib/libmpfr.so $(TARGET_DIR)/usr/lib/libmpfr.so.$(MPFR_LIBVERSION) $(TARGET_DIR)/usr/lib/libmpfr.a: $(STAGING_DIR)/usr/lib/$(MPFR_BINARY)
 	cp -dpf $(STAGING_DIR)/usr/lib/libmpfr$(LIBTGTEXT)* $(TARGET_DIR)/usr/lib/
@@ -76,6 +66,10 @@ ifeq ($(BR2_PACKAGE_LIBMPFR_HEADERS),y)
 	cp -dpf $(STAGING_DIR)/usr/include/mpfr.h $(STAGING_DIR)/usr/include/mpf2mpfr.h \
 		$(TARGET_DIR)/usr/include/
 endif
+
+.PHONY: libmpfr-source
+
+libmpfr-source: $(DL_DIR)/$(MPFR_SOURCE) $(MPFR_PATCH_SOURCE)
 
 libmpfr: uclibc $(TARGET_DIR)/usr/lib/libmpfr$(LIBTGTEXT)
 stage-libmpfr: uclibc $(STAGING_DIR)/usr/lib/$(MPFR_BINARY)
@@ -104,7 +98,7 @@ $(MPFR_DIR2)/.configured: $(MPFR_DIR)/.unpacked $(GMP_HOST_DIR)/lib/$(GMP_HOST_B
 		--enable-static \
 		--with-gmp=$(GMP_HOST_DIR) \
 		$(DISABLE_NLS) \
-	);
+	)
 	touch $@
 
 $(MPFR_HOST_DIR)/lib/libmpfr$(HOST_LIBEXT) $(MPFR_HOST_DIR)/lib/libmpfr$(HOST_SHREXT) $(MPFR_HOST_DIR)/lib/libmpfr$(HOST_SHREXT).$(MPFR_LIBVERSION): $(MPFR_DIR2)/.configured

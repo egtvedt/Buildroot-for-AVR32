@@ -35,12 +35,12 @@ $(DMRAID_DIR)/.configured: $(DMRAID_DIR)/.unpacked
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 		--with-user=$(shell id -un) --with-group=$(shell id -gn) \
-	);
+	)
 	touch $(DMRAID_DIR)/.configured
 
 $(DMRAID_DIR)/tools/$(DMRAID_BINARY): $(DMRAID_DIR)/.configured
 	$(MAKE1) -C $(DMRAID_DIR)
-	-$(STRIP) $(DMRAID_DIR)/tools/$(DMRAID_BINARY)
+	-$(STRIPCMD) $(DMRAID_DIR)/tools/$(DMRAID_BINARY)
 	-$(UPX) --best $(DMRAID_DIR)/tools/$(DMRAID_BINARY)
 	touch -c $(DMRAID_DIR)/tools/$(DMRAID_BINARY)
 

@@ -3,12 +3,12 @@
 # lzo
 #
 # Note: this builds only a static library, it does not provide
-#       anything to be installed into the target system.
+# anything to be installed into the target system.
 #
 #############################################################
 LZO_VERSION:=1.08
 LZO_SOURCE:=lzo_$(LZO_VERSION).orig.tar.gz
-LZO_SITE:=http://ftp.debian.org/debian/pool/main/l/lzo
+LZO_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/l/lzo
 #LZO_SOURCE:=lzo-$(LZO_VERSION).tar.bz2
 #LZO_SITE:=http://www.oberhumer.com/opensource/lzo/download
 LZO_DIR:=$(BUILD_DIR)/lzo-$(LZO_VERSION)
@@ -40,7 +40,7 @@ $(LZO_DIR)/.configured: $(LZO_DIR)/.unpacked
 		--includedir=/usr/include \
 		--libdir=/usr/lib \
 		$(LZO_CONFIG_SHARED) \
-	);
+	)
 	touch $@
 
 $(LZO_DIR)/src/liblzo.la: $(LZO_DIR)/.configured
@@ -48,6 +48,7 @@ $(LZO_DIR)/src/liblzo.la: $(LZO_DIR)/.configured
 
 $(STAGING_DIR)/usr/lib/liblzo.a: $(LZO_DIR)/src/liblzo.la
 	$(MAKE) CC="$(TARGET_CC)" DESTDIR=$(STAGING_DIR) -C $(LZO_DIR) install
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/liblzo.la
 	touch -c $@
 
 lzo: uclibc $(STAGING_DIR)/usr/lib/liblzo.a

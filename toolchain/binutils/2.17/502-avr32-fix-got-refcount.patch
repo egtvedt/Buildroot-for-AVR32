@@ -1,24 +1,15 @@
-Index: binutils/bfd/elf32-avr32.c
-===================================================================
---- binutils/bfd/elf32-avr32.c	(revision 38993)
-+++ binutils/bfd/elf32-avr32.c	(working copy)
-@@ -244,10 +244,12 @@
- 
- /*
-   Try to limit memory usage to something reasonable when sorting the
--  GOT.  If we ever get more than this many references to the same
--  symbol, we may need to do something special.
-+  GOT.  If just a couple of entries end up getting more references
-+  than this, it won't affect performance at all, but if there are many
-+  of them, we could end up with the wrong symbols being assigned the
-+  first GOT entries.
+--- a/bfd/elf32-avr32.c	2008-02-29 08:20:57.000000000 -0500
++++ b/bfd/elf32-avr32.c	2008-02-29 08:26:01.000000000 -0500
+@@ -247,7 +247,7 @@ avr32_elf_link_hash_table_create(bfd *ab
+   GOT.  If we ever get more than this many references to the same
+   symbol, we may need to do something special.
  */
 -#define MAX_NR_GOT_HOLES	8192
 +#define MAX_NR_GOT_HOLES	2048
  
  /*
    AVR32 GOT entry.  We need to keep track of refcounts and offsets
-@@ -916,16 +918,21 @@
+@@ -916,16 +916,21 @@ avr32_elf_size_dynamic_sections (bfd *ou
  static void
  insert_got_entry(struct elf_avr32_link_hash_table *htab, struct got_entry *got)
  {
@@ -46,7 +37,7 @@ Index: binutils/bfd/elf32-avr32.c
  }
  
  /* Decrement the refcount of a GOT entry and update its position in
-@@ -933,7 +940,6 @@
+@@ -933,7 +938,6 @@ insert_got_entry(struct elf_avr32_link_h
  static void
  unref_got_entry(struct elf_avr32_link_hash_table *htab, struct got_entry *got)
  {
@@ -54,7 +45,7 @@ Index: binutils/bfd/elf32-avr32.c
    BFD_ASSERT(got->refcount > 0);
  
    if (got->next)
-@@ -955,7 +961,6 @@
+@@ -955,7 +959,6 @@ ref_got_entry(struct elf_avr32_link_hash
    insert_got_entry(htab, got);
  
    BFD_ASSERT(got->refcount > 0);
@@ -62,7 +53,7 @@ Index: binutils/bfd/elf32-avr32.c
  }
  
  /* Assign offsets to all GOT entries we intend to keep.  The entries
-@@ -1106,13 +1111,16 @@
+@@ -1106,13 +1109,17 @@ avr32_elf_size_dynamic_sections (bfd *ou
      {
        /* Allocate holes for the pigeonhole sort algorithm */
        pr_debug("Highest GOT refcount: %d\n", htab->nr_got_holes);
@@ -70,6 +61,7 @@ Index: binutils/bfd/elf32-avr32.c
 +      /* Limit the memory usage by clipping the number of pigeonholes
 +       * at a predefined maximum. All entries with a higher refcount
 +       * will end up in the last pigeonhole.  */
++
        if (htab->nr_got_holes >= MAX_NR_GOT_HOLES)
  	{
 -	  /* TODO: Do something clever (different sorting algorithm) */
@@ -77,10 +69,10 @@ Index: binutils/bfd/elf32-avr32.c
 -			     htab->nr_got_holes, MAX_NR_GOT_HOLES);
 -	  bfd_set_error(bfd_error_no_memory);
 -	  return FALSE;
-+	  htab->nr_got_holes = MAX_NR_GOT_HOLES - 1;
++        htab->nr_got_holes = MAX_NR_GOT_HOLES - 1;
 +
-+	  pr_debug("Limiting maximum number of GOT pigeonholes to %u\n",
-+			     htab->nr_got_holes);
++        pr_debug("Limiting maximum number of GOT pigeonholes to %u\n",
++                           htab->nr_got_holes);
  	}
        htab->got_hole = bfd_zalloc(output_bfd,
  				  sizeof(struct got_entry *)

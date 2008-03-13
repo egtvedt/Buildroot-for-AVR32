@@ -3,15 +3,22 @@
 # portage
 #
 #############################################################
-PORTAGE_VERSION:=2.0.51.22
-PORTAGE_SOURCE:=portage-$(PORTAGE_VERSION).tar.bz2
+PORTAGE_BASE_VERSION:=2.1.3
+PORTAGE_DOWNLOAD_VERSION:=$(PORTAGE_BASE_VERSION).16
+PORTAGE_PATCH_VERSION:=.16
+PORTAGE_PATCH_APPLY:=n
+PORTAGE_VERSION:=$(PORTAGE_BASE_VERSION)$(PORTAGE_PATCH_VERSION)
+PORTAGE_PATCH:=portage-$(PORTAGE_VERSION).patch.bz2
+
+PORTAGE_SOURCE:=portage-$(PORTAGE_DOWNLOAD_VERSION).tar.bz2
 PORTAGE_SITE:=http://gentoo.osuosl.org/distfiles
 PORTAGE_CAT:=$(BZCAT)
+PORTAGE_DOWNLOAD_DIR:=$(BUILD_DIR)/portage-$(PORTAGE_DOWNLOAD_VERSION)
 PORTAGE_DIR:=$(BUILD_DIR)/portage-$(PORTAGE_VERSION)
 PORTAGE_TARGET_DIR:=$(TARGET_DIR)/usr/lib/portage
 PORTAGE_TARGET_BINARY:=usr/bin/emerge
 
-SANDBOX_VERSION:=1.2.13
+SANDBOX_VERSION:=1.2.18.1
 SANDBOX_SOURCE:=sandbox-$(SANDBOX_VERSION).tar.bz2
 SANDBOX_SITE:=$(PORTAGE_SITE)
 SANDBOX_CAT:=$(PORTAGE_CAT)
@@ -42,25 +49,42 @@ endif
 
 $(DL_DIR)/$(PORTAGE_SOURCE):
 	$(WGET) -P $(DL_DIR) $(PORTAGE_SITE)/$(PORTAGE_SOURCE)
+
 $(DL_DIR)/$(SANDBOX_SOURCE):
 	$(WGET) -P $(DL_DIR) $(SANDBOX_SITE)/$(SANDBOX_SOURCE)
 
 portage-source: $(DL_DIR)/$(PORTAGE_SOURCE)
 sandbox-source: $(DL_DIR)/$(SANDBOX_SOURCE)
 
-$(PORTAGE_DIR)/.unpacked: $(DL_DIR)/$(PORTAGE_SOURCE)
+$(PORTAGE_DOWNLOAD_DIR)/.unpacked: $(DL_DIR)/$(PORTAGE_SOURCE)
 	$(PORTAGE_CAT) $(DL_DIR)/$(PORTAGE_SOURCE) | tar -C $(BUILD_DIR) -xf -
+	touch $@
+
+ifeq ($(PORTAGE_PATCH_APPLY),y)
+$(DL_DIR)/$(PORTAGE_PATCH):
+	$(WGET) -P $(DL_DIR) $(PORTAGE_SITE)/$(PORTAGE_PATCH)
+
+$(PORTAGE_DIR)/.patched: $(PORTAGE_DOWNLOAD_DIR)/.unpacked $(DL_DIR)/$(PORTAGE_PATCH)
+	mv -f $(BUILD_DIR)/portage-$(PORTAGE_DOWNLOAD_VERSION) $(PORTAGE_DIR)
 	rm -f $(PORTAGE_DIR)/bin/tbz2tool
-	touch $(PORTAGE_DIR)/.unpacked
+	(cd $(PORTAGE_DIR); $(PORTAGE_CAT) $(DL_DIR)/$(PORTAGE_PATCH) | patch -p0)
+	touch $@
+else
+$(PORTAGE_DIR)/.patched: $(PORTAGE_DOWNLOAD_DIR)/.unpacked
+	rm -f $(PORTAGE_DIR)/bin/tbz2tool
+	touch $@
+endif
+
 $(SANDBOX_DIR)/.unpacked: $(DL_DIR)/$(SANDBOX_SOURCE)
 	$(SANDBOX_CAT) $(DL_DIR)/$(SANDBOX_SOURCE) | tar -C $(BUILD_DIR) -xf -
-	touch $(SANDBOX_DIR)/.unpacked
+	touch $@
 
-$(PORTAGE_DIR)/.compiled: $(PORTAGE_DIR)/.unpacked
+$(PORTAGE_DIR)/.compiled: $(PORTAGE_DIR)/.patched
 	$(TARGET_CC) $(TARGET_CFLAGS) $(PORTAGE_DIR)/src/tbz2tool.c -o $(PORTAGE_DIR)/src/tbz2tool
-	touch $(PORTAGE_DIR)/.compiled
+	touch $@
+
 $(SANDBOX_DIR)/.compiled: $(SANDBOX_DIR)/.unpacked
-	touch $(SANDBOX_DIR)/.compiled
+	touch $@
 
 newins=install -D
 doins=install
@@ -70,14 +94,20 @@ dosym=ln -sf
 $(TARGET_DIR)/$(PORTAGE_TARGET_BINARY): $(PORTAGE_DIR)/.compiled
 	(cd $(PORTAGE_DIR)/cnf; \
 		$(newins) make.globals $(TARGET_DIR)/etc/make.globals; \
-		$(newins) make.globals.$(PORTAGE_ARCH) $(TARGET_DIR)/etc/make.globals; \
 		$(newins) make.conf $(TARGET_DIR)/etc/make.conf; \
-		$(newins) make.conf.$(PORTAGE_ARCH) $(TARGET_DIR)/etc/make.conf; \
+		cp $(TARGET_DIR)/etc/make.conf $(TARGET_DIR)/etc/make.conf.$(PORTAGE_ARCH); \
+		patch $(TARGET_DIR)/etc/make.conf.$(PORTAGE_ARCH) $(PORTAGE_DIR)/cnf/make.conf.$(PORTAGE_ARCH).diff; \
 		$(doins) etc-update.conf dispatch-conf.conf $(TARGET_DIR)/etc; \
 	)
+# $(newins) make.globals.$(PORTAGE_ARCH) $(TARGET_DIR)/etc/make.globals; \
+# $(newins) make.conf.$(PORTAGE_ARCH) $(TARGET_DIR)/etc/make.conf; \
 
 	$(dodir) $(PORTAGE_TARGET_DIR)/pym
-	$(doins) $(PORTAGE_DIR)/pym/* $(PORTAGE_TARGET_DIR)/pym/
+	$(doins) $(PORTAGE_DIR)/pym/*.py $(PORTAGE_TARGET_DIR)/pym/
+	mkdir -p $(PORTAGE_TARGET_DIR)/pym/cache
+	$(doins) $(PORTAGE_DIR)/pym/cache/*.py $(PORTAGE_TARGET_DIR)/pym
+	mkdir -p $(PORTAGE_TARGET_DIR)/pym/elog_modules
+	$(doins) $(PORTAGE_DIR)/pym/elog_modules/*.py $(PORTAGE_TARGET_DIR)/pym/elog_modules
 
 	$(dodir) $(PORTAGE_TARGET_DIR)/bin
 	$(doexe) $(PORTAGE_DIR)/bin/* $(PORTAGE_DIR)/src/tbz2tool $(PORTAGE_TARGET_DIR)/bin/
@@ -89,10 +119,10 @@ $(TARGET_DIR)/$(PORTAGE_TARGET_BINARY): $(PORTAGE_DIR)/.compiled
 	$(dodir) $(PORTAGE_TARGET_DIR)/usr/sbin
 	$(dosym) newins $(PORTAGE_TARGET_DIR)/bin/donewins
 	for sbin in pkgmerge ebuild ebuild.sh etc-update dispatch-conf \
-		archive-conf fixpackages env-update regenworld emerge-webrsync ; do \
+		archive-conf fixpackages env-update regenworld emerge-webrsync; do \
 		$(dosym) ../lib/portage/bin/$${sbin} $(TARGET_DIR)/usr/sbin/$${sbin}; \
 	done
-	for bin in xpak repoman tbz2tool portageq g-cpan.pl quickpkg emerge ; do \
+	for bin in xpak repoman tbz2tool portageq g-cpan.pl quickpkg emerge; do \
 		$(dosym) ../lib/portage/bin/$${bin} $(TARGET_DIR)/usr/bin/$${bin}; \
 	done
 $(TARGET_DIR)/$(SANDBOX_TARGET_BINARY): $(SANDBOX_DIR)/.compiled
@@ -107,14 +137,14 @@ portage-clean:
 	rm -rf $(PORTAGE_TARGET_DIR)
 
 	for sbin in pkgmerge ebuild ebuild.sh etc-update dispatch-conf \
-		archive-conf fixpackages env-update regenworld emerge-webrsync ; do \
+		archive-conf fixpackages env-update regenworld emerge-webrsync; do \
 		rm -f $(TARGET_DIR)/usr/sbin/$${sbin}; \
 	done
-	for bin in xpak repoman tbz2tool portageq g-cpan.pl quickpkg emerge ; do \
+	for bin in xpak repoman tbz2tool portageq g-cpan.pl quickpkg emerge; do \
 		rm -f $(TARGET_DIR)/usr/bin/$${bin}; \
 	done
 sandbox-clean:
-	
+
 
 portage-dirclean:
 	rm -rf $(PORTAGE_DIR)

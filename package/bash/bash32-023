@@ -15,8 +15,8 @@ can free unallocated memory or free memory multiple times.
 
 Patch:
 
-*** a/subst.c	Tue Apr  3 16:47:19 2007
---- b/subst.c	Tue Jul 17 09:45:11 2007
+*** ../bash-3.2-patched/subst.c	Tue Apr  3 16:47:19 2007
+--- bash-3.2/subst.c	Tue Jul 17 09:45:11 2007
 ***************
 *** 3975,3979 ****
       patstr++;
@@ -34,8 +34,8 @@ Patch:
 !   free (temp1);
   
     temp1 = (char *)NULL;		/* shut up gcc */
-*** a/patchlevel.h	Thu Apr 13 08:31:04 2006
---- b/patchlevel.h	Mon Oct 16 14:22:54 2006
+*** ../bash-3.2/patchlevel.h	Thu Apr 13 08:31:04 2006
+--- bash-3.2/patchlevel.h	Mon Oct 16 14:22:54 2006
 ***************
 *** 26,30 ****
      looks for to find the patch level (for the sccs version string). */

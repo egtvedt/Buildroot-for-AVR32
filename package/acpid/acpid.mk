@@ -6,7 +6,7 @@
 ACPID_VERSION:=1.0.4
 ACPID_DIR=$(BUILD_DIR)/acpid-$(ACPID_VERSION)
 ACPID_SOURCE=acpid_$(ACPID_VERSION)-1.tar.gz
-ACPID_SITE=http://ftp.debian.org/debian/pool/main/a/acpid
+ACPID_SITE=$(BR2_DEBIAN_MIRROR)/debian/pool/main/a/acpid
 
 $(DL_DIR)/$(ACPID_SOURCE):
 	$(WGET) -P $(DL_DIR) $(ACPID_SITE)/$(ACPID_SOURCE)
@@ -18,8 +18,8 @@ $(ACPID_DIR)/.unpacked: $(DL_DIR)/$(ACPID_SOURCE)
 
 $(ACPID_DIR)/acpid: $(ACPID_DIR)/.unpacked
 	$(MAKE) CC=$(TARGET_CC) -C $(ACPID_DIR)
-	$(STRIP) -s $(ACPID_DIR)/acpid
-	$(STRIP) -s $(ACPID_DIR)/acpi_listen
+	$(STRIPCMD) $(STRIP_STRIP_ALL) $(ACPID_DIR)/acpid
+	$(STRIPCMD) $(STRIP_STRIP_ALL) $(ACPID_DIR)/acpi_listen
 	touch -c $(ACPID_DIR)/acpid $(ACPID_DIR)/acpi_listen
 
 $(TARGET_DIR)/usr/sbin/acpid: $(ACPID_DIR)/acpid

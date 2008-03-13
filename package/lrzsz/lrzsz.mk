@@ -55,14 +55,14 @@ $(LRZSZ_DIR)/.configured: $(LRZSZ_DIR)/.unpacked
 		--infodir=/usr/info \
 		$(DISABLE_NLS) \
 		--disable-timesync \
-	);
+	)
 	$(SED) "s/-lnsl//;" $(LRZSZ_DIR)/src/Makefile
 	$(SED) "s~\(#define ENABLE_SYSLOG.*\)~/* \1 */~;" $(LRZSZ_DIR)/config.h
 	touch $(LRZSZ_DIR)/.configured
 
 $(LRZSZ_DIR)/src/lrz: $(LRZSZ_DIR)/.configured
 	$(MAKE) CROSS_COMPILE="$(TARGET_CROSS)" prefix="$(TARGET_DIR)" -C $(LRZSZ_DIR)
-	$(STRIP) $(LRZSZ_DIR)/src/lrz $(LRZSZ_DIR)/src/lsz
+	$(STRIPCMD) $(LRZSZ_DIR)/src/lrz $(LRZSZ_DIR)/src/lsz
 
 $(TARGET_DIR)/usr/bin/rz: $(LRZSZ_DIR)/src/lrz
 	cp $(LRZSZ_DIR)/src/lrz $(TARGET_DIR)/usr/bin/rz

@@ -22,6 +22,7 @@ $(EXPAT_DIR)/.unpacked: $(DL_DIR)/$(EXPAT_SOURCE)
 	$(EXPAT_CAT) $(DL_DIR)/$(EXPAT_SOURCE) | \
 		tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(CONFIG_UPDATE) $(EXPAT_DIR)
+	$(CONFIG_UPDATE) $(EXPAT_DIR)/conftools
 	touch $@
 
 $(EXPAT_DIR)/.configured: $(EXPAT_DIR)/.unpacked
@@ -34,18 +35,18 @@ $(EXPAT_DIR)/.configured: $(EXPAT_DIR)/.unpacked
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--exec-prefix=/usr \
-		--bindir=/usr/bin \
-		--sbindir=/usr/sbin \
+		--bindir=/bin \
+		--sbindir=/sbin \
 		--libdir=/lib \
-		--libexecdir=/usr/lib \
+		--libexecdir=/lib \
 		--sysconfdir=/etc \
-		--datadir=/usr/share \
+		--datadir=/share \
 		--localstatedir=/var \
-		--includedir=/usr/include \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--includedir=/include \
+		--mandir=/man \
+		--infodir=/info \
 		--enable-shared \
-	);
+	)
 	touch $@
 
 $(EXPAT_DIR)/$(EXPAT_BINARY): $(EXPAT_DIR)/.configured
@@ -61,7 +62,7 @@ $(STAGING_DIR)/$(EXPAT_TARGET_BINARY): $(EXPAT_DIR)/$(EXPAT_BINARY)
 $(TARGET_DIR)/$(EXPAT_TARGET_BINARY): $(STAGING_DIR)/$(EXPAT_TARGET_BINARY)
 	cp -dpf $(STAGING_DIR)/usr/lib/libexpat.so* $(TARGET_DIR)/usr/lib/
 	#cp -dpf $(STAGING_DIR)/usr/bin/xmlwf $(TARGET_DIR)/usr/bin/xmlwf
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libexpat.so*
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libexpat.so*
 	touch -c $@
 
 expat: uclibc pkgconfig $(TARGET_DIR)/$(EXPAT_TARGET_BINARY)
@@ -70,7 +71,7 @@ expat-clean:
 	rm -f $(EXPAT_DIR)/.configured
 	rm -f $(STAGING_DIR)/usr/lib/libexpat.* \
 		$(TARGET_DIR)/usr/lib/libexpat.*
-	#rm -f $(STAGING_DIR)/usr/bin/xmlwf  $(TARGET_DIR)/usr/bin/xmlwf
+	#rm -f $(STAGING_DIR)/usr/bin/xmlwf $(TARGET_DIR)/usr/bin/xmlwf
 	-$(MAKE) -C $(EXPAT_DIR) clean
 
 expat-dirclean:

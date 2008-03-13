@@ -8,28 +8,31 @@ BINUTILS_VERSION:=$(strip $(subst ",, $(BR2_BINUTILS_VERSION)))
 
 EXTRA_BINUTILS_CONFIG_OPTIONS=$(strip $(subst ",, $(BR2_EXTRA_BINUTILS_CONFIG_OPTIONS)))
 #"))
-BINUTILS_SITE:=ftp://ftp.kernel.org/pub/linux/devel/binutils
+BINUTILS_SITE:=$(BR2_KERNEL_MIRROR)/linux/devel/binutils
+ifeq ($(BINUTILS_VERSION),2.18)
+BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
+endif
 ifeq ($(BINUTILS_VERSION),2.17)
-BINUTILS_SITE:=ftp://ftp.gnu.org/gnu/binutils/
+BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
 endif
 ifeq ($(BINUTILS_VERSION),2.16)
-BINUTILS_SITE:=ftp://ftp.gnu.org/gnu/binutils/
+BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
 BINUTILS_NO_MPFR:=y
 endif
 ifeq ($(BINUTILS_VERSION),2.16.1)
-BINUTILS_SITE:=ftp://ftp.gnu.org/gnu/binutils/
+BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
 BINUTILS_NO_MPFR:=y
 endif
 ifeq ($(BINUTILS_VERSION),2.15)
-BINUTILS_SITE:=ftp://ftp.gnu.org/gnu/binutils/
+BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
 BINUTILS_NO_MPFR:=y
 endif
 ifeq ($(BINUTILS_VERSION),2.14)
-BINUTILS_SITE:=ftp://ftp.gnu.org/gnu/binutils/
+BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
 BINUTILS_NO_MPFR:=y
 endif
 ifeq ($(BINUTILS_VERSION),2.13)
-BINUTILS_SITE:=ftp://ftp.gnu.org/gnu/binutils/
+BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
 BINUTILS_NO_MPFR:=y
 endif
 ifeq ($(BINUTILS_VERSION),2.15.97)
@@ -41,10 +44,10 @@ endif
 BINUTILS_HOST_PREREQ:=
 BINUTILS_TARGET_PREREQ:=
 
-ifeq ($(findstring 3.,$(GCC_VERSION)),3.)
+ifeq ($(findstring x3.,x$(GCC_VERSION)),x3.)
 BINUTILS_NO_MPFR:=y
 endif
-ifeq ($(findstring 4.0,$(GCC_VERSION)),4.0)
+ifeq ($(findstring x4.0,x$(GCC_VERSION)),x4.0)
 BINUTILS_NO_MPFR:=y
 endif
 
@@ -62,8 +65,16 @@ BINUTILS_TARGET_CONFIG_OPTIONS=--with-gmp="$(GMP_TARGET_DIR)"
 BINUTILS_TARGET_CONFIG_OPTIONS+=--with-mpfr="$(MPFR_TARGET_DIR)"
 endif
 
-BINUTILS_SOURCE:=binutils-$(BINUTILS_VERSION).tar.bz2
-BINUTILS_DIR:=$(TOOL_BUILD_DIR)/binutils-$(BINUTILS_VERSION)
+BINUTILS_OFFICIAL_VERSION:=$(BINUTILS_VERSION)$(VENDOR_SUFFIX)$(VENDOR_BINUTILS_RELEASE)
+ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
+BINUTILS_PATCH_DIR:=toolchain/binutils/$(BINUTILS_VERSION)
+else # ifeq ($(BR2_TOOLCHAIN_EXTERNAL_SOURCE),)
+BINUTILS_SITE:=$(VENDOR_SITE)
+BINUTILS_PATCH_DIR:=$(VENDOR_PATCH_DIR)/binutils-$(BINUTILS_OFFICIAL_VERSION)
+endif
+
+BINUTILS_SOURCE:=binutils-$(BINUTILS_OFFICIAL_VERSION).tar.bz2
+BINUTILS_DIR:=$(TOOL_BUILD_DIR)/binutils-$(BINUTILS_OFFICIAL_VERSION)
 BINUTILS_CAT:=$(BZCAT)
 
 BINUTILS_DIR1:=$(TOOL_BUILD_DIR)/binutils-$(BINUTILS_VERSION)-build
@@ -72,7 +83,7 @@ $(DL_DIR)/$(BINUTILS_SOURCE):
 	mkdir -p $(DL_DIR)
 	$(WGET) -P $(DL_DIR) $(BINUTILS_SITE)/$(BINUTILS_SOURCE)
 
-binutils-unpacked: $(BINUTILS_DIR)/.unpacked
+binutils-unpacked: $(BINUTILS_DIR)/.patched
 $(BINUTILS_DIR)/.unpacked: $(DL_DIR)/$(BINUTILS_SOURCE)
 	mkdir -p $(TOOL_BUILD_DIR)
 	rm -rf $(BINUTILS_DIR)
@@ -82,12 +93,12 @@ $(BINUTILS_DIR)/.unpacked: $(DL_DIR)/$(BINUTILS_SOURCE)
 
 $(BINUTILS_DIR)/.patched: $(BINUTILS_DIR)/.unpacked
 	# Apply appropriate binutils patches.
-	toolchain/patch-kernel.sh $(BINUTILS_DIR) toolchain/binutils/$(BINUTILS_VERSION) \*.patch
+	toolchain/patch-kernel.sh $(BINUTILS_DIR) $(BINUTILS_PATCH_DIR) \*.patch
 	touch $@
 
 $(BINUTILS_DIR1)/.configured: $(BINUTILS_DIR)/.patched
 	mkdir -p $(BINUTILS_DIR1)
-	(cd $(BINUTILS_DIR1); rm -rf config.cache ; \
+	(cd $(BINUTILS_DIR1); rm -rf config.cache; \
 		$(HOST_CONFIGURE_OPTS) \
 		$(BINUTILS_DIR)/configure \
 		--prefix=$(BR2_SYSROOT_PREFIX)/usr \
@@ -100,7 +111,8 @@ $(BINUTILS_DIR1)/.configured: $(BINUTILS_DIR)/.patched
 		$(MULTILIB) \
 		--disable-werror \
 		$(SOFT_FLOAT_CONFIG_OPTION) \
-		$(EXTRA_BINUTILS_CONFIG_OPTIONS));
+		$(EXTRA_BINUTILS_CONFIG_OPTIONS) \
+	)
 	touch $@
 
 $(BINUTILS_DIR1)/binutils/objdump: $(BINUTILS_DIR1)/.configured
@@ -113,7 +125,7 @@ $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-ld: $(BINUTILS_DIR1)/binutils/obj
 	#	tooldir=/usr build_tooldir=/usr install
 	#rm -f $(STAGING_DIR)/usr/bin/{ar,as,ld,nm,objdump,ranlib,strip}
 
-binutils: dependencies uclibc-configured $(BINUTILS_HOST_PREREQ) $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-ld
+binutils: uclibc-configured $(BINUTILS_HOST_PREREQ) $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-ld
 
 binutils-source: $(DL_DIR)/$(BINUTILS_SOURCE)
 
@@ -121,7 +133,7 @@ binutils-clean:
 	rm -rf $(STAGING_DIR)/usr/bin/*{ar,as,ld,nm,objdump,ranlib,strip} \
 		$(STAGING_DIR)/usr/lib/{libiberty*,ldscripts}
 	-$(MAKE) -C $(BINUTILS_DIR1) DESTDIR=$(STAGING_DIR) \
-	 	tooldir=/usr build_tooldir=/usr uninstall
+		tooldir=/usr build_tooldir=/usr uninstall
 	-$(MAKE) -C $(BINUTILS_DIR1) clean
 
 binutils-dirclean:
@@ -137,7 +149,7 @@ binutils-dirclean:
 BINUTILS_DIR2:=$(BUILD_DIR)/binutils-$(BINUTILS_VERSION)-target
 $(BINUTILS_DIR2)/.configured: $(BINUTILS_DIR)/.patched
 	mkdir -p $(BINUTILS_DIR2)
-	(cd $(BINUTILS_DIR2); rm -rf config.cache ; \
+	(cd $(BINUTILS_DIR2); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(BINUTILS_DIR)/configure \
 		--prefix=/usr \
@@ -149,7 +161,8 @@ $(BINUTILS_DIR2)/.configured: $(BINUTILS_DIR)/.patched
 		$(MULTILIB) \
 		$(BINUTILS_TARGET_CONFIG_OPTIONS) \
 		--disable-werror \
-		$(SOFT_FLOAT_CONFIG_OPTION) );
+		$(SOFT_FLOAT_CONFIG_OPTION) \
+	)
 	touch $@
 
 $(BINUTILS_DIR2)/binutils/objdump: $(BINUTILS_DIR2)/.configured
@@ -162,15 +175,16 @@ $(TARGET_DIR)/usr/bin/ld: $(BINUTILS_DIR2)/binutils/objdump
 		-C $(BINUTILS_DIR2) install
 	#rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
 	#	$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
-	-$(STRIP) $(TARGET_DIR)/usr/$(REAL_GNU_TARGET_NAME)/bin/* > /dev/null 2>&1
-	-$(STRIP) $(TARGET_DIR)/usr/bin/* > /dev/null 2>&1
+	-$(STRIPCMD) $(TARGET_DIR)/usr/$(REAL_GNU_TARGET_NAME)/bin/* > /dev/null 2>&1
+	-$(STRIPCMD) $(TARGET_DIR)/usr/bin/* > /dev/null 2>&1
 
 binutils_target: $(BINUTILS_TARGET_PREREQ) $(TARGET_DIR)/usr/bin/ld
 
 binutils_target-clean:
 	(cd $(TARGET_DIR)/usr/bin; \
 		rm -f addr2line ar as gprof ld nm objcopy \
-		      objdump ranlib readelf size strings strip)
+		      objdump ranlib readelf size strings strip; \
+	)
 	rm -f $(TARGET_DIR)/bin/$(REAL_GNU_TARGET_NAME)*
 	-$(MAKE) -C $(BINUTILS_DIR2) clean
 

@@ -35,12 +35,12 @@ $(VALGRIND_DIR)/.configured: $(VALGRIND_DIR)/.patched
 		--disable-tui --disable-valgrindtk \
 		--without-x --without-included-gettext \
 		--disable-tls \
-	);
+	)
 	touch $(VALGRIND_DIR)/.configured
 
 $(VALGRIND_DIR)/none/vgskin_none.so: $(VALGRIND_DIR)/.configured
 	$(MAKE) -C $(VALGRIND_DIR)
-	-$(STRIP) --strip-unneeded $(VALGRIND_DIR)/*.so*
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(VALGRIND_DIR)/*.so*
 	touch -c $(VALGRIND_DIR)/none/vgskin_none.so
 
 $(TARGET_DIR)/usr/bin/valgrind: $(VALGRIND_DIR)/none/vgskin_none.so
@@ -58,7 +58,7 @@ $(TARGET_DIR)/usr/bin/valgrind: $(VALGRIND_DIR)/none/vgskin_none.so
 	    infodir=$(TARGET_DIR)/usr/info \
 	    mandir=$(TARGET_DIR)/usr/man \
 	    includedir=$(TARGET_DIR)/usr/include \
-	    -C $(VALGRIND_DIR) install;
+	    -C $(VALGRIND_DIR) install
 	mv $(TARGET_DIR)/usr/bin/valgrind $(TARGET_DIR)/usr/bin/valgrind.bin
 	cp package/valgrind/uclibc.supp $(TARGET_DIR)/usr/lib/valgrind/
 	cp package/valgrind/valgrind.sh $(TARGET_DIR)/usr/bin/valgrind

@@ -1,7 +1,7 @@
 config BR2_PACKAGE_XORG
+	depends BR2_DEPRECATED
 	bool "X.org X Window System"
-	default n
-	depends !BR2_PACKAGE_TINYX
+	default y if BR2_PACKAGE_XSERVER_xorg
 	select BR2_PACKAGE_ZLIB
 	select BR2_PACKAGE_LIBPNG
 	select BR2_PACKAGE_EXPAT
@@ -10,7 +10,6 @@ config BR2_PACKAGE_XORG
 	help
 	  The official X Window system and server.
 
-comment "X.org X Window System disabled, tinyx selected"
-	depends on BR2_PACKAGE_TINYX
-
+comment "X.org 6.8.2 X Window System disabled"
+	depends on BR2_PACKAGE_TINYX||BR2_PACKAGE_XORG7
 

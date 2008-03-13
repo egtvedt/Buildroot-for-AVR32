@@ -17,18 +17,20 @@ $(DL_DIR)/$(FBSET_SOURCE):
 $(FBSET_DIR)/.unpacked: $(DL_DIR)/$(FBSET_SOURCE)
 	$(FBSET_CAT) $(DL_DIR)/$(FBSET_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(FBSET_DIR) package/fbset/ fbset-$(FBSET_VERSION)\*.patch\*
-	@touch $@
+	touch $@
 
 $(FBSET_DIR)/$(FBSET_BINARY): $(FBSET_DIR)/.unpacked
-	$(MAKE1) $(TARGET_CONFIGURE_OPTS) -C $(FBSET_DIR)
-	@touch -c $@
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(FBSET_DIR)
+	touch -c $@
 
 $(TARGET_DIR)/$(FBSET_TARGET_BINARY): $(FBSET_DIR)/$(FBSET_BINARY)
 	$(INSTALL) -m 755 $(FBSET_DIR)/$(FBSET_BINARY) $(TARGET_DIR)/$(FBSET_TARGET_BINARY)
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/$(FBSET_TARGET_BINARY)
-	@touch -c $@
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/$(FBSET_TARGET_BINARY)
+	touch -c $@
 
-fbset: linux26 uclibc $(TARGET_DIR)/$(FBSET_TARGET_BINARY)
+fbset: uclibc $(TARGET_DIR)/$(FBSET_TARGET_BINARY)
+
+fbset-source: $(DL_DIR)/$(FBSET_SOURCE)
 
 fbset-clean:
 	rm -f $(TARGET_DIR)/$(FBSET_TARGET_BINARY)

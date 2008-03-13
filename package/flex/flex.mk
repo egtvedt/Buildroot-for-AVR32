@@ -7,7 +7,7 @@ FLEX_VERSION:=2.5.33
 FLEX_PATCH_VERSION:=11
 FLEX_SOURCE:=flex_$(FLEX_VERSION).orig.tar.gz
 FLEX_PATCH:=flex_$(FLEX_VERSION)-$(FLEX_PATCH_VERSION).diff.gz
-FLEX_SITE:=http://ftp.debian.org/debian/pool/main/f/flex
+FLEX_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/f/flex
 FLEX_DIR:=$(BUILD_DIR)/flex-$(FLEX_VERSION)
 FLEX_CAT:=$(ZCAT)
 FLEX_BINARY:=flex
@@ -26,7 +26,7 @@ $(FLEX_DIR)/.unpacked: $(DL_DIR)/$(FLEX_SOURCE) $(DL_DIR)/$(FLEX_PATCH)
 ifneq ($(FLEX_PATCH),)
 	toolchain/patch-kernel.sh $(FLEX_DIR) $(DL_DIR) $(FLEX_PATCH)
 	if [ -d $(FLEX_DIR)/debian/patches ]; then \
-		toolchain/patch-kernel.sh $(FLEX_DIR) $(FLEX_DIR)/debian/patches \*.patch ; \
+		toolchain/patch-kernel.sh $(FLEX_DIR) $(FLEX_DIR)/debian/patches \*.patch; \
 	fi
 endif
 	$(CONFIG_UPDATE) $(FLEX_DIR)
@@ -49,12 +49,12 @@ $(FLEX_DIR)/.configured: $(FLEX_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		--includedir=$(TARGET_DIR)/usr/include \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
+	)
 	touch $@
 
 $(FLEX_DIR)/$(FLEX_BINARY): $(FLEX_DIR)/.configured
@@ -77,10 +77,16 @@ $(TARGET_DIR)/$(FLEX_TARGET_BINARY): $(FLEX_DIR)/$(FLEX_BINARY)
 	    includedir=$(TARGET_DIR)/usr/include \
 	    -C $(FLEX_DIR) install
 ifeq ($(strip $(BR2_PACKAGE_FLEX_LIBFL)),y)
-	install -D $(FLEX_DIR)/libfl.a $(STAGING_DIR)/lib/libfl.a
+	install -D $(FLEX_DIR)/libfl.a $(STAGING_DIR)/usr/lib/libfl.a
 endif
-	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
-		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/info
+endif
+ifneq ($(BR2_HAVE_MANPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/man
+endif
+	rm -rf $(TARGET_DIR)/share/locale
+	rm -rf $(TARGET_DIR)/usr/share/doc
 	(cd $(TARGET_DIR)/usr/bin; ln -snf flex lex)
 
 flex: uclibc $(TARGET_DIR)/$(FLEX_TARGET_BINARY)
@@ -97,8 +103,8 @@ flex-clean:
 	    sharedstatedir=$(TARGET_DIR)/usr/com \
 	    localstatedir=$(TARGET_DIR)/var \
 	    libdir=$(TARGET_DIR)/usr/lib \
-	    infodir=$(TARGET_DIR)/usr/info \
-	    mandir=$(TARGET_DIR)/usr/man \
+	    infodir=$(TARGET_DIR)/usr/share/info \
+	    mandir=$(TARGET_DIR)/usr/share/man \
 	    includedir=$(TARGET_DIR)/usr/include \
 		-C $(FLEX_DIR) uninstall
 	rm -f $(TARGET_DIR)/usr/bin/lex

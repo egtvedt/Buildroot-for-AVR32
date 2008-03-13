@@ -5,7 +5,7 @@
 #############################################################
 GETTEXT_VERSION:=0.16.1
 GETTEXT_SOURCE:=gettext-$(GETTEXT_VERSION).tar.gz
-GETTEXT_SITE:=http://ftp.gnu.org/pub/gnu/gettext
+GETTEXT_SITE:=$(BR2_GNU_MIRROR)/gnu/gettext
 GETTEXT_DIR:=$(BUILD_DIR)/gettext-$(GETTEXT_VERSION)
 GETTEXT_CAT:=$(ZCAT)
 GETTEXT_BINARY:=gettext-runtime/src/gettext
@@ -26,6 +26,7 @@ $(GETTEXT_DIR)/.unpacked: $(DL_DIR)/$(GETTEXT_SOURCE)
 	$(GETTEXT_CAT) $(DL_DIR)/$(GETTEXT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(GETTEXT_DIR) package/gettext/ gettext\*.patch
 	$(CONFIG_UPDATE) $(@D)
+	$(CONFIG_UPDATE) $(GETTEXT_DIR)/build-aux
 	touch $@
 
 ifeq ($(strip $(BR2_TOOLCHAIN_EXTERNAL)),y)
@@ -89,7 +90,6 @@ $(GETTEXT_DIR)/.configured: $(GETTEXT_DIR)/.unpacked
 		jm_cv_func_working_re_compile_pattern=yes \
 		ac_use_included_regex=no \
 		gl_cv_c_restrict=no \
-		LD=$(TARGET_CROSS)gcc \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -100,7 +100,7 @@ $(GETTEXT_DIR)/.configured: $(GETTEXT_DIR)/.unpacked
 		--enable-shared \
 		$(IGNORE_EXTERNAL_GETTEXT) \
 		$(OPENMP) \
-	);
+	)
 	touch $@
 
 $(GETTEXT_DIR)/$(GETTEXT_BINARY): $(GETTEXT_DIR)/.configured
@@ -116,12 +116,13 @@ $(STAGING_DIR)/$(GETTEXT_TARGET_BINARY): $(GETTEXT_DIR)/$(GETTEXT_BINARY)
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libgettextpo.la
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libgettextsrc.la
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libintl.la
-	rm -f $(STAGING_DIR)/usr/bin/autopoint $(STAGING_DIR)/usr/bin/envsubst \
-	 $(STAGING_DIR)/usr/bin/gettext.sh $(STAGING_DIR)/usr/bin/gettextize \
-	 $(STAGING_DIR)/usr/bin/msg* $(STAGING_DIR)/usr/bin/?gettext
+	rm -f $(addprefix $(STAGING_DIR)/usr/bin/, \
+		autopoint envsubst gettext.sh gettextize msg* ?gettext)
 	touch -c $@
 
 gettext: uclibc pkgconfig $(STAGING_DIR)/$(GETTEXT_TARGET_BINARY)
+
+gettext-unpacked: $(GETTEXT_DIR)/.unpacked
 
 gettext-clean:
 	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(GETTEXT_DIR) uninstall
@@ -139,21 +140,26 @@ gettext-dirclean:
 gettext-target: $(GETTEXT_DIR)/$(GETTEXT_BINARY)
 	$(MAKE) DESTDIR=$(TARGET_DIR) -C $(GETTEXT_DIR) install
 	chmod +x $(TARGET_DIR)/usr/lib/libintl.so* # identify as needing to be stripped
-	rm -rf  $(TARGET_DIR)/usr/info \
-		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc \
-		$(TARGET_DIR)/usr/doc $(TARGET_DIR)/usr/share/aclocal \
-		$(TARGET_DIR)/usr/include/libintl.h
-	-rmdir $(TARGET_DIR)/usr/include
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/info
+endif
+ifneq ($(BR2_HAVE_MANPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/man
+endif
+	rm -rf $(addprefix $(TARGET_DIR),/usr/share/doc \
+		/usr/doc /usr/share/aclocal /usr/include/libintl.h)
+	rmdir --ignore-fail-on-non-empty $(TARGET_DIR)/usr/include
 
 $(TARGET_DIR)/usr/lib/libintl.so: $(STAGING_DIR)/$(GETTEXT_TARGET_BINARY)
 	cp -dpf $(STAGING_DIR)/usr/lib/libgettext*.so* \
 		$(STAGING_DIR)/usr/lib/libintl*.so* $(TARGET_DIR)/usr/lib/
-	rm -f $(TARGET_DIR)/usr/lib/libgettext*.so*.la $(TARGET_DIR)/usr/lib/libintl*.so*.la
+	rm -f $(addprefix $(TARGET_DIR)/usr/lib/, \
+		libgettext*.so*.la libintl*.so*.la)
 	touch -c $@
 
 $(TARGET_DIR)/usr/lib/libintl.a: $(STAGING_DIR)/$(GETTEXT_TARGET_BINARY)
 	cp -dpf $(STAGING_DIR)/usr/lib/libgettext*.a $(TARGET_DIR)/usr/lib/
-	cp -dpf $(STAGING_DIR)/usr/lib/libintl*.a 	$(TARGET_DIR)/usr/lib/
+	cp -dpf $(STAGING_DIR)/usr/lib/libintl*.a $(TARGET_DIR)/usr/lib/
 	touch -c $@
 
 libintl: $(TARGET_DIR)/$(LIBINTL_TARGET_BINARY)

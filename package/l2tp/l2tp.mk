@@ -5,8 +5,8 @@
 #############################################################
 L2TP_VERSION:=0.70-pre20031121
 L2TP_SOURCE:=l2tpd_$(L2TP_VERSION).orig.tar.gz
-L2TP_PATCH:=l2tpd_$(L2TP_VERSION)-2.1.diff.gz
-L2TP_SITE:=ftp://ftp.debian.org/debian/pool/main/l/l2tpd/
+L2TP_PATCH:=l2tpd_$(L2TP_VERSION)-2.2.diff.gz
+L2TP_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/l/l2tpd/
 L2TP_DIR:=$(BUILD_DIR)/l2tpd-$(L2TP_VERSION)
 L2TP_CAT:=$(ZCAT)
 L2TP_BINARY:=l2tpd
@@ -26,7 +26,7 @@ $(L2TP_DIR)/.unpacked: $(DL_DIR)/$(L2TP_SOURCE) $(DL_DIR)/$(L2TP_PATCH)
 ifneq ($(L2TP_PATCH),)
 	(cd $(L2TP_DIR) && $(L2TP_CAT) $(DL_DIR)/$(L2TP_PATCH) | patch -p1)
 	if [ -d $(L2TP_DIR)/debian/patches ]; then \
-		toolchain/patch-kernel.sh $(L2TP_DIR) $(L2TP_DIR)/debian/patches \*.patch ; \
+		toolchain/patch-kernel.sh $(L2TP_DIR) $(L2TP_DIR)/debian/patches \*.patch; \
 	fi
 endif
 	toolchain/patch-kernel.sh $(L2TP_DIR) package/l2tp/ l2tp\*.patch
@@ -40,7 +40,7 @@ $(L2TP_DIR)/$(L2TP_BINARY): $(L2TP_DIR)/.unpacked
 $(TARGET_DIR)/$(L2TP_TARGET_BINARY): $(L2TP_DIR)/$(L2TP_BINARY)
 	cp -dpf $(L2TP_DIR)/$(L2TP_BINARY) $@
 	cp -dpf package/l2tp/l2tpd $(TARGET_DIR)/etc/init.d/
-	$(STRIP) $@
+	$(STRIPCMD) $@
 
 l2tp: uclibc $(TARGET_DIR)/$(L2TP_TARGET_BINARY)
 

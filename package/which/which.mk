@@ -3,7 +3,7 @@
 # which
 #
 #############################################################
-WHICH_VERSION:=2.16
+WHICH_VERSION:=2.19
 WHICH_SOURCE:=which-$(WHICH_VERSION).tar.gz
 WHICH_SITE:=http://www.xs4all.nl/~carlo17/which/
 WHICH_DIR:=$(BUILD_DIR)/which-$(WHICH_VERSION)
@@ -18,7 +18,8 @@ which-source: $(DL_DIR)/$(WHICH_SOURCE)
 
 $(WHICH_DIR)/.unpacked: $(DL_DIR)/$(WHICH_SOURCE)
 	$(WHICH_CAT) $(DL_DIR)/$(WHICH_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	touch $(WHICH_DIR)/.unpacked
+	$(CONFIG_UPDATE) $(WHICH_DIR)
+	touch $@
 
 $(WHICH_DIR)/.configured: $(WHICH_DIR)/.unpacked
 	(cd $(WHICH_DIR); rm -rf config.cache; \
@@ -29,8 +30,8 @@ $(WHICH_DIR)/.configured: $(WHICH_DIR)/.unpacked
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/ \
-	);
-	touch $(WHICH_DIR)/.configured
+	)
+	touch $@
 
 $(WHICH_DIR)/$(WHICH_BINARY): $(WHICH_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(WHICH_DIR)

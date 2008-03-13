@@ -24,7 +24,7 @@
 
 # TARGETS
 NCURSES_VERSION:=5.6
-NCURSES_SITE:=http://ftp.gnu.org/pub/gnu/ncurses
+NCURSES_SITE:=$(BR2_GNU_MIRROR)/gnu/ncurses
 NCURSES_DIR:=$(BUILD_DIR)/ncurses-$(NCURSES_VERSION)
 NCURSES_SOURCE:=ncurses-$(NCURSES_VERSION).tar.gz
 NCURSES_CAT:=$(ZCAT)
@@ -75,7 +75,7 @@ $(NCURSES_DIR)/.configured: $(NCURSES_DIR)/.patched
 		--enable-echo --enable-const --enable-overwrite \
 		--enable-broken_linker \
 		$(NCURSES_WANT_STATIC) \
-	);
+	)
 	touch $@
 
 $(NCURSES_DIR)/lib/libncurses.so.$(NCURSES_VERSION): $(NCURSES_DIR)/.configured
@@ -118,11 +118,11 @@ $(TARGET_DIR)/lib/libncurses.so.$(NCURSES_VERSION): $(STAGING_DIR)/lib/libncurse
 	cp -dpf $(STAGING_DIR)/usr/share/terminfo/a/ansi $(TARGET_DIR)/usr/share/terminfo/a
 	mkdir -p $(TARGET_DIR)/usr/share/terminfo/l
 	cp -dpf $(STAGING_DIR)/usr/share/terminfo/l/linux $(TARGET_DIR)/usr/share/terminfo/l
-	-$(STRIP) --strip-unneeded $@
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
 	touch -c $@
 
 $(TARGET_DIR)/usr/lib/libncurses.a: $(STAGING_DIR)/lib/libncurses.a
-	-mkdir -p $(TARGET_DIR)/usr/include
+	mkdir -p $(TARGET_DIR)/usr/include
 	cp -dpf $(NCURSES_DIR)/include/curses.h $(TARGET_DIR)/usr/include/ncurses.h
 	cp -dpf $(NCURSES_DIR)/include/ncurses_dll.h $(TARGET_DIR)/usr/include/ncurses_dll.h
 	cp -dpf $(NCURSES_DIR)/include/term.h $(TARGET_DIR)/usr/include/
@@ -130,14 +130,14 @@ $(TARGET_DIR)/usr/lib/libncurses.a: $(STAGING_DIR)/lib/libncurses.a
 	cp -dpf $(NCURSES_DIR)/include/termcap.h $(TARGET_DIR)/usr/include/
 	cp -dpf $(NCURSES_DIR)/lib/libncurses.a $(TARGET_DIR)/usr/lib/
 	rm -f $(TARGET_DIR)/usr/lib/terminfo
-	(cd $(TARGET_DIR)/usr/lib; ln -fs ../share/terminfo ; \
-	 ln -fs libncurses.a libcurses.a ; \
-	 ln -fs libncurses.a libtermcap.a ; \
+	(cd $(TARGET_DIR)/usr/lib; ln -fs ../share/terminfo; \
+	 ln -fs libncurses.a libcurses.a; \
+	 ln -fs libncurses.a libtermcap.a; \
 	)
 	(cd $(TARGET_DIR)/usr/include; ln -fs ncurses.h curses.h)
 	rm -f $(TARGET_DIR)/lib/libncurses.so
 	(cd $(TARGET_DIR)/usr/lib; ln -fs ../../lib/libncurses.so.$(NCURSES_VERSION) libncurses.so)
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libncurses.so.$(NCURSES_VERSION)
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libncurses.so.$(NCURSES_VERSION)
 	touch -c $@
 
 ncurses: $(TARGET_DIR)/lib/libncurses.so.$(NCURSES_VERSION)

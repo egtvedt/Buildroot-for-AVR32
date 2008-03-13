@@ -38,12 +38,12 @@ $(LIBGLIB12_DIR)/.configured: $(LIBGLIB12_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
+		--includedir=/usr/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
 		--enable-shared \
 		$(DISABLE_NLS) \
-	);
+	)
 	touch $(LIBGLIB12_DIR)/.configured
 
 $(LIBGLIB12_DIR)/.libs/$(LIBGLIB12_BINARY): $(LIBGLIB12_DIR)/.configured
@@ -60,11 +60,11 @@ $(STAGING_DIR)/lib/$(LIBGLIB12_BINARY): $(LIBGLIB12_DIR)/.libs/$(LIBGLIB12_BINAR
 	    sharedstatedir=$(STAGING_DIR)/com \
 	    localstatedir=$(STAGING_DIR)/var \
 	    libdir=$(STAGING_DIR)/lib \
-	    includedir=$(STAGING_DIR)/include \
+	    includedir=$(STAGING_DIR)/usr/include \
 	    oldincludedir=$(STAGING_DIR)/include \
 	    infodir=$(STAGING_DIR)/info \
 	    mandir=$(STAGING_DIR)/man \
-	    -C $(LIBGLIB12_DIR) install;
+	    -C $(LIBGLIB12_DIR) install
 
 $(TARGET_DIR)/lib/libglib-1.2.so.0.0.10: $(STAGING_DIR)/lib/$(LIBGLIB12_BINARY)
 	cp -dpf $(STAGING_DIR)/lib/libglib.so $(TARGET_DIR)/lib/
@@ -73,8 +73,8 @@ $(TARGET_DIR)/lib/libglib-1.2.so.0.0.10: $(STAGING_DIR)/lib/$(LIBGLIB12_BINARY)
 	cp -dpf $(STAGING_DIR)/lib/libgmodule.so $(TARGET_DIR)/lib/
 	cp -dpf $(STAGING_DIR)/lib/libgmodule-1.2.so.0 $(TARGET_DIR)/lib/
 	cp -dpf $(STAGING_DIR)/lib/libgmodule-1.2.so.0.0.10 $(TARGET_DIR)/lib/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libglib-1.2.so.0.0.10
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/lib/libgmodule-1.2.so.0.0.10
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libglib-1.2.so.0.0.10
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/lib/libgmodule-1.2.so.0.0.10
 
 libglib12: uclibc $(TARGET_DIR)/lib/libglib-1.2.so.0.0.10
 

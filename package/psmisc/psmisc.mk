@@ -28,7 +28,7 @@ $(PSMISC_DIR)/.configured: $(PSMISC_DIR)/.unpacked
 		--prefix=/ \
 		$(DISABLE_NLS) \
 		$(DISABLE_IPV6) \
-	);
+	)
 	touch $(PSMISC_DIR)/.configured
 
 $(PSMISC_DIR)/$(PSMISC_BINARY): $(PSMISC_DIR)/.configured
@@ -43,8 +43,8 @@ psmisc: uclibc ncurses $(TARGET_DIR)/$(PSMISC_TARGET_BINARY)
 psmisc-source: $(DL_DIR)/$(PSMISC_SOURCE)
 
 psmisc-clean:
-	for bin in fuser killall pstree oldfuser pstree.x11 ; do \
-		rm -f $(TARGET_DIR)/bin/$${bin} ; \
+	for bin in fuser killall pstree oldfuser pstree.x11; do \
+		rm -f $(TARGET_DIR)/bin/$${bin}; \
 	done
 
 psmisc-dirclean:

@@ -5,7 +5,7 @@
 #############################################################
 LIBFLOAT_SOURCE:=libfloat_990616.orig.tar.gz
 LIBFLOAT_PATCH:=libfloat_990616-3.diff.gz
-LIBFLOAT_SITE:=http://ftp.debian.org/debian/pool/main/libf/libfloat
+LIBFLOAT_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/libf/libfloat
 LIBFLOAT_CAT:=$(ZCAT)
 LIBFLOAT_DIR:=$(BUILD_DIR)/libfloat
 
@@ -32,22 +32,22 @@ $(LIBFLOAT_DIR)/.unpacked: $(DL_DIR)/$(LIBFLOAT_SOURCE) $(DL_DIR)/$(LIBFLOAT_PAT
 	$(MAKE) -C $(LIBFLOAT_DIR) clean
 	toolchain/patch-kernel.sh $(LIBFLOAT_DIR) $(DL_DIR) $(LIBFLOAT_PATCH)
 	toolchain/patch-kernel.sh $(LIBFLOAT_DIR) package/libfloat/ libfloat\*.patch
-	touch $(LIBFLOAT_DIR)/.unpacked
+	touch $@
 
 $(LIBFLOAT_DIR)/libfloat.so.1: $(LIBFLOAT_DIR)/.unpacked $(TARGET_CC)
 	$(MAKE) CC=$(TARGET_CC) LD=$(TARGET_CROSS)ld -C $(LIBFLOAT_DIR)
 
-$(STAGING_DIR)/lib/libfloat.so: $(LIBFLOAT_DIR)/libfloat.so.1
+$(STAGING_DIR)/lib/libfloat.so $(STAGING_DIR)/lib/libfloat.a: $(LIBFLOAT_DIR)/libfloat.so.1
 	cp -dpf $(LIBFLOAT_DIR)/libfloat.a $(STAGING_DIR)/lib/libfloat.a
 	cp -dpf $(LIBFLOAT_DIR)/libfloat.so.1 $(STAGING_DIR)/lib/libfloat.so.1
-	(cd $(STAGING_DIR)/lib ; ln -snf libfloat.so.1 libfloat.so)
+	(cd $(STAGING_DIR)/lib; ln -snf libfloat.so.1 libfloat.so)
 	cp -dpf $(LIBFLOAT_DIR)/libfloat.a $(TARGET_DIR)/usr/lib/libfloat.a
 	cp -dpf $(LIBFLOAT_DIR)/libfloat.so.1 $(TARGET_DIR)/lib/libfloat.so.1
-	$(STRIP) $(TARGET_DIR)/lib/libfloat.so.1 > /dev/null 2>&1
-	(cd $(TARGET_DIR)/lib ; ln -snf libfloat.so.1 libfloat.so)
-	(cd $(TARGET_DIR)/usr/lib ; ln -snf /lib/libfloat.so libfloat.so)
+	$(STRIPCMD) $(TARGET_DIR)/lib/libfloat.so.1 > /dev/null 2>&1
+	(cd $(TARGET_DIR)/lib; ln -snf libfloat.so.1 libfloat.so)
+	(cd $(TARGET_DIR)/usr/lib; ln -snf /lib/libfloat.so libfloat.so)
 
-libfloat: $(STAGING_DIR)/lib/libfloat.so
+libfloat: $(gcc_initial) $(STAGING_DIR)/lib/libfloat.so
 
 libfloat-clean:
 	-$(MAKE) -C $(LIBFLOAT_DIR) clean

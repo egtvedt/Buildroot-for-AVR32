@@ -58,12 +58,12 @@ $(DMALLOC_DIR)/.configured: $(DMALLOC_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
+		--includedir=/usr/include \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
 		--enable-shlib \
 		$(DMALLOC_CONFIG_ARGS) \
-	);
+	)
 	touch $@
 
 $(DMALLOC_DIR)/$(DMALLOC_BINARY): $(DMALLOC_DIR)/.configured
@@ -71,27 +71,27 @@ $(DMALLOC_DIR)/$(DMALLOC_BINARY): $(DMALLOC_DIR)/.configured
 
 $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY): $(DMALLOC_DIR)/$(DMALLOC_BINARY)
 	# both DESTDIR and PREFIX are ignored..
-	$(MAKE)	includedir="$(STAGING_DIR)/usr/include" \
+	$(MAKE) includedir="$(STAGING_DIR)/usr/include" \
 		bindir="$(STAGING_DIR)/usr/bin" \
 		libdir="$(STAGING_DIR)/usr/lib" \
 		shlibdir="$(STAGING_DIR)/usr/lib" \
 		includedir="$(STAGING_DIR)/usr/share/info/" \
 		-C $(DMALLOC_DIR) install
 	(cd $(STAGING_DIR)/usr/lib; \
-		mv libdmalloc*.so $(TARGET_DIR)/usr/lib);
+		mv libdmalloc*.so $(TARGET_DIR)/usr/lib)
 	cp -dpf $(STAGING_DIR)/usr/bin/dmalloc $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
-	$(STRIP) -s $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
+	$(STRIPCMD) $(STRIP_STRIP_ALL) $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
 
 dmalloc: uclibc $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
 
-dmalloc-clean: 
+dmalloc-clean:
 	rm -f $(TARGET_DIR)/usr/lib/libdmalloc*
 	rm -f $(STAGING_DIR)/usr/lib/libdmalloc*
-	rm -f $(STAGING_DIR)/include/dmalloc.h
+	rm -f $(STAGING_DIR)/usr/include/dmalloc.h
 	rm -f $(TARGET_DIR)/$(DMALLOC_TARGET_BINARY)
 	$(MAKE) -C $(DMALLOC_DIR) clean
 
-dmalloc-dirclean: 
+dmalloc-dirclean:
 	rm -rf $(DMALLOC_DIR)
 
 

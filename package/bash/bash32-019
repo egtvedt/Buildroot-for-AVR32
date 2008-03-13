@@ -17,8 +17,8 @@ loops.
 
 Patch:
 
-*** a/lib/readline/complete.c	Fri Jul 28 11:35:49 2006
---- b/lib/readline/complete.c	Tue Mar 13 08:50:16 2007
+*** ../bash-3.2-patched/lib/readline/complete.c	Fri Jul 28 11:35:49 2006
+--- bash-3.2/lib/readline/complete.c	Tue Mar 13 08:50:16 2007
 ***************
 *** 429,433 ****
         if (c == 'n' || c == 'N' || c == RUBOUT)
@@ -32,8 +32,8 @@ Patch:
 !       if (c == ABORT_CHAR || c < 0)
   	_rl_abort_internal ();
         if (for_pager && (c == NEWLINE || c == RETURN))
-*** a/lib/readline/input.c	Wed Aug 16 15:15:16 2006
---- b/lib/readline/input.c	Wed May  2 16:07:59 2007
+*** ../bash-3.2-patched/lib/readline/input.c	Wed Aug 16 15:15:16 2006
+--- bash-3.2/lib/readline/input.c	Wed May  2 16:07:59 2007
 ***************
 *** 514,518 ****
        int size;
@@ -91,8 +91,8 @@ Patch:
 !   for (i = 0; c >= 0 && i < mlen; i++)
       {
         mb[i] = (char)c;
-*** a/lib/readline/isearch.c	Mon Dec 26 17:18:53 2005
---- b/lib/readline/isearch.c	Fri Mar  9 14:30:59 2007
+*** ../bash-3.2-patched/lib/readline/isearch.c	Mon Dec 26 17:18:53 2005
+--- bash-3.2/lib/readline/isearch.c	Fri Mar  9 14:30:59 2007
 ***************
 *** 328,333 ****
   
@@ -115,8 +115,8 @@ Patch:
 !   /* Translate the keys we do something with to opcodes. */
     if (c >= 0 && _rl_keymap[c].type == ISFUNC)
       {
-*** a/lib/readline/misc.c	Mon Dec 26 17:20:46 2005
---- b/lib/readline/misc.c	Fri Mar  9 14:44:11 2007
+*** ../bash-3.2-patched/lib/readline/misc.c	Mon Dec 26 17:20:46 2005
+--- bash-3.2/lib/readline/misc.c	Fri Mar  9 14:44:11 2007
 ***************
 *** 147,150 ****
 --- 147,152 ----
@@ -126,8 +126,8 @@ Patch:
 + 	    return -1;
   	  return (_rl_dispatch (key, _rl_keymap));
   	}
-*** a/lib/readline/readline.c	Wed Aug 16 15:00:36 2006
---- b/lib/readline/readline.c	Fri Mar  9 14:47:24 2007
+*** ../bash-3.2-patched/lib/readline/readline.c	Wed Aug 16 15:00:36 2006
+--- bash-3.2/lib/readline/readline.c	Fri Mar  9 14:47:24 2007
 ***************
 *** 646,649 ****
 --- 669,677 ----
@@ -140,8 +140,8 @@ Patch:
 + 	}
         r = _rl_dispatch_subseq (nkey, cxt->dmap, cxt->subseq_arg);
         cxt->flags |= KSEQ_DISPATCHED;
-*** a/lib/readline/text.c	Fri Jul 28 11:55:27 2006
---- b/lib/readline/text.c	Sun Mar 25 13:41:38 2007
+*** ../bash-3.2-patched/lib/readline/text.c	Fri Jul 28 11:55:27 2006
+--- bash-3.2/lib/readline/text.c	Sun Mar 25 13:41:38 2007
 ***************
 *** 858,861 ****
 --- 864,870 ----
@@ -172,8 +172,8 @@ Patch:
 + 
     if (count < 0)
       return (_rl_char_search_internal (-count, bdir, c));
-*** a/lib/readline/vi_mode.c	Sat Jul 29 16:42:28 2006
---- b/lib/readline/vi_mode.c	Fri Mar  9 15:02:11 2007
+*** ../bash-3.2-patched/lib/readline/vi_mode.c	Sat Jul 29 16:42:28 2006
+--- bash-3.2/lib/readline/vi_mode.c	Fri Mar  9 15:02:11 2007
 ***************
 *** 887,890 ****
 --- 887,897 ----
@@ -326,8 +326,8 @@ Patch:
 !   else if (ch < 0 || ch < 'a' || ch > 'z')	/* make test against 0 explicit */
       {
         rl_ding ();
-*** a/patchlevel.h	Thu Apr 13 08:31:04 2006
---- b/patchlevel.h	Mon Oct 16 14:22:54 2006
+*** ../bash-3.2/patchlevel.h	Thu Apr 13 08:31:04 2006
+--- bash-3.2/patchlevel.h	Mon Oct 16 14:22:54 2006
 ***************
 *** 26,30 ****
      looks for to find the patch level (for the sccs version string). */

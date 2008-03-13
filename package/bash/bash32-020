@@ -15,8 +15,8 @@ loop from a builtin command  would leave the shell in an inconsistent state.
 
 Patch:
 
-*** a/sig.c	Wed Jan 25 14:57:59 2006
---- b/sig.c	Sat Mar 10 11:11:30 2007
+*** ../bash-3.2-patched/sig.c	Wed Jan 25 14:57:59 2006
+--- bash-3.2/sig.c	Sat Mar 10 11:11:30 2007
 ***************
 *** 351,354 ****
 --- 351,373 ----
@@ -43,8 +43,8 @@ Patch:
 + 
   /* What to do when we've been interrupted, and it is safe to handle it. */
   void
-*** a/sig.h	Wed Jan 25 14:50:27 2006
---- b/sig.h	Sat Mar 10 11:14:18 2007
+*** ../bash-3.2-patched/sig.h	Wed Jan 25 14:50:27 2006
+--- bash-3.2/sig.h	Sat Mar 10 11:14:18 2007
 ***************
 *** 122,125 ****
 --- 122,126 ----
@@ -53,8 +53,8 @@ Patch:
 + extern void top_level_cleanup __P((void));
   extern void throw_to_top_level __P((void));
   extern void jump_to_top_level __P((int)) __attribute__((__noreturn__));
-*** a/builtins/common.c	Tue Apr  3 16:47:13 2007
---- b/builtins/common.c	Mon Apr 30 15:01:33 2007
+*** ../bash-3.2-patched/builtins/common.c	Tue Apr  3 16:47:13 2007
+--- bash-3.2/builtins/common.c	Mon Apr 30 15:01:33 2007
 ***************
 *** 132,135 ****
 --- 132,136 ----
@@ -79,8 +79,8 @@ Patch:
 ! 	    }
   	}
         no_args (list->next);
-*** a/subst.c	Tue Apr  3 16:47:19 2007
---- b/subst.c	Tue Jul 17 09:45:11 2007
+*** ../bash-3.2-patched/subst.c	Tue Apr  3 16:47:19 2007
+--- bash-3.2/subst.c	Tue Jul 17 09:45:11 2007
 ***************
 *** 1279,1283 ****
         if (no_longjmp_on_fatal_error == 0)
@@ -116,8 +116,8 @@ Patch:
 ! 	      exp_jump_to_top_level (DISCARD);
   	    }
   	  else if (allow_null_glob_expansion == 0)
-*** a/arrayfunc.c	Thu Jul 27 09:37:59 2006
---- b/arrayfunc.c	Thu May 31 11:55:46 2007
+*** ../bash-3.2-patched/arrayfunc.c	Thu Jul 27 09:37:59 2006
+--- bash-3.2/arrayfunc.c	Thu May 31 11:55:46 2007
 ***************
 *** 619,622 ****
 --- 619,624 ----
@@ -127,8 +127,8 @@ Patch:
 +       top_level_cleanup ();      
         jump_to_top_level (DISCARD);
       }
-*** a/expr.c	Wed Dec 28 17:47:03 2005
---- b/expr.c	Tue Apr 24 14:17:59 2007
+*** ../bash-3.2-patched/expr.c	Wed Dec 28 17:47:03 2005
+--- bash-3.2/expr.c	Tue Apr 24 14:17:59 2007
 ***************
 *** 930,933 ****
 --- 930,934 ----
@@ -137,8 +137,8 @@ Patch:
 + 	  top_level_cleanup ();
   	  jump_to_top_level (DISCARD);
   	}
-*** a/variables.c	Fri Sep  8 13:33:32 2006
---- b/variables.c	Tue Jul 17 09:54:59 2007
+*** ../bash-3.2-patched/variables.c	Fri Sep  8 13:33:32 2006
+--- bash-3.2/variables.c	Tue Jul 17 09:54:59 2007
 ***************
 *** 1822,1830 ****
   	  lval = evalexp (oval, &expok);	/* ksh93 seems to do this */
@@ -166,8 +166,8 @@ Patch:
 ! 	}
         if (flags & ASS_APPEND)
   	rval += lval;
-*** a/patchlevel.h	Thu Apr 13 08:31:04 2006
---- b/patchlevel.h	Mon Oct 16 14:22:54 2006
+*** ../bash-3.2/patchlevel.h	Thu Apr 13 08:31:04 2006
+--- bash-3.2/patchlevel.h	Mon Oct 16 14:22:54 2006
 ***************
 *** 26,30 ****
      looks for to find the patch level (for the sccs version string). */

@@ -21,9 +21,9 @@ ifeq ($(GRUB_SUPPORTED_ARCH),y)
 #
 #############################################################
 GRUB_SOURCE:=grub_0.97.orig.tar.gz
-GRUB_PATCH:=grub_0.97-28.diff.gz
-GRUB_SITE=http://ftp.debian.org/debian/pool/main/g/grub
-GRUB_PATCH_SITE:=http://ftp.debian.org/debian/pool/main/g/grub
+GRUB_PATCH:=grub_0.97-31.diff.gz
+GRUB_SITE=$(BR2_DEBIAN_MIRROR)/debian/pool/main/g/grub
+GRUB_PATCH_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/g/grub
 GRUB_CAT:=$(ZCAT)
 GRUB_DIR:=$(BUILD_DIR)/grub-0.97
 GRUB_BINARY:=grub/grub
@@ -92,11 +92,16 @@ $(GRUB_DIR)/.configured: $(GRUB_DIR)/.unpacked
 		--infodir=/usr/info \
 		--disable-auto-linux-mem-opt \
 		$(GRUB_CONFIG-y) \
-	);
+	)
 	touch $@
 
 $(GRUB_DIR)/$(GRUB_BINARY): $(GRUB_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(GRUB_DIR)
+	rm -f $(GRUB_DIR)/$(GRUB_BINARY)
+	$(MAKE) CC=$(TARGET_CC) CFLAGS+=-static -C $(GRUB_DIR)/grub grub
+	mkdir -p $(dir $(STAGING_DIR)/$(GRUB_TARGET_BINARY))
+	mv $(GRUB_DIR)/$(GRUB_BINARY) $(STAGING_DIR)/$(GRUB_TARGET_BINARY).static
+	$(MAKE) CC=$(TARGET_CC) -C $(GRUB_DIR)/grub
 
 $(GRUB_DIR)/.installed: $(GRUB_DIR)/$(GRUB_BINARY)
 	cp $(GRUB_DIR)/$(GRUB_BINARY) $(TARGET_DIR)/$(GRUB_TARGET_BINARY)

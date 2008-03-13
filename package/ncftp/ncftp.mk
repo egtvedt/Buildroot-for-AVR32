@@ -10,8 +10,29 @@ NCFTP_DIR:=$(BUILD_DIR)/ncftp-$(NCFTP_VERSION)
 
 NCFTP_TARGET_BINS:=ncftp
 
-ifeq ($(strip $(BR2_PACKAGE_NCFTP_UTILS)),y)
-NCFTP_TARGET_BINS+=ncftpbatch ncftpbookmarks ncftpget ncftpls ncftpput
+ifeq ($(strip $(BR2_PACKAGE_NCFTP_GET)),y)
+NCFTP_TARGET_BINS+=ncftpget
+endif
+
+ifeq ($(strip $(BR2_PACKAGE_NCFTP_PUT)),y)
+NCFTP_TARGET_BINS+=ncftpput
+endif
+
+ifeq ($(strip $(BR2_PACKAGE_NCFTP_LS)),y)
+NCFTP_TARGET_BINS+=ncftpls
+endif
+
+ifeq ($(strip $(BR2_PACKAGE_NCFTP_BATCH)),y)
+NCFTP_TARGET_BINS+=ncftpbatch
+endif
+
+ifeq ($(strip $(BR2_PACKAGE_NCFTP_SPOOLER)),y)
+#Someone needs to figure out what to do...
+NCFTP_TARGET_BINS+=
+endif
+
+ifeq ($(strip $(BR2_PACKAGE_NCFTP_BOOKMARKS)),y)
+NCFTP_TARGET_BINS+=ncftpbookmarks
 endif
 
 ncftp-source: $(DL_DIR)/$(NCFTP_SOURCE)
@@ -20,11 +41,11 @@ $(DL_DIR)/$(NCFTP_SOURCE):
 	$(WGET) -P $(DL_DIR) $(NCFTP_SITE)/$(NCFTP_SOURCE)
 
 $(NCFTP_DIR)/.source: $(DL_DIR)/$(NCFTP_SOURCE)
-	bzcat $(DL_DIR)/$(NCFTP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(BZCAT) $(DL_DIR)/$(NCFTP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	touch $@
 
 $(NCFTP_DIR)/.configured: $(NCFTP_DIR)/.source
-	(cd $(NCFTP_DIR); \
+	(cd $(NCFTP_DIR); rm -f config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
@@ -33,7 +54,7 @@ $(NCFTP_DIR)/.configured: $(NCFTP_DIR)/.source
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--sysconfdir=/etc \
-	);
+	)
 	touch $@
 
 $(NCFTP_DIR)/bin/%: $(NCFTP_DIR)/.configured
@@ -41,7 +62,7 @@ $(NCFTP_DIR)/bin/%: $(NCFTP_DIR)/.configured
 
 $(TARGET_DIR)/usr/bin/ncftp $(TARGET_DIR)/usr/bin/ncftp%: $(addprefix $(NCFTP_DIR)/bin/, $(NCFTP_TARGET_BINS))
 	$(INSTALL) -m 0755 $(NCFTP_DIR)/bin/$(notdir $@) $(TARGET_DIR)/usr/bin
-	$(STRIP) -s $@
+	$(STRIPCMD) $(STRIP_STRIP_ALL) $@
 
 ncftp: uclibc $(addprefix $(TARGET_DIR)/usr/bin/, $(NCFTP_TARGET_BINS))
 

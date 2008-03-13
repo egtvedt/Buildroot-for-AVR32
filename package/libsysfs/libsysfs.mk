@@ -1,6 +1,6 @@
 #############################################################
 #
-# libsysfs 
+# libsysfs
 #
 #############################################################
 # Copyright (C) 2001-2003 by Erik Andersen <andersen@codepoet.org>
@@ -38,7 +38,7 @@ $(LIBSYSFS_DIR)/.unpacked: $(DL_DIR)/$(LIBSYSFS_SOURCE)
 	touch $@
 
 $(LIBSYSFS_DIR)/.configured: $(LIBSYSFS_DIR)/.unpacked
-	(cd $(LIBSYSFS_DIR); rm -rf config.cache ; \
+	(cd $(LIBSYSFS_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
@@ -47,7 +47,7 @@ $(LIBSYSFS_DIR)/.configured: $(LIBSYSFS_DIR)/.unpacked
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--sysconfdir=/etc \
-	);
+	)
 	touch $@
 
 $(LIBSYSFS_DIR)/.compiled: $(LIBSYSFS_DIR)/.configured
@@ -56,11 +56,13 @@ $(LIBSYSFS_DIR)/.compiled: $(LIBSYSFS_DIR)/.configured
 
 $(STAGING_DIR)/usr/lib/libsysfs.so: $(LIBSYSFS_DIR)/.compiled
 	$(MAKE) -C $(LIBSYSFS_DIR) DESTDIR=$(STAGING_DIR) install
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" \
+		$(STAGING_DIR)/usr/lib/libsysfs.la
 	touch -c $@
 
 $(TARGET_DIR)/usr/lib/libsysfs.so: $(STAGING_DIR)/usr/lib/libsysfs.so
 	cp -dpf $(STAGING_DIR)/usr/lib/libsysfs.so* $(TARGET_DIR)/usr/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libsysfs.so
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libsysfs.so
 
 libsysfs: uclibc $(TARGET_DIR)/usr/lib/libsysfs.so
 

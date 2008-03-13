@@ -5,7 +5,7 @@
 #############################################################
 DASH_VERSION:=0.5.3
 DASH_SOURCE:=dash_$(DASH_VERSION).orig.tar.gz
-DASH_SITE:=http://ftp.debian.org/debian/pool/main/d/dash
+DASH_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/d/dash
 DASH_CAT:=$(ZCAT)
 DASH_DIR:=$(BUILD_DIR)/dash-$(DASH_VERSION)
 DASH_PATCH1:=dash_$(DASH_VERSION)-7.diff.gz
@@ -43,7 +43,7 @@ $(DASH_DIR)/.configured: $(DASH_DIR)/.unpacked
 		--localstatedir=/var \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-	);
+	)
 	touch $(DASH_DIR)/.configured
 
 $(DASH_DIR)/$(DASH_BINARY): $(DASH_DIR)/.configured

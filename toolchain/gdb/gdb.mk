@@ -3,7 +3,7 @@
 # gdb
 #
 ######################################################################
-ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
+ifeq ($(BR2_TOOLCHAIN_SOURCE),y)
 GDB_VERSION:=$(strip $(subst ",, $(BR2_GDB_VERSION)))
 #"))
 else
@@ -17,12 +17,27 @@ GDB_SITE:=ftp://sources.redhat.com/pub/gdb/snapshots/current
 GDB_SOURCE:=gdb.tar.bz2
 GDB_CAT:=$(BZCAT)
 GDB_DIR:=$(TOOL_BUILD_DIR)/gdb-$(GDB_VERSION)
+GDB_PATCH_DIR:=toolchain/gdb/$(GDB_VERSION)
 else
-GDB_SITE:=http://ftp.gnu.org/gnu/gdb
-GDB_SOURCE:=gdb-$(GDB_VERSION).tar.bz2
+
+ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
+GDB_SITE:=$(BR2_GNU_MIRROR)/gdb
+else
+GDB_SITE:=$(VENDOR_SITE)
+endif
+
+GDB_OFFICIAL_VERSION:=$(GDB_VERSION)$(VENDOR_SUFFIX)$(VENDOR_GDB_RELEASE)
+
+GDB_SOURCE:=gdb-$(GDB_OFFICIAL_VERSION).tar.bz2
 GDB_CAT:=$(BZCAT)
 
-GDB_DIR:=$(TOOL_BUILD_DIR)/gdb-$(GDB_VERSION)
+ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
+GDB_PATCH_DIR:=toolchain/gdb/$(GDB_OFFICIAL_VERSION)
+else
+GDB_PATCH_DIR:=$(VENDOR_PATCH_DIR)/gdb-$(GDB_OFFICIAL_VERSION)
+endif
+
+GDB_DIR:=$(TOOL_BUILD_DIR)/gdb-$(GDB_OFFICIAL_VERSION)
 
 # NOTE: This option should not be used with gdb versions 6.4 and above.
 ifeq ($(GDB_VERSION),6.2.1)
@@ -39,13 +54,14 @@ $(DL_DIR)/$(GDB_SOURCE):
 
 gdb-unpacked: $(GDB_DIR)/.unpacked
 $(GDB_DIR)/.unpacked: $(DL_DIR)/$(GDB_SOURCE)
+	mkdir -p $(TOOL_BUILD_DIR)
 	$(GDB_CAT) $(DL_DIR)/$(GDB_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
 ifeq ($(GDB_VERSION),snapshot)
 	GDB_REAL_DIR=$(shell \
 		tar jtf $(DL_DIR)/$(GDB_SOURCE) | head -1 | cut -d"/" -f1)
 	ln -sf $(TOOL_BUILD_DIR)/$(shell tar jtf $(DL_DIR)/$(GDB_SOURCE) | head -1 | cut -d"/" -f1) $(GDB_DIR)
 endif
-	toolchain/patch-kernel.sh $(GDB_DIR) toolchain/gdb/$(GDB_VERSION) \*.patch
+	toolchain/patch-kernel.sh $(GDB_DIR) $(GDB_PATCH_DIR) \*.patch
 	$(CONFIG_UPDATE) $(GDB_DIR)
 	touch $@
 
@@ -72,7 +88,7 @@ GDB_TARGET_CONFIGURE_VARS:= \
 
 $(GDB_TARGET_DIR)/.configured: $(GDB_DIR)/.unpacked
 	mkdir -p $(GDB_TARGET_DIR)
-	(cd $(GDB_TARGET_DIR); rm -rf config.cache ; \
+	(cd $(GDB_TARGET_DIR); rm -rf config.cache; \
 		gdb_cv_func_sigsetjmp=yes \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS_FOR_TARGET="$(TARGET_CFLAGS) $(TARGET_LDFLAGS) -Wno-error" \
@@ -89,7 +105,7 @@ $(GDB_TARGET_DIR)/.configured: $(GDB_DIR)/.unpacked
 		--disable-sim --enable-gdbserver \
 		--without-included-gettext \
 		--disable-werror \
-	);
+	)
 ifeq ($(BR2_ENABLE_LOCALE),y)
 	-$(SED) "s,^INTL *=.*,INTL = -lintl,g;" $(GDB_DIR)/gdb/Makefile
 endif
@@ -98,7 +114,7 @@ endif
 $(GDB_TARGET_DIR)/gdb/gdb: $(GDB_TARGET_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) MT_CFLAGS="$(TARGET_CFLAGS)" \
 		-C $(GDB_TARGET_DIR)
-	$(STRIP) $(GDB_TARGET_DIR)/gdb/gdb
+	$(STRIPCMD) $(GDB_TARGET_DIR)/gdb/gdb
 
 $(TARGET_DIR)/usr/bin/gdb: $(GDB_TARGET_DIR)/gdb/gdb
 	install -c -D $(GDB_TARGET_DIR)/gdb/gdb $(TARGET_DIR)/usr/bin/gdb
@@ -123,7 +139,7 @@ GDB_SERVER_DIR:=$(BUILD_DIR)/gdbserver-$(GDB_VERSION)
 
 $(GDB_SERVER_DIR)/.configured: $(GDB_DIR)/.unpacked
 	mkdir -p $(GDB_SERVER_DIR)
-	(cd $(GDB_SERVER_DIR); rm -rf config.cache ; \
+	(cd $(GDB_SERVER_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		gdb_cv_func_sigsetjmp=yes \
 		bash_cv_have_mbstate_t=yes \
@@ -141,18 +157,18 @@ $(GDB_SERVER_DIR)/.configured: $(GDB_DIR)/.unpacked
 		--localstatedir=/var \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-		--includedir=$(STAGING_DIR)/include \
+		--includedir=$(STAGING_DIR)/usr/include \
 		$(DISABLE_NLS) \
 		--without-uiout $(DISABLE_GDBMI) \
 		--disable-tui --disable-gdbtk --without-x \
 		--without-included-gettext \
-	);
+	)
 	touch $@
 
 $(GDB_SERVER_DIR)/gdbserver: $(GDB_SERVER_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) MT_CFLAGS="$(TARGET_CFLAGS)" \
 		-C $(GDB_SERVER_DIR)
-	$(STRIP) $(GDB_SERVER_DIR)/gdbserver
+	$(STRIPCMD) $(GDB_SERVER_DIR)/gdbserver
 $(TARGET_DIR)/usr/bin/gdbserver: $(GDB_SERVER_DIR)/gdbserver
 ifeq ($(strip $(BR2_CROSS_TOOLCHAIN_TARGET_UTILS)),y)
 	mkdir -p $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/target_utils
@@ -179,7 +195,7 @@ GDB_HOST_DIR:=$(TOOL_BUILD_DIR)/gdbhost-$(GDB_VERSION)
 
 $(GDB_HOST_DIR)/.configured: $(GDB_DIR)/.unpacked
 	mkdir -p $(GDB_HOST_DIR)
-	(cd $(GDB_HOST_DIR); rm -rf config.cache ; \
+	(cd $(GDB_HOST_DIR); rm -rf config.cache; \
 		gdb_cv_func_sigsetjmp=yes \
 		bash_cv_have_mbstate_t=yes \
 		$(GDB_DIR)/configure \
@@ -192,7 +208,7 @@ $(GDB_HOST_DIR)/.configured: $(GDB_DIR)/.unpacked
 		--disable-tui --disable-gdbtk --without-x \
 		--without-included-gettext \
 		--enable-threads \
-	);
+	)
 	touch $@
 
 $(GDB_HOST_DIR)/gdb/gdb: $(GDB_HOST_DIR)/.configured

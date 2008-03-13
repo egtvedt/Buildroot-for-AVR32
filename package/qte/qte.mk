@@ -61,14 +61,14 @@ QTE_QTOPIA_IFILE:=$(QTE_QTOPIA_DIR)/opt/Qtopia/bin/qpe
 #
 #############################################################
 # I choose to make the link in libqte so that the linking later is trivial -- a user may choose to use -luuid, or not, and it'll just work.
-# ...since libqte* needs -luuid anyhow... 
+# ...since libqte* needs -luuid anyhow...
 QTE_QTE_CONFIGURE:=-no-xft -L$(E2FSPROGS_DIR)/lib -luuid
 QTE_QVFB_CONFIGURE:=-no-xft
 QTE_QTOPIA_CONFIGURE:=
 QTE_QT3_CONFIGURE:=
 
 ifeq ($(BR2_PTHREADS_NATIVE),y)
-QTE_QTE_CONFIGURE:=$(QTE_QTE_CONFIGURE) -thread 
+QTE_QTE_CONFIGURE:=$(QTE_QTE_CONFIGURE) -thread
 QTE_QVFB_CONFIGURE:=$(QTE_QVFB_CONFIGURE) -thread
 QTE_QTOPIA_CONFIGURE:=$(QTE_QTOPIA_CONFIGURE) -thread
 QTE_QT3_CONFIGURE:=$(QTE_QT3_CONFIGURE) -thread
@@ -87,7 +87,7 @@ endif
 
 # as of 2005-08-17's snapshot, uClibc's pthread does NOT support pthread_yield, which is needed
 # for ffmpeg's qtopia-phone-2.1.1/src/3rdparty/plugins/codecs/libffmpeg/mediapacketbuffer.h:230
-# (also called at line 232).  ...so we have to disable ffmpeg
+# (also called at line 232). ...so we have to disable ffmpeg
 QTE_QTOPIA_CONFIGURE:=$(QTE_QTOPIA_CONFIGURE) -without-libffmpeg
 
 QTE_QTOPIA_CONFIGURE:=$(QTE_QTOPIA_CONFIGURE) -L $(E2FSPROGS_DIR)/lib -I $(E2FSPROGS_DIR)/lib -luuid
@@ -131,50 +131,50 @@ $(QTE_QTOPIA_DIR)/.unpacked: $(DL_DIR)/$(QTE_QTOPIA_SOURCE)
 	touch $@
 
 
-# currently, this assumes that Qtopis is always involved.  The dependency fails and the cp is wrong if Qtopis is not selected.
+# currently, this assumes that Qtopis is always involved. The dependency fails and the cp is wrong if Qtopis is not selected.
 # I'll fix that later.
 $(QTE_QTE_DIR)/.configured: $(QTE_QTE_DIR)/.unpacked $(QTE_TMAKE_DIR)/.unpacked $(QTE_QTE_DIR)/$(QTE_UIC_BINARY) $(QTE_QTE_DIR)/$(QTE_QVFB_BINARY) $(QTE_QTOPIA_DIR)/.unpacked
 	cp $(QTE_QTOPIA_DIR)/src/qt/qconfig-qpe.h $(QTE_QTE_DIR)/src/tools/
-	(cd $(@D); export QTDIR=`pwd`; export TMAKEPATH=$(QTE_TMAKE_DIR)/lib/qws/linux-x86-g++; export PATH=$(STAGING_DIR)/bin:$$QTDIR/bin:$$PATH; export LD_LIBRARY_PATH=$$QTDIR/lib:$$LD_LIBRARY_PATH; echo 'yes' | \
-		$(TARGET_CONFIGURE_OPTS) \
+	(cd $(@D); rm -f config.cache;  export QTDIR=`pwd`; export TMAKEPATH=$(QTE_TMAKE_DIR)/lib/qws/linux-x86-g++; export PATH=$(STAGING_DIR)/bin:$$QTDIR/bin:$$PATH; export LD_LIBRARY_PATH=$$QTDIR/lib:$$LD_LIBRARY_PATH; echo 'yes' | \
 		$(TARGET_CONFIGURE_ARGS) \
+		$(TARGET_CONFIGURE_OPTS) \
 		./configure \
 		$(QTE_QTE_CONFIGURE) -qconfig qpe -keypad-mode -qvfb -depths 4,8,16,32 -xplatform $(BR2_QTE_CROSS_PLATFORM) \
-	);
+	)
 	touch $@
 
 ifneq ($(BR2_QTE_C_QTE_VERSION),$(BR2_QTE_C_QT3_VERSION))
 # this is a host-side build, so we don't use any staging dir stuff, nor any TARGET_CONFIGURE_OPTS
 $(QTE_QT3_DIR)/.configured: $(QTE_QT3_DIR)/.unpacked $(QTE_TMAKE_DIR)/.unpacked
-	(cd $(@D); export QTDIR=`pwd`; export TMAKEPATH=$(QTE_TMAKE_DIR)/lib/qws/linux-x86-g++; export PATH=$$QTDIR/bin:$$PATH; export LD_LIBRARY_PATH=$$QTDIR/lib:$$LD_LIBRARY_PATH; echo 'yes' | \
+	(cd $(@D); rm -f config.cache;  export QTDIR=`pwd`; export TMAKEPATH=$(QTE_TMAKE_DIR)/lib/qws/linux-x86-g++; export PATH=$$QTDIR/bin:$$PATH; export LD_LIBRARY_PATH=$$QTDIR/lib:$$LD_LIBRARY_PATH; echo 'yes' | \
 		CC_FOR_BUILD="$(HOSTCC)" \
 		./configure \
 		-fast $(QTE_QT3_CONFIGURE) \
-	);
+	)
 	touch $@
 endif
 
 $(QTE_QVFB_DIR)/.configured: $(QTE_QVFB_DIR)/.unpacked $(QTE_TMAKE_DIR)/.unpacked
-	(cd $(@D); export QTDIR=`pwd`; export TMAKEPATH=$(QTE_TMAKE_DIR)/lib/linux-g++; export $$QTDIR/bin:$$PATH; export LD_LIBRARY_PATH=$$QTDIR/lib:$$LD_LIBRARY_PATH; echo 'yes' | \
+	(cd $(@D); rm -f config.cache;  export QTDIR=`pwd`; export TMAKEPATH=$(QTE_TMAKE_DIR)/lib/linux-g++; export $$QTDIR/bin:$$PATH; export LD_LIBRARY_PATH=$$QTDIR/lib:$$LD_LIBRARY_PATH; echo 'yes' | \
 		$(TARGET_CONFIGURE_OPTS) \
 		./configure \
 		$(QTE_QVFB_CONFIGURE) \
-	);
+	)
 	touch $@
 
 # --edition {other}
-# This has some kooky logic.  Qtopia requires a Qt <= 3.3.0 to build, yet we like to use s Qt-2.3.x for size constraints on an embedded device
-# This target depends on both $(QTE_QTE_DIR)/$(QTE_UIC_BINARY) **and** $(QTE_QT3_DIR)/.configured.   if BR2_QTE_C_QTE_VERSION == BR2_QTE_C_QT3_VERSION,
-# then it really depends on $(QTE_QTE_DIR)/.configured, which $(QTE_QTE_DIR)/$(QTE_UIC_BINARY) needs, so it's redundant.  If QTE is 3.3.0 or later,
+# This has some kooky logic. Qtopia requires a Qt <= 3.3.0 to build, yet we like to use s Qt-2.3.x for size constraints on an embedded device
+# This target depends on both $(QTE_QTE_DIR)/$(QTE_UIC_BINARY) **and** $(QTE_QT3_DIR)/.configured. if BR2_QTE_C_QTE_VERSION == BR2_QTE_C_QT3_VERSION,
+# then it really depends on $(QTE_QTE_DIR)/.configured, which $(QTE_QTE_DIR)/$(QTE_UIC_BINARY) needs, so it's redundant. If QTE is 3.3.0 or later,
 # then BR2_QTE_C_QTE_VERSION != BR2_QTE_C_QT3_VERSION, then we need to unpack the other Qt/E, so this dependency is not redundant.
 
 $(QTE_QTOPIA_DIR)/.configured: $(QTE_QTOPIA_DIR)/.unpacked $(QTE_TMAKE_DIR)/.unpacked $(QTE_QTE_DIR)/$(QTE_UIC_BINARY) $(QTE_QTE_DIR)/$(QTE_QVFB_BINARY) $(QTE_QT3_DIR)/.configured
-	(cd $(@D); export QTDIR=$(QTE_QTE_DIR); export QPEDIR=$(QTE_QTOPIA_DIR); export PATH=$(STAGING_DIR)/bin:$$QTDIR/bin:$$PATH; QT3DIR=$(QTE_QTE_DIR); echo 'yes' | \
+	(cd $(@D); rm -f config.cache;  export QTDIR=$(QTE_QTE_DIR); export QPEDIR=$(QTE_QTOPIA_DIR); export PATH=$(STAGING_DIR)/bin:$$QTDIR/bin:$$PATH; QT3DIR=$(QTE_QTE_DIR); echo 'yes' | \
 		$(TARGET_CONFIGURE_OPTS) \
 		./configure \
 		$(QTE_QTOPIA_CONFIGURE) --edition phone -no-qtopiadesktop -dqt $(QTE_QT3_DIR) -arch generic -displaysize 160-240 -languages en_US \
 		-platform linux-g++ -qvfb -xplatform $(BR2_QTE_CROSS_PLATFORM) \
-	);
+	)
 	touch $@
 
 # there is no build for tmake, only unpack
@@ -201,7 +201,7 @@ $(QTE_QT3_DIR)/.make: $(QTE_QT3_DIR)/.unpacked
 	$(MAKE) -C $(QTE_QT3_DIR)/tools/linguist/lupdate \
 	$(MAKE) -C $(QTE_QT3_DIR)/tools/designer/uilib \
 	$(MAKE) -C $(QTE_QT3_DIR)/tools/designer/uic
-	);
+	)
 	touch $@
 endif
 
@@ -214,11 +214,11 @@ $(QTE_QTE_DIR)/$(QTE_QVFB_BINARY): $(QTE_QVFB_DIR)/.make $(QTE_QTE_DIR)/.unpacke
 	install -m 0755 $(QTE_QVFB_DIR)/tools/qvfb/$(@F) $@
 
 $(QTE_QTE_DIR)/src-mt.mk: $(QTE_QTE_DIR)/.configured
-	# I don't like the src-mk that gets built, so blow it away.  Too many includes to override yet
+	# I don't like the src-mk that gets built, so blow it away. Too many includes to override yet
 	echo "SHELL=/bin/sh" > $@
 	echo "" >> $@
 	echo "src-mt:" >> $@
-	echo "	cd src; "'$$(MAKE)'" 'QT_THREAD_SUFFIX=-mt' 'QT_LFLAGS_MT="'$$$$(SYSCONF_LFLAGS_THREAD)'" "'$$$$(SYSCONF_LIBS_THREAD)'"' 'QT_CXX_MT="'$$$$(SYSCONF_CXXFLAGS_THREAD)'" -DQT_THREAD_SUPPORT' 'QT_C_MT="'$$$$(SYSCONF_CFLAGS_THREAD)'" -DQT_THREAD_SUPPORT'" >> $@
+	echo " cd src; "'$$(MAKE)'" 'QT_THREAD_SUFFIX=-mt' 'QT_LFLAGS_MT="'$$$$(SYSCONF_LFLAGS_THREAD)'" "'$$$$(SYSCONF_LIBS_THREAD)'"' 'QT_CXX_MT="'$$$$(SYSCONF_CXXFLAGS_THREAD)'" -DQT_THREAD_SUPPORT' 'QT_C_MT="'$$$$(SYSCONF_CFLAGS_THREAD)'" -DQT_THREAD_SUPPORT'" >> $@
 
 $(QTE_QTE_LIB): $(QTE_QTE_DIR)/src-mt.mk
 	export QTDIR=$(QTE_QTE_DIR); export QPEDIR=$(QTE_QTOPIA_DIR); export PATH=$(STAGING_DIR)/bin:$$QTDIR/bin:$$PATH; \
@@ -236,15 +236,15 @@ $(QTE_QTOPIA_IFILE): $(QTE_QTOPIA_FILE)
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(QTE_QTOPIA_DIR) install PREFIX=$(TARGET_DIR)
 
 
-qte:: $(QTE_QTE_LIB)
+qte: $(QTE_QTE_LIB)
 
 ifeq ($(strip $(BR2_PACKAGE_QTE_QTOPIA)),y)
-qte:: $(QTE_QTOPIA_IFILE)
+qte: $(QTE_QTOPIA_IFILE)
 endif
 
 # kinda no-op right now, these are built anyhow
 ifeq ($(strip $(BR2_PACKAGE_QTE_QVFB)),y)
-qte:: $(QTE_QTE_DIR)/$(QTE_UIC_BINARY) $(QTE_QTE_DIR)/$(QTE_QVFB_BINARY)
+qte: $(QTE_QTE_DIR)/$(QTE_UIC_BINARY) $(QTE_QTE_DIR)/$(QTE_QVFB_BINARY)
 endif
 
 qte-clean:

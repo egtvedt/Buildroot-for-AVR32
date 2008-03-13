@@ -3,11 +3,37 @@
 # SDL
 #
 #############################################################
-SDL_VERSION:=1.2.11
+SDL_VERSION:=1.2.13
 SDL_SOURCE:=SDL-$(SDL_VERSION).tar.gz
 SDL_SITE:=http://www.libsdl.org/release
 SDL_CAT:=$(ZCAT)
 SDL_DIR:=$(BUILD_DIR)/SDL-$(SDL_VERSION)
+
+ifeq ($(BR2_PACKAGE_SDL_FBCON),y)
+SDL_FBCON=--enable-video-fbcon=yes
+else
+SDL_FBCON=--enable-video-fbcon=no
+endif
+
+ifeq ($(BR2_PACKAGE_SDL_DIRECTFB),y)
+SDL_DIRECTFB=--enable-video-directfb=yes
+SDL_DIRECTFB_TARGET:=$(STAGING_DIR)/include/directfb
+SDL_DIRECTFB_INCLUDES:=-I$(STAGING_DIR)/usr/include/directfb
+else
+SDL_DIRECTFB=--enable-video-directfb=no
+endif
+
+ifeq ($(BR2_PACKAGE_SDL_QTOPIA),y)
+SDL_QTOPIA=--enable-video-qtopia=yes
+else
+SDL_QTOPIA=--enable-video-qtopia=no
+endif
+
+ifeq ($(BR2_PACKAGE_SDL_X11),y)
+SDL_X11=--enable-video-x11=yes
+else
+SDL_X11=--enable-video-x11=no
+endif
 
 $(DL_DIR)/$(SDL_SOURCE):
 	$(WGET) -P $(DL_DIR) $(SDL_SITE)/$(SDL_SOURCE)
@@ -16,47 +42,56 @@ sdl-source: $(DL_DIR)/$(SDL_SOURCE)
 
 $(SDL_DIR)/.unpacked: $(DL_DIR)/$(SDL_SOURCE)
 	$(SDL_CAT) $(DL_DIR)/$(SDL_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	toolchain/patch-kernel.sh $(SDL_DIR) package/sdl sdl\*.patch
+	toolchain/patch-kernel.sh $(SDL_DIR) package/sdl sdl-$(SDL_VERSION)\*.patch
+	$(CONFIG_UPDATE) $(SDL_DIR)
 	$(CONFIG_UPDATE) $(SDL_DIR)/build-scripts
 	touch $@
 
 $(SDL_DIR)/.configured: $(SDL_DIR)/.unpacked
-	(cd $(SDL_DIR); rm -rf config.cache ; \
+	(cd $(SDL_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
-		--prefix=/usr \
+		--prefix=$(STAGING_DIR)/usr \
 		--exec-prefix=/usr \
-		--bindir=/usr/bin \
-		--sbindir=/usr/sbin \
-		--libdir=/lib \
-		--libexecdir=/usr/lib \
 		--sysconfdir=/etc \
-		--datadir=/usr/share \
 		--localstatedir=/var \
-		--includedir=/include \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--enable-pulseaudio=no \
 		--disable-arts \
 		--disable-esd \
 		--disable-nasm \
-		--disable-video-x11 );
+		$(SDL_FBCON) \
+		$(SDL_DIRECTFB) \
+		$(SDL_QTOPIA) \
+		$(SDL_X11) \
+		)
 	touch $@
 
-$(SDL_DIR)/.compiled: $(SDL_DIR)/.configured
-	$(MAKE1) -C $(SDL_DIR) 
+ifeq ($(BR2_PACKAGE_SDL_DIRECTFB),y)
+$(SDL_DIRECTFB_TARGET):
+	ln -s ../usr/include/directfb $(STAGING_DIR)/include/directfb
+endif
+
+$(SDL_DIR)/.compiled: $(SDL_DIR)/.configured $(SDL_DIRECTFB_TARGET)
+	$(MAKE1) $(TARGET_CONFIGURE_OPTS) \
+		INCLUDE="-I./include $(SDL_DIRECTFB_INCLUDES)" \
+		LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
+		DESTDIR=$(STAGING_DIR)/usr -C $(SDL_DIR)
 	touch $@
 
 $(STAGING_DIR)/usr/lib/libSDL.so: $(SDL_DIR)/.compiled
-	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(SDL_DIR) install;
+	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(SDL_DIR) install
+# sdl-config uses -Lexec_prefix/lib instead of -Lprefix/lib - fix it
+	$(SED) 's^-L\$${exec_prefix}^-L\$${prefix}^' \
+		$(STAGING_DIR)/usr/bin/sdl-config
 	touch -c $@
 
 $(TARGET_DIR)/usr/lib/libSDL.so: $(STAGING_DIR)/usr/lib/libSDL.so
 	cp -dpf $(STAGING_DIR)/usr/lib/libSDL*.so* $(TARGET_DIR)/usr/lib/
-	-$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libSDL.so
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libSDL.so
 
 SDL sdl: uclibc $(TARGET_DIR)/usr/lib/libSDL.so
 

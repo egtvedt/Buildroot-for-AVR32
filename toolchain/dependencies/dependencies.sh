@@ -13,16 +13,22 @@ source_dir="`pwd`/toolchain/dependencies/src"
 # check build system 'environment'
 #
 #############################################################
-if test -n "$CC"; then
-	echo "CC clean:					FALSE"
-	/bin/echo -e "\n\nYou must run 'unset CC' so buildroot can run with"
-	/bin/echo -e "a clean environment on your build machine\n"
-	exit 1
+if test -n "$BUILDROOT_DL_DIR" ; then
+	/bin/echo -e "Overriding \$(DL_DIR) in '.config'.		Ok"
+	/bin/echo -e "External download directory:			Ok ($BUILDROOT_DL_DIR)"
+else
+	echo "BUILDROOT_DL_DIR clean:				Ok"
 fi
+
+if test -n "$CC" ; then
+	echo "CC clean:						FALSE"
+	/bin/echo -e "\n\nYou must run 'unset CC' so buildroot can run with";
+	/bin/echo -e "a clean environment on your build machine\n";
+	exit 1;
+fi;
 echo "CC clean:					Ok"
 
-
-if test -n "$CXX"; then
+if test -n "$CXX" ; then
 	echo "CXX clean:					FALSE"
 	/bin/echo -e "\n\nYou must run 'unset CXX' so buildroot can run with"
 	/bin/echo -e "a clean environment on your build machine\n"

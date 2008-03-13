@@ -44,18 +44,17 @@ $(STAGING_DIR)/$(LIBID3TAG_TARGET_BIN): $(LIBID3TAG_DIR)/.libs/$(LIBID3TAG_BIN)
 
 $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN): $(STAGING_DIR)/$(LIBID3TAG_TARGET_BIN)
 	cp -dpf $(STAGING_DIR)/usr/lib/libid3tag.so* $(TARGET_DIR)/usr/lib/
-	-$(STRIP) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libid3tag.so*
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libid3tag.so*
 
 libid3tag: uclibc zlib libmad $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN)
 
 libid3tag-source: $(DL_DIR)/$(LIBID3TAG_SOURCE)
 
 libid3tag-clean:
-	@if [ -d $(LIBID3TAG_DIR)/Makefile ]; then \
-		$(MAKE) -C $(LIBID3TAG_DIR) clean; \
-	fi
+	-$(MAKE) -C $(LIBID3TAG_DIR) clean
 	rm -f $(STAGING_DIR)/$(LIBID3TAG_TARGET_BIN)
-	rm -f $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN)
+	rm -f $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN) \
+		$(TARGET_DIR)/usr/lib/libid3tag*
 
 libid3tag-dirclean:
 	rm -rf $(LIBID3TAG_DIR)

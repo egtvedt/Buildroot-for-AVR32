@@ -3,9 +3,10 @@
 # quagga suite
 #
 #############################################################
-QUAGGA_VERSION:=0.99.7
+QUAGGA_VERSION:=0.99.9
 QUAGGA_SOURCE:=quagga-$(QUAGGA_VERSION).tar.gz
 QUAGGA_SITE:=http://www.quagga.net/download
+QUAGGA_RELIC_SITE:=http://www.quagga.net/download/attic
 QUAGGA_DIR:=$(BUILD_DIR)/quagga-$(QUAGGA_VERSION)
 QUAGGA_CAT:=$(ZCAT)
 
@@ -129,7 +130,7 @@ $(QUAGGA_DIR)/.unpacked: $(DL_DIR)/$(QUAGGA_SOURCE) $(DL_DIR)/$(QUAGGA_PATCH)
 ifneq ($(QUAGGA_PATCH),)
 	(cd $(QUAGGA_DIR) && $(QUAGGA_CAT) $(DL_DIR)/$(QUAGGA_PATCH) | patch -p1)
 	if [ -d $(QUAGGA_DIR)/debian/patches ]; then \
-		toolchain/patch-kernel.sh $(QUAGGA_DIR) $(QUAGGA_DIR)/debian/patches \*.patch ; \
+		toolchain/patch-kernel.sh $(QUAGGA_DIR) $(QUAGGA_DIR)/debian/patches \*.patch; \
 	fi
 endif
 	touch $@
@@ -148,7 +149,7 @@ $(QUAGGA_DIR)/.configured: $(QUAGGA_DIR)/.unpacked
 		$(DISABLE_IPV6) \
 		$(QUAGGA_CONFIGURE) \
 		--program-transform-name='' \
-	);
+	)
 	touch $@
 
 $(QUAGGA_BINARY): $(QUAGGA_DIR)/.configured
@@ -160,7 +161,10 @@ ifneq ($(BR2_PACKAGE_QUAGGA_HEADERS),y)
 	rm -rf $(TARGET_DIR)/usr/include/quagga
 endif
 ifneq ($(BR2_HAVE_MANPAGES),y)
-	rm -rf $(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/info
+	rm -rf $(TARGET_DIR)/usr/man
+endif
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/info
 endif
 
 quagga: uclibc $(TARGET_DIR)/usr/sbin/$(QUAGGA_TARGET_BINARY)

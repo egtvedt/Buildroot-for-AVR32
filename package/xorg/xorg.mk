@@ -90,6 +90,7 @@ $(XORG_DIR)/.configured: $(XORG_DIR)/.unpacked
 	$(SED) 's:REPLACE_GCCINC_DIR:$(shell $(TARGET_CROSS)gcc -print-file-name=include):g' $(XORG_CF)
 	$(SED) 's:REPLACE_STAGING_DIR:$(STAGING_DIR):g' $(XORG_CF)
 	$(SED) 's:REPLACE_ARCH:$(ARCH):g' $(XORG_CF)
+	$(SED) 's:#define StdIncDir.*:#define StdIncDir $(STAGING_DIR)/usr/include:g' $(XORG_CF)
 	$(SED) 's:#define CcCmd.*:#define CcCmd $(TARGET_CROSS)gcc:g' $(XORG_CF)
 	$(SED) 's:#define RanlibCmd.*:#define RanlibCmd $(TARGET_CROSS)ranlib:g' $(XORG_CF)
 	$(SED) 's:#define LdCmd.*:#define LdCmd $(TARGET_CROSS)ld:g' $(XORG_CF)
@@ -101,13 +102,13 @@ $(XORG_DIR)/.configured: $(XORG_DIR)/.unpacked
 
 $(XORG_XSERVER): $(XORG_DIR)/.configured
 	rm -f $(TARGET_XSERVER) $(XORG_XSERVER)
-	( cd $(XORG_DIR) ; $(MAKE) \
+	( cd $(XORG_DIR); $(MAKE) \
 		PKG_CONFIG=$(STAGING_DIR)/$(PKGCONFIG_TARGET_BINARY) \
 		World XCURSORGEN=xcursorgen MKFONTSCALE=mkfontscale )
 	touch -c $(XORG_XSERVER)
 
 $(STAGING_DIR)$(TARGET_LIBX)/libX11.so.6.2: $(XORG_XSERVER)
-	-mkdir -p $(STAGING_DIR)/usr/X11R6
+	mkdir -p $(STAGING_DIR)/usr/X11R6
 	ln -fs ../../include $(STAGING_DIR)/usr/X11R6/include
 	ln -fs ../../lib $(STAGING_DIR)$(TARGET_LIBX)
 	( cd $(XORG_DIR); $(MAKE) \
@@ -120,18 +121,18 @@ $(STAGING_DIR)$(TARGET_LIBX)/libX11.so.6.2: $(XORG_XSERVER)
 	touch -c $(STAGING_DIR)$(TARGET_LIBX)/libX11.so.6.2
 
 $(TARGET_XSERVER): $(XORG_XSERVER)
-	-mkdir -p $(XORG_BINX)
-	for file in $(XORG_APPS) ; do \
-		cp -f $(XORG_DIR)/programs/$$file $(XORG_BINX) ; \
-		chmod a+x $(XORG_PROGS)/$$file ; \
-		$(STRIP) $(XORG_PROGS)/$$file || /bin/true ; \
+	mkdir -p $(XORG_BINX)
+	for file in $(XORG_APPS); do \
+		cp -f $(XORG_DIR)/programs/$$file $(XORG_BINX); \
+		chmod a+x $(XORG_PROGS)/$$file; \
+		$(STRIPCMD) $(XORG_PROGS)/$$file || /bin/true; \
 	done
 	cp $(XORG_XSERVER) $(TARGET_XSERVER)
 	(cd $(XORG_BINX); ln -snf $(XSERVER_BINARY) X)
-	$(STRIP) $(TARGET_XSERVER)
+	$(STRIPCMD) $(TARGET_XSERVER)
 	mkdir -p $(XORG_LIBX)/modules
 	cp -LRf $(XORG_DIR)/exports/lib/modules/ $(XORG_LIBX)/
-	( cd $(XORG_DIR)/fonts ; $(MAKE) \
+	( cd $(XORG_DIR)/fonts; $(MAKE) \
 		DESTDIR=$(TARGET_DIR) install XCURSORGEN=xcursorgen MKFONTSCALE=mkfontscale )
 	cp -LRf $(XORG_DIR)/fonts/bdf/misc/7x14.bdf $(XORG_LIBX)/X11/fonts/misc/
 	cp -LRf $(XORG_DIR)/fonts/bdf/misc/7x14-L1.bdf $(XORG_LIBX)/X11/fonts/misc/
@@ -186,25 +187,25 @@ $(XORG_LIBX)/X11/fonts/ttf-dejavu/DejaVuSansMono.ttf: $(DEJAVU_DIR)/.unpacked
 	touch -c $(XORG_LIBX)/X11/fonts/ttf-dejavu/DejaVuSansMono.ttf
 
 $(XORG_LIBX)/libX11.so.6.2: $(TARGET_XSERVER) $(XORG_LIBX)/X11/fonts/ttf-dejavu/DejaVuSansMono.ttf
-	-mkdir -p $(XORG_LIBX)
-	set -e; for dirs in $(XORG_LIBS) ; do \
-		file=`find $(XORG_LDIR)/$$dirs -type f -iname "*$$dirs.so*"` ; \
-		$(STRIP) --strip-unneeded $$file ; \
-		cp -f $$file $(XORG_LIBX) ; \
-		file=`find $(XORG_LDIR)/$$dirs -type l -iname "*$$dirs.so*"` ; \
-		cp -pRf $$file $(XORG_LIBX) ; \
+	mkdir -p $(XORG_LIBX)
+	set -e; for dirs in $(XORG_LIBS); do \
+		file=`find $(XORG_LDIR)/$$dirs -type f -iname "*$$dirs.so*"`; \
+		$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $$file; \
+		cp -f $$file $(XORG_LIBX); \
+		file=`find $(XORG_LDIR)/$$dirs -type l -iname "*$$dirs.so*"`; \
+		cp -pRf $$file $(XORG_LIBX); \
 	done
 	(cd $(TARGET_DIR)/usr/lib; ln -snf $(TARGET_LIBX) X11)
 	touch $(TARGET_DIR)/etc/ld.so.conf
-	if [ "`grep -c '$(TARGET_LIBX)' $(TARGET_DIR)/etc/ld.so.conf`" = "0" ] ; then \
+	if [ "`grep -c '$(TARGET_LIBX)' $(TARGET_DIR)/etc/ld.so.conf`" = "0" ]; then \
 		echo "$(TARGET_LIBX)" >> $(TARGET_DIR)/etc/ld.so.conf; \
-	fi;
+	fi
 	touch -c $(XORG_LIBX)/libX11.so.6.2
 
 $(TARGET_DIR)/usr/bin/mcookie: package/xorg/mcookie.c
 	$(TARGET_CROSS)gcc -Wall -Os -s package/xorg/mcookie.c -o $(TARGET_DIR)/usr/bin/mcookie
 
-xorg: zlib png pkgconfig expat fontconfig $(STAGING_DIR)$(TARGET_LIBX)/libX11.so.6.2 \
+xorg: zlib png pkgconfig expat fontconfig libdrm $(STAGING_DIR)$(TARGET_LIBX)/libX11.so.6.2 \
 	$(XORG_LIBX)/libX11.so.6.2 $(TARGET_DIR)/usr/bin/mcookie
 
 xorg-source: $(DL_DIR)/$(XORG_SOURCE) $(DL_DIR)/$(DEJAVU_SOURCE)

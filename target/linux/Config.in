@@ -1,16 +1,6 @@
-menu "Linux Options"
+#comment "Linux kernel options"
 
-config BR2_PACKAGE_LINUX
-	bool "linux kernel"
-	default n
-	help
-	  The Linux kernel.
-	  http://www.kernel.org/
-
-	  Note: Requires kernel-headers >= 2.6.19 since the other
-	        kernel headers are just that (headers) and not full
-		kernels. This is a feature.
-
+if BR2_KERNEL_LINUX
 config BR2_PACKAGE_LINUX_KCONFIG
 	string ".config file"
 	depends on BR2_PACKAGE_LINUX
@@ -40,5 +30,4 @@ config BR2_PACKAGE_LINUX_FORMAT
 	  If the above setting is empty, you can change the default
 	  board-imposed value by passing LINUX26_FORMAT=<string> to
 	  make.
-
-endmenu
+endif

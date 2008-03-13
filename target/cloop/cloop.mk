@@ -3,35 +3,28 @@
 # mkcloop to build to target cloop filesystems
 #
 #############################################################
-### /cloop_2.01.5.orig.tar.gz
-CLOOP_VERSION=2.01
+CLOOP_VERSION=2.06
 CLOOP_DIR=$(BUILD_DIR)/cloop-$(CLOOP_VERSION)
-### CLOOP_SOURCE=cloop_$(CLOOP_VERSION).5.orig.tar.gz
-### CLOOP_SITE=http://ftp.debian.org/debian/pool/main/c/cloop
-# http://ftp.debian.org/debian/pool/main/c/cloop/cloop_2.01.5-4.diff.gz
-### CLOOP_PATCH1:=cloop_2.01.5-4.diff.gz
-### CLOOP_PATCH1_URL:=$(CLOOP_SITE)
-# http://developer.linuxtag.net/knoppix/sources/cloop_2.01-5.tar.gz
-CLOOP_SOURCE=cloop_$(CLOOP_VERSION)-5.tar.gz
-CLOOP_SITE=http://developer.linuxtag.net/knoppix/sources
+CLOOP_SOURCE=cloop_$(CLOOP_VERSION)-2.tar.gz
+CLOOP_SITE=http://debian-knoppix.alioth.debian.org/sources/
 
 CLOOP_TARGET:=$(IMAGE).cloop
 ### Note: not used yet! ck
 ### $(DL_DIR)/$(CLOOP_PATCH1):
-### 	$(WGET) -P $(DL_DIR) $(CLOOP_PATCH1_URL)/$(CLOOP_PATCH1)
+### $(WGET) -P $(DL_DIR) $(CLOOP_PATCH1_URL)/$(CLOOP_PATCH1)
 
 $(DL_DIR)/$(CLOOP_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(CLOOP_SITE)/$(CLOOP_SOURCE)
 
 $(CLOOP_DIR)/.unpacked: $(DL_DIR)/$(CLOOP_SOURCE) ### $(DL_DIR)/$(CLOOP_PATCH1)
 	$(ZCAT) $(DL_DIR)/$(CLOOP_SOURCE) | tar -C $(BUILD_DIR) -xvf -
-	touch $(CLOOP_DIR)/.unpacked
-###		$(ZCAT) $(DL_DIR)/$(CLOOP_PATCH1) | patch -p1 -d $(CLOOP_DIR)
-###		toolchain/patch-kernel.sh $(CLOOP_DIR) target/cloop/ cloop*.patch
+	touch $@
+### $(ZCAT) $(DL_DIR)/$(CLOOP_PATCH1) | patch -p1 -d $(CLOOP_DIR)
+### toolchain/patch-kernel.sh $(CLOOP_DIR) target/cloop/ cloop\*.patch
 
 $(CLOOP_DIR)/create_compressed_fs: $(CLOOP_DIR)/.unpacked
 	$(MAKE) CFLAGS="-Wall -O2 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DUSE_ERROR_SILENT" -C $(CLOOP_DIR) \
-		APPSONLY=yes -j1 
+		APPSONLY=yes -j1
 
 cloop: $(CLOOP_DIR)/create_compressed_fs
 
@@ -51,7 +44,7 @@ cloop-dirclean:
 
 $(CLOOP_DIR)/cloop.o: $(CLOOP_DIR)/create_compressed_fs
 	$(MAKE) CFLAGS="-Wall -O2 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DUSE_ERROR_SILENT" -C $(CLOOP_DIR) -j1
- 
+
 cloop-module: $(CLOOP_DIR)/cloop.o
 
 #############################################################
@@ -62,29 +55,34 @@ cloop-module: $(CLOOP_DIR)/cloop.o
 # required:
 # mkisofs 2.01a34-unofficial-iconv from http://users.utu.fi/jahhein/mkisofs/
 # optional:
-# symlinks: scan/change symbolic links - v1.2 - by Mark Lord 
-#           from ftp://ftp.ibiblio.org/pub/Linux/utils/file/
+# symlinks: scan/change symbolic links - v1.2 - by Mark Lord
+# from ftp://ftp.ibiblio.org/pub/Linux/utils/file/
 #
 #############################################################
 
 ### Note: target/default/device_table.txt is not yet supported! ck
-# the quickfix is to use sudo to mount the previous created cramroot 
+# the quickfix is to use sudo to mount the previous created cramroot
 check-tools:
-	which mkisofs
-	- which symlinks
-
-clooproot: cloop check-tools $(IMAGE).cramfs ### cramfsroot
-	-@find $(TARGET_DIR) -type f -perm +111 | xargs $(STRIP) 2>/dev/null || true;
+ifneq ($(BR2_HAVE_MANPAGES),y)
 	@rm -rf $(TARGET_DIR)/usr/man
 	@rm -rf $(TARGET_DIR)/usr/share/man
+endif
+ifneq ($(BR2_HAVE_INFOPAGES),y)
 	@rm -rf $(TARGET_DIR)/usr/info
+	@rm -rf $(TARGET_DIR)/usr/share/info
+endif
 	@rmdir -p --ignore-fail-on-non-empty $(TARGET_DIR)/usr/share
+	which mkisofs
+	-@find $(TARGET_DIR) -type f -perm +111 | xargs $(STRIPCMD) 2>/dev/null || true
+	- which symlinks && symlinks -r $(TARGET_DIR)
+
+$(IMAGE).cramfs: cramfsroot
+
+clooproot: cloop check-tools $(IMAGE).cramfs
 	### $(CLOOP_DIR)/create_compressed_fs -q -D target/default/device_table.txt $(TARGET_DIR) $(CLOOP_TARGET)
 	## mkisofs -r $(TARGET_DIR) | $(CLOOP_DIR)/create_compressed_fs - 65536 > $(CLOOP_TARGET)
-	sudo /sbin/losetup -d /dev/loop1
-	sudo /sbin/losetup /dev/loop1 $(IMAGE).cramfs
 	sudo mkdir -p /mnt/compressed
-	sudo mount -o ro -t cramfs /dev/loop1 /mnt/compressed
+	sudo mount -o ro,loop -t cramfs $(IMAGE).cramfs /mnt/compressed
 	mkisofs -r /mnt/compressed | $(CLOOP_DIR)/create_compressed_fs - 65536 > $(CLOOP_TARGET)
 	- symlinks -r /mnt/compressed
 	sudo umount /mnt/compressed
@@ -115,8 +113,7 @@ clooproot-dirclean:
 # other_fs: /mnt/compressed/var/tmp -> /tmp
 #
 # ls -lrsS root_fs_*.*
-# 1296 -rw-r--r--    1 claus users 1325478 Mar 13 16:52 root_fs_powerpc.cloop
-# 1448 -rw-r--r--    1 claus users 1482752 Mar 13 16:52 root_fs_powerpc.cramfs
-# 1840 -rw-r--r--    1 claus users 1883408 Mar 13 13:14 root_fs_powerpc.jffs2
+# 1296 -rw-r--r-- 1 claus users 1325478 Mar 13 16:52 root_fs_powerpc.cloop
+# 1448 -rw-r--r-- 1 claus users 1482752 Mar 13 16:52 root_fs_powerpc.cramfs
+# 1840 -rw-r--r-- 1 claus users 1883408 Mar 13 13:14 root_fs_powerpc.jffs2
 #############################################################
-

@@ -35,7 +35,8 @@ rxvt-source: $(DL_DIR)/$(RXVT_SOURCE)
 $(RXVT_DIR)/.unpacked: $(DL_DIR)/$(RXVT_SOURCE)
 	$(RXVT_CAT) $(DL_DIR)/$(RXVT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(RXVT_DIR) package/rxvt/ \*.patch
-	touch $(RXVT_DIR)/.unpacked
+	$(CONFIG_UPDATE) $(RXVT_DIR)/autoconf
+	touch $@
 
 $(RXVT_DIR)/.configured: $(RXVT_DIR)/.unpacked
 	(cd $(RXVT_DIR); rm -rf config.cache; \
@@ -46,28 +47,28 @@ $(RXVT_DIR)/.configured: $(RXVT_DIR)/.unpacked
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
-		--prefix=/usr/X11R6 \
+		--prefix=$(X11_PREFIX) \
 		--mandir=/usr/man \
 		--infodir=/usr/info \
-		--x-includes=$(STAGING_DIR)/usr/X11R6/include \
-		--x-libraries=$(STAGING_DIR)/usr/X11R6/lib \
+		--x-includes=$(STAGING_DIR)$(X11_PREFIX)/include \
+		--x-libraries=$(STAGING_DIR)$(X11_PREFIX)/lib \
 		--disable-resources \
 		--disable-memset \
-	);
-	touch $(RXVT_DIR)/.configured
+	)
+	touch $@
 
 $(RXVT_BINARY): $(RXVT_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(RXVT_DIR)
-	$(STRIP) -x $(RXVT_BINARY)
+	$(STRIPCMD) $(STRIP_DISCARD_ALL) $(RXVT_BINARY)
 
-$(TARGET_DIR)/usr/X11R6/bin/rxvt: $(RXVT_BINARY)
-	cp -f $(RXVT_BINARY) $(TARGET_DIR)/usr/X11R6/bin
-	(cd $(TARGET_DIR)/usr/X11R6/bin; ln -fs rxvt xterm)
+$(TARGET_DIR)$(X11_PREFIX)/bin/rxvt: $(RXVT_BINARY)
+	cp -f $(RXVT_BINARY) $(TARGET_DIR)$(X11_PREFIX)/bin
+	(cd $(TARGET_DIR)$(X11_PREFIX)/bin; ln -fs rxvt xterm)
 
-rxvt: $(XSERVER) $(TARGET_DIR)/usr/X11R6/bin/rxvt
+rxvt: $(XSERVER) $(TARGET_DIR)$(X11_PREFIX)/bin/rxvt
 
 rxvt-clean:
-	rm -f $(TARGET_DIR)/usr/X11R6/bin/rxvt
+	rm -f $(TARGET_DIR)$(X11_PREFIX)/bin/rxvt
 	-$(MAKE) -C $(RXVT_DIR) clean
 
 rxvt-dirclean:

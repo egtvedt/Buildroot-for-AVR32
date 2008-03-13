@@ -7,7 +7,7 @@ SETSERIAL_VERSION:=2.17
 SETSERIAL_PATCH_VERSION:=-44
 #SETSERIAL_PATCH_FILE:=
 SETSERIAL_SOURCE:=setserial_$(SETSERIAL_VERSION)$(SETSERIAL_PATCH_VERSION).tar.gz
-SETSERIAL_SITE:=http://ftp.debian.org/debian/pool/main/s/setserial/
+SETSERIAL_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/s/setserial/
 SETSERIAL_DIR:=$(BUILD_DIR)/setserial-$(SETSERIAL_VERSION)
 SETSERIAL_BINARY:=setserial
 SETSERIAL_TARGET_BINARY:=usr/bin/setserial
@@ -30,7 +30,7 @@ $(SETSERIAL_DIR)/.unpacked: $(DL_DIR)/$(SETSERIAL_SOURCE) $(SETSERIAL_PATCH)
 ifneq ($(SETSERIAL_PATCH_FILE),)
 	toolchain/patch-kernel.sh $(SETSERIAL_DIR) $(DL_DIR) $(SETSERIAL_PATCH_FILE)
 	if [ -d $(SETSERIAL_DIR)/debian/patches ]; then \
-		toolchain/patch-kernel.sh $(SETSERIAL_DIR) $(SETSERIAL_DIR)/debian/patches \*.patch ; \
+		toolchain/patch-kernel.sh $(SETSERIAL_DIR) $(SETSERIAL_DIR)/debian/patches \*.patch; \
 	fi
 endif
 	touch $(SETSERIAL_DIR)/gorhack.h
@@ -41,7 +41,7 @@ SETSERIAL_CFLAGS=$(CFLAGS_COMBINE) $(CFLAGS_WHOLE_PROGRAM)
 endif
 
 $(SETSERIAL_DIR)/.configured: $(SETSERIAL_DIR)/.unpacked
-	(cd $(SETSERIAL_DIR); rm -rf config.cache ; \
+	(cd $(SETSERIAL_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		CFLAGS="$(TARGET_CFLAGS) $(SETSERIAL_CFLAGS)" \
@@ -51,7 +51,7 @@ $(SETSERIAL_DIR)/.configured: $(SETSERIAL_DIR)/.unpacked
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--sysconfdir=/etc \
-	);
+	)
 	touch $@
 
 $(SETSERIAL_DIR)/$(SETSERIAL_BINARY): $(SETSERIAL_DIR)/.configured
@@ -59,7 +59,7 @@ $(SETSERIAL_DIR)/$(SETSERIAL_BINARY): $(SETSERIAL_DIR)/.configured
 
 $(TARGET_DIR)/$(SETSERIAL_TARGET_BINARY): $(SETSERIAL_DIR)/$(SETSERIAL_BINARY)
 	install -c $(SETSERIAL_DIR)/$(SETSERIAL_BINARY) $(TARGET_DIR)/$(SETSERIAL_TARGET_BINARY)
-	$(STRIP) -s $(TARGET_DIR)/$(SETSERIAL_TARGET_BINARY)
+	$(STRIPCMD) $(STRIP_STRIP_ALL) $(TARGET_DIR)/$(SETSERIAL_TARGET_BINARY)
 
 setserial: uclibc $(TARGET_DIR)/$(SETSERIAL_TARGET_BINARY)
 

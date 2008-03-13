@@ -20,7 +20,7 @@ $(NTP_DIR)/.patched: $(DL_DIR)/$(NTP_SOURCE)
 	$(NTP_CAT) $(DL_DIR)/$(NTP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(NTP_DIR) package/ntp/ ntp\*.patch
 	$(SED) "s,^#if.*__GLIBC__.*_BSD_SOURCE.*$$,#if 0," \
-		$(NTP_DIR)/ntpd/refclock_pcf.c;
+		$(NTP_DIR)/ntpd/refclock_pcf.c
 	$(SED) '/[[:space:](]index[[:space:]]*(/s/[[:space:]]*index[[:space:]]*(/ strchr(/g' $(NTP_DIR)/libisc/*.c $(NTP_DIR)/arlib/sample.c
 	$(SED) '/[[:space:](]rindex[[:space:]]*(/s/[[:space:]]*rindex[[:space:]]*(/ strrchr(/g' $(NTP_DIR)/ntpd/*.c
 	#$(SED) 's/\(^#[[:space:]]*include[[:space:]]*<sys\/var.h>\)/\/\/ \1/' $(NTP_DIR)/util/tickadj.c
@@ -54,7 +54,7 @@ $(NTP_DIR)/.configured: $(NTP_DIR)/.patched
 		--program-transform-name=s,,, \
 		--without-crypto \
 		--disable-tickadj \
-	);
+	)
 	touch $@
 
 $(NTP_DIR)/$(NTP_BINARY): $(NTP_DIR)/.configured
@@ -74,7 +74,7 @@ ntp-clean:
 	rm -f $(TARGET_DIR)/usr/sbin/ntpd $(TARGET_DIR)/usr/bin/sntp \
 		$(TARGET_DIR)/etc/init.d/S49ntp \
 		$(TARGET_DIR)/$(NTP_TARGET_BINARY)
-	-$(MAKE) -C $(NTP_DIR) clean 
+	-$(MAKE) -C $(NTP_DIR) clean
 
 ntp-dirclean:
 	rm -rf $(NTP_DIR)

@@ -15,7 +15,7 @@ MTD_DIR:=$(BUILD_DIR)/mtd_snapshot
 else
 MTD_SOURCE:=$(strip $(subst ",, $(BR2_PACKAGE_MTD_ORIG_STRING)))
 #"))
-MTD_SITE:=http://ftp.debian.org/debian/pool/main/m/mtd
+MTD_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/m/mtd
 MTD_HOST_DIR := $(TOOL_BUILD_DIR)/mtd_orig
 MTD_DIR:=$(BUILD_DIR)/mtd_orig
 MTD_CAT:=$(ZCAT)
@@ -25,11 +25,12 @@ endif
 
 #############################################################
 #
-# Build mkfs.jffs2 for use on the local host system if
+# Build mkfs.jffs2 and sumtool for use on the local host system if
 # needed by target/jffs2root.
 #
 #############################################################
 MKFS_JFFS2 := $(MTD_HOST_DIR)/util/mkfs.jffs2
+SUMTOOL := $(MTD_HOST_DIR)/util/sumtool
 
 ifeq ($(strip $(BR2_PACKAGE_MTD_SNAPSHOT)),y)
 $(DL_DIR)/$(MTD_SOURCE):
@@ -55,11 +56,15 @@ $(MTD_HOST_DIR)/.unpacked: $(DL_DIR)/$(MTD_SOURCE)
 	touch $@
 endif
 
-$(MTD_HOST_DIR)/util/mkfs.jffs2: $(MTD_HOST_DIR)/.unpacked
+$(MKFS_JFFS2): $(MTD_HOST_DIR)/.unpacked
 	CFLAGS=-I$(LINUX_HEADERS_DIR)/include $(MAKE) CC="$(HOSTCC)" CROSS= \
 		LINUXDIR=$(LINUX_DIR) -C $(MTD_HOST_DIR)/util mkfs.jffs2
 
-mtd-host: $(MKFS_JFFS2)
+$(SUMTOOL): $(MTD_HOST_DIR)/.unpacked
+	CFLAGS=-I$(LINUX_HEADERS_DIR)/include $(MAKE) CC="$(HOSTCC)" CROSS= \
+		LINUXDIR=$(LINUX_DIR) -C $(MTD_HOST_DIR)/util sumtool
+
+mtd-host: $(MKFS_JFFS2) $(SUMTOOL)
 
 mtd-host-source: $(DL_DIR)/$(MTD_SOURCE)
 

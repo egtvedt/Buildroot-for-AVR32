@@ -5,7 +5,7 @@
 #############################################################
 GNUMAKE_VERSION:=3.81
 GNUMAKE_SOURCE:=make-$(GNUMAKE_VERSION).tar.bz2
-GNUMAKE_SITE:=http://ftp.gnu.org/pub/gnu/make
+GNUMAKE_SITE:=$(BR2_GNU_MIRROR)/gnu/make
 GNUMAKE_DIR:=$(BUILD_DIR)/make-$(GNUMAKE_VERSION)
 GNUMAKE_CAT:=$(BZCAT)
 GNUMAKE_BINARY:=make
@@ -45,11 +45,11 @@ $(GNUMAKE_DIR)/.configured: $(GNUMAKE_DIR)/.unpacked
 		--infodir=/usr/info \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
+	)
 	touch $@
 
 $(GNUMAKE_DIR)/$(GNUMAKE_BINARY): $(GNUMAKE_DIR)/.configured
-	$(MAKE) -C $(GNUMAKE_DIR)
+	$(MAKE) MAKE=$(HOSTMAKE) -C $(GNUMAKE_DIR)
 
 $(TARGET_DIR)/$(GNUMAKE_TARGET_BINARY): $(GNUMAKE_DIR)/$(GNUMAKE_BINARY)
 	$(MAKE) DESTDIR=$(TARGET_DIR) -C $(GNUMAKE_DIR) install

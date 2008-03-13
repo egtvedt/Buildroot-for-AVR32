@@ -30,6 +30,7 @@ $(E2FSPROGS_DIR)/.configured: $(E2FSPROGS_DIR)/.unpacked
 	(cd $(E2FSPROGS_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
+		CFLAGS="$(TARGET_CFLAGS)" \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -45,39 +46,75 @@ $(E2FSPROGS_DIR)/.configured: $(E2FSPROGS_DIR)/.unpacked
 		--sysconfdir=/etc \
 		--datadir=/usr/share \
 		--localstatedir=/var \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		--enable-elf-shlibs --enable-dynamic-e2fsck --disable-swapfs \
 		--disable-debugfs --disable-imager \
 		--disable-resizer --enable-fsck \
 		--disable-e2initrd-helper \
 		--without-catgets $(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
-	);
+	)
+	# do away with hiding the commands
+	find $(E2FSPROGS_DIR) -name Makefile \
+		| xargs $(SED) '/^[[:space:]]*@/s/@/$$\(Q\)/'
 	touch $@
 
 $(E2FSPROGS_DIR)/$(E2FSPROGS_BINARY): $(E2FSPROGS_DIR)/.configured
-	$(MAKE1) PATH=$(TARGET_PATH) -C $(E2FSPROGS_DIR)
-	( \
-		cd $(E2FSPROGS_DIR)/misc ; \
-		$(STRIP) $(E2FSPROGS_MISC_STRIP) ; \
+	$(MAKE1) -C $(E2FSPROGS_DIR)
+	(cd $(E2FSPROGS_DIR)/misc; \
+		$(STRIPCMD) $(E2FSPROGS_MISC_STRIP); \
 	)
-	$(STRIP) $(E2FSPROGS_DIR)/lib/lib*.so.*.*
-	touch -c $(E2FSPROGS_DIR)/$(E2FSPROGS_BINARY)
+	#$(STRIPCMD) $(E2FSPROGS_DIR)/lib/lib*.so.*.*
+	touch -c $@
+
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_BADBLOCKS)) += ${TARGET_DIR}/sbin/badblocks
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_BLKID)) += ${TARGET_DIR}/sbin/blkid
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_CHATTR)) += ${TARGET_DIR}/bin/chattr
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_DUMPE2FS)) += ${TARGET_DIR}/sbin/dumpe2fs
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_E2LABEL)) += ${TARGET_DIR}/sbin/e2label
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_E2FSCK)) += ${TARGET_DIR}/sbin/e2fsck
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_FILEFRAG)) += ${TARGET_DIR}/sbin/filefrag
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_FSCK)) += ${TARGET_DIR}/sbin/fsck
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_LOGSAVE)) += ${TARGET_DIR}/sbin/logsave
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_LSATTR)) += ${TARGET_DIR}/bin/lsattr
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_MKE2FS)) += ${TARGET_DIR}/sbin/mke2fs
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_MKLOSTFOUND)) += ${TARGET_DIR}/sbin/mklost+found
+E2FSPROGS_RM$(strip $(BR2_PACKAGE_E2FSPROGS_UUIDGEN)) += ${TARGET_DIR}/bin/uuidgen
 
 $(TARGET_DIR)/$(E2FSPROGS_TARGET_BINARY): $(E2FSPROGS_DIR)/$(E2FSPROGS_BINARY)
-	$(MAKE1) PATH=$(TARGET_PATH) DESTDIR=$(TARGET_DIR) -C $(E2FSPROGS_DIR) install
-	rm -rf ${TARGET_DIR}/sbin/mkfs.ext[23] ${TARGET_DIR}/sbin/fsck.ext[23] \
-		${TARGET_DIR}/sbin/findfs ${TARGET_DIR}/sbin/tune2fs
+	$(MAKE1) PATH=$(TARGET_PATH) DESTDIR=$(TARGET_DIR) LDCONFIG=true \
+		-C $(E2FSPROGS_DIR) install
+	rm -rf ${TARGET_DIR}/sbin/mkfs.ext[23] \
+		${TARGET_DIR}/sbin/fsck.ext[23] \
+		${TARGET_DIR}/sbin/findfs \
+		${TARGET_DIR}/sbin/tune2fs
+ifneq ($(strip $(E2FSPROGS_RM)),)
+	rm -rf $(E2FSPROGS_RM)
+endif
+ifeq ($(strip $(BR2_PACKAGE_E2FSPROGS_MKE2FS)),y)
 	ln -sf mke2fs ${TARGET_DIR}/sbin/mkfs.ext2
 	ln -sf mke2fs ${TARGET_DIR}/sbin/mkfs.ext3
+endif
+ifeq ($(strip $(BR2_PACKAGE_E2FSPROGS_E2FSCK)),y)
 	ln -sf e2fsck ${TARGET_DIR}/sbin/fsck.ext2
 	ln -sf e2fsck ${TARGET_DIR}/sbin/fsck.ext3
+endif
+ifeq ($(strip $(BR2_PACKAGE_E2FSPROGS_TUNE2FS)),y)
 	ln -sf e2label ${TARGET_DIR}/sbin/tune2fs
+endif
+ifeq ($(strip $(BR2_PACKAGE_E2FSPROGS_FINDFS)),y)
 	ln -sf e2label ${TARGET_DIR}/sbin/findfs
-	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
-		$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
-	touch -c $(TARGET_DIR)/$(E2FSPROGS_TARGET_BINARY)
+endif
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/info
+endif
+ifneq ($(BR2_HAVE_MANPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/share/man
+endif
+	rm -rf $(TARGET_DIR)/share/locale
+	rm -rf $(TARGET_DIR)/usr/share/doc
+	touch -c $@
 
 e2fsprogs: uclibc $(TARGET_DIR)/$(E2FSPROGS_TARGET_BINARY)
 
@@ -96,4 +133,3 @@ e2fsprogs-dirclean:
 ifeq ($(strip $(BR2_PACKAGE_E2FSPROGS)),y)
 TARGETS+=e2fsprogs
 endif
-

@@ -27,14 +27,15 @@ $(NETKITTELNET_DIR)/.unpacked: $(DL_DIR)/$(NETKITTELNET_SOURCE)
 	touch $(NETKITTELNET_DIR)/.unpacked
 
 $(NETKITTELNET_DIR)/.configured: $(NETKITTELNET_DIR)/.unpacked
-	(cd $(NETKITTELNET_DIR); PATH=$(TARGET_PATH) CC=$(TARGET_CC) \
-		./configure --installroot=$(TARGET_DIR) --with-c-compiler=$(TARGET_CC) \
+	(cd $(NETKITTELNET_DIR); rm -f config.cache; \
+	 PATH=$(TARGET_PATH) CC=$(TARGET_CC) \
+	./configure --installroot=$(TARGET_DIR) --with-c-compiler=$(TARGET_CC) \
 	)
 	touch $(NETKITTELNET_DIR)/.configured
 
 $(NETKITTELNET_DIR)/$(NETKITTELNET_BINARY): $(NETKITTELNET_DIR)/.configured
 	$(MAKE) SUB=telnetd CC=$(TARGET_CC) -C $(NETKITTELNET_DIR)
-	$(STRIP) $(NETKITTELNET_DIR)/$(NETKITTELNET_BINARY)
+	$(STRIPCMD) $(NETKITTELNET_DIR)/$(NETKITTELNET_BINARY)
 
 $(TARGET_DIR)/$(NETKITTELNET_TARGET_BINARY): $(NETKITTELNET_DIR)/$(NETKITTELNET_BINARY)
 	# Only install a few selected items...
@@ -45,7 +46,7 @@ $(TARGET_DIR)/$(NETKITTELNET_TARGET_BINARY): $(NETKITTELNET_DIR)/$(NETKITTELNET_
 	$(SED) "s~^#telnet.*~telnet\tstream\ttcp\tnowait\troot\t/usr/sbin/telnetd\t/usr/sbin/telnetd~;" $(TARGET_DIR)/etc/inetd.conf
 	#$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(NETKITTELNET_DIR) install
 	#rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
-	#	$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
+	# $(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
 
 netkittelnet: uclibc netkitbase $(TARGET_DIR)/$(NETKITTELNET_TARGET_BINARY)
 

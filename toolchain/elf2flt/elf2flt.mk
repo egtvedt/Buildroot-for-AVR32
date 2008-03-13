@@ -11,7 +11,7 @@ ELF2FLT_BINARY:=elf2flt
 
 $(ELF2FLT_DIR)/.unpacked:
 	cp -r toolchain/elf2flt/elf2flt "$(TOOL_BUILD_DIR)/elf2flt"
-	touch $(ELF2FLT_DIR)/.unpacked
+	touch $@
 
 $(ELF2FLT_DIR)/.patched: $(ELF2FLT_DIR)/.unpacked
 ifeq ($(strip $(ARCH)),nios2)
@@ -19,7 +19,7 @@ ifeq ($(strip $(ARCH)),nios2)
 	$(SED) "s,CROSS_COMPILE_PREFIX,$(REAL_GNU_TARGET_NAME),g;" toolchain/elf2flt/elf2flt.nios2.conditional
 	toolchain/patch-kernel.sh $(ELF2FLT_DIR) toolchain/elf2flt elf2flt.nios2.conditional
 endif
-	touch $(ELF2FLT_DIR)/.patched
+	touch $@
 
 $(ELF2FLT_DIR)/.configured: $(ELF2FLT_DIR)/.patched
 	(cd $(ELF2FLT_DIR); rm -rf config.cache; \
@@ -30,11 +30,14 @@ $(ELF2FLT_DIR)/.configured: $(ELF2FLT_DIR)/.patched
 		--with-libbfd=$(BINUTILS_DIR1)/bfd/libbfd.a \
 		--with-libiberty=$(BINUTILS_DIR1)/libiberty/libiberty.a \
 		--prefix=$(STAGING_DIR))
-	touch $(ELF2FLT_DIR)/.configured
+	touch $@
 
 $(ELF2FLT_DIR)/$(ELF2FLT_BINARY): $(ELF2FLT_DIR)/.configured
 	$(MAKE) -C $(ELF2FLT_DIR) all
 	$(MAKE) -C $(ELF2FLT_DIR) install
+	ln -snf $(REAL_GNU_TARGET_NAME)-elf2flt $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-elf2flt
+	ln -snf $(REAL_GNU_TARGET_NAME)-flthdr  $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-flthdr
+	ln -snf $(REAL_GNU_TARGET_NAME)-ld.real $(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-ld.real
 
 elf2flt: uclibc_target uclibc-configured binutils gcc $(ELF2FLT_DIR)/$(ELF2FLT_BINARY)
 

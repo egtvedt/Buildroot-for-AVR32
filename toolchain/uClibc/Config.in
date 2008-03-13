@@ -5,20 +5,18 @@ comment "uClibc Options"
 
 choice
 	prompt "uClibc C library Version"
-	default BR2_UCLIBC_VERSION_SNAPSHOT
+	default BR2_UCLIBC_VERSION_0_9_29
 	help
 	  Select the version of uClibc you wish to use.
-
-	config BR2_UCLIBC_VERSION_0_9_28
-		depends BR2_DEPRECATED
-		bool "uClibc 0.9.28"
 
 	config BR2_UCLIBC_VERSION_0_9_28_3
 		depends BR2_DEPRECATED
 		bool "uClibc 0.9.28.3"
+		depends BR2_EXT_UCLIBC_VERSION_0_9_28_3
 
 	config BR2_UCLIBC_VERSION_0_9_29
 		bool "uClibc 0.9.29"
+		depends BR2_EXT_UCLIBC_VERSION_0_9_29
 
 	config BR2_UCLIBC_VERSION_SNAPSHOT
 		depends !BR2_avr32
@@ -36,7 +34,6 @@ config BR2_USE_UCLIBC_SNAPSHOT
 
 config BR2_UCLIBC_CONFIG
 	string "uClibc configuration file to use?"
-	default "toolchain/uClibc/uClibc-0.9.28.config" if BR2_UCLIBC_VERSION_0_9_28
 	default "toolchain/uClibc/uClibc-0.9.28.config" if BR2_UCLIBC_VERSION_0_9_28_3
 	default "toolchain/uClibc/uClibc-0.9.29.config" if BR2_UCLIBC_VERSION_0_9_29
 	default "toolchain/uClibc/uClibc-0.9.29.config" if BR2_UCLIBC_VERSION_0_9_30
@@ -81,3 +78,12 @@ config BR2_PTHREAD_DEBUG
 	default n
 	help
 	  Build the thread library with debugging enabled.
+
+config BR2_UCLIBC_PROGRAM_INVOCATION
+	bool "Enable 'program invocation name'"
+	default n
+	help
+	  Support for the GNU-specific program_invocation_name and
+	  program_invocation_short_name strings.  Some GNU packages 
+	  (like tar and coreutils) utilize these for extra useful
+	  output, but in general are not required.
