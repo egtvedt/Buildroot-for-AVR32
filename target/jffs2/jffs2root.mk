@@ -4,13 +4,9 @@
 #
 #############################################################
 
-<<<<<<< HEAD:target/jffs2/jffs2root.mk
 ifneq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP)),y)
 JFFS2_OPTS := --eraseblock=$(strip $(BR2_TARGET_ROOTFS_JFFS2_EBSIZE))
-=======
-JFFS2_OPTS := -e $(strip $(BR2_TARGET_ROOTFS_JFFS2_EBSIZE))
 SUMTOOL_OPTS := $(JFFS2_OPTS)
->>>>>>> 70f8646742da25adcc5ad27913c77e19320dedcb:target/jffs2/jffs2root.mk
 
 ifeq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_PAD)),y)
 ifneq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_PADSIZE)),0x0)
@@ -26,32 +22,20 @@ JFFS2_OPTS += --squash
 endif
 
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_LE),y)
-<<<<<<< HEAD:target/jffs2/jffs2root.mk
 JFFS2_OPTS += --little-endian
-=======
-JFFS2_OPTS += -l
-SUMTOOL_OPTS += -l
->>>>>>> 70f8646742da25adcc5ad27913c77e19320dedcb:target/jffs2/jffs2root.mk
+SUMTOOL_OPTS += --little-endian
 endif
 
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_BE),y)
-<<<<<<< HEAD:target/jffs2/jffs2root.mk
 JFFS2_OPTS += --big-endian
-=======
-JFFS2_OPTS += -b
-SUMTOOL_OPTS += -b
->>>>>>> 70f8646742da25adcc5ad27913c77e19320dedcb:target/jffs2/jffs2root.mk
+SUMTOOL_OPTS += --big-endian
 endif
 
 ifneq ($(BR2_TARGET_ROOTFS_JFFS2_DEFAULT_PAGESIZE),y)
 JFFS2_OPTS += --pagesize=$(BR2_TARGET_ROOTFS_JFFS2_PAGESIZE)
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_NOCLEANMARKER),y)
-<<<<<<< HEAD:target/jffs2/jffs2root.mk
 JFFS2_OPTS += --no-cleanmarkers
-=======
-JFFS2_OPTS += -n
-SUMTOOL_OPTS += -n
->>>>>>> 70f8646742da25adcc5ad27913c77e19320dedcb:target/jffs2/jffs2root.mk
+SUMTOOL_OPTS += --no-cleanmarkers
 endif
 endif
 
@@ -88,29 +72,17 @@ endif
 # value of MKFS_JFFS2 to either the previously installed copy or the one
 # just built.
 #
-<<<<<<< HEAD:target/jffs2/jffs2root.mk
-$(JFFS2_TARGET):
-	-@find $(TARGET_DIR) -type f -perm +111 | xargs $(STRIP) 2>/dev/null || true;
-=======
 $(JFFS2_TARGET): host-fakeroot makedevs mtd-host
 	-@find $(TARGET_DIR) -type f -perm +111 | xargs $(STRIPCMD) 2>/dev/null || true
 ifneq ($(BR2_HAVE_MANPAGES),y)
->>>>>>> 70f8646742da25adcc5ad27913c77e19320dedcb:target/jffs2/jffs2root.mk
 	@rm -rf $(TARGET_DIR)/usr/man
 	@rm -rf $(TARGET_DIR)/usr/share/man
 endif
 ifneq ($(BR2_HAVE_INFOPAGES),y)
 	@rm -rf $(TARGET_DIR)/usr/info
-<<<<<<< HEAD:target/jffs2/jffs2root.mk
-	@if [ -d $(TARGET_DIR)/usr/share ]; then \
-		rmdir -p --ignore-fail-on-non-empty $(TARGET_DIR)/usr/share; \
-	fi
-	-$(STAGING_DIR)/bin/ldconfig -r $(TARGET_DIR) 2>/dev/null
-=======
 endif
 	@rmdir -p --ignore-fail-on-non-empty $(TARGET_DIR)/usr/share
 	$(if $(TARGET_LDCONFIG),test -x $(TARGET_LDCONFIG) && $(TARGET_LDCONFIG) -r $(TARGET_DIR) 2>/dev/null)
->>>>>>> 70f8646742da25adcc5ad27913c77e19320dedcb:target/jffs2/jffs2root.mk
 	# Use fakeroot to pretend all target binaries are owned by root
 	rm -f $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(JFFS2_TARGET))
 	touch $(PROJECT_BUILD_DIR)/.fakeroot.00000
