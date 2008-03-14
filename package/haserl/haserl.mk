@@ -40,7 +40,7 @@ $(TARGET_DIR)/$(HASERL_BIN): $(HASERL_DIR)/src/haserl
 	cp $(HASERL_DIR)/src/haserl $(TARGET_DIR)/$(HASERL_BIN)
 	touch $@
 
-haserl: uclibc $(HASERL_DIR)/.installed
+haserl: uclibc $(TARGET_DIR)/$(HASERL_BIN)
 
 haserl-source: $(DL_DIR)/$(HASERL_SOURCE)
 
