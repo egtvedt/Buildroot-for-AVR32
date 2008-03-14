@@ -25,7 +25,7 @@ define insert_define
 @echo "#endif" >> $(U_BOOT_INC_CONF_FILE)
 @echo "#define $(strip $(1)) $(2)" >> $(U_BOOT_INC_CONF_FILE)
 endef
-	
+
 $(DL_DIR)/$(U_BOOT_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(U_BOOT_SITE)/$(U_BOOT_SOURCE)
 
@@ -60,7 +60,6 @@ $(U_BOOT_DIR)/.configured: $(U_BOOT_DIR)/.header_copied
 
 $(U_BOOT_DIR)/.header_modified: $(U_BOOT_DIR)/.configured
 	# Modify configuration header in $(U_BOOT_INC_CONF_FILE)
-	
 	@echo >> $(U_BOOT_INC_CONF_FILE)
 	@echo "/* Add a wrapper around the values Buildroot sets. */" >> $(U_BOOT_INC_CONF_FILE)
 	@echo "#ifndef __BR2_ADDED_CONFIG_H" >> $(U_BOOT_INC_CONF_FILE)
