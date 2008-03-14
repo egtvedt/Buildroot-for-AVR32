@@ -109,7 +109,7 @@ endif
 
 # -----------------------------------------------------------------------------
 # Has to be set by the target/device
-ifeq ($(LINUX26_BINLOC),)
+ifeq ($(strip $(LINUX26_BINLOC)),)
 
 # --------------
 # VMLINUX
@@ -120,7 +120,10 @@ endif
 
 # --------------
 # UIMAGE
-ifeq ($(LINUX26_FORMAT),uImage)
+ifeq ($(strip $(LINUX26_FORMAT)),uImage)
+ifeq ($(strip $(BR2_TARGET_UBOOT)),y)
+LINUX26_TARGETS+=u-boot
+endif
 ifeq ($(BR2_avr32),y)
 LINUX26_BINLOC:=arch/$(KERNEL_ARCH)/boot/images/$(LINUX26_FORMAT)
 else
@@ -181,7 +184,8 @@ LINUX26_MAKE_FLAGS = HOSTCC="$(HOSTCC)" HOSTCFLAGS="$(HOSTCFLAGS)" \
 	INSTALL_MOD_PATH=$(TARGET_DIR) \
 	CROSS_COMPILE=$(KERNEL_CROSS) \
 	LDFLAGS="$(TARGET_LDFLAGS)" \
-	LZMA="$(LZMA)" 
+	LZMA="$(LZMA)" \
+	PATH=$(TARGET_PATH)
 
 # =============================================================================
 
