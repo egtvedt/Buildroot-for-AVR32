@@ -36,6 +36,7 @@ $(BASH_DIR)/.configured: $(BASH_DIR)/.unpacked
 		$(TARGET_CONFIGURE_ARGS) \
 		CCFLAGS_FOR_BUILD="$(HOST_CFLAGS)" \
 		ac_cv_func_setvbuf_reversed=no \
+		bash_cv_getcwd_malloc=yes \
 		./configure \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
