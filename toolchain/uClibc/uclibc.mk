@@ -88,6 +88,10 @@ else
 UCLIBC_NOT_TARGET_ENDIAN:=LITTLE
 endif
 
+ifeq ($(strip $(BR2_CROSS_TOOLCHAIN_TARGET_UTILS)),y)
+UCLIBC_TARGETS+=$(TARGET_DIR)/usr/bin/ldd
+endif
+
 UCLIBC_ARM_TYPE:=CONFIG_$(strip $(subst ",, $(BR2_ARM_TYPE)))
 #"))
 UCLIBC_SPARC_TYPE:=CONFIG_SPARC_$(strip $(subst ",, $(BR2_SPARC_TYPE)))
@@ -476,7 +480,7 @@ $(TARGET_DIR)/lib/libc.so.0: $(STAGING_DIR)/usr/lib/libc.a
 		install_runtime
 	touch -c $@
 
-$(TARGET_DIR)/usr/bin/ldd: $(cross_compiler)
+$(TARGET_DIR)/usr/bin/ldd:
 	$(MAKE1) -C $(UCLIBC_DIR) CC=$(TARGET_CROSS)gcc \
 		CPP=$(TARGET_CROSS)cpp LD=$(TARGET_CROSS)ld \
 		PREFIX=$(TARGET_DIR) utils install_utils
@@ -487,10 +491,10 @@ ifeq ($(strip $(BR2_CROSS_TOOLCHAIN_TARGET_UTILS)),y)
 endif
 	touch -c $@
 
-UCLIBC_TARGETS=$(TARGET_DIR)/lib/libc.so.0
+UCLIBC_TARGETS+=$(TARGET_DIR)/lib/libc.so.0
 endif
 
-uclibc: $(cross_compiler) $(STAGING_DIR)/usr/lib/libc.a $(UCLIBC_TARGETS)
+uclibc: cross_compiler $(STAGING_DIR)/usr/lib/libc.a $(UCLIBC_TARGETS)
 
 uclibc-source: $(DL_DIR)/$(UCLIBC_SOURCE)
 
@@ -513,11 +517,6 @@ uclibc-clean:
 
 uclibc-dirclean:
 	rm -rf $(UCLIBC_DIR)
-
-uclibc-target-utils: 
-#$(TARGET_DIR)/usr/bin/ldd
-
-uclibc-target-utils-source: $(DL_DIR)/$(UCLIBC_SOURCE)
 
 #############################################################
 #
@@ -552,7 +551,7 @@ else
 endif
 	touch -c $@
 
-uclibc_target: cross_compiler uclibc $(TARGET_DIR)/usr/lib/libc.a $(TARGET_DIR)/usr/bin/ldd
+uclibc_target: cross_compiler uclibc $(TARGET_DIR)/usr/lib/libc.a
 
 uclibc_target-clean:
 	rm -rf $(TARGET_DIR)/usr/include \
