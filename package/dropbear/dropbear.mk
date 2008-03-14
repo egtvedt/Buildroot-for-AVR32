@@ -9,7 +9,7 @@ DROPBEAR_SITE:=http://matt.ucc.asn.au/dropbear/releases/
 DROPBEAR_DIR:=$(BUILD_DIR)/dropbear-$(DROPBEAR_VERSION)
 DROPBEAR_CAT:=$(ZCAT)
 DROPBEAR_BINARY:=dropbearmulti
-DROPBEAR_TARGET_BINARY:=usr/bin/$(DROPBEAR_BINARY)
+DROPBEAR_TARGET_BINARY:=usr/sbin/$(DROPBEAR_BINARY)
 
 $(DL_DIR)/$(DROPBEAR_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(DROPBEAR_SITE)/$(DROPBEAR_SOURCE)
@@ -45,16 +45,17 @@ $(DROPBEAR_DIR)/$(DROPBEAR_BINARY): $(DROPBEAR_DIR)/.configured
 		MULTI=1 SCPPROGRESS=1 -C $(DROPBEAR_DIR)
 
 $(TARGET_DIR)/$(DROPBEAR_TARGET_BINARY): $(DROPBEAR_DIR)/$(DROPBEAR_BINARY)
-	$(INSTALL) -d -m 755 $(TARGET_DIR)/usr/sbin
 	$(INSTALL) -d -m 755 $(TARGET_DIR)/usr/bin
+	$(INSTALL) -d -m 755 $(TARGET_DIR)/usr/sbin
 	$(INSTALL) -m 755 $(DROPBEAR_DIR)/$(DROPBEAR_BINARY) \
 		$(TARGET_DIR)/$(DROPBEAR_TARGET_BINARY)
 	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/$(DROPBEAR_TARGET_BINARY)
-	ln -snf ../sbin/dropbear $(TARGET_DIR)/usr/bin/scp
-	ln -snf ../sbin/dropbear $(TARGET_DIR)/usr/bin/ssh
-	ln -snf ../sbin/dropbear $(TARGET_DIR)/usr/bin/dbclient
-	ln -snf ../sbin/dropbear $(TARGET_DIR)/usr/bin/dropbearkey
-	ln -snf ../sbin/dropbear $(TARGET_DIR)/usr/bin/dropbearconvert
+	ln -snf ../sbin/$(DROPBEAR_BINARY) $(TARGET_DIR)/usr/bin/scp
+	ln -snf ../sbin/$(DROPBEAR_BINARY) $(TARGET_DIR)/usr/bin/ssh
+	ln -snf ../sbin/$(DROPBEAR_BINARY) $(TARGET_DIR)/usr/bin/dbclient
+	ln -snf ../sbin/$(DROPBEAR_BINARY) $(TARGET_DIR)/usr/bin/dropbearkey
+	ln -snf ../sbin/$(DROPBEAR_BINARY) $(TARGET_DIR)/usr/bin/dropbearconvert
+	ln -snf $(DROPBEAR_BINARY) $(TARGET_DIR)/usr/sbin/dropbear
 	mkdir -p $(TARGET_DIR)/etc/init.d
 	cp -dpf $(DROPBEAR_DIR)/S50dropbear $(TARGET_DIR)/etc/init.d/
 	chmod a+x $(TARGET_DIR)/etc/init.d/S50dropbear
