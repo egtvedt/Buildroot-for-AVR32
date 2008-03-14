@@ -1,0 +1,13 @@
+Index: a/gcc/reload.c
+===================================================================
+--- a/gcc/reload.c	(revision 131351)
++++ b/gcc/reload.c	(working copy)
+@@ -4574,7 +4574,7 @@
+ 	      x = mem;
+ 	      i = find_reloads_address (GET_MODE (x), &x, XEXP (x, 0), &XEXP (x, 0),
+ 					opnum, type, ind_levels, insn);
+-	      if (x != mem)
++	      if (!rtx_equal_p (x, mem))
+ 		push_reg_equiv_alt_mem (regno, x);
+ 	      if (address_reloaded)
+ 		*address_reloaded = i;
