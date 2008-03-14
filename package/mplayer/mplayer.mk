@@ -24,6 +24,7 @@ endif
 ifeq ($(strip $(BR2_PACKAGE_FAAD2)),y)
 MPLAYER_DEP_LIBS+=faad2
 MPLAYER_LIB_FAAD:=--enable-faad-external --disable-faad-internal
+MPLAYER_FAAD_LDFLAGS:=-lfaad
 else
 ifeq ($(strip $(BR2_PACKAGE_MPLAYER_FAAD_INTERNAL_FIXED)),y)
 MPLAYER_LIB_FAAD:=--enable-faad-fixed
@@ -46,7 +47,7 @@ $(MPLAYER_DIR)/.configured: $(MPLAYER_DIR)/.unpacked
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
-		LDFLAGS="$(TARGET_LDFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS) $(MPLAYER_FAAD_LDFLAGS)" \
 		./configure \
 		--prefix=/usr \
 		--confdir=/etc \
@@ -75,7 +76,7 @@ $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY): $(MPLAYER_DIR)/$(MPLAYER_BINARY)
 	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
 	touch -c $@
 
-mplayer: uclibc libmad $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
+mplayer: uclibc $(MPLAYER_DEP_LIBS) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
 
 mplayer-source: $(DL_DIR)/$(MPLAYER_SOURCE)
 
