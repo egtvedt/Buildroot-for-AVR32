@@ -340,8 +340,9 @@ ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
 endif
 ifeq ($(BR2_INSTALL_LIBSTDCPP),y)
 ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
-	-cp -dpf $(STAGING_DIR)/lib/libstdc++.so* $(TARGET_DIR)/usr/lib/
-	-strip --strip-unneeded $(TARGET_DIR)/usr/lib/libstdc++.so*
+	mkdir -p $(TARGET_DIR)/usr/lib
+	cp -dpf $(STAGING_DIR)/lib/libstdc++.so* $(TARGET_DIR)/usr/lib
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libstdc++.so*
 endif
 endif
 ifeq ($(BR2_INSTALL_LIBGCJ),y)
