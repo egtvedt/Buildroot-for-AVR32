@@ -3,23 +3,11 @@
 # mtd provides jffs2 utilities
 #
 #############################################################
-ifeq ($(strip $(BR2_PACKAGE_MTD_SNAPSHOT)),y)
-# Be aware that this changes daily....
-
-MTD_DL_SOURCE:=mtd-snapshot-$(DATE).tar.bz2
-MTD_CAT:=$(BZCAT)
-MTD_SOURCE:=mtd-snapshot.tar.bz2
-MTD_SITE:=ftp://ftp.uk.linux.org/pub/people/dwmw2/mtd/cvs
-MTD_HOST_DIR := $(TOOL_BUILD_DIR)/mtd_snapshot
-MTD_DIR:=$(BUILD_DIR)/mtd_snapshot
-else
-MTD_SOURCE:=$(strip $(subst ",, $(BR2_PACKAGE_MTD_ORIG_STRING)))
-#"))
+MTD_SOURCE:=mtd_20050122.orig.tar.gz
 MTD_SITE:=$(BR2_DEBIAN_MIRROR)/debian/pool/main/m/mtd
 MTD_HOST_DIR := $(TOOL_BUILD_DIR)/mtd_orig
 MTD_DIR:=$(BUILD_DIR)/mtd_orig
 MTD_CAT:=$(ZCAT)
-endif
 
 
 
@@ -32,17 +20,6 @@ endif
 MKFS_JFFS2 := $(MTD_HOST_DIR)/util/mkfs.jffs2
 SUMTOOL := $(MTD_HOST_DIR)/util/sumtool
 
-ifeq ($(strip $(BR2_PACKAGE_MTD_SNAPSHOT)),y)
-$(DL_DIR)/$(MTD_SOURCE):
-	$(WGET) -P $(DL_DIR) $(MTD_SITE)/$(MTD_DL_SOURCE)
-	mv $(DL_DIR)/$(MTD_DL_SOURCE) $(DL_DIR)/$(MTD_SOURCE)
-
-$(MTD_HOST_DIR)/.unpacked: $(DL_DIR)/$(MTD_SOURCE_GENERIC)
-	$(MTD_CAT) $(DL_DIR)/$(MTD_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
-	mv $(TOOL_BUILD_DIR)/$(shell tar tjf $(DL_DIR)/$(MTD_SOURCE) \
-		| head -n 1 | xargs basename) $(MTD_HOST_DIR)
-	touch $@
-else
 ifneq ($(MTD_SOURCE),)
 $(DL_DIR)/$(MTD_SOURCE):
 	$(WGET) -P $(DL_DIR) $(MTD_SITE)/$(MTD_SOURCE)
@@ -54,7 +31,6 @@ $(MTD_HOST_DIR)/.unpacked: $(DL_DIR)/$(MTD_SOURCE)
 		| xargs basename) $(MTD_HOST_DIR)
 	toolchain/patch-kernel.sh $(MTD_HOST_DIR) package/mtd/20050122 \*.patch
 	touch $@
-endif
 
 $(MKFS_JFFS2): $(MTD_HOST_DIR)/.unpacked
 	CFLAGS=-I$(LINUX_HEADERS_DIR)/include $(MAKE) CC="$(HOSTCC)" CROSS= \
@@ -81,17 +57,11 @@ mtd-host-dirclean:
 #############################################################
 $(MTD_DIR)/.unpacked: $(DL_DIR)/$(MTD_SOURCE)
 	$(MTD_CAT) $(DL_DIR)/$(MTD_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-ifeq ($(strip $(BR2_PACKAGE_MTD_SNAPSHOT)),y)
-	mv $(BUILD_DIR)/$(shell tar tjf $(DL_DIR)/$(MTD_SOURCE) \
-		| head -n 1 | xargs basename) $(MTD_DIR)
-	touch $@
-else
 	mv $(BUILD_DIR)/$(shell tar tzf $(DL_DIR)/$(MTD_SOURCE) \
 		| head -n 1 | xargs basename) $(MTD_DIR)
 	toolchain/patch-kernel.sh $(MTD_DIR) \
-		package/mtd \*.patch
+		package/mtd/20050122 \*.patch
 	touch $@
-endif
 
 MTD_TARGETS_n :=
 MTD_TARGETS_y :=

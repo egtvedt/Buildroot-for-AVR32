@@ -4,7 +4,7 @@
 #
 #############################################################
 
-SQLITE_VERSION:=3.5.4
+SQLITE_VERSION:=3.5.7
 SQLITE_SOURCE:=sqlite-$(SQLITE_VERSION).tar.gz
 SQLITE_SITE:=http://www.sqlite.org
 SQLITE_DIR:=$(BUILD_DIR)/sqlite-$(SQLITE_VERSION)
@@ -68,9 +68,11 @@ sqlite: uclibc readline-target ncurses $(TARGET_DIR)/usr/bin/sqlite3
 sqlite-source: $(DL_DIR)/$(SQLITE_SOURCE)
 
 sqlite-clean:
-	@if [ -d $(SQLITE_DIR)/Makefile ]; then \
-		$(MAKE) -C $(SQLITE_DIR) clean; \
-	fi
+	-$(MAKE) -C $(SQLITE_DIR) clean
+	-rm -rf $(STAGING_DIR)/usr/lib/libsqlite*
+	-rm -rf $(STAGING_DIR)/usr/bin/sqlite3
+	-rm -rf $(TARGET_DIR)/usr/lib/libsqlite*
+	-rm -rf $(TARGET_DIR)/usr/bin/sqlite3
 
 sqlite-dirclean:
 	rm -rf $(SQLITE_DIR)
