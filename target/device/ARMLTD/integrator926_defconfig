@@ -84,12 +84,12 @@ BR2_BANNER="Welcome to the Erik's uClibc development environment."
 # Preset Devices
 #
 BR2_PACKAGE_LINUX=y
-BR2_TARGET_ARM=y
+BR2_TARGET_ARMLTD=y
 
 #
 # Arm based Device Support
 #
-BR2_TARGET_ARM_INTEGRATOR_926=y
+BR2_TARGET_ARMLTD_INTEGRATOR_926=y
 # BR2_TARGET_ATMEL is not set
 # BR2_TARGET_SHARP is not set
 
