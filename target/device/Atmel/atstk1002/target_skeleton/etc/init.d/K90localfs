@@ -1,1 +1,11 @@
 #!/bin/sh
+
+UMOUNT=/bin/umount
+
+echo -n "Unmounting local filesystems: "
+if ${UMOUNT} -a -r; then
+	echo "done"
+else
+	echo "failed"
+	exit 1
+fi
