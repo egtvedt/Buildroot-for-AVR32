@@ -1,0 +1,17 @@
+Index: a/gcc/config/avr32/avr32.c
+===================================================================
+--- a/gcc/config/avr32/avr32.c	(revision 39731)
++++ b/gcc/config/avr32/avr32.c	(revision 39757)
+@@ -7434,7 +7434,11 @@
+               if ( !insn_invalid_p (insn) 
+                    /* Do not allow conditional insns to be moved outside the
+                       if-then-else. */
+-                   && !reg_mentioned_p (cc0_rtx, insn) )
++                   && !reg_mentioned_p (cc0_rtx, insn) 
++                   /* We cannot move memory loads outside of the if-then-else
++                      since the memory access should not be perfomed if the
++                      condition is not met. */
++                   && !MEM_P (SET_SRC (op)) )
+                 {
+                   rtx scratch_reg = gen_reg_rtx (mode);
+                   rtx op_pattern = copy_rtx (op);
