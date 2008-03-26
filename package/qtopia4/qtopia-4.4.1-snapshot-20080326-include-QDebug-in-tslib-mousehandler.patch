@@ -1,0 +1,15 @@
+Index: qt-embedded-linux-opensource-src-4.4.1-snapshot-20080326/src/gui/embedded/qmousetslib_qws.cpp
+===================================================================
+--- qt-embedded-linux-opensource-src-4.4.1-snapshot-20080326.orig/src/gui/embedded/qmousetslib_qws.cpp	2008-03-26 08:56:39.000000000 +0100
++++ qt-embedded-linux-opensource-src-4.4.1-snapshot-20080326/src/gui/embedded/qmousetslib_qws.cpp	2008-03-26 08:56:44.000000000 +0100
+@@ -57,6 +57,10 @@
+ #define QT_QWS_TP_JITTER_LIMIT 3
+ #endif
+ 
++#ifdef TSLIBMOUSEHANDLER_DEBUG
++#include <QDebug>
++#endif
++
+ /*!
+     \internal
+ 

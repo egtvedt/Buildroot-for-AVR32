@@ -1,0 +1,13 @@
+Index: qt-embedded-linux-opensource-src-4.4.1-snapshot-20080326/mkspecs/qws/linux-avr32-g++/qmake.conf
+===================================================================
+--- qt-embedded-linux-opensource-src-4.4.1-snapshot-20080326.orig/mkspecs/qws/linux-avr32-g++/qmake.conf	2008-03-26 01:02:10.000000000 +0100
++++ qt-embedded-linux-opensource-src-4.4.1-snapshot-20080326/mkspecs/qws/linux-avr32-g++/qmake.conf	2008-03-26 09:12:41.000000000 +0100
+@@ -15,8 +15,10 @@
+ QMAKE_LINK_SHLIB        = avr32-linux-g++
+ QMAKE_CFLAGS_RELEASE   ~= s/-O2/-Os/
+ QMAKE_CXXFLAGS_RELEASE ~= s/-O2/-Os/
++QMAKE_CFLAGS_DEBUG     += -Os
++QMAKE_CXXFLAGS_DEBUG   += -Os
+ 
+ include(../../common/linux.conf)
+ 
