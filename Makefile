@@ -75,8 +75,9 @@ endif
 CONFIG_SHELL:=$(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	else if [ -x /bin/bash ]; then echo /bin/bash; \
 	else echo sh; fi; fi)
+SHELL:=$(CONFIG_SHELL)
 
-export CONFIG_SHELL quiet Q KBUILD_VERBOSE VERBOSE
+export CONFIG_SHELL SHELL quiet Q KBUILD_VERBOSE VERBOSE
 
 ifndef HOSTAR
 HOSTAR:=ar
@@ -247,7 +248,7 @@ TARGETS+=target-devfiles
 # target stuff is last so it can override anything else
 include target/Makefile.in
 
-TARGETS+=erase-fakeroots 
+TARGETS+=erase-fakeroots
 
 TARGETS_CLEAN:=$(patsubst %,%-clean,$(TARGETS))
 TARGETS_SOURCE:=$(patsubst %,%-source,$(TARGETS) $(BASE_TARGETS))
@@ -324,10 +325,10 @@ ifeq ($(BR2_HAVE_DEVFILES),y)
 	( scripts/copy.sh $(STAGING_DIR) $(TARGET_DIR) )
 else
 	rm -rf $(TARGET_DIR)/usr/include
-	find $(TARGET_DIR)/usr/lib -name '*.a' -delete 
-	find $(TARGET_DIR)/lib -name '*.a' -delete 
-	find $(TARGET_DIR)/usr/lib -name '*.la' -delete 
-	find $(TARGET_DIR)/lib -name '*.la' -delete 
+	find $(TARGET_DIR)/usr/lib -name '*.a' -delete
+	find $(TARGET_DIR)/lib -name '*.a' -delete
+	find $(TARGET_DIR)/usr/lib -name '*.la' -delete
+	find $(TARGET_DIR)/lib -name '*.la' -delete
 endif
 
 source: $(TARGETS_SOURCE) $(HOST_SOURCE)
@@ -503,4 +504,3 @@ help:
 
 .PHONY: dummy subdirs release distclean clean config oldconfig \
 	menuconfig tags check test depend defconfig help
-	
