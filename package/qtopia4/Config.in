@@ -13,6 +13,15 @@ config BR2_PACKAGE_QTOPIA4_DEBUG
 	default n
 	depends BR2_PACKAGE_QTOPIA4
 
+config BR2_PACKAGE_QTOPIA4_SED_CFLAGS
+	bool "Change CFLAGS in qmake.conf file"
+	default n
+	depends BR2_PACKAGE_QTOPIA4
+	help
+	  Use sed to change the CFLAGS in qmake.conf. This will allow Qt
+	  Embedded to be built with the CFLAGS chocen by Buildroot. Leave
+	  unchecked if you want to use Qt Embedded defaults.
+
 choice
 	prompt "Library type"
 	default BR2_PACKAGE_QTOPIA4_SHARED
