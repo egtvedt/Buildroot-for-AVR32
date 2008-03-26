@@ -154,6 +154,12 @@ else
 QTOPIA4_OPENSSL=-no-openssl
 endif
 
+ifeq ($(BR2_PACKAGE_QTOPIA4_SVG),y)
+QTOPIA4_SVG=-svg
+else
+QTOPIA4_SVG=-no-svg
+endif
+
 ifeq ($(BR2_PACKAGE_QTOPIA4_SQL),y)
 QTOPIA4_SQL_IBASE=-qt-sql-ibase
 QTOPIA4_SQL_MYSQL=-qt-sql-mysql
@@ -221,6 +227,7 @@ endif
 		$(QTOPIA4_PNG) \
 		$(QTOPIA4_TIFF) \
 		$(QTOPIA4_ZLIB) \
+		$(QTOPIA4_SVG) \
 		$(QTOPIA4_SQL_IBASE) \
 		$(QTOPIA4_SQL_MYSQL) \
 		$(QTOPIA4_SQL_ODBC) \
@@ -273,8 +280,10 @@ ifneq ($(BR2_PACKAGE_QTOPIA4_SQL),y)
 	# Remove Sql libraries, not needed
 	-rm $(TARGET_DIR)/usr/lib/libQtSql*
 endif
+ifneq ($(BR2_PACKAGE_QTOPIA4_SVG),y)
 	# Remove Svg libraries, not needed
 	-rm $(TARGET_DIR)/usr/lib/libQtSvg*
+endif
 
 qtopia4: uclibc zlib $(QTOPIA4_DEP_LIBS) $(TARGET_DIR)/usr/lib/libQtCore.so.4
 
