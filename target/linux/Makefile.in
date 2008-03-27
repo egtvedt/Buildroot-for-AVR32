@@ -205,15 +205,25 @@ $(LINUX26_KERNEL): $(INITRAMFS_TARGET) $(BB_INITRAMFS_TARGET) \
 $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/modules.dep: $(LINUX26_DIR)/.configured
 	rm -rf $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)
 	rm -f $(TARGET_DIR)/sbin/cardmgr
-# Make Linux depend on modules only if enabled in the .config.
-ifneq ($(strip $(shell grep -c "CONFIG_MODULES=y" $(LINUX26_KCONFIG))),0)
-	$(TARGET_CONFIGURE_OPTS) \
-		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) \
-		DEPMOD=$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26 \
-		INSTALL_MOD_PATH=$(TARGET_DIR) modules_install
-	rm -f $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/build
-	rm -f $(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/source
-	$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26 -b $(TARGET_DIR) $(LINUX_HEADERS_VERSION)
+	# Make Linux depend on modules only if enabled in the .config.
+	@if [ $(shell grep -c "CONFIG_MODULES=y" $(LINUX26_DIR)/.config) != 0 ] ; then	\
+		echo "*** Installing Linux kernel modules" ;				\
+		$(TARGET_CONFIGURE_OPTS)						\
+			$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR)			\
+			DEPMOD=$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26		\
+			INSTALL_MOD_PATH=$(TARGET_DIR) modules_install ;		\
+		if [ -f $(LINUX26_DIR)/localversion* ] ; then				\
+			rm -f "$(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)$(shell cat $(LINUX26_DIR)/localversion*)/build"  ; \
+			rm -f "$(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)$(shell cat $(LINUX26_DIR)/localversion*)/source" ; \
+			$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26 -b $(TARGET_DIR) $(LINUX26_VERSION)$(shell cat $(LINUX26_DIR)/localversion*) ; \
+		else									\
+			rm -f "$(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/build" ;	\
+			rm -f "$(TARGET_DIR)/lib/modules/$(LINUX26_VERSION)/source" ;	\
+			$(STAGING_DIR)/bin/$(GNU_TARGET_NAME)-depmod26 -b $(TARGET_DIR) $(LINUX26_VERSION) ; \
+		fi ;									\
+	else										\
+		echo "*** Skipping installing modules since it is not enabled" ;	\
+	fi
 	touch -c $@
 
 linux26-menuconfig: $(LINUX26_DIR)/.patched host-sed
