@@ -325,10 +325,14 @@ ifeq ($(BR2_HAVE_DEVFILES),y)
 	( scripts/copy.sh $(STAGING_DIR) $(TARGET_DIR) )
 else
 	rm -rf $(TARGET_DIR)/usr/include
-	find $(TARGET_DIR)/usr/lib -name '*.a' -delete
-	find $(TARGET_DIR)/lib -name '*.a' -delete
-	find $(TARGET_DIR)/usr/lib -name '*.la' -delete
-	find $(TARGET_DIR)/lib -name '*.la' -delete
+	@if [ -d $(TARGET_DIR)/usr/lib ]; then \
+		find $(TARGET_DIR)/usr/lib -name '*.a' -delete  ; \
+		find $(TARGET_DIR)/usr/lib -name '*.la' -delete ; \
+	fi
+	@if [ -d $(TARGET_DIR)/lib ]; then \
+		find $(TARGET_DIR)/lib -name '*.a' -delete  ; \
+		find $(TARGET_DIR)/lib -name '*.la' -delete ; \
+	fi
 endif
 
 source: $(TARGETS_SOURCE) $(HOST_SOURCE)
