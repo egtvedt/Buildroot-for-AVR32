@@ -1,0 +1,78 @@
+Index: gdb-6.7.1/Makefile.in
+===================================================================
+--- gdb-6.7.1.orig/Makefile.in	2007-10-29 18:52:21.000000000 +0100
++++ gdb-6.7.1/Makefile.in	2008-03-25 11:23:34.000000000 +0100
+@@ -366,8 +366,8 @@
+ # CFLAGS will be just -g.  We want to ensure that TARGET libraries
+ # (which we know are built with gcc) are built with optimizations so
+ # prepend -O2 when setting CFLAGS_FOR_TARGET.
+-CFLAGS_FOR_TARGET = -O2 $(CFLAGS) $(SYSROOT_CFLAGS_FOR_TARGET) \
+-	$(DEBUG_PREFIX_CFLAGS_FOR_TARGET)
++CFLAGS_FOR_TARGET = $(strip $(CFLAGS) $(SYSROOT_CFLAGS_FOR_TARGET) \
++	$(DEBUG_PREFIX_CFLAGS_FOR_TARGET))
+ SYSROOT_CFLAGS_FOR_TARGET = @SYSROOT_CFLAGS_FOR_TARGET@
+ DEBUG_PREFIX_CFLAGS_FOR_TARGET = @DEBUG_PREFIX_CFLAGS_FOR_TARGET@
+ CXXFLAGS_FOR_TARGET = $(CXXFLAGS) $(SYSROOT_CFLAGS_FOR_TARGET) \
+Index: gdb-6.7.1/Makefile.tpl
+===================================================================
+--- gdb-6.7.1.orig/Makefile.tpl	2007-08-18 17:19:09.000000000 +0200
++++ gdb-6.7.1/Makefile.tpl	2008-03-25 11:23:19.000000000 +0100
+@@ -369,8 +369,8 @@
+ # CFLAGS will be just -g.  We want to ensure that TARGET libraries
+ # (which we know are built with gcc) are built with optimizations so
+ # prepend -O2 when setting CFLAGS_FOR_TARGET.
+-CFLAGS_FOR_TARGET = -O2 $(CFLAGS) $(SYSROOT_CFLAGS_FOR_TARGET) \
+-	$(DEBUG_PREFIX_CFLAGS_FOR_TARGET)
++CFLAGS_FOR_TARGET = $(strip $(CFLAGS) $(SYSROOT_CFLAGS_FOR_TARGET) \
++	$(DEBUG_PREFIX_CFLAGS_FOR_TARGET))
+ SYSROOT_CFLAGS_FOR_TARGET = @SYSROOT_CFLAGS_FOR_TARGET@
+ DEBUG_PREFIX_CFLAGS_FOR_TARGET = @DEBUG_PREFIX_CFLAGS_FOR_TARGET@
+ CXXFLAGS_FOR_TARGET = $(CXXFLAGS) $(SYSROOT_CFLAGS_FOR_TARGET) \
+Index: gdb-6.7.1/gdb/configure
+===================================================================
+--- gdb-6.7.1.orig/gdb/configure	2007-10-23 14:36:50.000000000 +0200
++++ gdb-6.7.1/gdb/configure	2008-03-25 11:22:55.000000000 +0100
+@@ -272,7 +272,7 @@
+ PACKAGE_BUGREPORT=
+ 
+ ac_unique_file="main.c"
+-ac_subdirs_all="$ac_subdirs_all doc testsuite"
++ac_subdirs_all="$ac_subdirs_all doc"
+ # Factoring default headers for most tests.
+ ac_includes_default="\
+ #include <stdio.h>
+@@ -3077,7 +3077,7 @@
+ 
+ 
+ 
+-subdirs="$subdirs doc testsuite"
++subdirs="$subdirs doc"
+ 
+ 
+ # Provide defaults for some variables set by the per-host and per-target
+Index: gdb-6.7.1/gdb/gdbserver/configure
+===================================================================
+--- gdb-6.7.1.orig/gdb/gdbserver/configure	2007-03-29 03:06:48.000000000 +0200
++++ gdb-6.7.1/gdb/gdbserver/configure	2008-03-25 11:22:55.000000000 +0100
+@@ -1239,7 +1239,7 @@
+       ac_cache_corrupted=: ;;
+     ,);;
+     *)
+-      if test "x$ac_old_val" != "x$ac_new_val"; then
++      if test "`echo $ac_old_val`" != "`echo $ac_new_val`"; then
+ 	{ echo "$as_me:$LINENO: error: \`$ac_var' has changed since the previous run:" >&5
+ echo "$as_me: error: \`$ac_var' has changed since the previous run:" >&2;}
+ 	{ echo "$as_me:$LINENO:   former value:  $ac_old_val" >&5
+Index: gdb-6.7.1/gdb/testsuite/configure
+===================================================================
+--- gdb-6.7.1.orig/gdb/testsuite/configure	2007-01-23 18:11:54.000000000 +0100
++++ gdb-6.7.1/gdb/testsuite/configure	2008-03-25 11:22:55.000000000 +0100
+@@ -1248,7 +1248,7 @@
+       ac_cache_corrupted=: ;;
+     ,);;
+     *)
+-      if test "x$ac_old_val" != "x$ac_new_val"; then
++      if test "`echo $ac_old_val" != "`echo $ac_new_val"; then
+ 	{ echo "$as_me:$LINENO: error: \`$ac_var' has changed since the previous run:" >&5
+ echo "$as_me: error: \`$ac_var' has changed since the previous run:" >&2;}
+ 	{ echo "$as_me:$LINENO:   former value:  $ac_old_val" >&5
