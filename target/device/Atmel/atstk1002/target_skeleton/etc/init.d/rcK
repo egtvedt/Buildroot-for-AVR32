@@ -2,5 +2,7 @@
 
 echo "Shutting down ..."
 for k in /etc/init.d/K*; do
-	$k stop
+	if [ -x $k ]; then
+		$k stop
+	fi
 done
