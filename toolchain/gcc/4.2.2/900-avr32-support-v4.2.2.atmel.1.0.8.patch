@@ -1,6 +1,6 @@
-diff -Nrup gcc-4.2.2/configure.in gcc-4.2.2.atmel.1.0.6/configure.in
+diff -Nrup gcc-4.2.2/configure.in gcc-4.2.2.atmel.1.0.8/configure.in
 --- gcc-4.2.2/configure.in	2007-09-15 02:42:24.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/configure.in	2008-03-25 10:10:13.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/configure.in	2008-04-02 14:59:48.000000000 +0200
 @@ -503,6 +503,9 @@ case "${target}" in
    arm-*-riscix*)
      noconfigdirs="$noconfigdirs ld target-libgloss ${libgcj}"
@@ -11,9 +11,9 @@ diff -Nrup gcc-4.2.2/configure.in gcc-4.2.2.atmel.1.0.6/configure.in
    avr-*-*)
      noconfigdirs="$noconfigdirs target-libiberty target-libstdc++-v3 ${libgcj}"
      ;;
-diff -Nrup gcc-4.2.2/gcc/builtins.c gcc-4.2.2.atmel.1.0.6/gcc/builtins.c
+diff -Nrup gcc-4.2.2/gcc/builtins.c gcc-4.2.2.atmel.1.0.8/gcc/builtins.c
 --- gcc-4.2.2/gcc/builtins.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/builtins.c	2008-03-25 10:07:22.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/builtins.c	2008-04-02 14:57:05.000000000 +0200
 @@ -9223,7 +9223,7 @@ validate_arglist (tree arglist, ...)
  
    do
@@ -23,9 +23,9 @@ diff -Nrup gcc-4.2.2/gcc/builtins.c gcc-4.2.2.atmel.1.0.6/gcc/builtins.c
        switch (code)
  	{
  	case 0:
-diff -Nrup gcc-4.2.2/gcc/calls.c gcc-4.2.2.atmel.1.0.6/gcc/calls.c
+diff -Nrup gcc-4.2.2/gcc/calls.c gcc-4.2.2.atmel.1.0.8/gcc/calls.c
 --- gcc-4.2.2/gcc/calls.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/calls.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/calls.c	2008-04-02 14:57:05.000000000 +0200
 @@ -3447,7 +3447,7 @@ emit_library_call_value_1 (int retval, r
    for (; count < nargs; count++)
      {
@@ -35,9 +35,9 @@ diff -Nrup gcc-4.2.2/gcc/calls.c gcc-4.2.2.atmel.1.0.6/gcc/calls.c
  
        /* We cannot convert the arg value to the mode the library wants here;
  	 must do it earlier where we know the signedness of the arg.  */
-diff -Nrup gcc-4.2.2/gcc/c-incpath.c gcc-4.2.2.atmel.1.0.6/gcc/c-incpath.c
+diff -Nrup gcc-4.2.2/gcc/c-incpath.c gcc-4.2.2.atmel.1.0.8/gcc/c-incpath.c
 --- gcc-4.2.2/gcc/c-incpath.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/c-incpath.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/c-incpath.c	2008-04-02 14:57:06.000000000 +0200
 @@ -347,6 +347,18 @@ add_path (char *path, int chain, int cxx
    char* c;
    for (c = path; *c; c++)
@@ -57,10 +57,10 @@ diff -Nrup gcc-4.2.2/gcc/c-incpath.c gcc-4.2.2.atmel.1.0.6/gcc/c-incpath.c
  #endif
  
    p = XNEW (cpp_dir);
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32.c
+diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32.c
 --- gcc-4.2.2/gcc/config/avr32/avr32.c	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32.c	2008-03-25 10:07:07.000000000 +0100
-@@ -0,0 +1,7750 @@
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32.c	2008-04-02 14:56:51.000000000 +0200
+@@ -0,0 +1,7754 @@
 +/*
 +   Target hooks and helper functions for AVR32.
 +   Copyright 2003-2006 Atmel Corporation.
@@ -224,7 +224,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.0.6/gcc/config/a
 +/* Set default target_flags. */
 +#undef TARGET_DEFAULT_TARGET_FLAGS
 +#define TARGET_DEFAULT_TARGET_FLAGS \
-+  (MASK_HAS_ASM_ADDR_PSEUDOS | MASK_MD_REORG_OPTIMIZATION)
++  (MASK_HAS_ASM_ADDR_PSEUDOS | MASK_MD_REORG_OPTIMIZATION | MASK_COND_EXEC_BEFORE_RELOAD)
 +
 +void 
 +avr32_optimization_options (int level,
@@ -7497,7 +7497,11 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.0.6/gcc/config/a
 +              if ( !insn_invalid_p (insn) 
 +                   /* Do not allow conditional insns to be moved outside the
 +                      if-then-else. */
-+                   && !reg_mentioned_p (cc0_rtx, insn) )
++                   && !reg_mentioned_p (cc0_rtx, insn) 
++                   /* We cannot move memory loads outside of the if-then-else
++                      since the memory access should not be perfomed if the
++                      condition is not met. */
++                   && !MEM_P (SET_SRC (op)) )
 +                {
 +                  rtx scratch_reg = gen_reg_rtx (mode);
 +                  rtx op_pattern = copy_rtx (op);
@@ -7811,9 +7815,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.0.6/gcc/config/a
 +      set_optab_libfunc (sdiv_optab, SFmode, "__avr32_f32_div");
 +    }
 +}
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-elf.h gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32-elf.h
+diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-elf.h gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32-elf.h
 --- gcc-4.2.2/gcc/config/avr32/avr32-elf.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32-elf.h	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32-elf.h	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,84 @@
 +/*
 +   Elf specific definitions.
@@ -7899,9 +7903,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-elf.h gcc-4.2.2.atmel.1.0.6/gcc/conf
 +        builtin_define ("__AVR32_FAST_FLOAT__");                \
 +    }								\
 +  while (0)
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.h gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32.h
+diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.h gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32.h
 --- gcc-4.2.2/gcc/config/avr32/avr32.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32.h	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32.h	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,3325 @@
 +/*
 +   Definitions of target machine for AVR32.
@@ -11228,10 +11232,10 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.h gcc-4.2.2.atmel.1.0.6/gcc/config/a
 +#endif
 +
 +#endif
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32.md
+diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32.md
 --- gcc-4.2.2/gcc/config/avr32/avr32.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32.md	2008-03-25 10:07:07.000000000 +0100
-@@ -0,0 +1,4911 @@
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32.md	2008-04-02 14:56:51.000000000 +0200
+@@ -0,0 +1,4910 @@
 +;;   AVR32 machine description file.
 +;;   Copyright 2003-2006 Atmel Corporation.
 +;;
@@ -12465,16 +12469,15 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.6/gcc/config/
 +
 +
 +(define_insn "add<mode>_imm_predicable"
-+  [(set (match_operand:INTM 0 "register_operand" "=r")
-+	(plus:INTM (match_operand:INTM 1 "register_operand" "0")
-+                   (match_operand:INTM 2 "avr32_cond_immediate_operand" "Is08")))]
++  [(set (match_operand:INTM 0 "register_operand" "+r")
++	(plus:INTM (match_dup 0)
++                   (match_operand:INTM 1 "avr32_cond_immediate_operand" "%Is08")))]
 +  ""
-+  "sub%?\t%0, -%2"
++  "sub%?\t%0, -%1"
 +  [(set_attr "length" "4")
 +   (set_attr "cc" "cmp_cond_insn")
 +   (set_attr "predicable" "yes")]
 +)
-+
 +
 +;;=============================================================================
 +;; subtract
@@ -12537,19 +12540,19 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.6/gcc/config/
 +
 +
 +(define_insn "sub<mode>_imm_predicable"
-+  [(set (match_operand:INTM 0 "register_operand" "=r")
-+	(minus:INTM (match_operand:INTM 1 "register_operand" "0")
-+                    (match_operand:INTM 2 "avr32_cond_immediate_operand" "Ks08")))]
++  [(set (match_operand:INTM 0 "register_operand" "+r")
++	(minus:INTM (match_dup 0)
++                    (match_operand:INTM 1 "avr32_cond_immediate_operand" "Ks08")))]
 +  ""
-+  "sub%?\t%0, %2"
++  "sub%?\t%0, %1"
 +  [(set_attr "length" "4")
 +   (set_attr "cc" "cmp_cond_insn")
 +   (set_attr "predicable" "yes")])
 +
 +(define_insn "rsub<mode>_imm_predicable"
-+  [(set (match_operand:INTM 0 "register_operand" "=r")
++  [(set (match_operand:INTM 0 "register_operand" "+r")
 +	(minus:INTM (match_operand:INTM 1 "avr32_cond_immediate_operand"  "Ks08")
-+                    (match_operand:INTM 2 "register_operand" "0")))]
++                    (match_dup 0)))]
 +  ""
 +  "rsub%?\t%0, %1"
 +  [(set_attr "length" "4")
@@ -13072,11 +13075,11 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.6/gcc/config/
 +;;=============================================================================
 +
 +(define_insn "andnsi"
-+  [(set (match_operand:SI 0 "register_operand" "=r")
-+        (and:SI (match_operand:SI 1 "register_operand" "0")
-+                (not:SI (match_operand:SI 2 "register_operand" "r"))))]
++  [(set (match_operand:SI 0 "register_operand" "+r")
++        (and:SI (match_dup 0)
++                (not:SI (match_operand:SI 1 "register_operand" "r"))))]
 +  ""
-+  "andn    %0, %2"
++  "andn    %0, %1"
 +  [(set_attr "cc" "set_z")
 +   (set_attr "length" "2")]
 +)
@@ -13556,8 +13559,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.6/gcc/config/
 +   (set_attr "cc" "set_vncz")])
 +
 +(define_insn "negsi2_predicable"
-+  [(set (match_operand:SI 0 "register_operand" "=r")
-+	(neg:SI (match_operand:SI 1 "register_operand" "0")))]
++  [(set (match_operand:SI 0 "register_operand" "+r")
++	(neg:SI (match_dup 0)))]
 +  "TARGET_V2_INSNS"
 +  "rsub%?\t%0, 0"
 +  [(set_attr "length" "4")
@@ -13596,8 +13599,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.6/gcc/config/
 +
 +
 +(define_insn "one_cmplsi2_predicable"
-+  [(set (match_operand:SI 0 "register_operand" "=r")
-+	(not:SI (match_operand:SI 1 "register_operand" "0")))]
++  [(set (match_operand:SI 0 "register_operand" "+r")
++	(not:SI (match_dup 0)))]
 +  "TARGET_V2_INSNS"
 +  "rsub%?\t%0, -1"
 +  [(set_attr "length" "4")
@@ -15796,13 +15799,13 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.6/gcc/config/
 +;;=================================================================
 +
 +(define_insn "*round"
-+  [(set (match_operand:SI 0 "register_operand" "=r")
-+        (ashiftrt:SI (plus:SI (match_operand:SI 1 "register_operand" "0")
-+                              (match_operand:SI 2 "immediate_operand" "i"))
-+                     (match_operand:SI 3 "immediate_operand" "i")))]
-+  "avr32_rnd_operands(operands[2], operands[3])"
++  [(set (match_operand:SI 0 "register_operand" "+r")
++        (ashiftrt:SI (plus:SI (match_dup 0)
++                              (match_operand:SI 1 "immediate_operand" "i"))
++                     (match_operand:SI 2 "immediate_operand" "i")))]
++  "avr32_rnd_operands(operands[1], operands[2])"
 +
-+  "satrnds    %0 >> %3, 31"
++  "satrnds    %0 >> %2, 31"
 +
 +  [(set_attr "type" "alu_sat")
 +   (set_attr "length" "4")]
@@ -16143,14 +16146,14 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.0.6/gcc/config/
 +
 +;; Load the FP coprAocessor patterns
 +(include "fpcp.md")
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-modes.def gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32-modes.def
+diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-modes.def gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32-modes.def
 --- gcc-4.2.2/gcc/config/avr32/avr32-modes.def	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32-modes.def	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32-modes.def	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1 @@
 +VECTOR_MODES (INT, 4);        /*            V4QI V2HI */
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.opt gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32.opt
+diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.opt gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32.opt
 --- gcc-4.2.2/gcc/config/avr32/avr32.opt	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32.opt	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32.opt	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,80 @@
 +; Options for the ATMEL AVR32 port of the compiler.
 +
@@ -16232,9 +16235,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.opt gcc-4.2.2.atmel.1.0.6/gcc/config
 +mcond-exec-before-reload
 +Target Report Undocumented Mask(COND_EXEC_BEFORE_RELOAD) 
 +Enable experimental conditional execution preparation before the reload stage. 
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-protos.h gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32-protos.h
+diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-protos.h gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32-protos.h
 --- gcc-4.2.2/gcc/config/avr32/avr32-protos.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/avr32-protos.h	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/avr32-protos.h	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,196 @@
 +/*
 +   Prototypes for exported functions defined in avr32.c
@@ -16432,9 +16435,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-protos.h gcc-4.2.2.atmel.1.0.6/gcc/c
 +
 +
 +#endif /* AVR32_PROTOS_H */
-diff -Nrup gcc-4.2.2/gcc/config/avr32/crti.asm gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/crti.asm
+diff -Nrup gcc-4.2.2/gcc/config/avr32/crti.asm gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/crti.asm
 --- gcc-4.2.2/gcc/config/avr32/crti.asm	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/crti.asm	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/crti.asm	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,64 @@
 +/*
 +   Init/fini stuff for AVR32.
@@ -16500,9 +16503,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/crti.asm gcc-4.2.2.atmel.1.0.6/gcc/config/
 +1:	.long	0b - _GLOBAL_OFFSET_TABLE_		
 +2:	
 +
-diff -Nrup gcc-4.2.2/gcc/config/avr32/crtn.asm gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/crtn.asm
+diff -Nrup gcc-4.2.2/gcc/config/avr32/crtn.asm gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/crtn.asm
 --- gcc-4.2.2/gcc/config/avr32/crtn.asm	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/crtn.asm	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/crtn.asm	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,44 @@
 +/*   Copyright (C) 2001 Free Software Foundation, Inc.
 +    Written By Nick Clifton
@@ -16548,9 +16551,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/crtn.asm gcc-4.2.2.atmel.1.0.6/gcc/config/
 +	.section	".fini"
 +	ldm	sp++, r6, pc
 +		
-diff -Nrup gcc-4.2.2/gcc/config/avr32/fpcp.md gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/fpcp.md
+diff -Nrup gcc-4.2.2/gcc/config/avr32/fpcp.md gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/fpcp.md
 --- gcc-4.2.2/gcc/config/avr32/fpcp.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/fpcp.md	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/fpcp.md	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,551 @@
 +;;   AVR32 machine description file for Floating-Point instructions.
 +;;   Copyright 2003-2006 Atmel Corporation.
@@ -17103,9 +17106,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/fpcp.md gcc-4.2.2.atmel.1.0.6/gcc/config/a
 +  [(set_attr "type" "fstm")
 +   (set_attr "length" "4")
 +   (set_attr "cc" "none")])
-diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/lib1funcs.S
+diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/lib1funcs.S
 --- gcc-4.2.2/gcc/config/avr32/lib1funcs.S	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/lib1funcs.S	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/lib1funcs.S	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,2586 @@
 + 
 +/* Adjust the unpacked double number if it is a subnormal number.
@@ -19693,9 +19696,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.0.6/gcc/conf
 +                
 +#endif
 + 
-diff -Nrup gcc-4.2.2/gcc/config/avr32/lib2funcs.S gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/lib2funcs.S
+diff -Nrup gcc-4.2.2/gcc/config/avr32/lib2funcs.S gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/lib2funcs.S
 --- gcc-4.2.2/gcc/config/avr32/lib2funcs.S	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/lib2funcs.S	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/lib2funcs.S	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,21 @@
 +	.align	4
 +	.global __nonlocal_goto
@@ -19718,9 +19721,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib2funcs.S gcc-4.2.2.atmel.1.0.6/gcc/conf
 +
 +
 +		
-diff -Nrup gcc-4.2.2/gcc/config/avr32/linux-elf.h gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/linux-elf.h
+diff -Nrup gcc-4.2.2/gcc/config/avr32/linux-elf.h gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/linux-elf.h
 --- gcc-4.2.2/gcc/config/avr32/linux-elf.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/linux-elf.h	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/linux-elf.h	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,151 @@
 +/*
 +   Linux/Elf specific definitions.
@@ -19873,9 +19876,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/linux-elf.h gcc-4.2.2.atmel.1.0.6/gcc/conf
 +
 +#define LINK_GCC_C_SEQUENCE_SPEC \
 +  "%{static:--start-group} %G %L %{static:--end-group}%{!static:%G}"
-diff -Nrup gcc-4.2.2/gcc/config/avr32/predicates.md gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/predicates.md
+diff -Nrup gcc-4.2.2/gcc/config/avr32/predicates.md gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/predicates.md
 --- gcc-4.2.2/gcc/config/avr32/predicates.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/predicates.md	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/predicates.md	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,381 @@
 +;;   AVR32 predicates file.
 +;;   Copyright 2003-2006 Atmel Corporation.
@@ -20258,9 +20261,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/predicates.md gcc-4.2.2.atmel.1.0.6/gcc/co
 +(define_predicate "avr32_mov_immediate_operand"
 +  (and (match_operand 0 "immediate_operand")
 +       (match_test "avr32_const_ok_for_move(INTVAL(op))")))
-diff -Nrup gcc-4.2.2/gcc/config/avr32/simd.md gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/simd.md
+diff -Nrup gcc-4.2.2/gcc/config/avr32/simd.md gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/simd.md
 --- gcc-4.2.2/gcc/config/avr32/simd.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/simd.md	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/simd.md	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,145 @@
 +;;   AVR32 machine description file for SIMD instructions.
 +;;   Copyright 2003-2006 Atmel Corporation.
@@ -20407,9 +20410,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/simd.md gcc-4.2.2.atmel.1.0.6/gcc/config/a
 +  "psubadd.h\t%0, %1:b, %2:b"
 +  [(set_attr "length" "4")
 +   (set_attr "type" "alu")])
-diff -Nrup gcc-4.2.2/gcc/config/avr32/sync.md gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/sync.md
+diff -Nrup gcc-4.2.2/gcc/config/avr32/sync.md gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/sync.md
 --- gcc-4.2.2/gcc/config/avr32/sync.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/sync.md	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/sync.md	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,175 @@
 +;;=================================================================
 +;; Atomic operations
@@ -20586,9 +20589,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/sync.md gcc-4.2.2.atmel.1.0.6/gcc/config/a
 +  "xchg\t%0, %p1, %2"
 +  [(set_attr "length" "4")]
 +  )
-diff -Nrup gcc-4.2.2/gcc/config/avr32/t-avr32 gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/t-avr32
+diff -Nrup gcc-4.2.2/gcc/config/avr32/t-avr32 gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/t-avr32
 --- gcc-4.2.2/gcc/config/avr32/t-avr32	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/t-avr32	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/t-avr32	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,70 @@
 +
 +MD_INCLUDES= 	$(srcdir)/config/avr32/avr32.md \
@@ -20660,9 +20663,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/t-avr32 gcc-4.2.2.atmel.1.0.6/gcc/config/a
 +
 +
 +
-diff -Nrup gcc-4.2.2/gcc/config/avr32/t-elf gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/t-elf
+diff -Nrup gcc-4.2.2/gcc/config/avr32/t-elf gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/t-elf
 --- gcc-4.2.2/gcc/config/avr32/t-elf	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/t-elf	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/t-elf	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,16 @@
 +
 +# Assemble startup files.
@@ -20680,9 +20683,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/t-elf gcc-4.2.2.atmel.1.0.6/gcc/config/avr
 +
 +LIBGCC = stmp-multilib
 +INSTALL_LIBGCC = install-multilib
-diff -Nrup gcc-4.2.2/gcc/config/avr32/uclinux-elf.h gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/uclinux-elf.h
+diff -Nrup gcc-4.2.2/gcc/config/avr32/uclinux-elf.h gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/uclinux-elf.h
 --- gcc-4.2.2/gcc/config/avr32/uclinux-elf.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/avr32/uclinux-elf.h	2008-03-25 10:07:07.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/avr32/uclinux-elf.h	2008-04-02 14:56:51.000000000 +0200
 @@ -0,0 +1,20 @@
 +
 +/* Run-time Target Specification.  */
@@ -20704,9 +20707,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/uclinux-elf.h gcc-4.2.2.atmel.1.0.6/gcc/co
 +
 +#undef TARGET_DEFAULT
 +#define TARGET_DEFAULT (AVR32_FLAG_NO_INIT_GOT)
-diff -Nrup gcc-4.2.2/gcc/config/host-linux.c gcc-4.2.2.atmel.1.0.6/gcc/config/host-linux.c
+diff -Nrup gcc-4.2.2/gcc/config/host-linux.c gcc-4.2.2.atmel.1.0.8/gcc/config/host-linux.c
 --- gcc-4.2.2/gcc/config/host-linux.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config/host-linux.c	2008-03-25 10:07:19.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config/host-linux.c	2008-04-02 14:57:04.000000000 +0200
 @@ -25,6 +25,9 @@
  #include "hosthooks.h"
  #include "hosthooks-def.h"
@@ -20717,9 +20720,9 @@ diff -Nrup gcc-4.2.2/gcc/config/host-linux.c gcc-4.2.2.atmel.1.0.6/gcc/config/ho
  
  /* Linux has a feature called exec-shield-randomize that perturbs the
     address of non-fixed mapped segments by a (relatively) small amount.
-diff -Nrup gcc-4.2.2/gcc/config.gcc gcc-4.2.2.atmel.1.0.6/gcc/config.gcc
+diff -Nrup gcc-4.2.2/gcc/config.gcc gcc-4.2.2.atmel.1.0.8/gcc/config.gcc
 --- gcc-4.2.2/gcc/config.gcc	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/config.gcc	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/config.gcc	2008-04-02 14:57:06.000000000 +0200
 @@ -781,6 +781,24 @@ avr-*-*)
  	tm_file="avr/avr.h dbxelf.h"
  	use_fixproto=yes
@@ -20788,9 +20791,9 @@ diff -Nrup gcc-4.2.2/gcc/config.gcc gcc-4.2.2.atmel.1.0.6/gcc/config.gcc
  	fr*-*-*linux*)
  		supported_defaults=cpu
  		case "$with_cpu" in
-diff -Nrup gcc-4.2.2/gcc/COPYING3 gcc-4.2.2.atmel.1.0.6/gcc/COPYING3
+diff -Nrup gcc-4.2.2/gcc/COPYING3 gcc-4.2.2.atmel.1.0.8/gcc/COPYING3
 --- gcc-4.2.2/gcc/COPYING3	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/COPYING3	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/COPYING3	1970-01-01 01:00:00.000000000 +0100
 @@ -1,674 +0,0 @@
 -                    GNU GENERAL PUBLIC LICENSE
 -                       Version 3, 29 June 2007
@@ -21466,9 +21469,9 @@ diff -Nrup gcc-4.2.2/gcc/COPYING3 gcc-4.2.2.atmel.1.0.6/gcc/COPYING3
 -the library.  If this is what you want to do, use the GNU Lesser General
 -Public License instead of this License.  But first, please read
 -<http://www.gnu.org/philosophy/why-not-lgpl.html>.
-diff -Nrup gcc-4.2.2/gcc/COPYING3.LIB gcc-4.2.2.atmel.1.0.6/gcc/COPYING3.LIB
+diff -Nrup gcc-4.2.2/gcc/COPYING3.LIB gcc-4.2.2.atmel.1.0.8/gcc/COPYING3.LIB
 --- gcc-4.2.2/gcc/COPYING3.LIB	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/COPYING3.LIB	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/COPYING3.LIB	1970-01-01 01:00:00.000000000 +0100
 @@ -1,165 +0,0 @@
 -		   GNU LESSER GENERAL PUBLIC LICENSE
 -                       Version 3, 29 June 2007
@@ -21635,9 +21638,9 @@ diff -Nrup gcc-4.2.2/gcc/COPYING3.LIB gcc-4.2.2.atmel.1.0.6/gcc/COPYING3.LIB
 -apply, that proxy's public statement of acceptance of any version is
 -permanent authorization for you to choose that version for the
 -Library.
-diff -Nrup gcc-4.2.2/gcc/doc/extend.texi gcc-4.2.2.atmel.1.0.6/gcc/doc/extend.texi
+diff -Nrup gcc-4.2.2/gcc/doc/extend.texi gcc-4.2.2.atmel.1.0.8/gcc/doc/extend.texi
 --- gcc-4.2.2/gcc/doc/extend.texi	2007-03-12 23:10:12.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/doc/extend.texi	2008-03-25 09:59:19.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/doc/extend.texi	2008-04-02 14:49:32.000000000 +0200
 @@ -1981,7 +1981,7 @@ this attribute to work correctly.
  
  @item interrupt
@@ -21728,9 +21731,9 @@ diff -Nrup gcc-4.2.2/gcc/doc/extend.texi gcc-4.2.2.atmel.1.0.6/gcc/doc/extend.te
  @node Blackfin Built-in Functions
  @subsection Blackfin Built-in Functions
  
-diff -Nrup gcc-4.2.2/gcc/doc/invoke.texi gcc-4.2.2.atmel.1.0.6/gcc/doc/invoke.texi
+diff -Nrup gcc-4.2.2/gcc/doc/invoke.texi gcc-4.2.2.atmel.1.0.8/gcc/doc/invoke.texi
 --- gcc-4.2.2/gcc/doc/invoke.texi	2007-09-07 12:45:50.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/doc/invoke.texi	2008-03-25 09:59:19.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/doc/invoke.texi	2008-04-02 14:49:32.000000000 +0200
 @@ -190,7 +190,7 @@ in the following sections.
  -fno-default-inline  -fvisibility-inlines-hidden @gol
  -Wabi  -Wctor-dtor-privacy @gol
@@ -21963,9 +21966,9 @@ diff -Nrup gcc-4.2.2/gcc/doc/invoke.texi gcc-4.2.2.atmel.1.0.6/gcc/doc/invoke.te
  @item -mcall-sysv-eabi
  @opindex mcall-sysv-eabi
  Specify both @option{-mcall-sysv} and @option{-meabi} options.
-diff -Nrup gcc-4.2.2/gcc/doc/md.texi gcc-4.2.2.atmel.1.0.6/gcc/doc/md.texi
+diff -Nrup gcc-4.2.2/gcc/doc/md.texi gcc-4.2.2.atmel.1.0.8/gcc/doc/md.texi
 --- gcc-4.2.2/gcc/doc/md.texi	2007-04-04 03:24:10.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/doc/md.texi	2008-03-25 09:59:19.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/doc/md.texi	2008-04-02 14:49:32.000000000 +0200
 @@ -3,6 +3,7 @@
  @c This is part of the GCC manual.
  @c For copying conditions, see the file gcc.texi.
@@ -22033,9 +22036,9 @@ diff -Nrup gcc-4.2.2/gcc/doc/md.texi gcc-4.2.2.atmel.1.0.6/gcc/doc/md.texi
  @item AVR family---@file{config/avr/constraints.md}
  @table @code
  @item l
-diff -Nrup gcc-4.2.2/gcc/expmed.c gcc-4.2.2.atmel.1.0.6/gcc/expmed.c
+diff -Nrup gcc-4.2.2/gcc/expmed.c gcc-4.2.2.atmel.1.0.8/gcc/expmed.c
 --- gcc-4.2.2/gcc/expmed.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/expmed.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/expmed.c	2008-04-02 14:57:06.000000000 +0200
 @@ -36,6 +36,7 @@ along with GCC; see the file COPYING3.  
  #include "real.h"
  #include "recog.h"
@@ -22044,7 +22047,7 @@ diff -Nrup gcc-4.2.2/gcc/expmed.c gcc-4.2.2.atmel.1.0.6/gcc/expmed.c
  
  static void store_fixed_bit_field (rtx, unsigned HOST_WIDE_INT,
  				   unsigned HOST_WIDE_INT,
-@@ -454,9 +455,18 @@ store_bit_field (rtx str_rtx, unsigned H
+@@ -454,9 +455,19 @@ store_bit_field (rtx str_rtx, unsigned H
  	  ? ((GET_MODE_SIZE (fieldmode) >= UNITS_PER_WORD
  	     || GET_MODE_SIZE (GET_MODE (op0)) == GET_MODE_SIZE (fieldmode))
  	     && byte_offset % GET_MODE_SIZE (fieldmode) == 0)
@@ -22059,6 +22062,7 @@ diff -Nrup gcc-4.2.2/gcc/expmed.c gcc-4.2.2.atmel.1.0.6/gcc/expmed.c
 +                consistent with the container type. */
 +             !(MEM_VOLATILE_P (op0) 
 +               && GET_MODE_BITSIZE (GET_MODE (op0)) != bitsize
++               && bitsize < BITS_PER_WORD
 +               && !targetm.narrow_volatile_bitfield ())
 +             && (! SLOW_UNALIGNED_ACCESS (fieldmode, MEM_ALIGN (op0))
 +                 || (offset * BITS_PER_UNIT % bitsize == 0
@@ -22066,7 +22070,7 @@ diff -Nrup gcc-4.2.2/gcc/expmed.c gcc-4.2.2.atmel.1.0.6/gcc/expmed.c
      {
        if (MEM_P (op0))
  	op0 = adjust_address (op0, fieldmode, offset);
-@@ -1256,6 +1266,13 @@ extract_bit_field (rtx str_rtx, unsigned
+@@ -1256,6 +1267,13 @@ extract_bit_field (rtx str_rtx, unsigned
  	   && GET_MODE_SIZE (mode1) != 0
  	   && byte_offset % GET_MODE_SIZE (mode1) == 0)
  	  || (MEM_P (op0)
@@ -22080,9 +22084,9 @@ diff -Nrup gcc-4.2.2/gcc/expmed.c gcc-4.2.2.atmel.1.0.6/gcc/expmed.c
  	      && (! SLOW_UNALIGNED_ACCESS (mode, MEM_ALIGN (op0))
  		  || (offset * BITS_PER_UNIT % bitsize == 0
  		      && MEM_ALIGN (op0) % bitsize == 0)))))
-diff -Nrup gcc-4.2.2/gcc/expr.c gcc-4.2.2.atmel.1.0.6/gcc/expr.c
+diff -Nrup gcc-4.2.2/gcc/expr.c gcc-4.2.2.atmel.1.0.8/gcc/expr.c
 --- gcc-4.2.2/gcc/expr.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/expr.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/expr.c	2008-04-02 14:57:05.000000000 +0200
 @@ -3519,18 +3519,19 @@ emit_single_push_insn (enum machine_mode
      }
    else
@@ -22157,9 +22161,9 @@ diff -Nrup gcc-4.2.2/gcc/expr.c gcc-4.2.2.atmel.1.0.6/gcc/expr.c
  	    || REG_P (op0) || GET_CODE (op0) == SUBREG
  	    || (mode1 != BLKmode && ! direct_load[(int) mode1]
  		&& GET_MODE_CLASS (mode) != MODE_COMPLEX_INT
-diff -Nrup gcc-4.2.2/gcc/flow.c gcc-4.2.2.atmel.1.0.6/gcc/flow.c
+diff -Nrup gcc-4.2.2/gcc/flow.c gcc-4.2.2.atmel.1.0.8/gcc/flow.c
 --- gcc-4.2.2/gcc/flow.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/flow.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/flow.c	2008-04-02 14:57:05.000000000 +0200
 @@ -3327,12 +3327,12 @@ not_reg_cond (rtx x)
    if (GET_CODE (x) == NOT)
      return XEXP (x, 0);
@@ -22176,9 +22180,9 @@ diff -Nrup gcc-4.2.2/gcc/flow.c gcc-4.2.2.atmel.1.0.6/gcc/flow.c
      }
    return gen_rtx_NOT (0, x);
  }
-diff -Nrup gcc-4.2.2/gcc/function.c gcc-4.2.2.atmel.1.0.6/gcc/function.c
+diff -Nrup gcc-4.2.2/gcc/function.c gcc-4.2.2.atmel.1.0.8/gcc/function.c
 --- gcc-4.2.2/gcc/function.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/function.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/function.c	2008-04-02 14:57:05.000000000 +0200
 @@ -2676,8 +2676,12 @@ assign_parm_setup_reg (struct assign_par
      SET_DECL_RTL (parm, parmreg);
  
@@ -22194,9 +22198,9 @@ diff -Nrup gcc-4.2.2/gcc/function.c gcc-4.2.2.atmel.1.0.6/gcc/function.c
      {
        int save_tree_used;
  
-diff -Nrup gcc-4.2.2/gcc/genemit.c gcc-4.2.2.atmel.1.0.6/gcc/genemit.c
+diff -Nrup gcc-4.2.2/gcc/genemit.c gcc-4.2.2.atmel.1.0.8/gcc/genemit.c
 --- gcc-4.2.2/gcc/genemit.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/genemit.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/genemit.c	2008-04-02 14:57:05.000000000 +0200
 @@ -121,6 +121,24 @@ max_operand_vec (rtx insn, int arg)
  }
  
@@ -22285,9 +22289,9 @@ diff -Nrup gcc-4.2.2/gcc/genemit.c gcc-4.2.2.atmel.1.0.6/gcc/genemit.c
    printf ("  start_sequence ();\n");
  
    /* The fourth operand of DEFINE_EXPAND is some code to be executed
-diff -Nrup gcc-4.2.2/gcc/genflags.c gcc-4.2.2.atmel.1.0.6/gcc/genflags.c
+diff -Nrup gcc-4.2.2/gcc/genflags.c gcc-4.2.2.atmel.1.0.8/gcc/genflags.c
 --- gcc-4.2.2/gcc/genflags.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/genflags.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/genflags.c	2008-04-02 14:57:06.000000000 +0200
 @@ -127,7 +127,6 @@ static void
  gen_proto (rtx insn)
  {
@@ -22324,9 +22328,9 @@ diff -Nrup gcc-4.2.2/gcc/genflags.c gcc-4.2.2.atmel.1.0.6/gcc/genflags.c
        else
  	puts ("(void)");
        puts ("{\n  return 0;\n}");
-diff -Nrup gcc-4.2.2/gcc/genoutput.c gcc-4.2.2.atmel.1.0.6/gcc/genoutput.c
+diff -Nrup gcc-4.2.2/gcc/genoutput.c gcc-4.2.2.atmel.1.0.8/gcc/genoutput.c
 --- gcc-4.2.2/gcc/genoutput.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/genoutput.c	2008-03-25 10:07:22.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/genoutput.c	2008-04-02 14:57:05.000000000 +0200
 @@ -386,7 +386,7 @@ output_insn_data (void)
  	}
  
@@ -22336,9 +22340,9 @@ diff -Nrup gcc-4.2.2/gcc/genoutput.c gcc-4.2.2.atmel.1.0.6/gcc/genoutput.c
        else
  	printf ("    0,\n");
  
-diff -Nrup gcc-4.2.2/gcc/ifcvt.c gcc-4.2.2.atmel.1.0.6/gcc/ifcvt.c
+diff -Nrup gcc-4.2.2/gcc/ifcvt.c gcc-4.2.2.atmel.1.0.8/gcc/ifcvt.c
 --- gcc-4.2.2/gcc/ifcvt.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/ifcvt.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/ifcvt.c	2008-04-02 14:57:05.000000000 +0200
 @@ -77,7 +77,7 @@ static int num_possible_if_blocks;
  static int num_updated_if_blocks;
  
@@ -22412,19 +22416,39 @@ diff -Nrup gcc-4.2.2/gcc/ifcvt.c gcc-4.2.2.atmel.1.0.6/gcc/ifcvt.c
  
        /* First try to use addcc pattern.  */
        if (general_operand (XEXP (cond, 0), VOIDmode)
-@@ -2651,7 +2661,8 @@ process_if_block (struct ce_if_block * c
+@@ -2651,7 +2661,12 @@ process_if_block (struct ce_if_block * c
        && cond_move_process_if_block (ce_info))
      return TRUE;
  
 -  if (HAVE_conditional_execution && reload_completed)
 +  if (HAVE_conditional_execution && 
++#ifdef IFCVT_COND_EXEC_BEFORE_RELOAD
 +      (reload_completed || IFCVT_COND_EXEC_BEFORE_RELOAD))
++#else
++      reload_completed)
++#endif
      {
        /* If we have && and || tests, try to first handle combining the && and
           || tests into the conditional code, and if that fails, go back and
-diff -Nrup gcc-4.2.2/gcc/longlong.h gcc-4.2.2.atmel.1.0.6/gcc/longlong.h
+@@ -4036,6 +4051,15 @@ rest_of_handle_if_after_reload (void)
+   cleanup_cfg (CLEANUP_EXPENSIVE
+                | CLEANUP_UPDATE_LIFE
+                | (flag_crossjumping ? CLEANUP_CROSSJUMP : 0));
++  
++  /* Hack for the AVR32 experimental ifcvt processing before reload.
++     The AVR32 specific ifcvt code needs to know when ifcvt after reload 
++     has begun. */
++#ifdef IFCVT_COND_EXEC_BEFORE_RELOAD
++  if ( IFCVT_COND_EXEC_BEFORE_RELOAD )
++    cfun->machine->ifcvt_after_reload = 1;
++#endif
++  
+   if (flag_if_conversion2)
+     if_convert (1);
+   return 0;
+diff -Nrup gcc-4.2.2/gcc/longlong.h gcc-4.2.2.atmel.1.0.8/gcc/longlong.h
 --- gcc-4.2.2/gcc/longlong.h	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/longlong.h	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/longlong.h	2008-04-02 14:57:05.000000000 +0200
 @@ -226,6 +226,39 @@ UDItype __umulsidi3 (USItype, USItype);
  #define UDIV_TIME 100
  #endif /* __arm__ */
@@ -22465,9 +22489,9 @@ diff -Nrup gcc-4.2.2/gcc/longlong.h gcc-4.2.2.atmel.1.0.6/gcc/longlong.h
  #if defined (__hppa) && W_TYPE_SIZE == 32
  #define add_ssaaaa(sh, sl, ah, al, bh, bl) \
    __asm__ ("add %4,%5,%1\n\taddc %2,%3,%0"				\
-diff -Nrup gcc-4.2.2/gcc/optabs.h gcc-4.2.2.atmel.1.0.6/gcc/optabs.h
+diff -Nrup gcc-4.2.2/gcc/optabs.h gcc-4.2.2.atmel.1.0.8/gcc/optabs.h
 --- gcc-4.2.2/gcc/optabs.h	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/optabs.h	2008-03-25 10:07:21.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/optabs.h	2008-04-02 14:57:05.000000000 +0200
 @@ -431,7 +431,7 @@ extern enum insn_code reload_out_optab[N
  extern GTY(()) optab code_to_optab[NUM_RTX_CODE + 1];
  
@@ -22477,19 +22501,9 @@ diff -Nrup gcc-4.2.2/gcc/optabs.h gcc-4.2.2.atmel.1.0.6/gcc/optabs.h
  
  /* Indexed by the rtx-code for a conditional (e.g. EQ, LT,...)
     gives the gen_function to make a branch to test that condition.  */
-Binary files gcc-4.2.2/gcc/po/be.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/be.gmo differ
-Binary files gcc-4.2.2/gcc/po/ca.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/ca.gmo differ
-Binary files gcc-4.2.2/gcc/po/da.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/da.gmo differ
-Binary files gcc-4.2.2/gcc/po/el.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/el.gmo differ
-Binary files gcc-4.2.2/gcc/po/es.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/es.gmo differ
-Binary files gcc-4.2.2/gcc/po/fr.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/fr.gmo differ
-Binary files gcc-4.2.2/gcc/po/ja.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/ja.gmo differ
-Binary files gcc-4.2.2/gcc/po/nl.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/nl.gmo differ
-Binary files gcc-4.2.2/gcc/po/tr.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/tr.gmo differ
-Binary files gcc-4.2.2/gcc/po/zh_CN.gmo and gcc-4.2.2.atmel.1.0.6/gcc/po/zh_CN.gmo differ
-diff -Nrup gcc-4.2.2/gcc/reload.c gcc-4.2.2.atmel.1.0.6/gcc/reload.c
+diff -Nrup gcc-4.2.2/gcc/reload.c gcc-4.2.2.atmel.1.0.8/gcc/reload.c
 --- gcc-4.2.2/gcc/reload.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/reload.c	2008-03-25 10:07:22.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/reload.c	2008-04-02 14:57:05.000000000 +0200
 @@ -4574,7 +4574,7 @@ find_reloads_toplev (rtx x, int opnum, e
  	      x = mem;
  	      i = find_reloads_address (GET_MODE (x), &x, XEXP (x, 0), &XEXP (x, 0),
@@ -22499,9 +22513,9 @@ diff -Nrup gcc-4.2.2/gcc/reload.c gcc-4.2.2.atmel.1.0.6/gcc/reload.c
  		push_reg_equiv_alt_mem (regno, x);
  	      if (address_reloaded)
  		*address_reloaded = i;
-diff -Nrup gcc-4.2.2/gcc/sched-deps.c gcc-4.2.2.atmel.1.0.6/gcc/sched-deps.c
+diff -Nrup gcc-4.2.2/gcc/sched-deps.c gcc-4.2.2.atmel.1.0.8/gcc/sched-deps.c
 --- gcc-4.2.2/gcc/sched-deps.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/sched-deps.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/sched-deps.c	2008-04-02 14:57:06.000000000 +0200
 @@ -649,7 +649,14 @@ fixup_sched_groups (rtx insn)
  
    prev_nonnote = prev_nonnote_insn (insn);
@@ -22548,9 +22562,9 @@ diff -Nrup gcc-4.2.2/gcc/sched-deps.c gcc-4.2.2.atmel.1.0.6/gcc/sched-deps.c
        /* ??? Should be recording conditions so we reduce the number of
  	 false dependencies.  */
        x = COND_EXEC_CODE (x);
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/compile/20070827-1.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/compile/20070827-1.c
 --- gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c	2007-08-31 09:27:40.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/compile/20070827-1.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/compile/20070827-1.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,20 +0,0 @@
 -/* PR rtl-optimization/33148 */
 -
@@ -22572,9 +22586,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c gcc-4.2.2.
 -    }
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/compile/20070925-1.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/compile/20070925-1.c
 --- gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c	2007-09-25 17:14:42.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/compile/20070925-1.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/compile/20070925-1.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,22 +0,0 @@
 -/* PR tree-optimization/32694 */
 -
@@ -22598,9 +22612,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c gcc-4.2.2.
 -      p++;
 -    }
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/compile/pr33382.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/compile/pr33382.c
 --- gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c	2007-09-12 09:54:17.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/compile/pr33382.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/compile/pr33382.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,95 +0,0 @@
 -typedef unsigned int size_t;
 -typedef struct {
@@ -22697,9 +22711,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c gcc-4.2.2.atm
 -	))
 -	return;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/execute/pr33142.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/execute/pr33142.c
 --- gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c	2007-08-22 10:45:58.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/execute/pr33142.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/execute/pr33142.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,16 +0,0 @@
 -int abs(int j);
 -extern void abort(void);
@@ -22717,9 +22731,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c gcc-4.2.2.atm
 -        abort();
 -    return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/execute/pr33382.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/execute/pr33382.c
 --- gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c	2007-09-12 09:54:17.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.c-torture/execute/pr33382.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.c-torture/execute/pr33382.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,21 +0,0 @@
 -struct Foo {
 -  int i;
@@ -22742,9 +22756,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c gcc-4.2.2.atm
 -    abort();
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/20070801-1.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/20070801-1.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/20070801-1.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/20070801-1.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/20070801-1.c	2007-08-01 10:43:06.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/20070801-1.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/20070801-1.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,62 +0,0 @@
 -/* This failed on s390x due to a back end bug.  */
 -
@@ -22808,18 +22822,18 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/20070801-1.c gcc-4.2.2.atmel.1.0.6/gcc
 -      }
 -    }
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c	2005-02-19 20:48:02.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c	2008-03-25 10:01:48.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c	2008-04-02 14:51:43.000000000 +0200
 @@ -1 +1,3 @@
 -/* Test no newline at eof warning when Mac line ending is used*//* { dg-do compile } */int main() { return 0; } 
 \ No newline at end of file
 +/* Test no newline at eof warning when Mac line ending is used*/
 +/* { dg-do compile } */
 +int main() { return 0; } 
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr32610.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/debug/pr32610.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr32610.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/debug/pr32610.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr32610.c	2007-08-24 19:06:59.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/debug/pr32610.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/debug/pr32610.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,14 +0,0 @@
 -/* PR debug/32610 */
 -/* { dg-do compile } */
@@ -22835,9 +22849,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr32610.c gcc-4.2.2.atmel.1.0.6/
 -{
 -  foo (1);
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr33316.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/debug/pr33316.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr33316.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/debug/pr33316.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr33316.c	2007-09-24 11:17:10.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/debug/pr33316.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/debug/pr33316.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,15 +0,0 @@
 -/* PR debug/33316 */
 -
@@ -22854,9 +22868,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr33316.c gcc-4.2.2.atmel.1.0.6/
 -  const struct S { int d[y]; } *a = x;
 -  return a[0].d[0];
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-1.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/pr32912-1.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-1.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/pr32912-1.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-1.c	2007-09-13 05:45:16.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/pr32912-1.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/pr32912-1.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,45 +0,0 @@
 -/* PR middle-end/32912 */
 -/* { dg-do run } */
@@ -22903,9 +22917,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-1.c gcc-4.2.2.atmel.1.0.6/gcc/
 -  check (f, 0);
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-2.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/pr32912-2.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-2.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/pr32912-2.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-2.c	2007-09-13 05:45:16.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/pr32912-2.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/pr32912-2.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,43 +0,0 @@
 -/* { dg-do run } */
 -/* { dg-options "-O2 -w" } */
@@ -22950,9 +22964,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-2.c gcc-4.2.2.atmel.1.0.6/gcc/
 -    }
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-3.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/sibcall-3.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-3.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/sibcall-3.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-3.c	2005-07-20 08:39:38.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/sibcall-3.c	2008-03-25 10:02:39.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/sibcall-3.c	2008-04-02 14:52:28.000000000 +0200
 @@ -5,7 +5,7 @@
     Copyright (C) 2002 Free Software Foundation Inc.
     Contributed by Hans-Peter Nilsson  <hp@bitrange.com>  */
@@ -22962,9 +22976,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-3.c gcc-4.2.2.atmel.1.0.6/gcc/
  /* { dg-options "-O2 -foptimize-sibling-calls" } */
  
  /* The option -foptimize-sibling-calls is the default, but serves as
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-4.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/sibcall-4.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-4.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/sibcall-4.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-4.c	2005-07-20 08:39:38.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/sibcall-4.c	2008-03-25 10:02:38.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/sibcall-4.c	2008-04-02 14:52:27.000000000 +0200
 @@ -5,7 +5,7 @@
     Copyright (C) 2002 Free Software Foundation Inc.
     Contributed by Hans-Peter Nilsson  <hp@bitrange.com>  */
@@ -22974,9 +22988,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-4.c gcc-4.2.2.atmel.1.0.6/gcc/
  /* { dg-options "-O2 -foptimize-sibling-calls" } */
  
  /* The option -foptimize-sibling-calls is the default, but serves as
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/trampoline-1.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/trampoline-1.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/trampoline-1.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/trampoline-1.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/trampoline-1.c	2004-08-03 10:22:26.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/trampoline-1.c	2008-03-25 10:02:39.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/trampoline-1.c	2008-04-02 14:52:28.000000000 +0200
 @@ -46,6 +46,8 @@ void foo (void)
  
  int main (void)
@@ -22986,9 +23000,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/trampoline-1.c gcc-4.2.2.atmel.1.0.6/g
 +#endif
    return 0;
  }
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413a.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/vect/pr25413a.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413a.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/vect/pr25413a.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413a.c	2007-07-25 10:51:12.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/vect/pr25413a.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/vect/pr25413a.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,129 +0,0 @@
 -/* { dg-require-effective-target vect_double } */
 -
@@ -23119,9 +23133,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413a.c gcc-4.2.2.atmel.1.0.6/
 -/* { dg-final { scan-tree-dump-times "vector alignment may not be reachable" 1 "vect" { target { ! vect_aligned_arrays  } } } } */
 -/* { dg-final { scan-tree-dump-times "Alignment of access forced using versioning" 1 "vect" { target { ! vect_aligned_arrays } } } } */
 -/* { dg-final { cleanup-tree-dump "vect" } } */
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/vect/pr25413.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/vect/pr25413.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413.c	2007-07-25 10:51:12.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/vect/pr25413.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/vect/pr25413.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,38 +0,0 @@
 -/* { dg-require-effective-target vect_double } */
 -
@@ -23161,9 +23175,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413.c gcc-4.2.2.atmel.1.0.6/g
 -/* { dg-final { scan-tree-dump-times "vector alignment may not be reachable" 1 "vect" { target { ! vect_aligned_arrays } } } } */
 -/* { dg-final { scan-tree-dump-times "not vectorized: unsupported unaligned store" 1 "vect" { target { ! vect_aligned_arrays } } } } */
 -/* { dg-final { cleanup-tree-dump "vect" } } */
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/vect/vect-align-1.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/vect/vect-align-1.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c	2007-07-25 10:51:12.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/vect/vect-align-1.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/vect/vect-align-1.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,50 +0,0 @@
 -/* { dg-require-effective-target vect_int } */
 -
@@ -23215,9 +23229,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c gcc-4.2.2.atmel.1.
 -/* { dg-final { scan-tree-dump-times "Alignment of access forced using versioning" 1 "vect" } } */
 -/* { dg-final { scan-tree-dump-times "vectorized 1 loops" 1 "vect" } } */
 -/* { dg-final { cleanup-tree-dump "vect" } } */
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/vect/vect-align-2.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/vect/vect-align-2.c
 --- gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c	2007-07-25 10:51:12.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.dg/vect/vect-align-2.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.dg/vect/vect-align-2.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,46 +0,0 @@
 -/* { dg-require-effective-target vect_int } */
 -/* { dg-do run } */
@@ -23265,9 +23279,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c gcc-4.2.2.atmel.1.
 -/* { dg-final { scan-tree-dump-times "Alignment of access forced using versioning" 1 "vect" } } */
 -/* { dg-final { scan-tree-dump-times "vectorized 1 loops" 1 "vect" } } */
 -/* { dg-final { cleanup-tree-dump "vect" } } */
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.target/mips/pr33256.c gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.target/mips/pr33256.c
+diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.target/mips/pr33256.c gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.target/mips/pr33256.c
 --- gcc-4.2.2/gcc/testsuite/gcc.target/mips/pr33256.c	2007-09-06 20:04:51.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gcc.target/mips/pr33256.c	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gcc.target/mips/pr33256.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,11 +0,0 @@
 -/* GCC used to report an ICE for this test because we generated a LO_SUM
 -   for an illegitimate constant.  */
@@ -23280,22 +23294,22 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.target/mips/pr33256.c gcc-4.2.2.atmel.1.0
 -{
 -  return b (a[0]);
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/debug/const3.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/debug/const3.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/debug/const3.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/debug/const3.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/debug/const3.C	2007-08-31 09:25:20.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/debug/const3.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/debug/const3.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,3 +0,0 @@
 -/* { dg-do compile } */
 -typedef float FloatVect __attribute__((__vector_size__(16)));
 -const FloatVect Foo = { 250000000.0, 0.0, 0.0, 0.0 };
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/debug/const4.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/debug/const4.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/debug/const4.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/debug/const4.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/debug/const4.C	2007-08-31 09:25:20.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/debug/const4.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/debug/const4.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,2 +0,0 @@
 -/* { dg-do compile } */
 -const __complex__ int x = 2i;
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/expr/bitfield9.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/expr/bitfield9.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/expr/bitfield9.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/expr/bitfield9.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/expr/bitfield9.C	2007-07-27 23:46:33.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/expr/bitfield9.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/expr/bitfield9.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,25 +0,0 @@
 -// PR c++/32346
 -// { dg-do run }
@@ -23322,16 +23336,16 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/expr/bitfield9.C gcc-4.2.2.atmel.1.0.6
 -  s.i = 0xabcdef01;
 -  g(s);
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/ext/label6.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/ext/label6.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/ext/label6.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/ext/label6.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/ext/label6.C	2007-07-30 17:38:39.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/ext/label6.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/ext/label6.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,3 +0,0 @@
 -// PR c++/32108
 -
 -__label__ L; // { dg-error "function scopes" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/init/ref14.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/init/ref14.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/init/ref14.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/init/ref14.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/init/ref14.C	2007-09-20 12:04:19.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/init/ref14.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/init/ref14.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,11 +0,0 @@
 -// PR c++/33459
 -
@@ -23344,9 +23358,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/init/ref14.C gcc-4.2.2.atmel.1.0.6/gcc
 -{
 -  A();
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/lookup/friend11.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/lookup/friend11.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/lookup/friend11.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/lookup/friend11.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/lookup/friend11.C	2007-07-28 22:12:42.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/lookup/friend11.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/lookup/friend11.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,24 +0,0 @@
 -/* PR c++/30917 */
 -/* This used to ICE */
@@ -23372,18 +23386,18 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/lookup/friend11.C gcc-4.2.2.atmel.1.0.
 -  };
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/lookup/ns3.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/lookup/ns3.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/lookup/ns3.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/lookup/ns3.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/lookup/ns3.C	2007-08-24 19:09:50.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/lookup/ns3.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/lookup/ns3.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,5 +0,0 @@
 -// PR c++/32898
 -
 -namespace N { }
 -
 -int N::i;	// { dg-error "should have been declared inside" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/opt/nrv14.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/opt/nrv14.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/opt/nrv14.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/opt/nrv14.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/opt/nrv14.C	2007-08-20 10:10:54.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/opt/nrv14.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/opt/nrv14.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,39 +0,0 @@
 -// PR c++/32992
 -// { dg-do run }
@@ -23424,9 +23438,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/opt/nrv14.C gcc-4.2.2.atmel.1.0.6/gcc/
 -    abort ();
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/other/error16.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/other/error16.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/other/error16.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/other/error16.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/other/error16.C	2007-08-10 20:04:46.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/other/error16.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/other/error16.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,14 +0,0 @@
 -// PR c++/17763
 -
@@ -23442,9 +23456,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/other/error16.C gcc-4.2.2.atmel.1.0.6/
 -  Outer<int>  ab;
 -  ab.foo() == 1; // { dg-error "ab.Outer" }
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/crash37.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/parse/crash37.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/crash37.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/parse/crash37.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/parse/crash37.C	2007-08-24 19:12:41.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/parse/crash37.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/parse/crash37.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,15 +0,0 @@
 -// PR c++/31941
 -// { dg-do compile }
@@ -23461,9 +23475,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/crash37.C gcc-4.2.2.atmel.1.0.6/
 -{
 -  return e.what ().c_str ();	// { dg-error "c_str.*S::what.*which is of non-class type" }
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/error31.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/parse/error31.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/error31.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/parse/error31.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/parse/error31.C	2007-08-17 23:38:19.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/parse/error31.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/parse/error31.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,12 +0,0 @@
 -// PR c++/32190
 -
@@ -23477,9 +23491,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/error31.C gcc-4.2.2.atmel.1.0.6/
 -    foo<int> m;
 -    return 0;
 -    }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/crash70.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/crash70.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/crash70.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/crash70.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/template/crash70.C	2007-08-31 11:57:50.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/crash70.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/crash70.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,7 +0,0 @@
 -// PR c++/32113
 -
@@ -23488,27 +23502,27 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/crash70.C gcc-4.2.2.atmel.1.0
 -template<typename T> void foo (A<&T::template i>); // { dg-error "not a template" }
 -
 -template void foo<A<0> > (A<0>); // { dg-error "does not match" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/error26.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/error26.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/error26.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/error26.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/template/error26.C	2007-08-18 12:07:42.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/error26.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/error26.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,5 +0,0 @@
 -// PR c++/32112
 -
 -template<typename> struct A;
 -
 -template<typename T> void foo (A<&T::template i>); // { dg-error "T::template i|mismatch|& T::i" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/error30.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/error30.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/error30.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/error30.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/template/error30.C	2007-09-05 12:40:29.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/error30.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/error30.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,5 +0,0 @@
 -// PR c++/33210
 -
 -template<int> struct A;
 -
 -template<template<typename> class B> A<B<int>::x> operator() (); // { dg-error "A<B<int>::x>" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial1.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/mem-partial1.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial1.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/mem-partial1.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial1.C	2007-09-04 17:43:00.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/mem-partial1.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/mem-partial1.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,15 +0,0 @@
 -// PR c++/14032
 -
@@ -23525,9 +23539,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial1.C gcc-4.2.2.atme
 -};
 -
 -int i = outer<int>::inner<double,int>::f();
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial2.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/mem-partial2.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial2.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/mem-partial2.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial2.C	2007-09-04 17:43:00.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/mem-partial2.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/mem-partial2.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,29 +0,0 @@
 -// PR c++/14032
 -// { dg-do run }
@@ -23558,9 +23572,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial2.C gcc-4.2.2.atme
 -
 -  return b != true;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/operator10.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/operator10.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/operator10.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/operator10.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/template/operator10.C	2007-07-24 11:18:39.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/operator10.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/operator10.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,7 +0,0 @@
 -// PR c++/30535
 -
@@ -23569,9 +23583,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/operator10.C gcc-4.2.2.atmel.
 -template<A, typename T> int operator-(A, T); // { dg-error "not a valid type" }
 -
 -int i = A() - 0; // { dg-error "no match" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/static31.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/static31.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/static31.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/static31.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/template/static31.C	2007-09-06 21:19:15.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/template/static31.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/template/static31.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,19 +0,0 @@
 -// PR c++/32674
 -
@@ -23592,9 +23606,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/static31.C gcc-4.2.2.atmel.1.
 -template<int N> const int A<N>::i2 = C::j;
 -template<int N> const int A<N>::i3(C::j, 5); // { dg-error "compound expression" }
 -template<int N> const int A<N>::i4 = (C::j, 7);
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/dg-torture.exp gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/torture/dg-torture.exp
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/dg-torture.exp gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/torture/dg-torture.exp
 --- gcc-4.2.2/gcc/testsuite/g++.dg/torture/dg-torture.exp	2007-05-30 23:17:32.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/torture/dg-torture.exp	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/torture/dg-torture.exp	1970-01-01 01:00:00.000000000 +0100
 @@ -1,7 +0,0 @@
 -# This harness is for tests that should be run at all optimisation levels.
 -
@@ -23603,9 +23617,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/dg-torture.exp gcc-4.2.2.atmel
 -dg-init
 -gcc-dg-runtest [lsort [glob $srcdir/$subdir/*.C]] ""
 -dg-finish
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/pr32563.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/torture/pr32563.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/pr32563.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/torture/pr32563.C
 --- gcc-4.2.2/gcc/testsuite/g++.dg/torture/pr32563.C	2007-08-22 10:07:11.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.dg/torture/pr32563.C	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.dg/torture/pr32563.C	1970-01-01 01:00:00.000000000 +0100
 @@ -1,8 +0,0 @@
 -/* { dg-do compile } */
 -
@@ -23615,9 +23629,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/pr32563.C gcc-4.2.2.atmel.1.0.
 -} a;
 -
 -const __SIZE_TYPE__ i = (__SIZE_TYPE__)&a.c[0] - 1;
-diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90 gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gfortran.dg/char_pointer_assign.f90
+diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90 gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gfortran.dg/char_pointer_assign.f90
 --- gcc-4.2.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90	2005-05-29 18:03:43.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gfortran.dg/char_pointer_assign.f90	2008-03-25 10:05:38.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gfortran.dg/char_pointer_assign.f90	2008-04-02 14:55:25.000000000 +0200
 @@ -1,4 +1,4 @@
 -! { dg-do run }
 +! { dg-do run }
@@ -23651,9 +23665,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90 gcc-4.2.2
    const(1:1) ="o"      ! c4(:)(1:1) = "o" is still broken
    const(4:4) ="l"      ! c4(:)(4:4) = "l" is still broken
    c4 = const
-diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90 gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gfortran.dg/fmt_t_5.f90
+diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90 gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gfortran.dg/fmt_t_5.f90
 --- gcc-4.2.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90	2007-07-22 06:05:00.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/gfortran.dg/fmt_t_5.f90	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/gfortran.dg/fmt_t_5.f90	1970-01-01 01:00:00.000000000 +0100
 @@ -1,18 +0,0 @@
 -! { dg-do run }
 -! PR32678 GFortan works incorrectly when writing with FORMAT Tx
@@ -23673,9 +23687,9 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90 gcc-4.2.2.atmel.1.0.6
 -      close (10, status="delete")
 - 10   format (a2,t1,a1,t2,a1,t20,' x')
 -      end
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.old-deja/g++.pt/static11.C
+diff -Nrup gcc-4.2.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.old-deja/g++.pt/static11.C
 --- gcc-4.2.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C	2006-02-22 10:05:07.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/testsuite/g++.old-deja/g++.pt/static11.C	2008-03-25 10:04:06.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/testsuite/g++.old-deja/g++.pt/static11.C	2008-04-02 14:53:51.000000000 +0200
 @@ -2,7 +2,7 @@
  // in their dejagnu baseboard description) require that the status is
  // final when exit is entered (or main returns), and not "overruled" by a
@@ -23685,15 +23699,15 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C gcc-4.2.2.atme
  
  // Bug: g++ was failing to destroy C<int>::a because it was using two
  // different sentry variables for construction and destruction.
-diff -Nrup gcc-4.2.2/gcc/version.c gcc-4.2.2.atmel.1.0.6/gcc/version.c
+diff -Nrup gcc-4.2.2/gcc/version.c gcc-4.2.2.atmel.1.0.8/gcc/version.c
 --- gcc-4.2.2/gcc/version.c	2005-03-16 07:04:10.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/gcc/version.c	2008-03-25 10:07:23.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/gcc/version.c	2008-04-02 14:57:06.000000000 +0200
 @@ -8,7 +8,7 @@
     in parentheses.  You may also wish to include a number indicating
     the revision of your modified compiler.  */
  
 -#define VERSUFFIX ""
-+#define VERSUFFIX "-atmel.1.0.6"
++#define VERSUFFIX "-atmel.1.0.8"
  
  /* This is the location of the online document giving instructions for
     reporting bugs.  If you distribute a modified version of GCC,
@@ -23706,23 +23720,14 @@ diff -Nrup gcc-4.2.2/gcc/version.c gcc-4.2.2.atmel.1.0.6/gcc/version.c
  
  /* The complete version string, assembled from several pieces.
     BASEVER, DATESTAMP, and DEVPHASE are defined by the Makefile.  */
-diff -Nrup gcc-4.2.2/LAST_UPDATED gcc-4.2.2.atmel.1.0.6/LAST_UPDATED
+diff -Nrup gcc-4.2.2/LAST_UPDATED gcc-4.2.2.atmel.1.0.8/LAST_UPDATED
 --- gcc-4.2.2/LAST_UPDATED	2007-10-07 23:23:17.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/LAST_UPDATED	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/LAST_UPDATED	1970-01-01 01:00:00.000000000 +0100
 @@ -1 +0,0 @@
 -Obtained from SVN: tags/gcc_4_2_2_release revision 129115
-Binary files gcc-4.2.2/libcpp/po/ca.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/ca.gmo differ
-Binary files gcc-4.2.2/libcpp/po/da.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/da.gmo differ
-Binary files gcc-4.2.2/libcpp/po/de.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/de.gmo differ
-Binary files gcc-4.2.2/libcpp/po/es.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/es.gmo differ
-Binary files gcc-4.2.2/libcpp/po/fr.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/fr.gmo differ
-Binary files gcc-4.2.2/libcpp/po/ja.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/ja.gmo differ
-Binary files gcc-4.2.2/libcpp/po/nl.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/nl.gmo differ
-Binary files gcc-4.2.2/libcpp/po/tr.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/tr.gmo differ
-Binary files gcc-4.2.2/libcpp/po/uk.gmo and gcc-4.2.2.atmel.1.0.6/libcpp/po/uk.gmo differ
-diff -Nrup gcc-4.2.2/libcpp/po/uk.po gcc-4.2.2.atmel.1.0.6/libcpp/po/uk.po
+diff -Nrup gcc-4.2.2/libcpp/po/uk.po gcc-4.2.2.atmel.1.0.8/libcpp/po/uk.po
 --- gcc-4.2.2/libcpp/po/uk.po	2007-08-21 13:47:20.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libcpp/po/uk.po	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libcpp/po/uk.po	1970-01-01 01:00:00.000000000 +0100
 @@ -1,878 +0,0 @@
 -# Ukrainian translation of cpplib.
 -# Copyright (C) 2007 Free Software Foundation, Inc.
@@ -24602,9 +24607,9 @@ diff -Nrup gcc-4.2.2/libcpp/po/uk.po gcc-4.2.2.atmel.1.0.6/libcpp/po/uk.po
 -#: traditional.c:912
 -msgid "syntax error in macro parameter list"
 -msgstr "синтаксична помилка у списку параметрів макросу"
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/copying.txt gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/copying.txt
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/copying.txt gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/copying.txt
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/copying.txt	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/copying.txt	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/copying.txt	2008-04-02 14:59:32.000000000 +0200
 @@ -1,30 +1,30 @@
 -Copyright (c) 2001, Thai Open Source Software Center Ltd, Sun Microsystems.
 -All rights reserved.
@@ -24666,9 +24671,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/copying.txt gcc-
 +LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 +NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 +SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,45 +1,45 @@
 -package org.relaxng.datatype;
 -
@@ -24760,9 +24765,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	Datatype createDatatype() throws DatatypeException;
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,39 +1,39 @@
 -package org.relaxng.datatype;
 -
@@ -24842,9 +24847,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +		return index;
 +	}
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,237 +1,237 @@
 -package org.relaxng.datatype;
 -
@@ -25320,9 +25325,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	public boolean isContextDependent();
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,26 +1,26 @@
 -package org.relaxng.datatype;
 -
@@ -25376,9 +25381,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	DatatypeLibrary createDatatypeLibrary( String namespaceURI );
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,37 +1,37 @@
 -package org.relaxng.datatype;
 -
@@ -25454,9 +25459,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	Datatype createDatatype( String typeLocalName ) throws DatatypeException;
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,46 +1,46 @@
 -package org.relaxng.datatype;
 -
@@ -25550,9 +25555,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	void checkValid() throws DatatypeException;
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,262 +1,262 @@
 -/**
 - * Copyright (c) 2001, Thai Open Source Software Center Ltd
@@ -26078,9 +26083,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +  
 +}
 +
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,42 +1,42 @@
 -package org.relaxng.datatype.helpers;
 -
@@ -26166,9 +26171,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +		return baseType;
 +	}
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,55 +1,55 @@
 -package org.relaxng.datatype.helpers;
 -
@@ -26280,9 +26285,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +		this.context = context;
 +	}
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java	2008-04-02 14:59:32.000000000 +0200
 @@ -1,66 +1,66 @@
 -package org.relaxng.datatype;
 -
@@ -26416,9 +26421,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	boolean isNotation( String notationName );
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/README.txt gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/README.txt
+diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/README.txt gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/README.txt
 --- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/README.txt	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libjava/classpath/external/relaxngDatatype/README.txt	2008-03-25 10:09:53.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libjava/classpath/external/relaxngDatatype/README.txt	2008-04-02 14:59:32.000000000 +0200
 @@ -1,54 +1,54 @@
 -======================================================================
 -           README FILE FOR DATATYPE INTERFACES FOR RELAX NG
@@ -26528,10 +26533,9 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/README.txt gcc-4
 +Document written by Kohsuke Kawaguchi (kohsuke.kawaguchi@sun.com)
 +======================================================================
 +END OF README
-Binary files gcc-4.2.2/libjava/testsuite/libjava.jar/simple.jar and gcc-4.2.2.atmel.1.0.6/libjava/testsuite/libjava.jar/simple.jar differ
-diff -Nrup gcc-4.2.2/libstdc++-v3/acinclude.m4 gcc-4.2.2.atmel.1.0.6/libstdc++-v3/acinclude.m4
+diff -Nrup gcc-4.2.2/libstdc++-v3/acinclude.m4 gcc-4.2.2.atmel.1.0.8/libstdc++-v3/acinclude.m4
 --- gcc-4.2.2/libstdc++-v3/acinclude.m4	2007-06-29 01:02:05.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/acinclude.m4	2008-03-25 10:08:16.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/acinclude.m4	2008-04-02 14:57:59.000000000 +0200
 @@ -125,15 +125,6 @@ AC_DEFUN([GLIBCXX_CONFIGURE], [
    ## other macros from doing the same.  This should be automated.)  -pme
    need_libmath=no
@@ -26559,9 +26563,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/acinclude.m4 gcc-4.2.2.atmel.1.0.6/libstdc++-v
         	int i;
          int j;
          __locale_t        loc;
-diff -Nrup gcc-4.2.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h gcc-4.2.2.atmel.1.0.6/libstdc++-v3/config/os/gnu-linux/ctype_base.h
+diff -Nrup gcc-4.2.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h gcc-4.2.2.atmel.1.0.8/libstdc++-v3/config/os/gnu-linux/ctype_base.h
 --- gcc-4.2.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h	2006-12-01 13:56:23.000000000 +0100
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/config/os/gnu-linux/ctype_base.h	2008-03-25 10:08:14.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/config/os/gnu-linux/ctype_base.h	2008-04-02 14:57:57.000000000 +0200
 @@ -31,6 +31,8 @@
  //
  // ISO C++ 14882: 22.1  Locales
@@ -26586,10 +26590,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h gcc-4.2.2.atm
      // NB: Offsets into ctype<char>::_M_table force a particular size
      // on the mask type. Because of this, we don't use an enum.
      typedef unsigned short 	mask;   
-Binary files gcc-4.2.2/libstdc++-v3/docs/html/17_intro/confdeps.png and gcc-4.2.2.atmel.1.0.6/libstdc++-v3/docs/html/17_intro/confdeps.png differ
-diff -Nrup gcc-4.2.2/libstdc++-v3/include/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc++-v3/include/Makefile.in
+diff -Nrup gcc-4.2.2/libstdc++-v3/include/Makefile.in gcc-4.2.2.atmel.1.0.8/libstdc++-v3/include/Makefile.in
 --- gcc-4.2.2/libstdc++-v3/include/Makefile.in	2007-07-05 13:46:00.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/include/Makefile.in	2008-03-25 10:07:31.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/include/Makefile.in	2008-04-02 14:57:14.000000000 +0200
 @@ -36,6 +36,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26598,9 +26601,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/include/Makefile.in gcc-4.2.2.atmel.1.0.6/libs
  DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
  	$(top_srcdir)/fragment.am
  subdir = include
-diff -Nrup gcc-4.2.2/libstdc++-v3/libmath/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc++-v3/libmath/Makefile.in
+diff -Nrup gcc-4.2.2/libstdc++-v3/libmath/Makefile.in gcc-4.2.2.atmel.1.0.8/libstdc++-v3/libmath/Makefile.in
 --- gcc-4.2.2/libstdc++-v3/libmath/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/libmath/Makefile.in	2008-03-25 10:07:24.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/libmath/Makefile.in	2008-04-02 14:57:07.000000000 +0200
 @@ -37,6 +37,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26609,9 +26612,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/libmath/Makefile.in gcc-4.2.2.atmel.1.0.6/libs
  subdir = libmath
  DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
  ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-diff -Nrup gcc-4.2.2/libstdc++-v3/libsupc++/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc++-v3/libsupc++/Makefile.in
+diff -Nrup gcc-4.2.2/libstdc++-v3/libsupc++/Makefile.in gcc-4.2.2.atmel.1.0.8/libstdc++-v3/libsupc++/Makefile.in
 --- gcc-4.2.2/libstdc++-v3/libsupc++/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/libsupc++/Makefile.in	2008-03-25 10:07:31.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/libsupc++/Makefile.in	2008-04-02 14:57:14.000000000 +0200
 @@ -38,6 +38,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26620,9 +26623,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/libsupc++/Makefile.in gcc-4.2.2.atmel.1.0.6/li
  DIST_COMMON = $(glibcxxinstall_HEADERS) $(srcdir)/Makefile.am \
  	$(srcdir)/Makefile.in $(top_srcdir)/fragment.am
  subdir = libsupc++
-diff -Nrup gcc-4.2.2/libstdc++-v3/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc++-v3/Makefile.in
+diff -Nrup gcc-4.2.2/libstdc++-v3/Makefile.in gcc-4.2.2.atmel.1.0.8/libstdc++-v3/Makefile.in
 --- gcc-4.2.2/libstdc++-v3/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/Makefile.in	2008-03-25 10:08:16.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/Makefile.in	2008-04-02 14:57:59.000000000 +0200
 @@ -36,6 +36,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26631,9 +26634,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc++-v3
  DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
  	$(srcdir)/../config.sub $(srcdir)/../install-sh \
  	$(srcdir)/../ltmain.sh $(srcdir)/../missing \
-diff -Nrup gcc-4.2.2/libstdc++-v3/po/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc++-v3/po/Makefile.in
+diff -Nrup gcc-4.2.2/libstdc++-v3/po/Makefile.in gcc-4.2.2.atmel.1.0.8/libstdc++-v3/po/Makefile.in
 --- gcc-4.2.2/libstdc++-v3/po/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/po/Makefile.in	2008-03-25 10:08:15.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/po/Makefile.in	2008-04-02 14:57:59.000000000 +0200
 @@ -36,6 +36,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26642,9 +26645,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/po/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc++
  DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
  	$(top_srcdir)/fragment.am
  subdir = po
-diff -Nrup gcc-4.2.2/libstdc++-v3/src/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc++-v3/src/Makefile.in
+diff -Nrup gcc-4.2.2/libstdc++-v3/src/Makefile.in gcc-4.2.2.atmel.1.0.8/libstdc++-v3/src/Makefile.in
 --- gcc-4.2.2/libstdc++-v3/src/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/src/Makefile.in	2008-03-25 10:07:32.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/src/Makefile.in	2008-04-02 14:57:15.000000000 +0200
 @@ -36,6 +36,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26653,9 +26656,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/src/Makefile.in gcc-4.2.2.atmel.1.0.6/libstdc+
  DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
  	$(top_srcdir)/fragment.am
  subdir = src
-diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc gcc-4.2.2.atmel.1.0.6/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc
+diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc gcc-4.2.2.atmel.1.0.8/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc
 --- gcc-4.2.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc	2007-08-17 11:28:09.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc	1970-01-01 01:00:00.000000000 +0100
 @@ -1,48 +0,0 @@
 -// Copyright (C) 2007 Free Software Foundation, Inc.
 -//
@@ -26705,9 +26708,9 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc gcc-4.
 -  test01();
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc gcc-4.2.2.atmel.1.0.6/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc
+diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc gcc-4.2.2.atmel.1.0.8/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc
 --- gcc-4.2.2/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc	2007-08-28 10:48:54.000000000 +0200
-+++ gcc-4.2.2.atmel.1.0.6/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.2.2.atmel.1.0.8/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc	1970-01-01 01:00:00.000000000 +0100
 @@ -1,43 +0,0 @@
 -// Copyright (C) 2007 Free Software Foundation, Inc.
 -//
