@@ -5,7 +5,7 @@
 #############################################################
 GETTEXT_VERSION:=0.16.1
 GETTEXT_SOURCE:=gettext-$(GETTEXT_VERSION).tar.gz
-GETTEXT_SITE:=$(BR2_GNU_MIRROR)/gnu/gettext
+GETTEXT_SITE:=$(BR2_GNU_MIRROR)/gettext
 GETTEXT_DIR:=$(BUILD_DIR)/gettext-$(GETTEXT_VERSION)
 GETTEXT_CAT:=$(ZCAT)
 GETTEXT_BINARY:=gettext-runtime/src/gettext
@@ -125,7 +125,7 @@ gettext: uclibc pkgconfig $(STAGING_DIR)/$(GETTEXT_TARGET_BINARY)
 gettext-unpacked: $(GETTEXT_DIR)/.unpacked
 
 gettext-clean:
-	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(GETTEXT_DIR) uninstall
+	-$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(GETTEXT_DIR) uninstall
 	-$(MAKE) -C $(GETTEXT_DIR) clean
 
 gettext-dirclean:

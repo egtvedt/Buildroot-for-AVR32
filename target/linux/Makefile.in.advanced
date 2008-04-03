@@ -77,6 +77,13 @@ ifeq ($(strip $(LINUX26_PATCH_DIR)),)
 LINUX26_PATCH_DIR:=$(BOARD_PATH)/kernel-patches/
 endif
 
+# kernel architecture patches provided by buildroot
+KERNEL_ARCH_PATCH_DIR:=$(strip $(subst ",,$(BR2_KERNEL_ARCH_PATCH_DIR)))
+#"))
+
+
+
+
 # -----------------------------------------------------------------------------
 # Linux kernel configuration file
 # This is used if BR2_PACKAGE_LINUX_USE_KCONFIG is set
@@ -94,6 +101,12 @@ else
 LINUX26_KCONFIG:=$(BOARD_PATH)/linux-$(LINUX26_VERSION).config
 endif
 endif
+endif
+
+KERNEL_CONFIG_METHOD:=$(strip $(subst ",,$(BR2_KERNEL_CONFIG_METHOD)))
+#"))
+ifeq ($(KERNEL_CONFIG_METHOD),)
+KERNEL_CONFIG_METHOD:=xconfig
 endif
 
 # -----------------------------------------------------------------------------
@@ -192,21 +205,6 @@ LINUX26_MAKE_FLAGS = HOSTCC="$(HOSTCC)" HOSTCFLAGS="$(HOSTCFLAGS)" \
 	PATH=$(TARGET_PATH)
 
 # =============================================================================
-
-$(LINUX26_KCONFIG):
-ifneq ($(BR2_PACKAGE_LINUX_USE_DEFCONFIG),y)
-	@if [ ! -f "$(LINUX26_KCONFIG)" ] ; then \
-		echo ""; \
-		echo "You should create a .config for your kernel"; \
-		echo "and install it as $(LINUX26_KCONFIG)"; \
-		echo ""; \
-		sleep 5; \
-	fi
-endif
-	touch $@
-
-# =============================================================================
-
 ifneq ($(strip $(LINUX26_VERSION)),$(strip $(LINUX_HEADERS_VERSION)))
 $(DL_DIR)/$(LINUX26_SOURCE):
 	 $(WGET) -P $(DL_DIR) $(LINUX26_SITE)/$(LINUX26_SOURCE)
@@ -286,6 +284,18 @@ ifeq ($(BR2_PACKAGE_OPENSWAN),y)
 	toolchain/patch-kernel.sh $(LINUX26_DIR) package/openswan \
 		linux-$(LINUX26_VERSION)-\*.patch{,.gz,.bz2}
 endif
+	touch $@
+
+$(LINUX26_DIR)/.patched.arch: $(LINUX26_DIR)/.patched
+ifneq ($(BR2_KERNEL_ARCH_PATCH_DIR),)
+	if [ -d $(KERNEL_ARCH_PATCH_DIR) ] ; then \
+	toolchain/patch-kernel.sh $(LINUX26_DIR) $(KERNEL_ARCH_PATCH_DIR) \
+		linux-$(LINUX26_VERSION)-\*.patch{,.gz,.bz2} ; \
+	fi
+endif
+	touch $@
+
+$(LINUX26_DIR)/.patched.board: $(LINUX26_DIR)/.patched.arch $(KERNEL_COND_PATCHES)
 ifneq ($(LINUX26_PATCH_DIR),)
 	if [ -d $(LINUX26_PATCH_DIR) ] ; then \
 	toolchain/patch-kernel.sh $(LINUX26_DIR) $(LINUX26_PATCH_DIR) \
@@ -294,17 +304,48 @@ ifneq ($(LINUX26_PATCH_DIR),)
 endif
 	touch $@
 
-# -----------------------------------------------------------------------------
-$(LINUX26_DIR)/.configured: $(LINUX26_DIR)/.patched $(LINUX26_KCONFIG)
+# =============================================================================
+linux_patch: $(LINUX26_DIR)/.patched.board
+
+$(LINUX26_DIR)/.config:	$(LINUX26_DIR)/.patched.board
 ifeq ($(BR2_PACKAGE_LINUX_USE_DEFCONFIG),y)
 	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) $(BOARD_NAME)_defconfig 
 endif
 ifeq ($(BR2_PACKAGE_LINUX_USE_XCONFIG),y)
-	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) xconfig 
+	$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) $(KERNEL_CONFIG_METHOD)
 endif
 ifeq ($(BR2_PACKAGE_LINUX_USE_KCONFIG),y)
-	cp -dpf $(LINUX26_KCONFIG) $(LINUX26_DIR)/.config
+	# Try user defined config
+	if [ -f "$(LINUX26_KCONFIG)" ] ; then \
+		cp -dpf $(LINUX26_KCONFIG) $@ ; \
+	fi
+	# Try to get a config for this linux version in the board directory
+	if [ ! -f "$(LINUX26_DIR)/.config" ] ; then \
+	    if [ -f "$(BOARD_PATH)/$(BOARD_NAME)-linux-$(LINUX26_VERSION).config" ] ; then \
+		cp -dpf $(BOARD_PATH)/$(BOARD_NAME)-linux-$(LINUX26_VERSION).config $@ ; \
+	    fi ; \
+	fi
+	# Try to get a config for latest linux version in the board directory
+	if [ ! -f "$(LINUX26_DIR)/.config" ] ; then \
+		scripts/get_linux_config.sh $(BOARD_PATH) $(LINUX26_DIR) ; \
+	fi
+	# Use a board config defined in the linux source.
+	if [ ! -f "$(LINUX26_DIR)/.config" ] ; then \
+		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) $(BOARD_NAME)_defconfig || \
+			echo "$(BOARD_NAME)_defconfig failed..." ; \
+	fi
+	# let the user create his/her own config
+	if [ ! -f "$(LINUX26_DIR)/.config" ] ; then \
+		$(MAKE) $(LINUX26_MAKE_FLAGS) -C $(LINUX26_DIR) $(KERNEL_CONFIG_METHOD) ; \
+	fi
 endif
+ifneq ($(strip $(subst ",,$(BR2_EXTRA_VERSION))),)
+	$(SED) 's,^EXTRA_VERSION=.*,EXTRA_VERSION=="$(BR2_EXTRA_VERSION)",g'
+endif
+
+
+# -----------------------------------------------------------------------------
+$(LINUX26_DIR)/.configured: $(LINUX26_DIR)/.config
 	$(SED) '/CONFIG_AEABI=y/d' $(LINUX26_DIR)/.config
 ifeq ($(BR2_ARM_EABI),y)
 	echo "CONFIG_AEABI=y" >> $(LINUX26_DIR)/.config
@@ -460,6 +501,7 @@ linux-status:
 	@echo BR2_KERNEL_SITE=$(BR2_KERNEL_SITE)
 	@echo BR2_KERNEL_PATCH_SITE=$(BR2_KERNEL_PATCH_SITE)
 	@echo BR2_KERNEL_PATCH=$(BR2_KERNEL_PATCH)
+	@echo KERNEL_COND_PATCHES=$(KERNEL_COND_PATCHES)
 	@echo BR2_LINUX26_CUSTOM=$(BR2_LINUX26_CUSTOM)
 	@echo BR2_CUSTOM_LINUX26_PATCH_SITE=$(BR2_CUSTOM_LINUX26_PATCH_SITE)
 	@echo BR2_CUSTOM_LINUX26_PATCH=$(BR2_CUSTOM_LINUX26_PATCH)

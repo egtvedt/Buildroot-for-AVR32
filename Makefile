@@ -31,24 +31,31 @@ noconfig_targets:=menuconfig config oldconfig randconfig \
 	defconfig allyesconfig allnoconfig release tags \
 	source-check help
 
-# $(shell find . -name *_defconfig |sed 's/.*\///')
 
+# Use shell variables, if defined
+ifneq ($(BUILDROOT_LOCAL),)
+BR2_LOCAL:=$(BUILDROOT_LOCAL)
+else
+BR2_LOCAL:=$(TOPDIR)/local
+endif
+
+# $(shell find . -name *_defconfig |sed 's/.*\///')
 # Pull in the user's configuration file
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
 ifeq ($(BOARD),)
+# if "make BOARD=xyz" command
 -include $(TOPDIR).config
 else
--include $(TOPDIR)/local/$(BOARD)/$(BOARD).config
+# if "make" command
+-include $(BR2_LOCAL)/$(BOARD)/$(BOARD).config
 endif
 endif
+
+# Override BR2_DL_DIR if shell variable defined
 ifneq ($(BUILDROOT_DL_DIR),)
 BR2_DL_DIR:=$(BUILDROOT_DL_DIR)
 endif
-ifneq ($(BUILDROOT_LOCAL),)
-LOCAL:=$(BUILDROOT_LOCAL)
-else
-LOCAL:=local
-endif
+LOCAL:=$(BR2_LOCAL)
 
 # To put more focus on warnings, be less verbose as default
 # Use 'make V=1' to see the full commands
@@ -311,8 +318,8 @@ $(PROJECT_BUILD_DIR)/.root:
 		fi; \
 		touch $(STAGING_DIR)/.fakeroot.00000; \
 	fi
-	-find $(TARGET_DIR) -type d -name CVS | xargs rm -rf
-	-find $(TARGET_DIR) -type d -name .svn | xargs rm -rf
+	-find $(TARGET_DIR) -type d -name CVS -o -name .svn | xargs rm -rf
+	-find $(TARGET_DIR) -type f -name .empty | xargs rm -rf	
 	touch $@
 
 $(TARGET_DIR): $(PROJECT_BUILD_DIR)/.root
@@ -478,6 +485,9 @@ endif # ifeq ($(BR2_HAVE_DOT_CONFIG),y)
 %_defconfig: $(CONFIG)/conf
 	cp $(shell find ./target/ -name $@) .config
 	-@$(MAKE) oldconfig
+
+update:
+	cp .config $(BOARD_PATH)/$(BOARD_NAME)_defconfig
 
 configured: dirs host-sed kernel-headers uclibc-config busybox-config linux26-config
 

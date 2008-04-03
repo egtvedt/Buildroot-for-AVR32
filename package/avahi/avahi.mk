@@ -10,7 +10,7 @@
 # either version 2.1 of the License, or (at your option) any
 # later version.
 
-AVAHI_VERSION:=0.6.21
+AVAHI_VERSION:=0.6.22
 AVAHI_DIR:=$(BUILD_DIR)/avahi-$(AVAHI_VERSION)
 AVAHI_SITE:=http://www.avahi.org/download/
 AVAHI_SOURCE:=avahi-$(AVAHI_VERSION).tar.gz
@@ -37,7 +37,7 @@ endif
 
 ifeq ($(strip $(BR2_PACKAGE_DBUS)),y)
 AVAHI_DISABLE_DBUS:=
-AVAHI_EXTRA_DEPS+=$(TARGET_DIR)/usr/bin/dbus-daemon
+AVAHI_EXTRA_DEPS+=$(STAGING_DIR)/usr/bin/dbus-daemon
 else
 AVAHI_DISABLE_DBUS:=--disable-dbus
 endif
@@ -120,6 +120,7 @@ $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXTRA_DEPS)
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 		--disable-glib \
+		--disable-gobject \
 		--disable-qt3 \
 		--disable-qt4 \
 		--disable-gtk \
@@ -171,6 +172,7 @@ $(TARGET_DIR)/usr/sbin/avahi-daemon: $(AVAHI_DIR)/.installed
 ifeq ($(strip $(BR2_PACKAGE_DBUS)),y)
 	cp -dpf $(STAGING_DIR)/usr/bin/avahi-* $(TARGET_DIR)/usr/bin
 	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/avahi-*
+	mkdir -p $(TARGET_DIR)/etc/dbus-1/system.d/
 	cp -r $(STAGING_DIR)/etc/dbus-1/system.d/avahi-* \
 		$(TARGET_DIR)/etc/dbus-1/system.d/
 endif
@@ -181,7 +183,7 @@ endif
 avahi: uclibc busybox libdaemon $(AVAHI_TARGETS)
 
 avahi-clean:
-	$(MAKE) -C $(AVAHI_DIR) distclean
+	-$(MAKE) -C $(AVAHI_DIR) distclean
 	-rm -rf $(TARGET_DIR)/etc/avahi
 	-rm -f $(TARGET_DIR)/var/lib/avahi-autoipd
 	-rm -f $(TARGET_DIR)/etc/init.d/S*avahi*

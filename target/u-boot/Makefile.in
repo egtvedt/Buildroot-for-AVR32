@@ -112,7 +112,7 @@ $(BINARIES_DIR)/$(U_BOOT_BIN): $(U_BOOT_DIR)/$(U_BOOT_BIN)
 u-boot: gcc $(BINARIES_DIR)/$(U_BOOT_BIN)
 
 u-boot-clean:
-	$(MAKE) -C $(U_BOOT_DIR) clean
+	-$(MAKE) -C $(U_BOOT_DIR) clean
 
 u-boot-dirclean:
 	rm -rf $(U_BOOT_DIR)

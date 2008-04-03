@@ -40,7 +40,7 @@ $(TOOL_BUILD_DIR)/bin/file: $(FILE_DIR1)/.configured
 host-file: $(TOOL_BUILD_DIR)/bin/file
 
 host-file-clean:
-	$(MAKE) -C $(FILE_DIR1) clean
+	-$(MAKE) -C $(FILE_DIR1) clean
 
 host-file-dirclean:
 	rm -rf $(FILE_DIR1)
@@ -105,7 +105,7 @@ endif
 file: zlib uclibc $(TARGET_DIR)/$(FILE_TARGET_BINARY)
 
 file-clean:
-	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(FILE_DIR2) uninstall
+	-$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(FILE_DIR2) uninstall
 	-$(MAKE) -C $(FILE_DIR2) clean
 
 file-dirclean:
