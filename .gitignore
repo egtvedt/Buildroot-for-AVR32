@@ -5,6 +5,7 @@
 #
 # Normal rules
 #
+.*
 *.o
 *.a
 *.so
