@@ -3,9 +3,8 @@
 # gzip
 #
 #############################################################
-GZIP_VERSION:=1.3.5
+GZIP_VERSION:=1.3.12
 GZIP_SOURCE:=gzip-$(GZIP_VERSION).tar.gz
-#GZIP_SITE:=ftp://alpha.gnu.org/gnu/gzip
 GZIP_SITE:=$(BR2_GNU_MIRROR)/gzip
 GZIP_DIR:=$(BUILD_DIR)/gzip-$(GZIP_VERSION)
 GZIP_CAT:=$(ZCAT)
@@ -31,15 +30,6 @@ $(GZIP_DIR)/.configured: $(GZIP_DIR)/.unpacked
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
 		--exec-prefix=/ \
-		--bindir=/bin \
-		--sbindir=/bin \
-		--libdir=/lib \
-		--libexecdir=/usr/lib \
-		--sysconfdir=/etc \
-		--datadir=/usr/share/misc \
-		--localstatedir=/var \
-		--mandir=/usr/share/man \
-		--infodir=/usr/share/info \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 	)
@@ -49,22 +39,13 @@ $(GZIP_BINARY): $(GZIP_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) -C $(GZIP_DIR)
 
 $(GZIP_TARGET_BINARY): $(GZIP_BINARY)
-	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(GZIP_DIR) install
+	$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(GZIP_DIR) install-strip
 ifneq ($(BR2_HAVE_INFOPAGES),y)
-	rm -rf $(TARGET_DIR)/usr/info
+	rm -rf $(TARGET_DIR)/usr/share/info
 endif
 ifneq ($(BR2_HAVE_MANPAGES),y)
-	rm -rf $(TARGET_DIR)/usr/man
+	rm -rf $(TARGET_DIR)/usr/share/man
 endif
-	rm -rf $(TARGET_DIR)/share/locale
-	rm -rf $(TARGET_DIR)/usr/share/doc
-	(cd $(TARGET_DIR)/bin; \
-		$(HOSTLN) -snf gzip gunzip; \
-		$(HOSTLN) -snf gzip zcat; \
-		$(HOSTLN) -snf zdiff zcmp; \
-		$(HOSTLN) -snf zgrep zegrep; \
-		$(HOSTLN) -snf zgrep zfgrep; \
-	)
 
 gzip: uclibc $(GZIP_TARGET_BINARY)
 
