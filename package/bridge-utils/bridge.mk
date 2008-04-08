@@ -15,8 +15,8 @@ $(DL_DIR)/$(BRIDGE_SOURCE):
 
 $(BRIDGE_BUILD_DIR)/.unpacked: $(DL_DIR)/$(BRIDGE_SOURCE)
 	$(ZCAT) $(DL_DIR)/$(BRIDGE_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	patch -p1 -d $(BRIDGE_BUILD_DIR) < package/bridge/bridge.patch
-	touch $(BRIDGE_BUILD_DIR)/.unpacked
+	toolchain/patch-kernel.sh $(BRIDGE_BUILD_DIR) package/bridge-utils/ bridge-utils-$(BRIDGE_VERSION)\*.patch\*
+	touch $@
 
 $(BRIDGE_BUILD_DIR)/.configured: $(BRIDGE_BUILD_DIR)/.unpacked
 	(cd $(BRIDGE_BUILD_DIR); rm -rf config.cache; \
@@ -40,23 +40,20 @@ $(BRIDGE_BUILD_DIR)/.configured: $(BRIDGE_BUILD_DIR)/.unpacked
 		$(DISABLE_NLS) \
 		--with-linux-headers=$(LINUX_HEADERS_DIR) \
 	)
-	touch $(BRIDGE_BUILD_DIR)/.configured
+	touch $@
 
 $(BRIDGE_BUILD_DIR)/brctl/brctl: $(BRIDGE_BUILD_DIR)/.configured
 	$(MAKE) -C $(BRIDGE_BUILD_DIR)
 
 $(TARGET_DIR)/$(BRIDGE_TARGET_BINARY): $(BRIDGE_BUILD_DIR)/brctl/brctl
 	cp -af $(BRIDGE_BUILD_DIR)/brctl/brctl $(TARGET_DIR)/$(BRIDGE_TARGET_BINARY)
-	$(STRIPCMD) $(TARGET_DIR)/$(BRIDGE_TARGET_BINARY)
-	#cp -af $(BRIDGE_BUILD_DIR)/brctl/brctld $(TARGET_DIR)/usr/sbin/
-	#$(STRIPCMD) $(TARGET_DIR)/usr/sbin/brctld
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/$(BRIDGE_TARGET_BINARY)
 
 bridge-utils: $(TARGET_DIR)/$(BRIDGE_TARGET_BINARY)
 
 bridge-utils-source: $(DL_DIR)/$(BRIDGE_SOURCE)
 
 bridge-utils-clean:
-	#$(MAKE) DESTDIR=$(TARGET_DIR) CC=$(TARGET_CC) -C $(BRIDGE_BUILD_DIR) uninstall
 	-$(MAKE) -C $(BRIDGE_BUILD_DIR) clean
 
 bridge-utils-dirclean:
