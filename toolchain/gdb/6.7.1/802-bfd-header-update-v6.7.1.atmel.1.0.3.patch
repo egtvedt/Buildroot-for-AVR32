@@ -1,0 +1,18 @@
+diff -rup gdb-6.7.1.atmel.1.0.3/bfd/bfd-in2.h gdb-6.7.1.atmel.1.0.3-autoconf/bfd/bfd-in2.h
+--- gdb-6.7.1.atmel.1.0.3/bfd/bfd-in2.h	2008-03-25 09:58:02.000000000 +0100
++++ gdb-6.7.1.atmel.1.0.3-autoconf/bfd/bfd-in2.h	2008-03-25 12:16:20.000000000 +0100
+@@ -2015,9 +2015,12 @@ enum bfd_architecture
+ #define bfd_mach_avr3          3
+ #define bfd_mach_avr4          4
+ #define bfd_mach_avr5          5
+-#define bfd_mach_avr6          6
++#define bfd_mach_avr6      6
+   bfd_arch_avr32,     /* Atmel AVR32 */
+-#define bfd_mach_at32ap7000    7000
++#define bfd_mach_avr32_ap      7000
++#define bfd_mach_avr32_uc      3000
++#define bfd_mach_avr32_ucr1    3001
++#define bfd_mach_avr32_ucr2    3002
+   bfd_arch_bfin,        /* ADI Blackfin */
+ #define bfd_mach_bfin          1
+   bfd_arch_cr16,       /* National Semiconductor CompactRISC (ie CR16). */
