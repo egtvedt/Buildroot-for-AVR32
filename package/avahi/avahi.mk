@@ -25,14 +25,13 @@ endif
 AVAHI_EXTRA_DEPS:=
 
 ifeq ($(strip $(BR2_PACKAGE_AVAHI_DAEMON)),y)
+ifeq ($(strip $(BR2_PACKAGE_EXPAT)),y)
 AVAHI_TARGETS+=$(TARGET_DIR)/usr/sbin/avahi-daemon
-AVAHI_DISABLE_EXPAT:=
-# depend on the exact library file instead of expat so avahi isn't always
-# considered out-of-date
-AVAHI_EXTRA_DEPS+=$(STAGING_DIR)/usr/lib/libexpat.so.1
+AVAHI_XML:=--with-xml=expat
+AVAHI_EXTRA_DEPS+=expat
+endif
 else
-AVAHI_DISABLE_EXPAT:=--disable-expat
-
+AVAHI_XML:=--with-xml=none
 endif
 
 ifeq ($(strip $(BR2_PACKAGE_DBUS)),y)
@@ -125,7 +124,7 @@ $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXTRA_DEPS)
 		--disable-qt4 \
 		--disable-gtk \
 		$(AVAHI_DISABLE_DBUS) \
-		$(AVAHI_DISABLE_EXPAT) \
+		$(AVAHI_XML) \
 		--disable-gdbm \
 		--disable-python \
 		--disable-python-dbus \
