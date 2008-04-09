@@ -5,6 +5,14 @@ config BR2_TARGET_ROOTFS_EXT2
 	help
 	  Build an ext2 root filesystem
 
+config BR2_TARGET_ROOTFS_EXT2_EXT3
+	bool "generate ext3 filesystem"
+	depends on BR2_TARGET_ROOTFS_EXT2
+	help
+	  Add a journal to the ext2 filesystem making it an ext3 filesystem.
+
+	  This requires that the build machine has tune2fs installed.
+
 config BR2_TARGET_ROOTFS_EXT2_BLOCKS
 	int "size in blocks (leave at 0 for auto calculation)"
 	depends on BR2_TARGET_ROOTFS_EXT2

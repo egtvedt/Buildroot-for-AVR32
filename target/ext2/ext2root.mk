@@ -36,7 +36,7 @@ genext2fs: $(GENEXT2_DIR)/genext2fs
 
 #############################################################
 #
-# Build the ext2 root filesystem image
+# Build the ext2 or ext3 root filesystem image
 #
 #############################################################
 
@@ -86,6 +86,8 @@ else
 EXT2_TARGET := $(EXT2_BASE)
 endif
 
+EXT2_TUNE2FS:=$(shell which tune2fs)
+
 $(EXT2_BASE): host-fakeroot makedevs genext2fs
 	-@find $(TARGET_DIR) -type f -perm +111 | xargs $(STRIPCMD) 2>/dev/null || true
 ifneq ($(BR2_HAVE_MANPAGES),y)
@@ -127,6 +129,16 @@ endif
 	chmod a+x $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(EXT2_TARGET))
 	$(STAGING_DIR)/usr/bin/fakeroot -- $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(EXT2_TARGET))
 	-@rm -f $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(EXT2_TARGET))
+ifeq ($(BR2_TARGET_ROOTFS_EXT2_EXT3),y)
+ifeq ($(strip $(EXT2_TUNE2FS)),)
+	@echo
+	@echo "Error: you must install tune2fs to be able to generate a ext3 image"
+	@echo
+	@sleep 5
+else
+	$(EXT2_TUNE2FS) -j $(EXT2_BASE)
+endif
+endif
 
 ifneq ($(EXT2_ROOTFS_COMPRESSOR),)
 $(EXT2_BASE).$(EXT2_ROOTFS_COMPRESSOR_EXT): $(EXT2_ROOTFS_COMPRESSOR_PREREQ) $(EXT2_BASE)
