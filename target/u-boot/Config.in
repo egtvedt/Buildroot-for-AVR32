@@ -20,6 +20,36 @@ config BR2_TARGET_UBOOT_CUSTOM_PATCH
 	  If your board requires a custom patch, add the path to the file here.
 	  Most users may leave this empty
 
+config BR2_TARGET_UBOOT_BOOTCMD
+	string "bootcmd"
+	depends on BR2_TARGET_UBOOT
+	help
+	  Override the boot command with this string.
+
+	  Example flash boot:
+	    fsload 0x10300000 /boot/uImage; bootm
+
+	  Example MMC/SD boot:
+	    mmcinit; ext2load mmc 0:1 0x10300000 /boot/uImage; bootm
+
+	  Example network boot:
+	    dhcp 0x10300000 uImage; bootm
+
+config BR2_TARGET_UBOOT_BOOTARGS
+	string "bootargs"
+	depends on BR2_TARGET_UBOOT
+	help
+	  Override the boot arguments with this string.
+
+	  Example arguments when booting from flash:
+	    console=ttyS0 root=/dev/mtdblock1 rootfstype=jffs2
+
+	  Example arguments when booting from MMC/SD:
+	    console=ttyS0 root=/dev/mmcblk0p1
+
+	  Example arguments when booting from network:
+	    console=ttyS0 root=1.2.3.4:/nfs/root ip=dhcp
+
 config BR2_TARGET_UBOOT_SERVERIP
 	string "server ip"
 	depends on BR2_TARGET_UBOOT
