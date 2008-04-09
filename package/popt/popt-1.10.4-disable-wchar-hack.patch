@@ -1,0 +1,13 @@
+diff --git a/popthelp.c b/popthelp.c
+index 58712d5..3df9c46 100644
+--- a/popthelp.c
++++ b/popthelp.c
+@@ -10,7 +10,7 @@
+ 
+ #include "system.h"
+ 
+-#define	POPT_WCHAR_HACK
++#undef	POPT_WCHAR_HACK
+ #ifdef 	POPT_WCHAR_HACK
+ #include <wchar.h>			/* for mbsrtowcs */
+ /*@access mbstate_t @*/
