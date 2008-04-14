@@ -206,7 +206,7 @@ $(GCC_BUILD_DIR1)/.compiled: $(GCC_BUILD_DIR1)/.configured
 
 gcc_initial=$(GCC_BUILD_DIR1)/.installed
 $(gcc_initial) $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc: $(GCC_BUILD_DIR1)/.compiled
-	PATH=$(TARGET_PATH) $(MAKE) -C $(GCC_BUILD_DIR1) install-gcc
+	PATH=$(TARGET_PATH) $(MAKE1) -C $(GCC_BUILD_DIR1) install-gcc
 	#rm -f $(STAGING_DIR)/bin/gccbug $(STAGING_DIR)/bin/gcov
 	#rm -rf $(STAGING_DIR)/info $(STAGING_DIR)/man $(STAGING_DIR)/share/doc $(STAGING_DIR)/share/locale
 	touch $(gcc_initial)
@@ -274,7 +274,7 @@ $(GCC_BUILD_DIR2)/.compiled: $(GCC_BUILD_DIR2)/.configured
 
 $(GCC_BUILD_DIR2)/.installed: $(GCC_BUILD_DIR2)/.compiled
 	PATH=$(TARGET_PATH) \
-	$(MAKE) $(HOST_CONFIGURE_OPTS) \
+	$(MAKE1) $(HOST_CONFIGURE_OPTS) \
 	LDFLAGS_FOR_TARGET="$(patsubst %,LDFLAGS+=-Wl$(comma)%,$(TARGET_LDFLAGS)) -L$(STAGING_DIR)/lib -L$(STAGING_DIR)/usr/lib" \
 	-C $(GCC_BUILD_DIR2) install
 	if [ -d "$(STAGING_DIR)/usr/lib64" ]; then \
@@ -450,7 +450,7 @@ endif
 
 $(TARGET_DIR)/usr/bin/gcc: $(GCC_BUILD_DIR3)/.compiled
 	PATH=$(TARGET_PATH) \
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) \
+	$(MAKE1) $(TARGET_CONFIGURE_OPTS) \
 	CFLAGS_FOR_BUILD="-g -O2 $(HOST_CFLAGS)" \
 	$(TARGET_GCC_FLAGS) \
 	DESTDIR=$(TARGET_DIR) \
