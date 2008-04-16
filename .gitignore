@@ -13,6 +13,10 @@
 *.oS
 .config*
 
+# Some files we like to see but are catched by normal rules
+!.empty
+!.bash*
+
 #
 # Editor generated files
 #
