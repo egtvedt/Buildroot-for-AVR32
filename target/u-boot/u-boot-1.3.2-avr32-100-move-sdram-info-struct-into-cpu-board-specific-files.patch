@@ -1,0 +1,228 @@
+From efac4383910e3b2ca8523e06f8446c0df8d366c1 Mon Sep 17 00:00:00 2001
+From: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+Date: Fri, 11 Apr 2008 14:30:53 +0200
+Subject: [PATCH 1/2] AVR32: move SDRAM info struct into CPU-board specific files in board code
+
+This patch moved the SDRAM info struct defining how the SDRAM controller should
+be configured into a board specific file. This is due to future CPU-boards may
+have on-board SDRAM and will then need different setup.
+
+Signed-off-by: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+---
+ board/atmel/atstk1000/Makefile    |   10 +++++++++
+ board/atmel/atstk1000/atstk1000.c |   19 +---------------
+ board/atmel/atstk1000/atstk1002.c |   41 +++++++++++++++++++++++++++++++++++++
+ board/atmel/atstk1000/atstk1003.c |   41 +++++++++++++++++++++++++++++++++++++
+ board/atmel/atstk1000/atstk1004.c |   41 +++++++++++++++++++++++++++++++++++++
+ 5 files changed, 135 insertions(+), 17 deletions(-)
+ create mode 100644 board/atmel/atstk1000/atstk1002.c
+ create mode 100644 board/atmel/atstk1000/atstk1003.c
+ create mode 100644 board/atmel/atstk1000/atstk1004.c
+
+diff --git a/board/atmel/atstk1000/Makefile b/board/atmel/atstk1000/Makefile
+index 8a15713..b6df56a 100644
+--- a/board/atmel/atstk1000/Makefile
++++ b/board/atmel/atstk1000/Makefile
+@@ -28,6 +28,16 @@ LIB	:= $(obj)lib$(BOARD).a
+ 
+ COBJS	:= $(BOARD).o flash.o eth.o
+ 
++ifdef CONFIG_ATSTK1002
++COBJS	+= atstk1002.o
++endif
++ifdef CONFIG_ATSTK1003
++COBJS	+= atstk1003.o
++endif
++ifdef CONFIG_ATSTK1004
++COBJS	+= atstk1004.o
++endif
++
+ SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
+ OBJS	:= $(addprefix $(obj),$(SOBJS) $(COBJS))
+ 
+diff --git a/board/atmel/atstk1000/atstk1000.c b/board/atmel/atstk1000/atstk1000.c
+index 28f64c4..db16613 100644
+--- a/board/atmel/atstk1000/atstk1000.c
++++ b/board/atmel/atstk1000/atstk1000.c
+@@ -23,27 +23,12 @@
+ 
+ #include <asm/io.h>
+ #include <asm/sdram.h>
+-#include <asm/arch/clk.h>
+ #include <asm/arch/gpio.h>
+ #include <asm/arch/hmatrix2.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+-static const struct sdram_info sdram = {
+-	.phys_addr	= CFG_SDRAM_BASE,
+-	.row_bits	= 11,
+-	.col_bits	= 8,
+-	.bank_bits	= 2,
+-	.cas		= 3,
+-	.twr		= 2,
+-	.trc		= 7,
+-	.trp		= 2,
+-	.trcd		= 2,
+-	.tras		= 5,
+-	.txsr		= 5,
+-	/* 15.6 us */
+-	.refresh_period	= (156 * (SDRAMC_BUS_HZ / 1000)) / 10000,
+-};
++extern const struct sdram_info stk100x_sdram_info;
+ 
+ int board_early_init_f(void)
+ {
+@@ -65,7 +50,7 @@ int board_early_init_f(void)
+ 
+ long int initdram(int board_type)
+ {
+-	return sdram_init(&sdram);
++	return sdram_init(&stk100x_sdram_info);
+ }
+ 
+ void board_init_info(void)
+diff --git a/board/atmel/atstk1000/atstk1002.c b/board/atmel/atstk1000/atstk1002.c
+new file mode 100644
+index 0000000..fcf874c
+--- /dev/null
++++ b/board/atmel/atstk1000/atstk1002.c
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (C) 2008 Atmel Corporation
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++#include <common.h>
++
++#include <asm/sdram.h>
++#include <asm/arch/clk.h>
++
++const struct sdram_info stk100x_sdram_info = {
++	.phys_addr	= CFG_SDRAM_BASE,
++	.row_bits	= 11,
++	.col_bits	= 8,
++	.bank_bits	= 2,
++	.cas		= 3,
++	.twr		= 2,
++	.trc		= 7,
++	.trp		= 2,
++	.trcd		= 2,
++	.tras		= 5,
++	.txsr		= 5,
++	/* 15.6 us */
++	.refresh_period	= (156 * (SDRAMC_BUS_HZ / 1000)) / 10000,
++};
+diff --git a/board/atmel/atstk1000/atstk1003.c b/board/atmel/atstk1000/atstk1003.c
+new file mode 100644
+index 0000000..fcf874c
+--- /dev/null
++++ b/board/atmel/atstk1000/atstk1003.c
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (C) 2008 Atmel Corporation
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++#include <common.h>
++
++#include <asm/sdram.h>
++#include <asm/arch/clk.h>
++
++const struct sdram_info stk100x_sdram_info = {
++	.phys_addr	= CFG_SDRAM_BASE,
++	.row_bits	= 11,
++	.col_bits	= 8,
++	.bank_bits	= 2,
++	.cas		= 3,
++	.twr		= 2,
++	.trc		= 7,
++	.trp		= 2,
++	.trcd		= 2,
++	.tras		= 5,
++	.txsr		= 5,
++	/* 15.6 us */
++	.refresh_period	= (156 * (SDRAMC_BUS_HZ / 1000)) / 10000,
++};
+diff --git a/board/atmel/atstk1000/atstk1004.c b/board/atmel/atstk1000/atstk1004.c
+new file mode 100644
+index 0000000..fcf874c
+--- /dev/null
++++ b/board/atmel/atstk1000/atstk1004.c
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (C) 2008 Atmel Corporation
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++#include <common.h>
++
++#include <asm/sdram.h>
++#include <asm/arch/clk.h>
++
++const struct sdram_info stk100x_sdram_info = {
++	.phys_addr	= CFG_SDRAM_BASE,
++	.row_bits	= 11,
++	.col_bits	= 8,
++	.bank_bits	= 2,
++	.cas		= 3,
++	.twr		= 2,
++	.trc		= 7,
++	.trp		= 2,
++	.trcd		= 2,
++	.tras		= 5,
++	.txsr		= 5,
++	/* 15.6 us */
++	.refresh_period	= (156 * (SDRAMC_BUS_HZ / 1000)) / 10000,
++};
+-- 
+1.5.4.3
+
