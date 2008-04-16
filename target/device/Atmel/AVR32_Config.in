@@ -23,7 +23,7 @@ config BR2_TARGET_AVR32_ATSTK1002
 	depends BR2_at32ap7000
 	select BR2_PACKAGE_LINUX
 	help
-	  The Atmel ATSTK1000 AVR32 Development Board.
+	  The Atmel ATSTK1000 + ATSTK1002 AVR32 Development Board.
 
 config BR2_TARGET_AVR32_ATNGW100
 	bool "Atmel AVR32 network gateway board support"
