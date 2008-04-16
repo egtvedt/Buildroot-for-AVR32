@@ -1,0 +1,27 @@
+From a56bce84ae644082cd2a77e2faf8550a1e727adc Mon Sep 17 00:00:00 2001
+From: Haavard Skinnemoen <hskinnemoen@atmel.com>
+Date: Thu, 29 Nov 2007 13:09:14 +0100
+Subject: [PATCH 2/5] move hsmc_init() to core_initcall
+
+The board init code, typically running from postcore_initcall, may
+need to set up SMC timings. We have to make sure the SMC driver is
+ready before this happens.
+
+Signed-off-by: Haavard Skinnemoen <hskinnemoen@atmel.com>
+---
+ arch/avr32/mach-at32ap/hsmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/avr32/mach-at32ap/hsmc.c b/arch/avr32/mach-at32ap/hsmc.c
+index fa427ed..b2d9bc6 100644
+--- a/arch/avr32/mach-at32ap/hsmc.c
++++ b/arch/avr32/mach-at32ap/hsmc.c
+@@ -278,4 +278,4 @@ static int __init hsmc_init(void)
+ {
+ 	return platform_driver_register(&hsmc_driver);
+ }
+-arch_initcall(hsmc_init);
++core_initcall(hsmc_init);
+-- 
+1.5.4.3
+
