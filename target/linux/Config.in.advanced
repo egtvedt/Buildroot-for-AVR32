@@ -423,14 +423,19 @@ config BR2_PACKAGE_LINUX_USE_DEFCONFIG
 	help
 	  Configure Linux by make <board>_defconfig
 
+config BR2_PACKAGE_LINUX_USE_DEFCONFIG_CUSTOM
+	bool "Run make <custom>_defconfig"
+	depends BR2_PACKAGE_LINUX
+	help
+	  Configure Linux by make <custom>_defconfig where custom is defined by
+	  kconfig.
+
 config BR2_PACKAGE_LINUX_USE_XCONFIG
 	bool "Run make ARCH=$(ARCH) [xconfig|menuconfig] before build"
 	depends BR2_PACKAGE_LINUX
 	help
 	  Configure Linux by make xconfig
 endchoice
-
-
 
 config BR2_PACKAGE_LINUX_KCONFIG
 	string ".config file"
@@ -442,6 +447,14 @@ config BR2_PACKAGE_LINUX_KCONFIG
 	  If the above setting is empty, you can change the default
 	  board-imposed value by passing LINUX26_KCONFIG=<path> to
 	  make.
+
+config BR2_PACKAGE_LINUX_USE_DEFCONFIG_CUSTOM_NAME
+	string "make custom_defconfig"
+	depends BR2_PACKAGE_LINUX && BR2_PACKAGE_LINUX_USE_DEFCONFIG_CUSTOM
+	help
+	  Configure Linux by loading the string provided here.
+
+	  I.e. make BR2_LINUX26_DEFCONFIG_CUSTOM_NAME.
 
 choice
 	prompt "Preferred config tool"
