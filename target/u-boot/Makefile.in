@@ -11,12 +11,23 @@ U_BOOT_PATCH_DIR:=$(PROJECT_BUILD_DIR)/u-boot-patches
 U_BOOT_CAT:=$(BZCAT)
 U_BOOT_BIN:=u-boot.bin
 U_BOOT_TOOLS_BIN:=mkimage
+# u-boot still uses arch=ppc for powerpc
+U_BOOT_ARCH:=$(shell echo $(KERNEL_ARCH)|$(HOST_SED_DIR)/bin/sed 's/powerpc/ppc/')
 
 ifneq ($(BR2_TARGET_U_BOOT_CONFIG_BOARD),)
 U_BOOT_INC_CONF_FILE:=$(U_BOOT_DIR)/include/configs/$(subst _config,,$(BR2_TARGET_U_BOOT_CONFIG_BOARD)).h
 else
 U_BOOT_INC_CONF_FILE:=$(U_BOOT_DIR)/include/config.h
 endif
+
+U_BOOT_TARGET_TOOLS:=
+ifeq ($(strip $(BR2_TARGET_UBOOT_TOOL_MKIMAGE)),y)
+U_BOOT_TARGET_TOOLS+=$(TARGET_DIR)/usr/bin/mkimage
+endif
+ifeq ($(strip $(BR2_TARGET_UBOOT_TOOL_ENV)),y)
+U_BOOT_TARGET_TOOLS+=$(TARGET_DIR)/usr/sbin/fw_printenv
+endif
+
 
 # Define a helper function
 define insert_define
@@ -36,7 +47,8 @@ $(U_BOOT_DIR)/.unpacked: $(DL_DIR)/$(U_BOOT_SOURCE)
 
 $(U_BOOT_DIR)/.patched: $(U_BOOT_DIR)/.unpacked
 	toolchain/patch-kernel.sh $(U_BOOT_DIR) target/u-boot/ \
-		u-boot-$(U_BOOT_VERSION)-$(BR2_ARCH)-\*.patch\*
+		u-boot-$(U_BOOT_VERSION)-\*.patch \
+		u-boot-$(U_BOOT_VERSION)-\*.patch.$(ARCH)
 ifneq ($(strip $(BR2_TARGET_UBOOT_CUSTOM_PATCH)),"")
 	@mkdir -p $(U_BOOT_PATCH_DIR)
 	cp -dpr $(BR2_TARGET_UBOOT_CUSTOM_PATCH) $(U_BOOT_PATCH_DIR)
@@ -104,16 +116,30 @@ $(U_BOOT_DIR)/$(U_BOOT_BIN): $(U_BOOT_DIR)/.header_modified
 	$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
 		LDFLAGS="$(TARGET_LDFLAGS)" \
-		$(MAKE) -C $(U_BOOT_DIR)
+		$(MAKE) CROSS_COMPILE="$(TARGET_CROSS)" ARCH=$(U_BOOT_ARCH) \
+		 -C $(U_BOOT_DIR)
 
 $(BINARIES_DIR)/$(U_BOOT_BIN): $(U_BOOT_DIR)/$(U_BOOT_BIN)
 	cp -dpf $(U_BOOT_DIR)/$(U_BOOT_BIN) $(BINARIES_DIR)
 	cp -dpf $(U_BOOT_DIR)/tools/$(U_BOOT_TOOLS_BIN) $(STAGING_DIR)/usr/bin/
 
-u-boot: gcc $(BINARIES_DIR)/$(U_BOOT_BIN)
+$(TARGET_DIR)/usr/bin/mkimage: $(U_BOOT_DIR)/$(U_BOOT_BIN)
+	$(TARGET_CC) -I$(U_BOOT_DIR)/include -DUSE_HOSTCC -o $@ \
+		$(U_BOOT_DIR)/tools/mkimage.c $(U_BOOT_DIR)/tools/crc32.c
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
+
+$(TARGET_DIR)/usr/sbin/fw_printenv: $(U_BOOT_DIR)/$(U_BOOT_BIN)
+	$(TARGET_CC) -I$(U_BOOT_DIR)/include -I$(LINUX_HEADERS_DIR)/include \
+		-DUSE_HOSTCC -o $@ \
+		$(U_BOOT_DIR)/tools/env/*.c $(U_BOOT_DIR)/tools/crc32.c
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
+	ln -sf fw_printenv $(TARGET_DIR)/usr/sbin/fw_setenv
+
+u-boot: gcc $(BINARIES_DIR)/$(U_BOOT_BIN) $(U_BOOT_TARGET_TOOLS)
 
 u-boot-clean:
 	-$(MAKE) -C $(U_BOOT_DIR) clean
+	rm -f $(STAGING_DIR)/usr/bin/$(U_BOOT_TOOLS_BIN) $(U_BOOT_TARGET_TOOLS)
 
 u-boot-dirclean:
 	rm -rf $(U_BOOT_DIR)
