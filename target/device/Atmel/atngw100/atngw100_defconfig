@@ -44,6 +44,19 @@ BR2_BANNER="ATNGW100 ($(DATE))"
 BR2_TARGET_ATMEL=y
 
 #
+# Selection criteria
+#
+BR2_TARGET_ATMEL_ALL=y
+
+#
+# Device Selection
+#
+
+#
+# Development Board Selection
+#
+
+#
 # Atmel AVR32 Specific Device Support
 #
 BR2_TARGET_AVR32=y
@@ -107,7 +120,7 @@ BR2_DEBIAN_MIRROR="http://ftp.debian.org"
 #
 # Atmel Mirrors
 #
-BR2_ATMEL_MIRROR="ftp://at91dist:distrib@81.80.104.162/AT91_Third_Party_Design_Flow/Linux_Host/"
+BR2_ATMEL_MIRROR="ftp://www.at91.com/pub/buildroot/"
 BR2_AT91_PATCH_MIRROR="http://maxim.org.za/AT91RM9200/2.6/"
 BR2_STAGING_DIR="$(BUILD_DIR)/staging_dir"
 # BR2_FPU_SUFFIX is not set
@@ -274,7 +287,7 @@ BR2_PACKAGE_BUSYBOX=y
 # BR2_BUSYBOX_VERSION_1_9_X is not set
 BR2_BUSYBOX_VERSION_1_10_X=y
 # BR2_PACKAGE_BUSYBOX_SNAPSHOT is not set
-BR2_BUSYBOX_VERSION="1.10.0"
+BR2_BUSYBOX_VERSION="1.10.1"
 BR2_PACKAGE_BUSYBOX_FULLINSTALL=y
 BR2_PACKAGE_BUSYBOX_CONFIG="$(BR2_BOARD_PATH)/busybox-$(BR2_BUSYBOX_VERSION).config"
 BR2_PACKAGE_BUSYBOX_HIDE_OTHERS=y
@@ -310,6 +323,7 @@ BR2_HOST_FAKEROOT=y
 # BR2_PACKAGE_OPROFILE is not set
 # BR2_PACKAGE_PKGCONFIG is not set
 # BR2_READLINE is not set
+# BR2_PACKAGE_PCRE is not set
 
 #
 # Other stuff
@@ -332,6 +346,7 @@ BR2_PACKAGE_LIBDAEMON=y
 # BR2_PACKAGE_LIBFLOAT is not set
 # BR2_PACKAGE_LIBGCRYPT is not set
 # BR2_PACKAGE_LIBGPG_ERROR is not set
+# BR2_PACKAGE_LIBICONV is not set
 # BR2_PACKAGE_LIBLOCKFILE is not set
 # BR2_PACKAGE_LIBSYSFS is not set
 # BR2_PACKAGE_LOCKFILE_PROGS is not set
@@ -342,6 +357,7 @@ BR2_PACKAGE_LIBDAEMON=y
 # BR2_PACKAGE_NG_SPICE_REWORK is not set
 # BR2_PACKAGE_POPT is not set
 # BR2_PACKAGE_PORTAGE is not set
+# BR2_PACKAGE_SCREEN is not set
 # BR2_PACKAGE_SQLITE is not set
 # BR2_PACKAGE_STARTUP_NOTIFICATION is not set
 BR2_PACKAGE_STRACE=y
@@ -361,6 +377,7 @@ BR2_PACKAGE_AVAHI_AUTOIPD=y
 #
 # mDNS/DNS-SD daemon	- disabled (requires expat)
 #
+# BR2_PACKAGE_AXEL is not set
 # BR2_PACKAGE_BOA is not set
 # BR2_PACKAGE_BIND is not set
 BR2_PACKAGE_BRIDGE=y
@@ -489,6 +506,7 @@ BR2_BLOCKDEV_SUPPORT=y
 #
 # dbus not available (need expat or libxml2)
 #
+# BR2_PACKAGE_DEVMEM2 is not set
 # BR2_PACKAGE_DM is not set
 # BR2_PACKAGE_DMRAID is not set
 # BR2_PACKAGE_E2FSPROGS is not set
@@ -607,6 +625,8 @@ BR2_TARGET_UBOOT_NETMASK=""
 BR2_TARGET_UBOOT_ETHADDR=""
 BR2_TARGET_UBOOT_ETH1ADDR=""
 # BR2_TARGET_UBOOT_SILENT is not set
+# BR2_TARGET_UBOOT_TOOL_MKIMAGE is not set
+# BR2_TARGET_UBOOT_TOOL_ENV is not set
 
 #
 # Kernel

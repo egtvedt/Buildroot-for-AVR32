@@ -117,9 +117,12 @@ $(UCLIBC_DIR)/.unpacked: $(DL_DIR)/$(UCLIBC_SOURCE) $(UCLIBC_LOCALE_DATA)
 	rm -rf $(UCLIBC_DIR)
 	$(UCLIBC_CAT) $(DL_DIR)/$(UCLIBC_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
 ifneq ($(BR2_UCLIBC_VERSION_SNAPSHOT),y)
-	toolchain/patch-kernel.sh $(UCLIBC_DIR) $(UCLIBC_PATCH_DIR) uClibc-$(UCLIBC_OFFICIAL_VERSION)-\*.patch
+	toolchain/patch-kernel.sh $(UCLIBC_DIR) $(UCLIBC_PATCH_DIR) \
+		uClibc-$(UCLIBC_OFFICIAL_VERSION)-\*.patch \
+		uClibc-$(UCLIBC_OFFICIAL_VERSION)-\*.patch.$(ARCH)
 else
-	toolchain/patch-kernel.sh $(UCLIBC_DIR) $(UCLIBC_PATCH_DIR) uClibc.\*.patch
+	toolchain/patch-kernel.sh $(UCLIBC_DIR) $(UCLIBC_PATCH_DIR) \
+		uClibc.\*.patch uClibc.\*.patch.$(ARCH)
 endif
 ifneq ($(BR2_ENABLE_LOCALE),)
 	cp -dpf $(DL_DIR)/$(UCLIBC_SOURCE_LOCALE) $(UCLIBC_DIR)/extra/locale/
@@ -139,6 +142,23 @@ $(UCLIBC_DIR)/.oldconfig: $(UCLIBC_DIR)/.unpacked $(UCLIBC_CONFIG_FILE)
 		-e 's,^SHARED_LIB_LOADER_PREFIX=.*,SHARED_LIB_LOADER_PREFIX=\"/lib\",g' \
 		$(UCLIBC_DIR)/.oldconfig
 ifeq ($(UCLIBC_TARGET_ARCH),arm)
+	(/bin/echo "# CONFIG_GENERIC_ARM is not set"; \
+	 /bin/echo "# CONFIG_ARM610 is not set"; \
+	 /bin/echo "# CONFIG_ARM710 is not set"; \
+	 /bin/echo "# CONFIG_ARM7TDMI is not set"; \
+	 /bin/echo "# CONFIG_ARM720T is not set"; \
+	 /bin/echo "# CONFIG_ARM920T is not set"; \
+	 /bin/echo "# CONFIG_ARM922T is not set"; \
+	 /bin/echo "# CONFIG_ARM926T is not set"; \
+	 /bin/echo "# CONFIG_ARM10T is not set"; \
+	 /bin/echo "# CONFIG_ARM1136JF_S is not set"; \
+	 /bin/echo "# CONFIG_ARM1176JZ_S is not set"; \
+	 /bin/echo "# CONFIG_ARM1176JZF_S is not set"; \
+	 /bin/echo "# CONFIG_ARM_SA110 is not set"; \
+	 /bin/echo "# CONFIG_ARM_SA1100 is not set"; \
+	 /bin/echo "# CONFIG_ARM_XSCALE is not set"; \
+	 /bin/echo "# CONFIG_ARM_IWMMXT is not set"; \
+	) >> $(UCLIBC_DIR)/.oldconfig
 	$(SED) 's/^\(CONFIG_[^_]*[_]*ARM[^=]*\)=.*/# \1 is not set/g' \
 		 $(UCLIBC_DIR)/.oldconfig
 	$(SED) 's/^.*$(UCLIBC_ARM_TYPE).*/$(UCLIBC_ARM_TYPE)=y/g' $(UCLIBC_DIR)/.oldconfig
