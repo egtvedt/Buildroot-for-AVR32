@@ -1,0 +1,8 @@
+# Partition setup for ATSTK1006.
+#
+# root is a 256 MB NAND flash (MT29F2G08AACWP).
+# boot is a 8 MB NOR flash (AT49BV6416 or AT49BV642D).
+#
+# <mount point>		<mount name>	<page size>	<erase size>	<cleanmarkers>	<device file>	<pad size>
+/			root		0x800		0x20000		0		1		0x0
+/boot			boot		0x1000		0x10000		1		0		0x0
