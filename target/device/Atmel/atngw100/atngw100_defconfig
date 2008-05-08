@@ -44,19 +44,6 @@ BR2_BANNER="ATNGW100 ($(DATE))"
 BR2_TARGET_ATMEL=y
 
 #
-# Selection criteria
-#
-BR2_TARGET_ATMEL_ALL=y
-
-#
-# Device Selection
-#
-
-#
-# Development Board Selection
-#
-
-#
 # Atmel AVR32 Specific Device Support
 #
 BR2_TARGET_AVR32=y
@@ -80,10 +67,6 @@ BR2_BOARD_NAME="atngw100"
 #
 BR2_TARGET_ATMEL_COPYTO=""
 BR2_BOARD_PATH="target/device/Atmel/$(BR2_BOARD_NAME)"
-
-#
-# It will be copied to $(BR2_AT91BOOTSTRAP_JUMP_ADDR)
-#
 # BR2_TARGET_VALKA is not set
 
 #
