@@ -240,6 +240,8 @@ get_partition_jffs2_options()
 
 	# Remove annoing tabs in partition_jffs2_options
 	partition_jffs2_options=`echo ${partition_jffs2_options} | sed 's/\t//g'`
+
+	echo "  * options '${partition_jffs2_options}'"
 }
 
 #
