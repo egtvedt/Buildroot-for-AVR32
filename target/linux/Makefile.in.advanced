@@ -163,7 +163,8 @@ endif
 
 # -----------------------------------------------------------------------------
 # File name for the Linux kernel binary
-LINUX26_KERNEL_NAME:=$(BOARD_NAME)-linux-$(LINUX26_VERSION)-$(DATE)$(KERNEL_EXT)
+#LINUX26_KERNEL_NAME:=$(BOARD_NAME)-linux-$(LINUX26_VERSION)-$(DATE)$(KERNEL_EXT)
+LINUX26_KERNEL_NAME:=$(LINUX26_FORMAT)
 
 
 ifeq ($(BOARD_NAME),)
@@ -171,7 +172,8 @@ BOARD_NAME=$(ARCH)
 endif
 
 ifndef LINUX26_KERNEL
-LINUX26_KERNEL:=$(BINARIES_DIR)/$(BOARD_NAME)-linux-$(LINUX26_VERSION)-$(DATE)$(KERNEL_EXT)
+#LINUX26_KERNEL:=$(BINARIES_DIR)/$(BOARD_NAME)-linux-$(LINUX26_VERSION)-$(DATE)$(KERNEL_EXT)
+LINUX26_KERNEL:=$(BINARIES_DIR)/$(BOARD_NAME)-linux-kernel-$(LINUX26_VERSION)
 endif
 
 # for packages that need it
