@@ -122,12 +122,13 @@ endif
 
 # -----------------------------------------------------------------------------
 # Has to be set by the target/device
-ifeq ($(strip $(LINUX26_BINLOC)),)
 
 # --------------
 # VMLINUX
 ifeq ($(LINUX26_FORMAT),vmlinux)
+ifeq ($(LINUX26_BINLOC),)
 LINUX26_BINLOC:=$(LINUX26_FORMAT)
+endif
 KERNEL_EXT:=
 endif
 
@@ -137,10 +138,12 @@ ifeq ($(strip $(LINUX26_FORMAT)),uImage)
 ifeq ($(strip $(BR2_TARGET_UBOOT)),y)
 LINUX26_TARGETS+=u-boot
 endif
+ifeq ($(LINUX26_BINLOC),)
 ifeq ($(BR2_avr32),y)
 LINUX26_BINLOC:=arch/$(KERNEL_ARCH)/boot/images/$(LINUX26_FORMAT)
 else
 LINUX26_BINLOC:=arch/$(KERNEL_ARCH)/boot/$(LINUX26_FORMAT)
+endif
 KERNEL_EXT:=.gz
 endif
 endif
@@ -148,18 +151,21 @@ endif
 # --------------
 # ZIMAGE
 ifeq ($(LINUX26_FORMAT),zImage)
+ifeq ($(LINUX26_BINLOC),)
 LINUX26_BINLOC:=arch/$(KERNEL_ARCH)/boot/$(LINUX26_FORMAT)
+endif
 KERNEL_EXT:=.z
 endif
 
 # --------------
 # BZIMAGE
 ifeq ($(LINUX26_FORMAT),bzImage)
+ifeq ($(LINUX26_BINLOC),)
 LINUX26_BINLOC:=arch/$(KERNEL_ARCH)/boot/bzImage
+endif
 KERNEL_EXT:=.bz
 endif
 
-endif
 
 # -----------------------------------------------------------------------------
 # File name for the Linux kernel binary
