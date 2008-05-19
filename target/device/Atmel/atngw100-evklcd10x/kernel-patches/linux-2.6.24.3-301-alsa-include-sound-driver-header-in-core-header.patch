@@ -1,0 +1,10 @@
+--- linux-2.6.24.3.orig/include/sound/core.h	2008-05-15 16:48:28.000000000 +0200
++++ linux-2.6.24.3/include/sound/core.h	2008-05-15 16:48:39.000000000 +0200
+@@ -27,6 +27,7 @@
+ #include <linux/rwsem.h>		/* struct rw_semaphore */
+ #include <linux/pm.h>			/* pm_message_t */
+ #include <linux/device.h>
++#include <sound/driver.h>
+ 
+ /* forward declarations */
+ #ifdef CONFIG_PCI

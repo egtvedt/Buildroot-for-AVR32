@@ -1,0 +1,5 @@
+snd-atmel-ac97
+snd-mixer-oss
+snd-pcm-oss
+wm97xx-ts
+evdev

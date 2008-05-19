@@ -46,6 +46,22 @@ config BR2_TARGET_AVR32_ATNGW100_BASE
 	help
 	  Very simple configuration for the Atmel AVR32 Network Gateway Board.
 
+config BR2_TARGET_AVR32_ATNGW100_EVKLCD100
+	bool "Atmel AVR32 NGW100 + EVKLCD100 (QVGA) board support"
+	depends BR2_at32ap7000
+	select BR2_PACKAGE_LINUX
+	help
+	  Atmel AVR32 Network Gateway Board with an attached EVKLCD100 board.
+	  This addon board has a QVGA LCD screen.
+
+config BR2_TARGET_AVR32_ATNGW100_EVKLCD101
+	bool "Atmel AVR32 NGW100 + EVKLCD101 (VGA) board support"
+	depends BR2_at32ap7000
+	select BR2_PACKAGE_LINUX
+	help
+	  Atmel AVR32 Network Gateway Board with an attached EVKLCD100 board.
+	  This addon board has a VGA LCD screen.
+
 config BR2_TARGET_AVR32_ATNGW100_EXPANDED
 	bool "Atmel AVR32 expanded network gateway board support"
 	depends BR2_at32ap7000
