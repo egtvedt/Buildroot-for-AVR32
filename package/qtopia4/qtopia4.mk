@@ -16,10 +16,8 @@
 # (cd /usr/include; sudo ln -s dbus-1.0/dbus dbus)
 # to fix
 
-QTOPIA4_VERSION:=4.4.0-snapshot-20080325
-# QTOPIA4_VERSION:=4.4.1-snapshot-20080511
-# QTOPIA4_VERSION:=4.5.0-snapshot-20080511
-QTOPIA4_CAT:=$(ZCAT)
+QTOPIA4_VERSION:=4.4.0
+QTOPIA4_CAT:=$(BZCAT)
 
 BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME:=$(strip $(subst ",, $(BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME)))
 #"))
@@ -29,14 +27,14 @@ BR2_PACKAGE_QTOPIA4_COMMERCIAL_PASSWORD:=$(strip $(subst ",, $(BR2_PACKAGE_QTOPI
 # What to download, free or commercial version.
 ifneq ($(BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME),)
 QTOPIA4_SITE:=http://$(BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME):$(BR2_QTOPIA4_COMMERCIAL_PASSWORD)@dist.trolltech.com/$(BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME)
-QTOPIA4_SOURCE:=qt-embedded-linux-commercial-src-$(QTOPIA4_VERSION).tar.gz
+QTOPIA4_SOURCE:=qt-embedded-linux-commercial-src-$(QTOPIA4_VERSION).tar.bz2
 QTOPIA4_TARGET_DIR:=$(BUILD_DIR)/qt-embedded-linux-commercial-src-$(QTOPIA4_VERSION)
 QTOPIA4_NO_SQL_OCI:=-no-sql-oci
 QTOPIA4_NO_SQL_TDS:=-no-sql-tds
 QTOPIA4_NO_SQL_DB2:=-no-sql-db2
 else # Good, good, we are free:
-QTOPIA4_SITE=ftp://ftp.trolltech.com/qt/snapshots
-QTOPIA4_SOURCE:=qt-embedded-linux-opensource-src-$(QTOPIA4_VERSION).tar.gz
+QTOPIA4_SITE=ftp://ftp.trolltech.com/qt/source
+QTOPIA4_SOURCE:=qt-embedded-linux-opensource-src-$(QTOPIA4_VERSION).tar.bz2
 QTOPIA4_TARGET_DIR:=$(BUILD_DIR)/qt-embedded-linux-opensource-src-$(QTOPIA4_VERSION)
 ifeq ($(BR2_PACKAGE_QTOPIA4_GPL_LICENSE_APPROVED),y)
 QTOPIA4_APPROVE_GPL_LICENSE:=-confirm-license
@@ -156,6 +154,12 @@ else
 QTOPIA4_OPENSSL=-no-openssl
 endif
 
+ifeq ($(BR2_PACKAGE_QTOPIA4_SVG),y)
+QTOPIA4_SVG=-svg
+else
+QTOPIA4_SVG=-no-svg
+endif
+
 ifeq ($(BR2_PACKAGE_QTOPIA4_SQL),y)
 QTOPIA4_SQL_IBASE=-qt-sql-ibase
 QTOPIA4_SQL_MYSQL=-qt-sql-mysql
@@ -222,6 +226,7 @@ endif
 		$(QTOPIA4_PNG) \
 		$(QTOPIA4_TIFF) \
 		$(QTOPIA4_ZLIB) \
+		$(QTOPIA4_SVG) \
 		$(QTOPIA4_SQL_IBASE) \
 		$(QTOPIA4_SQL_MYSQL) \
 		$(QTOPIA4_SQL_ODBC) \
@@ -262,20 +267,22 @@ $(TARGET_DIR)/usr/lib/libQtCore.so.4: $(STAGING_DIR)/usr/lib/libQtCore.la
 	cp -dpf $(STAGING_DIR)/usr/lib/fonts/micro*.qpf $(TARGET_DIR)/usr/lib/fonts
 ifeq ($(BR2_PACKAGE_QTOPIA4_SHARED),y)
 	cp -dpf $(STAGING_DIR)/usr/lib/libQt*.so.* $(TARGET_DIR)/usr/lib/
-	-$(STRIPCMD) --strip-unneeded $(TARGET_DIR)/usr/lib/libQt*.so.*
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libQt*.so.*
 endif
 	# Install image plugins if they are built
 	if [ -d $(STAGING_DIR)/usr/plugins/imageformats ]; then \
 		mkdir -p $(TARGET_DIR)/usr/plugins; \
 		cp -dpfr $(STAGING_DIR)/usr/plugins/imageformats $(TARGET_DIR)/usr/plugins/; \
-		$(STRIPCMD) --strip-unneeded $(TARGET_DIR)/usr/plugins/imageformats/*; \
+		$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/plugins/imageformats/*; \
 	fi
 ifneq ($(BR2_PACKAGE_QTOPIA4_SQL),y)
 	# Remove Sql libraries, not needed
 	-rm $(TARGET_DIR)/usr/lib/libQtSql*
 endif
+ifneq ($(BR2_PACKAGE_QTOPIA4_SVG),y)
 	# Remove Svg libraries, not needed
 	-rm $(TARGET_DIR)/usr/lib/libQtSvg*
+endif
 
 qtopia4: uclibc zlib $(QTOPIA4_DEP_LIBS) $(TARGET_DIR)/usr/lib/libQtCore.so.4
 
