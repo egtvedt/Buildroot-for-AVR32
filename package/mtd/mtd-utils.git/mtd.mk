@@ -107,19 +107,19 @@ MTD_TARGETS_UBI_$(BR2_PACKAGE_MTD_UBIUPDATEVOL) += ubiupdatevol
 MTD_BUILD_TARGETS := $(addprefix $(MTD_DIR)/, $(MTD_TARGETS_y)) $(addprefix $(MTD_DIR)/ubi-utils/, $(MTD_TARGETS_UBI_y))
 
 $(MTD_BUILD_TARGETS): $(MTD_DIR)/.unpacked
-	mkdir -p $(TARGET_DIR)/usr/sbin
+	mkdir -p $(TARGET_DIR)/sbin
 	$(MAKE1) OPTFLAGS="-DNEED_BCOPY -Dbcmp=memcmp -I$(STAGING_DIR)/usr/include $(TARGET_CFLAGS)" \
 	       BUILDDIR=$(MTD_DIR) \
 	       CROSS=$(TARGET_CROSS) CC=$(TARGET_CC) WITHOUT_XATTR=1 -C $(MTD_DIR)
 
-MTD_TARGETS := $(addprefix $(TARGET_DIR)/usr/sbin/, $(MTD_TARGETS_y))
-MTD_UBI_TARGETS := $(addprefix $(TARGET_DIR)/usr/sbin/, $(MTD_TARGETS_UBI_y))
+MTD_TARGETS := $(addprefix $(TARGET_DIR)/sbin/, $(MTD_TARGETS_y))
+MTD_UBI_TARGETS := $(addprefix $(TARGET_DIR)/sbin/, $(MTD_TARGETS_UBI_y))
 
-$(MTD_TARGETS): $(TARGET_DIR)/usr/sbin/% : $(MTD_DIR)/%
+$(MTD_TARGETS): $(TARGET_DIR)/sbin/% : $(MTD_DIR)/%
 	cp -f $< $@
 	$(STRIPCMD) $@
 
-$(MTD_UBI_TARGETS): $(TARGET_DIR)/usr/sbin/% : $(MTD_DIR)/ubi-utils/%
+$(MTD_UBI_TARGETS): $(TARGET_DIR)/sbin/% : $(MTD_DIR)/ubi-utils/%
 	cp -f $< $@
 	$(STRIPCMD) $@
 
