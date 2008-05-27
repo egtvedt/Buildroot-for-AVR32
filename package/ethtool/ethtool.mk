@@ -35,7 +35,7 @@ $(ETHTOOL_DIR)/ethtool: $(ETHTOOL_DIR)/.configured
 
 $(TARGET_DIR)/usr/bin/ethtool: $(ETHTOOL_DIR)/ethtool
 	cp -dpf $(ETHTOOL_DIR)/ethtool $(TARGET_DIR)/usr/sbin/ethtool
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/sbin/ethtool
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/sbin/ethtool
 	touch -c $@
 
 ethtool: uclibc $(ETHTOOL_DIR)/.installed
