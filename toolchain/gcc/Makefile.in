@@ -74,11 +74,6 @@ EXTRA_GCC_CONFIG_OPTIONS+=--with-build-time-tools=$(STAGING_DIR)/$(REAL_GNU_TARG
 #EXTRA_GCC_CONFIG_OPTIONS+=--with-as=$(TARGET_CROSS)as
 endif
 
-# AVR32 GCC configuration
-ifeq ($(strip $(BR2_avr32)),y)
-SOFT_FLOAT_CONFIG_OPTION:=
-endif
-
 TARGET_GCC_FLAGS= CFLAGS_FOR_TARGET="$(TARGET_CFLAGS) $(TARGET_SOFT_FLOAT)" \
 	CXXFLAGS_FOR_TARGET="$(TARGET_CFLAGS) $(TARGET_SOFT_FLOAT)" \
 	CFLAGS="$(TARGET_CFLAGS) $(TARGET_SOFT_FLOAT)" \
@@ -106,11 +101,6 @@ ifneq ($(findstring x3.,x$(GCC_VERSION)),x3.)
 EXTRA_TARGET_GCC_CONFIG_OPTIONS+=--enable-intermodule
 endif
 endif # BR2_PREFER_IMA=y
-
-# AVR32 target GCC configuration
-ifeq ($(strip $(BR2_avr32)),y)
-SOFT_FLOAT_CONFIG_OPTION:=
-endif
 
 TARGETS+=gcc_target
 endif
