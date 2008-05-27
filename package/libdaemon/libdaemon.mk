@@ -74,8 +74,6 @@ libdaemon: uclibc pkgconfig $(LIBDAEMON_DESTDIR)/libdaemon.a
 
 libdaemon-unpacked: $(LIBDAEMON_DIR)/.unpacked
 
-libdaemon-unpacked: $(LIBDAEMON_DIR)/.unpacked
-
 libdaemon-clean:
 	-$(MAKE) -C $(LIBDAEMON_DIR) clean
 
