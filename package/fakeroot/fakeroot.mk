@@ -34,6 +34,7 @@ $(FAKEROOT_SOURCE_DIR)/.unpacked: $(DL_DIR)/$(FAKEROOT_SOURCE)
 $(FAKEROOT_DIR1)/.configured: $(FAKEROOT_SOURCE_DIR)/.unpacked
 	mkdir -p $(FAKEROOT_DIR1)
 	(cd $(FAKEROOT_DIR1); rm -rf config.cache; \
+		CC="$(HOSTCC)" \
 		$(FAKEROOT_SOURCE_DIR)/configure \
 		--prefix=/usr \
 		$(DISABLE_NLS) \
