@@ -52,10 +52,10 @@ $(STAGING_DIR)/$(FAAD2_TARGET_BINARY): $(FAAD2_DIR)/$(FAAD2_BINARY)
 
 $(TARGET_DIR)/$(FAAD2_TARGET_BINARY): $(STAGING_DIR)/$(FAAD2_TARGET_BINARY)
 	cp -dpf $(STAGING_DIR)/usr/lib/libfaad*so* $(TARGET_DIR)/usr/lib
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libfaad*so*
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libfaad*so*
 ifeq ($(strip $(BR2_PACKAGE_FAAD2_PLAYER)),y)
 	cp -dpf $(STAGING_DIR)/usr/bin/faad $(TARGET_DIR)/usr/bin/
-	$(STRIP) --strip-unneeded $(TARGET_DIR)/usr/bin/faad
+	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/faad
 endif
 
 faad2:	uclibc $(TARGET_DIR)/$(FAAD2_TARGET_BINARY)
