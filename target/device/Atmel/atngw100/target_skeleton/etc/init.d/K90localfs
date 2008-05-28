@@ -7,5 +7,11 @@ if ${UMOUNT} -a -r; then
 	echo "done"
 else
 	echo "failed"
-	exit 1
+fi
+
+echo -n "Unmounting root filesystem: "
+if ${UMOUNT} -r /; then
+	echo "done"
+else
+	echo "failed"
 fi
