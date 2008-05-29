@@ -85,7 +85,8 @@ BR2_BOARD_PATH="target/device/Atmel/$(BR2_BOARD_NAME)"
 #
 # Build options
 #
-BR2_WGET="wget --passive-ftp --retry-connrefused --waitretry=10"
+BR2_WGET="$(TOPDIR)/scripts/wget.sh $(BR2_WGET_MIRROR) --passive-ftp --retry-connrefused --waitretry=10"
+BR2_WGET_MIRROR="http://www.atmel.no/buildroot/source/mirror"
 BR2_SVN_CO="svn co"
 BR2_SVN_UP="svn up"
 BR2_GIT="git clone"

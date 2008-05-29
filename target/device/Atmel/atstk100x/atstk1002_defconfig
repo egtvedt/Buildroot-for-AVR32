@@ -85,7 +85,8 @@ BR2_BOARD_PATH="target/device/Atmel/$(BR2_BOARD_NAME)"
 #
 # Build options
 #
-BR2_WGET="wget --passive-ftp --retry-connrefused --waitretry=10"
+BR2_WGET="$(TOPDIR)/scripts/wget.sh $(BR2_WGET_MIRROR) --passive-ftp --retry-connrefused --waitretry=10"
+BR2_WGET_MIRROR="http://www.atmel.no/buildroot/source/mirror"
 BR2_SVN_CO="svn co"
 BR2_SVN_UP="svn up"
 BR2_GIT="git clone"
@@ -540,9 +541,9 @@ BR2_PACKAGE_ALSA_UTILS_APLAY=y
 # BR2_PACKAGE_AUMIX is not set
 BR2_PACKAGE_FAAD2=y
 # BR2_PACKAGE_FAAD2_PLAYER is not set
+# BR2_PACKAGE_LIBID3TAG is not set
 BR2_PACKAGE_LIBMAD=y
 # BR2_PACKAGE_LIBMAD_TARGET_HEADERS is not set
-# BR2_PACKAGE_LIBID3TAG is not set
 # BR2_PACKAGE_LIBOGG is not set
 # BR2_PACKAGE_LIBSNDFILE is not set
 
