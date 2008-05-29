@@ -18,6 +18,20 @@ menu "Build options"
 config BR2_WGET
 	string "Wget command"
 	default "wget --passive-ftp -nd"
+	help
+	  Which command to execute wget with. If the mirror option is going to
+	  be used the recommended string is:
+	  "$(TOPDIR)/scripts/wget.sh $(BR2_WGET_MIRROR) --passive-ftp -nd"
+
+	  The config option Wget mirror site must also be set to something
+	  sane.
+
+config BR2_WGET_MIRROR
+	string "Wget mirror site"
+	help
+	  This string is for those who wants to add a mirror site for the
+	  software packages. This config option must be used with the
+	  script/wget.sh script, instead of calling wget directly.
 
 config BR2_SVN_CO
 	string "Subversion (svn) command to download source tree"
