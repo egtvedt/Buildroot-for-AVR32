@@ -85,6 +85,7 @@ BR2_BOARD_PATH="target/device/Atmel/$(BR2_BOARD_NAME)"
 #
 # Build options
 #
+BR2_PRIMARY_SITE=""
 BR2_WGET="$(TOPDIR)/scripts/wget.sh $(BR2_WGET_MIRROR) --passive-ftp --retry-connrefused --waitretry=10"
 BR2_WGET_MIRROR="http://www.atmel.no/buildroot/source/mirror"
 BR2_SVN_CO="svn co"
@@ -168,8 +169,9 @@ BR2_EXT_UCLIBC_VERSION_0_9_28_3=y
 # BR2_KERNEL_HEADERS_2_6_22 is not set
 # BR2_KERNEL_HEADERS_2_6_23 is not set
 BR2_KERNEL_HEADERS_2_6_24=y
+# BR2_KERNEL_HEADERS_2_6_25 is not set
 # BR2_KERNEL_HEADERS_SNAP is not set
-BR2_DEFAULT_KERNEL_HEADERS="2.6.24"
+BR2_DEFAULT_KERNEL_HEADERS="2.6.24.3"
 
 #
 # uClibc Options
@@ -346,6 +348,7 @@ BR2_PACKAGE_LIBDAEMON=y
 # BR2_PACKAGE_STARTUP_NOTIFICATION is not set
 BR2_PACKAGE_STRACE=y
 # BR2_PACKAGE_SUDO is not set
+# BR2_DATABASE_SUPPORT is not set
 BR2_NETWORK_SUPPORT=y
 
 #
@@ -371,6 +374,7 @@ BR2_PACKAGE_AVAHI_AUTOIPD=y
 BR2_PACKAGE_DROPBEAR=y
 # BR2_PACKAGE_ETHTOOL is not set
 # BR2_PACKAGE_HASERL is not set
+# BR2_PACKAGE_IFPLUGD is not set
 # BR2_PACKAGE_IRDA_UTILS is not set
 # BR2_PACKAGE_IPERF is not set
 # BR2_PACKAGE_IPROUTE2 is not set
