@@ -6,8 +6,8 @@ Index: qt-embedded-linux-opensource-src-4.4.1-snapshot-20080326/mkspecs/qws/linu
  QMAKE_LINK_SHLIB        = avr32-linux-g++
  QMAKE_CFLAGS_RELEASE   ~= s/-O2/-Os/
  QMAKE_CXXFLAGS_RELEASE ~= s/-O2/-Os/
-+QMAKE_CFLAGS_DEBUG     += -Os
-+QMAKE_CXXFLAGS_DEBUG   += -Os
++QMAKE_CFLAGS_DEBUG     += -mrelax
++QMAKE_CXXFLAGS_DEBUG   += -mrelax
  
  include(../../common/linux.conf)
  
