@@ -144,12 +144,11 @@ $(AVAHI_DIR)/.compiled: $(AVAHI_DIR)/.configured
 	$(MAKE) -C $(AVAHI_DIR)
 	touch $@
 
-$(AVAHI_DIR)/.installed: $(AVAHI_DIR)/.compiled
+$(STAGING_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.compiled
 	mkdir -p $(STAGING_DIR)/etc/avahi
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR) install
-	touch $@
 
-$(TARGET_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.installed
+$(TARGET_DIR)/usr/sbin/avahi-autoipd: $(STAGING_DIR)/usr/sbin/avahi-autoipd
 	mkdir -p $(TARGET_DIR)/etc/avahi
 	mkdir -p $(TARGET_DIR)/etc/init.d
 	mkdir -p $(TARGET_DIR)/var/lib
