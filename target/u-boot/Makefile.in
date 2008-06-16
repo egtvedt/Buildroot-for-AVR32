@@ -11,6 +11,8 @@ U_BOOT_PATCH_DIR:=$(PROJECT_BUILD_DIR)/u-boot-patches
 U_BOOT_CAT:=$(BZCAT)
 U_BOOT_BIN:=u-boot.bin
 U_BOOT_TOOLS_BIN:=mkimage
+# u-boot still uses arch=ppc for powerpc
+U_BOOT_ARCH=$(KERNEL_ARCH:powerpc=ppc)
 
 ifneq ($(BR2_TARGET_U_BOOT_CONFIG_BOARD),)
 U_BOOT_INC_CONF_FILE:=$(U_BOOT_DIR)/include/configs/$(subst _config,,$(BR2_TARGET_U_BOOT_CONFIG_BOARD)).h
@@ -131,7 +133,7 @@ $(TARGET_DIR)/usr/sbin/fw_printenv: $(U_BOOT_DIR)/$(U_BOOT_BIN)
 	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
 	ln -sf fw_printenv $(TARGET_DIR)/usr/sbin/fw_setenv
 
-u-boot: gcc $(BINARIES_DIR)/$(U_BOOT_BIN) $(U_BOOT_TARGET_TOOLS)
+u-boot: $(BINARIES_DIR)/$(U_BOOT_BIN) $(U_BOOT_TARGET_TOOLS)
 
 u-boot-clean:
 	-$(MAKE) -C $(U_BOOT_DIR) clean
