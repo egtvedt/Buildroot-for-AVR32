@@ -6,7 +6,7 @@ comment "Kernel Header Options"
 
 choice
 	prompt "Kernel Headers"
-	default BR2_KERNEL_HEADERS_2_6_24
+	default BR2_KERNEL_HEADERS_2_6_25
 	help
 	  Select the version of kernel header files you wish to use.
 	  You must select the correct set of header files to match
