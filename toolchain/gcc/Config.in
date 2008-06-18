@@ -19,12 +19,12 @@ choice
 		bool "gcc 4.0.4"
 
 	config BR2_GCC_VERSION_4_1_2
-		depends !BR2_nios2
+		depends !BR2_avr32 && !BR2_nios2
 		depends BR2_EXT_GCC_VERSION_4_1_2
 		bool "gcc 4.1.2"
 
 	config BR2_GCC_VERSION_4_2_1
-		depends !BR2_nios2
+		depends !BR2_avr32 && !BR2_nios2
 		depends BR2_EXT_GCC_VERSION_4_2_1
 		bool "gcc 4.2.1"
 
