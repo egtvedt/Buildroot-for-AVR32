@@ -3,7 +3,7 @@
 # iptables
 #
 #############################################################
-IPTABLES_VERSION:=1.3.8
+IPTABLES_VERSION:=1.4.1
 IPTABLES_SOURCE_URL:=http://ftp.netfilter.org/pub/iptables
 IPTABLES_SOURCE:=iptables-$(IPTABLES_VERSION).tar.bz2
 IPTABLES_CAT:=$(BZCAT)
@@ -14,31 +14,29 @@ $(DL_DIR)/$(IPTABLES_SOURCE):
 
 $(IPTABLES_BUILD_DIR)/.unpacked: $(DL_DIR)/$(IPTABLES_SOURCE)
 	$(IPTABLES_CAT) $(DL_DIR)/$(IPTABLES_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	toolchain/patch-kernel.sh $(IPTABLES_BUILD_DIR) package/iptables/ iptables\*.patch
+	$(CONFIG_UPDATE) $(IPTABLES_BUILD_DIR)
 	touch $@
 
 $(IPTABLES_BUILD_DIR)/.configured: $(IPTABLES_BUILD_DIR)/.unpacked
-	# Allow patches. Needed for openwrt for instance.
-	toolchain/patch-kernel.sh $(IPTABLES_BUILD_DIR) package/iptables/ iptables\*.patch
-	#
-	$(SED) "s;\[ -f /usr/include/netinet/ip6.h \];grep -q '__UCLIBC_HAS_IPV6__ 1' \
-		$(STAGING_DIR)/usr/include/bits/uClibc_config.h;" $(IPTABLES_BUILD_DIR)/Makefile
+	(cd $(IPTABLES_BUILD_DIR); rm -rf config.cache; \
+		$(TARGET_CONFIGURE_ARGS) \
+		$(TARGET_CONFIGURE_OPTS) \
+		./configure \
+		--target=$(GNU_TARGET_NAME) \
+		--host=$(GNU_TARGET_NAME) \
+		--build=$(GNU_HOST_NAME) \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		$(DISABLE_NLS) \
+	)
 	touch $@
 
 $(IPTABLES_BUILD_DIR)/iptables: $(IPTABLES_BUILD_DIR)/.configured
-	$(MAKE1) $(TARGET_CONFIGURE_OPTS) -C $(IPTABLES_BUILD_DIR) \
-		KERNEL_DIR=$(LINUX_HEADERS_DIR) \
-		COPT_FLAGS="$(TARGET_CFLAGS)" \
-		PREFIX=/usr \
-		INCDIR="\$$(PREFIX)/include" \
-		MANDIR="\$$(PREFIX)/share/man"
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(IPTABLES_BUILD_DIR)
 
 $(TARGET_DIR)/usr/sbin/iptables: $(IPTABLES_BUILD_DIR)/iptables
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(IPTABLES_BUILD_DIR) \
-		KERNEL_DIR=$(LINUX_HEADERS_DIR) \
-		COPT_FLAGS="$(TARGET_CFLAGS)" \
-		PREFIX=/usr \
-		INCDIR="\$$(PREFIX)/include" \
-		MANDIR="\$$(PREFIX)/share/man" \
 		DESTDIR=$(TARGET_DIR) install
 	$(STRIPCMD) $(TARGET_DIR)/usr/sbin/iptables*
 	$(STRIPCMD) $(TARGET_DIR)/usr/lib/iptables/*.so
