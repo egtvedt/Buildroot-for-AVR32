@@ -61,7 +61,7 @@ if mount_fs dev /dev tmpfs "size=512k,mode=0755"; then
 	# g_serial is not detected by mdev.
 	mknod /dev/ttygserial c 127 0
 	# make touchscreen device link
-	ln -sf /dev/ts /dev/input/event0
+	ln -sf /dev/input/event0 /dev/ts
 fi
 
 mount_fs config /config configfs
