@@ -1,0 +1,113 @@
+From hcegtvedt@atmel.com Tue Feb  5 14:10:42 2008
+Return-Path: <hcegtvedt@atmel.com>
+Received: from relay.atmel.no ([unix socket]) by pat.norway.atmel.com
+	(Cyrus v2.2.12) with LMTPA; Tue, 05 Feb 2008 14:10:42 +0100
+X-Sieve: CMU Sieve 2.2
+Received: from sjogate2.atmel.com (sjogate2.atmel.com [10.64.0.119]) by
+	relay.atmel.no (8.13.4/8.13.4) with ESMTP id m15DAd9J014616 for
+	<hcegtvedt@pat.norway.atmel.com>; Tue, 5 Feb 2008 14:10:41 +0100 (CET)
+	(envelope-from hcegtvedt@atmel.com)
+Received: from relay.atmel.no (pat.norway.atmel.com [10.191.254.102]) by
+	sjogate2.atmel.com (8.13.6/8.13.6) with ESMTP id m15DB03d003422 for
+	<hcegtvedt@sjogate2.atmel.com>; Tue, 5 Feb 2008 05:11:02 -0800 (PST)
+Received: from localhost.localdomain (dhcp-252-083.norway.atmel.com
+	[10.191.252.83]) by relay.atmel.no (8.13.4/8.13.4) with ESMTP id
+	m15DAM3m014596; Tue, 5 Feb 2008 14:10:22 +0100 (CET) (envelope-from
+	hcegtvedt@atmel.com)
+Received: by localhost.localdomain (Postfix, from userid 1000) id
+	594AC13778E; Tue,  5 Feb 2008 14:09:43 +0100 (CET)
+From: Hans-Christian Egtvedt <hcegtvedt@atmel.com>
+To: kernel@avr32linux.org
+Cc: Hans-Christian Egtvedt <hcegtvedt@atmel.com>
+Subject: [PATCH 2/3] Add platform data for AC97C platform device
+Date: Tue,  5 Feb 2008 14:09:42 +0100
+Message-Id: <1202216983143-git-send-email-hcegtvedt@atmel.com>
+X-Mailer: git-send-email 1.5.2.5
+In-Reply-To: <12022169832799-git-send-email-hcegtvedt@atmel.com>
+References: <12022169832799-git-send-email-hcegtvedt@atmel.com>
+X-Evolution-Source: imap://hcegtvedt@imap.norway.atmel.com/
+Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+
+This patch adds platform data to the AC97C platform device. This will let the
+board add a GPIO line which is connected to the external codecs reset line.
+
+The platform data, ac97c_platform_data, must also contain the DMA controller
+ID, RX channel ID and TX channel ID.
+
+Tested with Wolfson WM9712 and AP7000.
+
+Signed-off-by: Hans-Christian Egtvedt <hcegtvedt@atmel.com>
+---
+ arch/avr32/mach-at32ap/at32ap700x.c   |   20 +++++++++++++++-----
+ include/asm-avr32/arch-at32ap/board.h |   11 ++++++++++-
+ 2 files changed, 25 insertions(+), 6 deletions(-)
+
+diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
+index 06795d0..58f3841 100644
+--- a/arch/avr32/mach-at32ap/at32ap700x.c
++++ b/arch/avr32/mach-at32ap/at32ap700x.c
+@@ -1552,12 +1552,15 @@ static struct clk atmel_ac97c0_pclk = {
+ 	.index		= 10,
+ };
+ 
+-struct platform_device *__init at32_add_device_ac97c(unsigned int id)
++struct platform_device *__init
++at32_add_device_ac97c(unsigned int id, struct ac97c_platform_data *data)
+ {
+ 	struct platform_device *pdev;
+ 
+ 	if (id != 0)
+ 		return NULL;
++	if (!data)
++		return NULL;
+ 
+ 	pdev = platform_device_alloc("atmel_ac97c", id);
+ 	if (!pdev)
+@@ -1567,10 +1570,17 @@ struct platform_device *__init at32_add_device_ac97c(unsigned int id)
+ 				ARRAY_SIZE(atmel_ac97c0_resource)))
+ 		goto err_add_resources;
+ 
+-	select_peripheral(PB(20), PERIPH_B, 0);	/* SYNC	*/
+-	select_peripheral(PB(21), PERIPH_B, 0);	/* SDO	*/
+-	select_peripheral(PB(22), PERIPH_B, 0);	/* SDI	*/
+-	select_peripheral(PB(23), PERIPH_B, 0);	/* SCLK	*/
++	if (platform_device_add_data(pdev, data,
++				sizeof(struct ac97c_platform_data)))
++		goto err_add_resources;
++
++	select_peripheral(PB(20), PERIPH_B, 0);	/* SDO	*/
++	select_peripheral(PB(21), PERIPH_B, 0);	/* SYNC	*/
++	select_peripheral(PB(22), PERIPH_B, 0);	/* SCLK	*/
++	select_peripheral(PB(23), PERIPH_B, 0);	/* SDI	*/
++
++	if (data->reset_pin != GPIO_PIN_NONE)
++		at32_select_gpio(data->reset_pin, 0);
+ 
+ 	atmel_ac97c0_pclk.dev = &pdev->dev;
+ 
+diff --git a/include/asm-avr32/arch-at32ap/board.h b/include/asm-avr32/arch-at32ap/board.h
+index 8816b66..0386a0e 100644
+--- a/include/asm-avr32/arch-at32ap/board.h
++++ b/include/asm-avr32/arch-at32ap/board.h
+@@ -76,7 +76,16 @@ struct mci_platform_data {
+ };
+ struct platform_device *
+ at32_add_device_mci(unsigned int id, struct mci_platform_data *data);
+-struct platform_device *at32_add_device_ac97c(unsigned int id);
++
++struct ac97c_platform_data {
++	unsigned short dma_rx_periph_id;
++	unsigned short dma_tx_periph_id;
++	unsigned short dma_controller_id;
++	int reset_pin;
++};
++struct platform_device *
++at32_add_device_ac97c(unsigned int id, struct ac97c_platform_data *data);
++
+ struct platform_device *at32_add_device_abdac(unsigned int id);
+ 
+ struct cf_platform_data {
+-- 
+1.5.2.5
+
