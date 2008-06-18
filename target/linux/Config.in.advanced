@@ -194,12 +194,6 @@ config BR2_LINUX_2_6_20
 	help
 	  Linux 2.6.20
 
-config BR2_LINUX_2_6_25
-	bool "Linux 2.6.25"
-	select BR2_KERNEL_BASE
-	help
-	  Linux 2.6.25
-
 config BR2_LINUX26_CUSTOM
 	bool "Linux <custom> version"
 	help
