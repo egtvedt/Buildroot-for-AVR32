@@ -76,7 +76,7 @@ choice
 		bool "Linux 2.6.23.x kernel headers"
 
 	config BR2_KERNEL_HEADERS_2_6_24
-		depends BR2_RECENT
+		depends BR2_DEPRECATED
 		bool "Linux 2.6.24.x kernel headers"
 
 	config BR2_KERNEL_HEADERS_2_6_25
