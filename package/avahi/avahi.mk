@@ -147,6 +147,7 @@ $(AVAHI_DIR)/.compiled: $(AVAHI_DIR)/.configured
 $(STAGING_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.compiled
 	mkdir -p $(STAGING_DIR)/etc/avahi
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR) install
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libavahi-*.la
 
 $(TARGET_DIR)/usr/sbin/avahi-autoipd: $(STAGING_DIR)/usr/sbin/avahi-autoipd
 	mkdir -p $(TARGET_DIR)/etc/avahi
