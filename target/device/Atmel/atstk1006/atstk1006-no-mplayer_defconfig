@@ -206,6 +206,7 @@ BR2_EXTRA_BINUTILS_CONFIG_OPTIONS=""
 # BR2_GCC_VERSION_4_1_2 is not set
 # BR2_GCC_VERSION_4_2_1 is not set
 BR2_GCC_VERSION_4_2_2=y
+# BR2_GCC_VERSION_4_2_3 is not set
 # BR2_GCC_VERSION_4_2_4 is not set
 BR2_GCC_SUPPORTS_SYSROOT=y
 # BR2_GCC_SUPPORTS_FINEGRAINEDMTUNE is not set
@@ -238,14 +239,9 @@ BR2_GDB_VERSION_6_7_1=y
 BR2_GDB_VERSION="6.7.1"
 
 #
-# elf2flt
-#
-# BR2_ELF2FLT is not set
-# BR2_MKLIBS is not set
-
-#
 # Common Toolchain Options
 #
+# BR2_MKLIBS is not set
 # BR2_PACKAGE_SSTRIP_TARGET is not set
 # BR2_PACKAGE_SSTRIP_HOST is not set
 # BR2_ENABLE_MULTILIB is not set
@@ -309,7 +305,6 @@ BR2_HOST_FAKEROOT=y
 # BR2_PACKAGE_LIBMPFR is not set
 # BR2_PACKAGE_LIBTOOL is not set
 # BR2_PACKAGE_M4 is not set
-# BR2_PACKAGE_MPATROL is not set
 # BR2_PACKAGE_OPROFILE is not set
 BR2_PACKAGE_PKGCONFIG=y
 # BR2_READLINE is not set
