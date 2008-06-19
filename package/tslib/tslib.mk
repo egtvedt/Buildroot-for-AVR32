@@ -51,6 +51,7 @@ $(TSLIB_DIR)/.compiled: $(TSLIB_DIR)/.configured
 
 $(STAGING_DIR)/usr/lib/libts.so: $(TSLIB_DIR)/.compiled
 	$(MAKE) -C $(TSLIB_DIR) DESTDIR=$(STAGING_DIR) install
+	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libts.la
 
 $(TARGET_DIR)/usr/lib/libts.so: $(STAGING_DIR)/usr/lib/libts.so
 	cp -dpf $(STAGING_DIR)/usr/lib/libts*.so* $(TARGET_DIR)/usr/lib/
