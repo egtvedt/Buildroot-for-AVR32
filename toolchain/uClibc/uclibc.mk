@@ -29,9 +29,6 @@ endif
 ifeq ($(BR2_UCLIBC_VERSION_0_9_28_3),y)
 UCLIBC_VER:=0.9.28.3
 endif
-ifeq ($(BR2_UCLIBC_VERSION_0_9_28),y)
-UCLIBC_VER:=0.9.28
-endif
 UCLIBC_SITE:=http://www.uclibc.org/downloads
 
 ifeq ($(BR2_TOOLCHAIN_EXTERNAL_SOURCE),y)
@@ -527,7 +524,11 @@ $(TARGET_DIR)/lib/libc.so.0: $(STAGING_DIR)/usr/lib/libc.a
 		DEVEL_PREFIX=/usr/ \
 		RUNTIME_PREFIX=/ \
 		install_runtime
-	$(STRIPCMD) $(@D)/lib*.so*
+ifeq ($(BR2_UCLIBC_VERSION_0_9_28_3),y)
+ifneq ($(BR2_PTHREAD_DEBUG),y)
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(@D)/libpthread*.so*
+endif
+endif
 	touch -c $@
 
 $(TARGET_DIR)/usr/bin/ldd: $(cross_compiler)
