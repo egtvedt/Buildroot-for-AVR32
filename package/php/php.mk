@@ -12,6 +12,10 @@ PHP_DEPS=
 PHP_TARGET_DEPS=
 PHP_CONFIGURE = $(ENABLE_DEBUG)
 
+ifeq ($(BR2_ENDIAN),"BIG")
+PHP_BIG_ENDIAN:=ac_cv_c_bigendian_php=yes
+endif
+
 ifneq ($(BR2_PACKAGE_PHP_CLI),y)
 	PHP_CONFIGURE+=--disable-cli
 else
@@ -138,6 +142,7 @@ $(PHP_DIR)/.configured: $(PHP_DIR)/.unpacked
 	(cd $(PHP_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
+		$(PHP_BIG_ENDIAN) \
 		CC=$(TARGET_CC) \
 		./configure $(DISABLE_NLS) \
 		--target=$(GNU_TARGET_NAME) \
