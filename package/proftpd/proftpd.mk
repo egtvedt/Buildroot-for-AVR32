@@ -54,7 +54,7 @@ $(PROFTPD_DIR)/.configured: $(PROFTPD_DIR)/.unpacked
 $(PROFTPD_DIR)/$(PROFTPD_BINARY): $(PROFTPD_DIR)/.configured
 	$(MAKE) CC="$(HOSTCC)" CFLAGS="" LDFLAGS="" \
 		-C $(PROFTPD_DIR)/lib/libcap _makenames
-	$(MAKE) -C $(PROFTPD_DIR)
+	$(MAKE1) -C $(PROFTPD_DIR)
 
 $(TARGET_DIR)/$(PROFTPD_TARGET_BINARY): $(PROFTPD_DIR)/$(PROFTPD_BINARY)
 	cp -dpf $(PROFTPD_DIR)/$(PROFTPD_BINARY) \
