@@ -77,7 +77,12 @@ applicable everywhere (see syntax).
   Optionally, dependencies only for this default value can be added with
   "if".
 
-- dependencies: "depends on"/"requires" <expr>
+- type definition + default value:
+	"def_bool"/"def_tristate" <expr> ["if" <expr>]
+  This is a shorthand notation for a type definition plus a value.
+  Optionally dependencies for this default value can be added with "if".
+
+- dependencies: "depends on" <expr>
   This defines a dependency for this menu entry. If multiple
   dependencies are defined, they are connected with '&&'. Dependencies
   are applied to all other options within this menu entry (which also
@@ -98,6 +103,15 @@ applicable everywhere (see syntax).
   times, the limit is set to the largest selection.
   Reverse dependencies can only be used with boolean or tristate
   symbols.
+  Note:
+	select is evil.... select will by brute force set a symbol
+	equal to 'y' without visiting the dependencies. So abusing
+	select you are able to select a symbol FOO even if FOO depends
+	on BAR that is not set. In general use select only for
+	non-visible symbols (no promts anywhere) and for symbols with
+	no dependencies. That will limit the usefulness but on the
+	other hand avoid the illegal configurations all over. kconfig
+	should one day warn about such things.
 
 - numerical ranges: "range" <symbol> <symbol> ["if" <expr>]
   This allows to limit the range of possible input values for int
@@ -280,3 +294,10 @@ source:
 	"source" <prompt>
 
 This reads the specified configuration file. This file is always parsed.
+
+mainmenu:
+
+	"mainmenu" <prompt>
+
+This sets the config program's title bar if the config program chooses
+to use it.
