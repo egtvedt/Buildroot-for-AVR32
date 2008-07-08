@@ -9,7 +9,7 @@ if [ ! -x "${FBV}" -o ! -f "${SPLASHFILE}" ]; then
 	exit 1
 fi
 
-${FBV} ${SPLASHFILE} > /dev/null &
+${FBV} --enlarge ${SPLASHFILE} > /dev/null &
 if [ $? -eq 0 ]; then
 	echo "loaded"
 else

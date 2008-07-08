@@ -9,7 +9,7 @@ if [ ! -x "${PROGRAM}" -o ! -f "${SPLASHFILE}" ]; then
 	exit 1
 fi
 
-${PROGRAM} ${SPLASHFILE} > /dev/null &
+${PROGRAM} --enlarge ${SPLASHFILE} > /dev/null &
 if [ $? -eq 0 ]; then
 	echo "loaded"
 else
