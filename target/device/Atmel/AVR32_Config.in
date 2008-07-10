@@ -1,19 +1,19 @@
 comment "Atmel AVR32 Specific Device Support"
-	depends BR2_avr32
+	depends on BR2_avr32
 
 config BR2_TARGET_AVR32
 	bool "Board support for the Atmel AP7 microprocessors"
-	depends BR2_avr32
+	depends on BR2_avr32
 	default n
 	help
 	  Atmel AT32AP7XXX AVR32 based systems
 
 comment "Development board support"
-	depends BR2_TARGET_AVR32
+	depends on BR2_TARGET_AVR32
 
 choice
 	prompt "Development board support"
-	depends BR2_TARGET_AVR32
+	depends on BR2_TARGET_AVR32
 	default BR2_TARGET_AVR32_ATSTK1000
 	help
 	  Select the specific AVR32 development board you wish to use.

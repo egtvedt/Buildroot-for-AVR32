@@ -27,7 +27,7 @@ GDB_CAT:=$(BZCAT)
 
 ifeq ($(BR2_TOOLCHAIN_EXTERNAL_SOURCE),y)
 GDB_SITE:=$(VENDOR_SITE)
-GDB_PATCH_DIR:=$(VENDOR_PATCH_DIR)/gdb-$(GDB_OFFICIAL_VERSION)
+GDB_PATCH_DIR:=toolchain/gdb/ext_source/$(VENDOR_PATCH_DIR)/$(GDB_OFFICIAL_VERSION)
 else
 GDB_SITE:=$(BR2_GNU_MIRROR)/gdb
 GDB_PATCH_DIR:=toolchain/gdb/$(GDB_OFFICIAL_VERSION)
@@ -61,6 +61,12 @@ endif
 	$(CONFIG_UPDATE) $(GDB_DIR)
 	touch $@
 
+gdb-patched: $(GDB_DIR)/.unpacked
+$(GDB_DIR)/.patched: $(GDB_DIR)/.unpacked
+	toolchain/patch-kernel.sh $(GDB_DIR) $(GDB_PATCH_DIR) \*.patch
+	$(CONFIG_UPDATE) $(GDB_DIR)
+	touch $@
+
 gdb-dirclean:
 	rm -rf $(GDB_DIR)
 
@@ -82,15 +88,16 @@ GDB_TARGET_CONFIGURE_VARS:= \
 	bash_cv_func_sigsetjmp=present \
 	bash_cv_have_mbstate_t=yes
 
-$(GDB_TARGET_DIR)/.configured: $(GDB_DIR)/.unpacked
+$(GDB_TARGET_DIR)/.configured: $(GDB_DIR)/.patched
 	mkdir -p $(GDB_TARGET_DIR)
-	(cd $(GDB_TARGET_DIR); rm -rf config.cache; \
+	(cd $(GDB_TARGET_DIR); \
 		gdb_cv_func_sigsetjmp=yes \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS_FOR_TARGET="$(TARGET_CFLAGS) $(TARGET_LDFLAGS) -Wno-error" \
 		CFLAGS="$(TARGET_CFLAGS) $(TARGET_LDFLAGS) -Wno-error" \
 		$(GDB_TARGET_CONFIGURE_VARS) \
 		$(GDB_DIR)/configure \
+		--cache-file=/dev/null \
 		--build=$(GNU_HOST_NAME) \
 		--host=$(REAL_GNU_TARGET_NAME) \
 		--target=$(REAL_GNU_TARGET_NAME) \
@@ -135,11 +142,12 @@ GDB_SERVER_DIR:=$(BUILD_DIR)/gdbserver-$(GDB_VERSION)
 
 $(GDB_SERVER_DIR)/.configured: $(GDB_DIR)/.unpacked
 	mkdir -p $(GDB_SERVER_DIR)
-	(cd $(GDB_SERVER_DIR); rm -rf config.cache; \
+	(cd $(GDB_SERVER_DIR); \
 		$(TARGET_CONFIGURE_OPTS) \
 		gdb_cv_func_sigsetjmp=yes \
 		bash_cv_have_mbstate_t=yes \
 		$(GDB_DIR)/gdb/gdbserver/configure \
+		--cache-file=/dev/null \
 		--build=$(GNU_HOST_NAME) \
 		--host=$(REAL_GNU_TARGET_NAME) \
 		--target=$(REAL_GNU_TARGET_NAME) \
@@ -165,6 +173,7 @@ $(GDB_SERVER_DIR)/gdbserver: $(GDB_SERVER_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) MT_CFLAGS="$(TARGET_CFLAGS)" \
 		-C $(GDB_SERVER_DIR)
 	$(STRIPCMD) $(GDB_SERVER_DIR)/gdbserver
+
 $(TARGET_DIR)/usr/bin/gdbserver: $(GDB_SERVER_DIR)/gdbserver
 ifeq ($(strip $(BR2_CROSS_TOOLCHAIN_TARGET_UTILS)),y)
 	mkdir -p $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/target_utils
@@ -191,10 +200,11 @@ GDB_HOST_DIR:=$(TOOL_BUILD_DIR)/gdbhost-$(GDB_VERSION)
 
 $(GDB_HOST_DIR)/.configured: $(GDB_DIR)/.unpacked
 	mkdir -p $(GDB_HOST_DIR)
-	(cd $(GDB_HOST_DIR); rm -rf config.cache; \
+	(cd $(GDB_HOST_DIR); \
 		gdb_cv_func_sigsetjmp=yes \
 		bash_cv_have_mbstate_t=yes \
 		$(GDB_DIR)/configure \
+		--cache-file=/dev/null \
 		--prefix=$(STAGING_DIR) \
 		--build=$(GNU_HOST_NAME) \
 		--host=$(GNU_HOST_NAME) \
@@ -204,6 +214,7 @@ $(GDB_HOST_DIR)/.configured: $(GDB_DIR)/.unpacked
 		--disable-tui --disable-gdbtk --without-x \
 		--without-included-gettext \
 		--enable-threads \
+		--disable-werror \
 	)
 	touch $@
 
@@ -225,8 +236,6 @@ gdbhost-clean:
 
 gdbhost-dirclean:
 	rm -rf $(GDB_HOST_DIR)
-
-
 
 #############################################################
 #

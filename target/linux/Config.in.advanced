@@ -32,7 +32,8 @@ if BR2_KERNEL_LINUX_ADVANCED
 # --- These 'constants' requires regular maintenance, so put them first
 config BR2_KERNEL_PATCH_LEVEL
 	string
-	default "4" if BR2_LINUX_2_6_24 && BR2_KERNEL_ADD_LATEST_MINORPATCH
+	default "9" if BR2_LINUX_2_6_25 && BR2_KERNEL_ADD_LATEST_MINORPATCH
+	default "7" if BR2_LINUX_2_6_24 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "17" if BR2_LINUX_2_6_23 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "19" if BR2_LINUX_2_6_22 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "7" if BR2_LINUX_2_6_21 && BR2_KERNEL_ADD_LATEST_MINORPATCH
@@ -45,6 +46,7 @@ config BR2_KERNEL_CURRENT_VERSION
 
 config BR2_KERNEL_NEXT_VERSION
 	string
+	default "2.6.27" if BR2_LINUX_2_6_26
 	default "2.6.26" if BR2_LINUX_2_6_25
 	default "2.6.25" if BR2_LINUX_2_6_24
 	default "2.6.24" if BR2_LINUX_2_6_23
@@ -54,6 +56,8 @@ config BR2_KERNEL_NEXT_VERSION
 
 config BR2_KERNEL_THIS_VERSION
 	string
+	default "2.6.27" if BR2_LINUX_2_6_27
+	default "2.6.26" if BR2_LINUX_2_6_26
 	default "2.6.25" if BR2_LINUX_2_6_25
 	default "2.6.24" if BR2_LINUX_2_6_24
 	default "2.6.23" if BR2_LINUX_2_6_23
@@ -63,15 +67,15 @@ config BR2_KERNEL_THIS_VERSION
 
 config LINUX26_LATEST_RC_VERSION
 	string
-	default "2.6.25-rc7" if BR2_KERNEL_ADD_LATEST_RC_PATCH
+	default "2.6.26-rc8" if BR2_KERNEL_ADD_LATEST_RC_PATCH
 
 config LINUX26_LATEST_GIT_VERSION
 	string
-	default "2.6.25-rc7-git5" if BR2_KERNEL_ADD_LATEST_SNAPSHOT
+	default "2.6.25-rc8-git2" if BR2_KERNEL_ADD_LATEST_SNAPSHOT
 
 config LINUX26_LATEST_MM_VERSION
 	string
-	default "2.6.25-rc5-mm1" if BR2_KERNEL_ADD_LATEST_MM_PATCH
+	default "2.6.26-rc5-mm3" if BR2_KERNEL_ADD_LATEST_MM_PATCH
 
 config BR2_KERNEL_SITE
 	string
@@ -193,6 +197,18 @@ config BR2_LINUX_2_6_20
 	select BR2_KERNEL_BASE
 	help
 	  Linux 2.6.20
+
+config BR2_LINUX_2_6_26
+	bool "Linux 2.6.26"
+	select BR2_KERNEL_BASE
+	help
+	  Linux 2.6.26
+
+config BR2_LINUX_2_6_27
+	bool "Linux 2.6.27"
+	select BR2_KERNEL_BASE
+	help
+	  Linux 2.6.27
 
 config BR2_LINUX26_CUSTOM
 	bool "Linux <custom> version"
@@ -419,7 +435,7 @@ config BR2_PACKAGE_LINUX_USE_KCONFIG
 
 config BR2_PACKAGE_LINUX_USE_DEFCONFIG
 	bool "Run make <board>_defconfig "
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	help
 	  Configure Linux by make <board>_defconfig
 
@@ -432,7 +448,7 @@ config BR2_PACKAGE_LINUX_USE_DEFCONFIG_CUSTOM
 
 config BR2_PACKAGE_LINUX_USE_XCONFIG
 	bool "Run make ARCH=$(ARCH) [xconfig|menuconfig] before build"
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	help
 	  Configure Linux by make xconfig
 endchoice
@@ -491,31 +507,31 @@ choice
 
 config BR2_LINUX_BIN_BZIMAGE
 	bool "bzImage"
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	help
 	  Linux 2.6.19.2
 
 config BR2_LINUX_BIN_UIMAGE
 	bool "uImage"
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	help
 	  Build uImage binary
 
 config BR2_LINUX_BIN_VMLINUX
 	bool "vmlinux"
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	help
 	  Build vmlinux binary
 
 config BR2_LINUX_BIN_ZIMAGE
 	bool "zImage"
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	help
 	  Linux 2.6.19.2
 
 config BR2_LINUX_BIN_CUSTOM
 	bool "<custom> Linux binary"
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	help
 	  Build custom Linux binary format
 endchoice
@@ -557,7 +573,7 @@ menu "Destinations for linux kernel binaries"
 
 config BR2_LINUX_COPYTO_ROOTFS
 	bool "Copy kernel to root file system"
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	default n
 	help
 	  Copy kernel to <root>/boot directory

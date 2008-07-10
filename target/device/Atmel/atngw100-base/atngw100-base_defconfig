@@ -44,6 +44,22 @@ BR2_BANNER="ATNGW100-BASE ($(DATE))"
 BR2_TARGET_ATMEL=y
 
 #
+# Selection criteria
+#
+BR2_TARGET_ATMEL_NET=y
+BR2_TARGET_ATMEL_LCD=y
+# BR2_TARGET_ATMEL_FPDSP is not set
+# BR2_TARGET_ATMEL_MPB is not set
+
+#
+# Device Selection
+#
+
+#
+# Development Board Selection
+#
+
+#
 # Atmel AVR32 Specific Device Support
 #
 BR2_TARGET_AVR32=y
@@ -69,6 +85,8 @@ BR2_BOARD_NAME="atngw100-base"
 #
 BR2_TARGET_ATMEL_COPYTO=""
 BR2_BOARD_PATH="target/device/Atmel/$(BR2_BOARD_NAME)"
+BR2_KERNEL_ARCH_PATCH_VERSION="2.6.24"
+BR2_KERNEL_ARCH_PATCH_DIR="target/device/Atmel/arch-avr32/kernel-patches-$(BR2_KERNEL_ARCH_PATCH_VERSION)"
 # BR2_TARGET_VALKA is not set
 
 #
@@ -139,16 +157,16 @@ BR2_UPDATE_CONFIG=y
 #
 # Toolchain
 #
-BR2_TOOLCHAIN_BUILDROOT=y
+# BR2_TOOLCHAIN_BUILDROOT is not set
 # BR2_TOOLCHAIN_EXTERNAL is not set
-# BR2_TOOLCHAIN_EXTERNAL_SOURCE is not set
+BR2_TOOLCHAIN_EXTERNAL_SOURCE=y
 BR2_TOOLCHAIN_SOURCE=y
 BR2_EXT_GCC_VERSION_4_1_2=y
 BR2_EXT_GCC_VERSION_4_2_1=y
 BR2_EXT_GCC_VERSION_4_2_2=y
 BR2_EXT_BINUTILS_VERSION_2_17=y
 BR2_EXT_UCLIBC_VERSION_0_9_29=y
-BR2_EXT_UCLIBC_VERSION_0_9_28_3=y
+# BR2_EXT_UCLIBC_VERSION_0_9_28_3 is not set
 
 #
 # Kernel Header Options
@@ -383,6 +401,7 @@ BR2_PACKAGE_AVAHI_AUTOIPD=y
 # BR2_PACKAGE_LRZSZ is not set
 # BR2_PACKAGE_MDNSRESPONDER is not set
 # BR2_PACKAGE_MICROCOM is not set
+# BR2_PACKAGE_MIIDIAG is not set
 # BR2_PACKAGE_MROUTED is not set
 # BR2_PACKAGE_MUTT is not set
 # BR2_PACKAGE_NBD is not set
@@ -530,6 +549,8 @@ BR2_LINUX_2_6_STABLE=y
 # BR2_LINUX_2_6_21_5 is not set
 # BR2_LINUX_2_6_21 is not set
 # BR2_LINUX_2_6_20 is not set
+# BR2_LINUX_2_6_26 is not set
+# BR2_LINUX_2_6_27 is not set
 # BR2_LINUX26_CUSTOM is not set
 
 #

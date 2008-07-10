@@ -77,6 +77,7 @@ source "package/customize/Config.in"
 source "package/dash/Config.in"
 source "package/file/Config.in"
 source "package/gamin/Config.in"
+source "package/gperf/Config.in"
 source "package/icu/Config.in"
 source "package/ipkg/Config.in"
 source "package/kexec/Config.in"
@@ -114,7 +115,6 @@ if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/rpm/Config.in"
 endif
 source "package/screen/Config.in"
-source "package/sqlite/Config.in"
 source "package/startup-notification/Config.in"
 source "package/strace/Config.in"
 source "package/sudo/Config.in"
@@ -179,12 +179,16 @@ source "package/libcgicc/Config.in"
 source "package/libeXosip2/Config.in"
 source "package/libosip2/Config.in"
 source "package/libpcap/Config.in"
+if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
+source "package/lighttpd/Config.in"
+endif
 source "package/links/Config.in"
 source "package/lrzsz/Config.in"
 source "package/mdnsresponder/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS || !BR2_PACKAGE_BUSYBOX_SNAPSHOT
 source "package/microcom/Config.in"
 endif
+source "package/mii-diag/Config.in"
 source "package/mrouted/Config.in"
 source "package/mutt/Config.in"
 source "package/nbd/Config.in"
@@ -218,7 +222,6 @@ source "package/stunnel/Config.in"
 source "package/tcpdump/Config.in"
 source "package/tftpd/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
-source "package/lighttpd/Config.in"
 source "package/thttpd/Config.in"
 source "package/tinyhttpd/Config.in"
 endif
@@ -264,6 +267,7 @@ source "package/hdparm/Config.in"
 source "package/hotplug/Config.in"
 endif
 source "package/hwdata/Config.in"
+source "package/i2c-tools/Config.in"
 source "package/input-tools/Config.in"
 source "package/iostat/Config.in"
 source "package/libaio/Config.in"
@@ -347,8 +351,8 @@ source "package/sdl_mixer/Config.in"
 source "package/sdl_ttf/Config.in"
 source "package/tiff/Config.in"
 
-comment "busybox graphic applications" 
-comment "--> (May be broken in busybox)"
+comment "busybox graphic applications"
+comment "--> May be broken in busybox"
 source "package/fbv/Config.in"
 source "package/fbset/Config.in"
 
@@ -358,24 +362,18 @@ source "package/qtopia4/Config.in"
 
 #source "package/microwin/Config.in"
 
-choice
-prompt "X Window System server"
-	default BR2_PACKAGE_XSERVER_none
-	help
-	  Xserver to use.
-	  For more information about the X protocol see
-	  http://www.x.org
-	  You may have to enable LOCALE and WCHAR to build
 
+menu "X Window System server"
 config BR2_PACKAGE_XSERVER_none
 	bool "none"
-config BR2_PACKAGE_XSERVER_x11r7
-	bool "x11r7"
+	default y
 config BR2_PACKAGE_XSERVER_xorg
-	bool "xorg"
+	bool "modular xorg"
+	depends on !BR2_PACKAGE_XSERVER_none
 config BR2_PACKAGE_XSERVER_tinyx
 	bool "tinyx"
-endchoice
+	depends on !BR2_PACKAGE_XSERVER_none
+endmenu
 
 config BR2_X11_PREFIX
 	string
@@ -384,15 +382,8 @@ config BR2_X11_PREFIX
 	help
 	  X11 apps root location
 
-if BR2_PACKAGE_XSERVER_x11r7
+if !BR2_PACKAGE_XSERVER_none
 source "package/x11r7/Config.in"
-endif
-if BR2_PACKAGE_XSERVER_xorg
-source "package/xorg/Config.in"
-endif
-if BR2_PACKAGE_XSERVER_tinyx
-source "package/tinyx/Config.in"
-source "package/tinyx-old/Config.in"
 endif
 
 comment "X libraries and helper libraries"

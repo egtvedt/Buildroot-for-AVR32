@@ -1041,7 +1041,7 @@ void ConfigInfoView::menuInfo(void)
 		if (showDebug())
 			debug = debug_info(sym);
 
-		help = print_filter(_(sym->help));
+		help = print_filter(_(menu_get_help(menu)));
 	} else if (menu->prompt) {
 		head += "<big><b>";
 		head += print_filter(_(menu->prompt->text));
@@ -1274,8 +1274,12 @@ ConfigMainWindow::ConfigMainWindow(void)
 	QMenuBar* menu;
 	bool ok;
 	int x, y, width, height;
+	char title[256];
 
 	QWidget *d = configApp->desktop();
+	snprintf(title, sizeof(title), _("Linux Kernel v%s Configuration"),
+		getenv("KERNELVERSION"));
+	setCaption(title);
 
 	width = configSettings->readNumEntry("/window width", d->width() - 64);
 	height = configSettings->readNumEntry("/window height", d->height() - 64);

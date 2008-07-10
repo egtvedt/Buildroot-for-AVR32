@@ -11,7 +11,9 @@ config BR2_PACKAGE_QTOPIA4
 config BR2_PACKAGE_QTOPIA4_DEBUG
 	bool "Compile with debug support"
 	default n
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
+	help
+	  If unsure, say N.
 
 config BR2_PACKAGE_QTOPIA4_SED_CFLAGS
 	bool "Change CFLAGS in qmake.conf file"
@@ -25,20 +27,31 @@ config BR2_PACKAGE_QTOPIA4_SED_CFLAGS
 choice
 	prompt "Library type"
 	default BR2_PACKAGE_QTOPIA4_SHARED
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	help
 	  Selects the library type: Shared or Static
 
 config BR2_PACKAGE_QTOPIA4_SHARED
 	bool "Shared library"
+	help
+	  Create and use shared Qt libraries.
+	  If you have multiple programs that depend on Qt or intend to use
+	  plugins, say Y.
+
 config BR2_PACKAGE_QTOPIA4_STATIC
 	bool "Static Library"
+	help
+	  Create and use static Qt libraries.
+	  If you don't have multiple programs on the target that depends on
+	  Qt, then this will save you quite some of storage space.
+	  If unsure, say Y.
+
 endchoice
 
 choice
 	prompt "Qtopia 4 Core license type"
 	default BR2_PACKAGE_QTOPIA4_LICENSE_TYPE_GPL
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	help
 	  Selects the type of license you which to use for Qtopia 4 Core.
 
@@ -53,7 +66,7 @@ endchoice
 config BR2_PACKAGE_QTOPIA4_GPL_LICENSE_APPROVED
 	bool "Approve Qtopia Core 4 GPL licence"
 	default n
-	depends BR2_PACKAGE_QTOPIA4 && BR2_PACKAGE_QTOPIA4_LICENSE_TYPE_GPL
+	depends on BR2_PACKAGE_QTOPIA4 && BR2_PACKAGE_QTOPIA4_LICENSE_TYPE_GPL
 	help
 	  Select this if you approve the GNU GENERAL PUBLIC LICENSE Version 2
 	  on the Qtopia Core 4 library. By doing this you will not be asked
@@ -66,7 +79,7 @@ config BR2_PACKAGE_QTOPIA4_GPL_LICENSE_APPROVED
 config BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME
 	string "Qtopia Core 4 Commercial License Username"
 	default ""
-	depends BR2_PACKAGE_QTOPIA4 && BR2_PACKAGE_QTOPIA4_LICENSE_TYPE_COMMERCIAL
+	depends on BR2_PACKAGE_QTOPIA4 && BR2_PACKAGE_QTOPIA4_LICENSE_TYPE_COMMERCIAL
 	help
 	  Commercial users can download their source directly by providing a username.
 
@@ -74,53 +87,68 @@ config BR2_PACKAGE_QTOPIA4_COMMERCIAL_USERNAME
 config BR2_PACKAGE_QTOPIA4_COMMERCIAL_PASSWORD
 	string "Qtopia Core 4 Commercial License Password"
 	default ""
-	depends BR2_PACKAGE_QTOPIA4 && BR2_PACKAGE_QTOPIA4_LICENSE_TYPE_COMMERCIAL
+	depends on BR2_PACKAGE_QTOPIA4 && BR2_PACKAGE_QTOPIA4_LICENSE_TYPE_COMMERCIAL
 	help
 	  Commercial users can download their source directly by providing a password.
 
 config BR2_PACKAGE_QTOPIA4_QT3SUPPORT
 	bool "Compatibility with Qt3"
-	default y
-	depends BR2_PACKAGE_QTOPIA4
+	default n
+	depends on BR2_PACKAGE_QTOPIA4
 	help
-	  Turns on support for older Qt3.
+	  Turns on support for older Qt3. This will create an additional 
+	  library with proxy code and increase the space required on target.
+	  If unsure say n.
+
+config BR2_PACKAGE_QTOPIA4_DEPTHS
+	string "color depths to support"
+	default "-depths 24,16,8"
+	depends on BR2_PACKAGE_QTOPIA4
+	help
+	  Which color depths to support for the library. Default is "-depths
+	  24,16,8". Different depths are specified by a comma separated list.
 
 config BR2_PACKAGE_QTOPIA4_GIF
 	bool "Enable GIF support"
 	default n
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	help
 	  This compiles and installs the plugin for GIF reading support.
 
 config BR2_PACKAGE_QTOPIA4_LIBMNG
 	bool "Enable libmng support"
 	default n
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	help
 	  This compiles and installs the plugin for MNG support.
 
 choice
 	prompt "JPEG support"
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	default BR2_PACKAGE_QTOPIA4_NOJPEG
 	help
 	  Select libjpeg support.
 
 config BR2_PACKAGE_QTOPIA4_NOJPEG
 	bool "No jpeg support"
+	help
+	  Disable JPEG support
 
 config BR2_PACKAGE_QTOPIA4_SYSTEMJPEG
-	bool "Use system libjpeg"
 	select BR2_PACKAGE_JPEG
+	bool "System libjpeg"
+	help
+	  Link against system libjpeg
 
 config BR2_PACKAGE_QTOPIA4_QTJPEG
-	bool "Use Qt libjpeg"
-
+	bool "Use Qt bundled libjpeg"
+	help
+	  Link against libjpeg proveded with Qt
 endchoice
 
 choice
 	prompt "PNG support"
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	default BR2_PACKAGE_QTOPIA4_NOPNG
 	help
 	  Select which library to use if PNG support should be enabled.
@@ -129,17 +157,16 @@ config BR2_PACKAGE_QTOPIA4_NOPNG
 	bool "No PNG support"
 
 config BR2_PACKAGE_QTOPIA4_SYSTEMPNG
-	bool "Use system libpng"
+	bool "System libpng"
 	select BR2_PACKAGE_LIBPNG
 
 config BR2_PACKAGE_QTOPIA4_QTPNG
 	bool "Use Qt bundled libpng"
-
 endchoice
 
 choice
 	prompt "TIFF support"
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	default BR2_PACKAGE_QTOPIA4_NOTIFF
 	help
 	  Select which library to use if TIFF support should be enabled.
@@ -148,60 +175,58 @@ config BR2_PACKAGE_QTOPIA4_NOTIFF
 	bool "No TIFF support"
 
 config BR2_PACKAGE_QTOPIA4_SYSTEMTIFF
-	bool "Use system libtiff"
+	bool "System libtiff"
 	select BR2_PACKAGE_TIFF
 
 config BR2_PACKAGE_QTOPIA4_QTTIFF
 	bool "Use Qt bundled libtiff"
-
 endchoice
-
-config BR2_PACKAGE_QTOPIA4_SVG
-	bool "Enable SVG support"
-	depends BR2_PACKAGE_QTOPIA4
-	help
-	  Enable the QtSvg library.
-
-config BR2_PACKAGE_QTOPIA4_SQL
-	bool "Enable SQL support"
-	depends BR2_PACKAGE_QTOPIA4
-	help
-	  Enable all the SQL drivers it QtSql library.
-
-config BR2_PACKAGE_QTOPIA4_OPENSSL
-	bool "Enable OpenSSL support"
-	depends BR2_PACKAGE_QTOPIA4
-	help
-	  Enable support for the OpenSSL encryption library.
 
 choice
 	prompt "zlib support"
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	default BR2_PACKAGE_QTOPIA4_QTZLIB
 	help
 	  Select zlib support.
 
-config BR2_PACKAGE_QTOPIA4_NOZLIB
-        bool
-	prompt "no zlib"
-	help
-	  Use the zlib bundled with Qt.
-
-
 config BR2_PACKAGE_QTOPIA4_QTZLIB
-	bool
-	prompt "Qt zlib"
+	bool "Qt zlib"
 	help
 	  Use the zlib bundled with Qt.
-
+	
 config BR2_PACKAGE_QTOPIA4_SYSTEMZLIB
-	bool
+	bool "System zlib"
 	select BR2_PACKAGE_ZLIB
-	prompt "System zlib"
 	help
 	  Use the shared zlib from the system.
 endchoice
+								    
+choice
+	prompt "freetype2 support"
+	depends on BR2_PACKAGE_QTOPIA4
+	default BR2_PACKAGE_QTOPIA4_NOFREETYPE
+	help
+	  Select freetype2 support.
 
+config BR2_PACKAGE_QTOPIA4_NOFREETYPE
+        bool "no freetype2 support"
+	help
+	  Do not compile in Freetype2 support.
+
+
+config BR2_PACKAGE_QTOPIA4_QTFREETYPE
+	bool "Qt freetype2"
+	help
+	  Use the libfreetype bundled with Qt.
+	
+config BR2_PACKAGE_QTOPIA4_SYSTEMFREETYPE
+	bool "System freetype2"
+	select BR2_PACKAGE_FREETYPE
+	help
+	  Use shared libfreetype from the target system.
+	  See http://www.freetype.org/
+endchoice
+	
 config BR2_PACKAGE_QTOPIA4_EMB_PLATFORM
 	string "The embedded platform we are making Qtopia4 for"
 	default "arm"	if BR2_arm
@@ -220,6 +245,52 @@ config BR2_PACKAGE_QTOPIA4_EMB_PLATFORM
 	default "generic"	if BR2_sh
 	default "generic"	if BR2_sh64
 	default "generic"	if BR2_sparc
-	depends BR2_PACKAGE_QTOPIA4
+	depends on BR2_PACKAGE_QTOPIA4
 	help
-	  The platform.
+	  The target platform.
+
+menuconfig BR2_PACKAGE_QTOPIA4_SQL_MODULE
+	bool "SQL Module"
+	default n
+	depends on BR2_PACKAGE_QTOPIA4
+	help
+	  Compile Qtopia SQL Module
+if BR2_PACKAGE_QTOPIA4_SQL_MODULE
+source "package/qtopia4/Config.sql.in"
+endif
+
+config BR2_PACKAGE_QTOPIA4_XMLPATTERNS
+	bool "XML Patterns Module"
+	default n
+	depends on BR2_PACKAGE_QTOPIA4
+	help
+	  Build QtXmlPatterns module.
+	  If unsure, say n
+
+config BR2_PACKAGE_QTOPIA4_SVG
+	bool "SVG Module"
+	default n
+	depends on BR2_PACKAGE_QTOPIA4
+	help
+	  Build the SVG module.
+	  If unsure, say n
+
+config BR2_PACKAGE_QTOPIA4_WEBKIT
+	bool "WebKit Module"
+	default n
+	depends on BR2_PACKAGE_QTOPIA4
+	help
+	  Build the WebKit module.
+	  If unsure, say n.
+
+config BR2_PACKAGE_QTOPIA4_OPENSSL
+	bool "Enable OpenSSL support"
+	depends on BR2_PACKAGE_QTOPIA4
+	select BR2_PACKAGE_OPENSSL
+	default n
+	help
+	  Enable support for the OpenSSL encryption library. If you use
+	  QSslSocket say y here, otherwise, say no to save space on the
+	  target.
+	  If unsure, say n.
+

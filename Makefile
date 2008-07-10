@@ -44,7 +44,7 @@ endif
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
 ifeq ($(BOARD),)
 # if "make BOARD=xyz" command
--include $(TOPDIR).config
+-include .config
 else
 # if "make" command
 -include $(BR2_LOCAL)/$(BOARD)/$(BOARD).config
@@ -123,6 +123,10 @@ HOSTCPP:=$(shell $(CONFIG_SHELL) -c "which $(HOSTCPP)" || type -p $(HOSTCPP) || 
 HOSTLD:=$(shell $(CONFIG_SHELL) -c "which $(HOSTLD)" || type -p $(HOSTLD) || echo ld)
 HOSTLN:=$(shell $(CONFIG_SHELL) -c "which $(HOSTLN)" || type -p $(HOSTLN) || echo ln)
 HOSTNM:=$(shell $(CONFIG_SHELL) -c "which $(HOSTNM)" || type -p $(HOSTNM) || echo nm)
+HOST_GLIB_BIN:=`dirname $(shell $(CONFIG_SHELL) -c "which glib-genmarshal" || echo /usr/bin/glib-genmarshal)`
+HOST_GLIB:=$(shell $(CONFIG_SHELL) -c "dirname $(HOST_GLIB_BIN)" || echo /usr)
+
+
 ifndef CFLAGS_FOR_BUILD
 CFLAGS_FOR_BUILD:=-g -O2
 endif
@@ -171,6 +175,8 @@ ifneq ($(findstring cygwin,$(BR2_GNU_BUILD_SUFFIX)),)
 HOST_EXEEXT:=.exe
 HOST_LIBEXT:=.lib
 HOST_SHREXT:=.dll
+HOST_LOADLIBES="-lcurses -lintl"
+export HOST_LOADLIBES
 endif
 ifneq ($(findstring mingw,$(BR2_GNU_BUILD_SUFFIX)),)
 HOST_EXEEXT:=.exe
@@ -331,15 +337,11 @@ target-devfiles:
 ifeq ($(BR2_HAVE_DEVFILES),y)
 	( scripts/copy.sh $(STAGING_DIR) $(TARGET_DIR) )
 else
-	rm -rf $(TARGET_DIR)/usr/include
-	@if [ -d $(TARGET_DIR)/usr/lib ]; then \
-		find $(TARGET_DIR)/usr/lib -name '*.a' -delete  ; \
-		find $(TARGET_DIR)/usr/lib -name '*.la' -delete ; \
-	fi
-	@if [ -d $(TARGET_DIR)/lib ]; then \
-		find $(TARGET_DIR)/lib -name '*.a' -delete  ; \
-		find $(TARGET_DIR)/lib -name '*.la' -delete ; \
-	fi
+	rm -rf $(TARGET_DIR)/usr/include $(TARGET_DIR)/usr/lib/pkgconfig
+	find $(TARGET_DIR)/usr/lib -name '*.a' -delete
+	find $(TARGET_DIR)/lib -name '*.a' -delete
+	find $(TARGET_DIR)/usr/lib -name '*.la' -delete
+	find $(TARGET_DIR)/lib -name '*.la' -delete
 endif
 
 source: $(TARGETS_SOURCE) $(HOST_SOURCE)
@@ -348,7 +350,7 @@ _source-check:
 	$(MAKE) SPIDER=--spider source
 
 external-deps:
-	@$(MAKE) -Bs BR2_WGET=$(TOPDIR)toolchain/wget-show-external-deps.sh \
+	@$(MAKE) -Bs BR2_WGET=$(TOPDIR)/toolchain/wget-show-external-deps.sh \
 	source
 
 #############################################################
@@ -474,7 +476,7 @@ source-check: allyesconfig
 #
 #############################################################
 clean:
-	rm -f .config .config.old .config.cmd .tmpconfig.h
+	rm -f .config .config.old .config.cmd .tmpconfig.h .lognr.*
 	-$(MAKE) -C $(CONFIG) clean
 
 distclean: clean
@@ -490,6 +492,17 @@ update:
 	cp .config $(BOARD_PATH)/$(BOARD_NAME)_defconfig
 
 configured: dirs host-sed kernel-headers uclibc-config busybox-config linux26-config
+
+prepatch:	gcc-patched binutils-patched gdb-patched uclibc-patched
+
+.lognr.$(PROJECT):
+	@echo "0" > .lognr.$(PROJECT)
+
+log:	.lognr.$(PROJECT)
+	@expr `cat .lognr.$(PROJECT)` + 1 > .lognr.$(PROJECT)	
+	@echo Creating $(PROJECT)-`cat .lognr.$(PROJECT)`.log
+	@$(MAKE) > $(PROJECT)-`cat .lognr.$(PROJECT)`.log 2>&1 
+
 
 cross: $(BASE_TARGETS)
 
@@ -518,3 +531,4 @@ help:
 
 .PHONY: dummy subdirs release distclean clean config oldconfig \
 	menuconfig tags check test depend defconfig help
+

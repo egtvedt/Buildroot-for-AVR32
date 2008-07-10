@@ -130,12 +130,14 @@ TAR ?= tar
 
 # Retrieve and unpack the archive
 $(BUILD_DIR)/%/.stamp_downloaded:
-# support make external-deps
-ifeq ($(strip $(WGET)),$(TOPDIR)toolchain/wget-show-external-deps.sh)
+# support make source-check/external-deps
+ifeq ($(MAKELEVEL),1)
 	$(WGET) -P $(DL_DIR) $($(PKG)_SITE)/$($(PKG)_SOURCE)
+	$(if $($(PKG)_PATCH),$(WGET) -P $(DL_DIR) $($(PKG)_SITE)/$($(PKG)_PATCH))
 else
 	$(call MESSAGE,"Downloading")
-ifdef BR2_PRIMARY_SITE
+ifneq ($(strip $(subst ",,$(BR2_PRIMARY_SITE))),)
+#"))
 	-$(Q)test -e $(DL_DIR)/$($(PKG)_SOURCE) || $(WGET) -P $(DL_DIR) $(BR2_PRIMARY_SITE)/$($(PKG)_SOURCE)
 endif
 	$(Q)test -e $(DL_DIR)/$($(PKG)_SOURCE) || $(WGET) -P $(DL_DIR) $($(PKG)_SITE)/$($(PKG)_SOURCE)
@@ -237,7 +239,7 @@ $(BUILD_DIR)/%/.stamp_staging_installed:
 $(BUILD_DIR)/%/.stamp_target_installed:
 	$(call MESSAGE,"Installing to target")
 	$($(PKG)_MAKE_ENV) $(MAKE) $($(PKG)_INSTALL_TARGET_OPT) -C $(@D)/$($(PKG)_SUBDIR)
-	$(if $(BR2_HAVE_MANPAGES),,for d in man; do \
+	$(if $(BR2_HAVE_MANPAGES),,for d in man share/man; do \
 		rm -rf $(TARGET_DIR)/$$d $(TARGET_DIR)/usr/$$d; \
 	done)
 	$(if $(BR2_HAVE_INFOPAGES),,for d in info share/info; do \

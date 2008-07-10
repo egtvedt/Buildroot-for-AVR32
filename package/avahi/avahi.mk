@@ -27,11 +27,12 @@ AVAHI_EXTRA_DEPS:=
 ifeq ($(strip $(BR2_PACKAGE_AVAHI_DAEMON)),y)
 ifeq ($(strip $(BR2_PACKAGE_EXPAT)),y)
 AVAHI_TARGETS+=$(TARGET_DIR)/usr/sbin/avahi-daemon
-AVAHI_XML:=--with-xml=expat
-AVAHI_EXTRA_DEPS+=expat
-endif
+AVAHI_DISABLE_EXPAT:=--with-xml=expat
+# depend on the exact library file instead of expat so avahi isn't always
+# considered out-of-date
+AVAHI_EXTRA_DEPS+=$(STAGING_DIR)/usr/lib/libexpat.so.1
 else
-AVAHI_XML:=--with-xml=none
+AVAHI_DISABLE_EXPAT:=--disable-expat --with-xml=none
 endif
 
 ifeq ($(strip $(BR2_PACKAGE_DBUS)),y)
