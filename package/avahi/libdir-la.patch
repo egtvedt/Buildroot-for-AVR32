@@ -1,6 +1,6 @@
 --- avahi/ltmain.sh.orig	2004-11-23 09:19:19.000000000 -0700
 +++ avahi/ltmain.sh	2007-01-13 14:36:53.000000000 -0700
-@@ -273,8 +273,9 @@
+@@ -231,8 +231,9 @@
  	# line option must be used.
  	if test -z "$tagname"; then
  	  $echo "$modename: unable to infer tagged configuration"
@@ -12,7 +12,7 @@
  #        else
  #          $echo "$modename: using $tagname tagged configuration"
  	fi
-@@ -2407,8 +2407,14 @@
+@@ -2279,8 +2280,14 @@
  	    absdir="$abs_ladir"
  	    libdir="$abs_ladir"
  	  else
@@ -27,9 +27,9 @@
 +	    #dir="$libdir"
 +	    #absdir="$libdir"
  	  fi
- 	  test "X$hardcode_automatic" = Xyes && avoidtemprpath=yes
  	else
-@@ -2889,6 +2896,16 @@
+ 	  if test ! -f "$ladir/$objdir/$linklib" && test -f "$abs_ladir/$linklib"; then
+@@ -2754,6 +2761,16 @@
  		esac
  		if grep "^installed=no" $deplib > /dev/null; then
  		  path="$absdir/$objdir"
@@ -46,7 +46,7 @@
  		else
  		  eval libdir=`${SED} -n -e 's/^libdir=\(.*\)$/\1/p' $deplib`
  		  if test -z "$libdir"; then
-@@ -5606,6 +5623,10 @@
+@@ -5141,6 +5158,10 @@
  	    # Replace all uninstalled libtool libraries with the installed ones
  	    newdependency_libs=
  	    for deplib in $dependency_libs; do
@@ -57,7 +57,7 @@
  	      case $deplib in
  	      *.la)
  		name=`$echo "X$deplib" | $Xsed -e 's%^.*/%%'`
-@@ -5927,10 +5948,13 @@
+@@ -5459,10 +5480,13 @@
  	  # At present, this check doesn't affect windows .dll's that
  	  # are installed into $libdir/../bin (currently, that works fine)
  	  # but it's something to keep an eye on.

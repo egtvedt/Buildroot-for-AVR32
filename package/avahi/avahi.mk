@@ -25,7 +25,6 @@ endif
 AVAHI_EXTRA_DEPS:=
 
 ifeq ($(strip $(BR2_PACKAGE_AVAHI_DAEMON)),y)
-ifeq ($(strip $(BR2_PACKAGE_EXPAT)),y)
 AVAHI_TARGETS+=$(TARGET_DIR)/usr/sbin/avahi-daemon
 AVAHI_DISABLE_EXPAT:=--with-xml=expat
 # depend on the exact library file instead of expat so avahi isn't always
@@ -125,7 +124,7 @@ $(AVAHI_DIR)/.configured: $(AVAHI_DIR)/.unpacked $(AVAHI_EXTRA_DEPS)
 		--disable-qt4 \
 		--disable-gtk \
 		$(AVAHI_DISABLE_DBUS) \
-		$(AVAHI_XML) \
+		$(AVAHI_DISABLE_EXPAT) \
 		--disable-gdbm \
 		--disable-python \
 		--disable-python-dbus \
@@ -145,12 +144,12 @@ $(AVAHI_DIR)/.compiled: $(AVAHI_DIR)/.configured
 	$(MAKE) -C $(AVAHI_DIR)
 	touch $@
 
-$(STAGING_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.compiled
+$(AVAHI_DIR)/.installed: $(AVAHI_DIR)/.compiled
 	mkdir -p $(STAGING_DIR)/etc/avahi
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(AVAHI_DIR) install
-	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libavahi-*.la
+	touch $@
 
-$(TARGET_DIR)/usr/sbin/avahi-autoipd: $(STAGING_DIR)/usr/sbin/avahi-autoipd
+$(TARGET_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.installed
 	mkdir -p $(TARGET_DIR)/etc/avahi
 	mkdir -p $(TARGET_DIR)/etc/init.d
 	mkdir -p $(TARGET_DIR)/var/lib
