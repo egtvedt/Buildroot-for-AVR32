@@ -441,7 +441,7 @@ config BR2_PACKAGE_LINUX_USE_DEFCONFIG
 
 config BR2_PACKAGE_LINUX_USE_DEFCONFIG_CUSTOM
 	bool "Run make <custom>_defconfig"
-	depends BR2_PACKAGE_LINUX
+	depends on BR2_PACKAGE_LINUX
 	help
 	  Configure Linux by make <custom>_defconfig where custom is defined by
 	  kconfig.
@@ -466,7 +466,7 @@ config BR2_PACKAGE_LINUX_KCONFIG
 
 config BR2_PACKAGE_LINUX_USE_DEFCONFIG_CUSTOM_NAME
 	string "make custom_defconfig"
-	depends BR2_PACKAGE_LINUX && BR2_PACKAGE_LINUX_USE_DEFCONFIG_CUSTOM
+	depends on BR2_PACKAGE_LINUX && BR2_PACKAGE_LINUX_USE_DEFCONFIG_CUSTOM
 	help
 	  Configure Linux by loading the string provided here.
 

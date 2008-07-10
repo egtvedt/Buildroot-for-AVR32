@@ -20,35 +20,35 @@ choice
 
 config BR2_TARGET_AVR32_ATSTK1002
 	bool "Atmel ATSTK1000/2 AVR32 development board support"
-	depends BR2_at32ap7000
+	depends on BR2_at32ap7000
 	select BR2_PACKAGE_LINUX
 	help
 	  The Atmel ATSTK1000 + ATSTK1002 AVR32 Development Board.
 
 config BR2_TARGET_AVR32_ATSTK1006
 	bool "Atmel ATSTK1000/6 AVR32 development board support"
-	depends BR2_at32ap7000
+	depends on BR2_at32ap7000
 	select BR2_PACKAGE_LINUX
 	help
 	  The Atmel ATSTK1000 + ATSTK1006 AVR32 Development Board.
 
 config BR2_TARGET_AVR32_ATNGW100
 	bool "Atmel AVR32 network gateway board support"
-	depends BR2_at32ap7000
+	depends on BR2_at32ap7000
 	select BR2_PACKAGE_LINUX
 	help
 	  The Atmel AVR32 Network Gateway Board.
 
 config BR2_TARGET_AVR32_ATNGW100_BASE
 	bool "Atmel AVR32 basic network gateway board support"
-	depends BR2_at32ap7000
+	depends on BR2_at32ap7000
 	select BR2_PACKAGE_LINUX
 	help
 	  Very simple configuration for the Atmel AVR32 Network Gateway Board.
 
 config BR2_TARGET_AVR32_ATNGW100_EVKLCD100
 	bool "Atmel AVR32 NGW100 + EVKLCD100 (QVGA) board support"
-	depends BR2_at32ap7000
+	depends on BR2_at32ap7000
 	select BR2_PACKAGE_LINUX
 	help
 	  Atmel AVR32 Network Gateway Board with an attached EVKLCD100 board.
@@ -56,7 +56,7 @@ config BR2_TARGET_AVR32_ATNGW100_EVKLCD100
 
 config BR2_TARGET_AVR32_ATNGW100_EVKLCD101
 	bool "Atmel AVR32 NGW100 + EVKLCD101 (VGA) board support"
-	depends BR2_at32ap7000
+	depends on BR2_at32ap7000
 	select BR2_PACKAGE_LINUX
 	help
 	  Atmel AVR32 Network Gateway Board with an attached EVKLCD100 board.
@@ -64,7 +64,7 @@ config BR2_TARGET_AVR32_ATNGW100_EVKLCD101
 
 config BR2_TARGET_AVR32_ATNGW100_EXPANDED
 	bool "Atmel AVR32 expanded network gateway board support"
-	depends BR2_at32ap7000
+	depends on BR2_at32ap7000
 	select BR2_PACKAGE_LINUX
 	help
 	  The Atmel AVR32 Network Gateway Board expanded to include audio, video, and PS/2.
