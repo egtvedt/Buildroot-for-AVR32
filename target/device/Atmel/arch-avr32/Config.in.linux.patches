@@ -2,6 +2,7 @@ choice
 	prompt "Add AVR32 specific patches"
 	depends on BR2_KERNEL_ARCH_PATCH_ENABLED
 	depends on BR2_avr32
+	default BR2_ARCH_AVR32_2_6_25_10	if BR2_LINUX_2_6_25
 	default BR2_ARCH_AVR32_2_6_24		if BR2_LINUX_2_6_24
 	default BR2_ARCH_AVR32_2_6_23		if BR2_LINUX_2_6_23
 	default BR2_ARCH_AVR32_2_6_22_10	if BR2_LINUX_2_6_22 || BR2_LINUX_2_6_22_10
@@ -11,6 +12,11 @@ choice
 	default BR2_ARCH_AVR32_2_6_24
 	help
 	  Select a patch to add to the Linux kernel
+
+config	BR2_ARCH_AVR32_2_6_25_10
+	bool "2.6.25.10"
+	help
+	  Apply the avr32 linux-2.6.25.10 patches
 
 config	BR2_ARCH_AVR32_2_6_24
 	bool "2.6.24"
@@ -48,6 +54,7 @@ config	BR2_KERNEL_ARCH_PATCH_VERSION
 	string
 	depends on BR2_KERNEL_ARCH_PATCH_ENABLED
 	depends on BR2_avr32
+	default "2.6.25.10"	if BR2_ARCH_AVR32_2_6_25_10
 	default "2.6.24"	if BR2_ARCH_AVR32_2_6_24
 	default "2.6.22.10"	if BR2_ARCH_AVR32_2_6_22_10
 	default "2.6.22.1"	if BR2_ARCH_AVR32_2_6_22_1
@@ -60,13 +67,11 @@ config	BR2_KERNEL_ARCH_PATCH_DIR
 
 config	BR2_LINUX_AVR32_ISI_PATCH
 	bool "Add ISI patch"
-	default n
 	help
 	  Add support for the Image Sensor Interface
 
 config	BR2_LINUX_AVR32_AC97_PATCH
 	bool "Add AC97 patch"
-	default n
 	help
 	  Add support for AC97. 
 	  Will need to be patched further to change GPIO_PIN_NONE
@@ -74,6 +79,5 @@ config	BR2_LINUX_AVR32_AC97_PATCH
 
 config	BR2_LINUX_AVR32_PSIF_PATCH
 	bool "Add PSIF patch"
-	default n
 	help
 	  Add support for the PS/2 Interface

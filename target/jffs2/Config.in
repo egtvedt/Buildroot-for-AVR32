@@ -1,6 +1,5 @@
 menuconfig BR2_TARGET_ROOTFS_JFFS2
 	bool "jffs2 root filesystem"
-	default n
 	select BR2_HOST_FAKEROOT
 	select BR2_PACKAGE_MTD
 	help
@@ -97,11 +96,13 @@ config BR2_TARGET_ROOTFS_JFFS2_EBSIZE
 config BR2_TARGET_ROOTFS_JFFS2_NOCLEANMARKER
 	bool "Do not use Cleanmarker"
 	depends on BR2_TARGET_ROOTFS_JFFS2
-	default n
 	help
-	  Do not use cleanmarkers when makeing the JFFS2 file system. This is
-	  appropriate for NAND flash and DataFlash where the pagesize is not a
-	  power of 2.
+	  Do not use cleanmarkers if using NAND flash or Dataflash where
+	  the pagesize is not a power of 2
+
+config BR2_JFFS2_TARGET_SREC
+	bool "RootFS in SREC file formet"
+	depends on BR2_TARGET_ROOTFS_JFFS2
 
 config BR2_TARGET_ROOTFS_JFFS2_PAD
 	bool "Pad output"
