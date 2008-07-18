@@ -1,5 +1,6 @@
  Documentation/ABI/stable/sysfs-class-ubi |  212 +++
  Documentation/filesystems/ubifs.txt      |  163 ++
+ Documentation/serial/driver              |   11 +
  arch/arm/mach-at91/at91cap9_devices.c    |   15 +-
  arch/arm/mach-at91/at91rm9200_devices.c  |    8 +-
  arch/arm/mach-at91/at91sam9260_devices.c |   15 +-
@@ -13,7 +14,7 @@
  arch/arm/mach-at91/board-sam9261ek.c     |    2 +-
  arch/arm/mach-at91/board-sam9263ek.c     |    2 +-
  arch/arm/mach-at91/board-sam9rlek.c      |    2 +-
- arch/avr32/Kconfig                       |   18 +
+ arch/avr32/Kconfig                       |   21 +
  arch/avr32/Makefile                      |    1 +
  arch/avr32/boards/atngw100/Kconfig       |   12 +
  arch/avr32/boards/atngw100/setup.c       |   21 +-
@@ -33,27 +34,30 @@
  arch/avr32/kernel/Makefile               |    1 +
  arch/avr32/kernel/avr32_ksyms.c          |    4 +
  arch/avr32/kernel/dma-controller.c       |   34 +
- arch/avr32/kernel/entry-avr32b.S         |   20 -
+ arch/avr32/kernel/entry-avr32b.S         |  108 +-
  arch/avr32/kernel/process.c              |    6 +-
  arch/avr32/kernel/setup.c                |    2 +
  arch/avr32/kernel/signal.c               |    3 +
- arch/avr32/kernel/time.c                 |  248 +--
+ arch/avr32/kernel/time.c                 |  262 +--
+ arch/avr32/kernel/vmlinux.lds.S          |   12 +-
  arch/avr32/lib/io-readsb.S               |    2 +-
  arch/avr32/mach-at32ap/Kconfig           |    7 +
  arch/avr32/mach-at32ap/Makefile          |   11 +-
  arch/avr32/mach-at32ap/at32ap.c          |   56 -
- arch/avr32/mach-at32ap/at32ap700x.c      |  557 +++++-
+ arch/avr32/mach-at32ap/at32ap700x.c      |  597 ++++++-
  arch/avr32/mach-at32ap/cpufreq.c         |    3 +-
  arch/avr32/mach-at32ap/gpio-dev.c        |  573 ++++++
  arch/avr32/mach-at32ap/hsmc.c            |    2 +-
  arch/avr32/mach-at32ap/intc.c            |   81 +-
  arch/avr32/mach-at32ap/pdc.c             |   48 +
  arch/avr32/mach-at32ap/pio.c             |   78 +
+ arch/avr32/mach-at32ap/pio.h             |    2 +-
  arch/avr32/mach-at32ap/pm-at32ap700x.S   |  174 ++
  arch/avr32/mach-at32ap/pm.c              |  245 +++
  arch/avr32/mach-at32ap/sdramc.h          |   76 +
  arch/avr32/mach-at32ap/time-tc.c         |  218 ---
- arch/avr32/mm/init.c                     |    5 +-
+ arch/avr32/mm/init.c                     |   25 +-
+ arch/avr32/mm/tlb.c                      |  175 +-
  arch/avr32/oprofile/op_model_avr32.c     |    1 -
  drivers/char/Kconfig                     |    4 +-
  drivers/char/keyboard.c                  |    3 +-
@@ -72,7 +76,7 @@
  drivers/misc/atmel_tclib.c               |  161 ++
  drivers/mmc/host/Kconfig                 |   10 +
  drivers/mmc/host/Makefile                |    1 +
- drivers/mmc/host/atmel-mci.c             | 1220 ++++++++++++
+ drivers/mmc/host/atmel-mci.c             | 1234 +++++++++++++
  drivers/mmc/host/atmel-mci.h             |  192 ++
  drivers/mtd/nand/Kconfig                 |   50 +-
  drivers/mtd/nand/Makefile                |    2 +-
@@ -106,7 +110,9 @@
  drivers/pcmcia/Kconfig                   |    7 +
  drivers/pcmcia/Makefile                  |    1 +
  drivers/pcmcia/at32_cf.c                 |  533 ++++++
- drivers/serial/atmel_serial.c            |   11 +-
+ drivers/rtc/rtc-at32ap700x.c             |    3 +
+ drivers/serial/atmel_serial.c            |   26 +-
+ drivers/serial/serial_core.c             |    2 +
  drivers/spi/atmel_spi.c                  |  162 +--
  drivers/usb/gadget/Kconfig               |    4 +-
  drivers/usb/gadget/atmel_usba_udc.c      |  156 +-
@@ -151,7 +157,7 @@
  fs/ubifs/xattr.c                         |  581 ++++++
  include/asm-arm/arch-at91/at91_ecc.h     |   38 -
  include/asm-arm/arch-at91/board.h        |    4 +-
- include/asm-avr32/arch-at32ap/board.h    |   42 +-
+ include/asm-avr32/arch-at32ap/board.h    |   53 +-
  include/asm-avr32/arch-at32ap/init.h     |    4 -
  include/asm-avr32/arch-at32ap/pm.h       |   51 +
  include/asm-avr32/arch-at32ap/portmux.h  |   12 +
@@ -161,30 +167,36 @@
  include/asm-avr32/dma-controller.h       |  166 ++
  include/asm-avr32/intc.h                 |  128 --
  include/asm-avr32/irq.h                  |    5 +
+ include/asm-avr32/mmu_context.h          |    1 -
  include/asm-avr32/page.h                 |    8 +-
  include/asm-avr32/pci.h                  |    2 +
+ include/asm-avr32/pgalloc.h              |   68 +-
+ include/asm-avr32/pgtable.h              |   34 +-
  include/asm-avr32/serial.h               |   13 +
  include/asm-avr32/thread_info.h          |    1 +
+ include/asm-avr32/tlbflush.h             |    1 -
  include/asm-avr32/xor.h                  |    6 +
  include/linux/atmel_tc.h                 |  252 +++
  include/linux/fs.h                       |    2 +
+ include/linux/serial_core.h              |    1 +
  include/linux/usb/atmel_usba_udc.h       |   22 +
  include/mtd/Kbuild                       |    1 -
  include/mtd/ubi-header.h                 |  372 ----
  init/do_mounts.c                         |   11 +-
  localversion-atmel                       |    1 +
+ mm/Kconfig                               |    2 +-
  sound/Kconfig                            |    2 +
  sound/Makefile                           |    2 +-
  sound/avr32/Kconfig                      |   11 +
  sound/avr32/Makefile                     |    3 +
- sound/avr32/ac97c.c                      |  914 +++++++++
+ sound/avr32/ac97c.c                      |  951 ++++++++++
  sound/avr32/ac97c.h                      |   71 +
  sound/oss/Kconfig                        |    4 +
  sound/oss/Makefile                       |    1 +
  sound/oss/at32_abdac.c                   |  722 ++++++++
  sound/oss/at32_abdac.h                   |   59 +
  sound/spi/at73c213.c                     |    6 +-
- 186 files changed, 44607 insertions(+), 2101 deletions(-)
+ 198 files changed, 44946 insertions(+), 2316 deletions(-)
  create mode 100644 Documentation/ABI/stable/sysfs-class-ubi
  create mode 100644 Documentation/filesystems/ubifs.txt
  create mode 100644 arch/avr32/boards/atngw100/Kconfig
@@ -653,6 +665,28 @@ index 0000000..ab653b4
 +UBIFS documentation and FAQ/HOWTO at the MTD web site:
 +http://www.linux-mtd.infradead.org/doc/ubifs.html
 +http://www.linux-mtd.infradead.org/faq/ubifs.html
+diff --git a/Documentation/serial/driver b/Documentation/serial/driver
+index 88ad615..77ba0af 100644
+--- a/Documentation/serial/driver
++++ b/Documentation/serial/driver
+@@ -186,6 +186,17 @@ hardware.
+ 	Locking: port_sem taken.
+ 	Interrupts: caller dependent.
+ 
++  flush_buffer(port)
++	Flush any write buffers, reset any DMA state and stop any
++	ongoing DMA transfers.
++
++	This will be called whenever the port->info->xmit circular
++	buffer is cleared.
++
++	Locking: port->lock taken.
++	Interrupts: locally disabled.
++	This call must not sleep
++
+   set_termios(port,termios,oldtermios)
+ 	Change the port parameters, including word length, parity, stop
+ 	bits.  Update read_status_mask and ignore_status_mask to indicate
 diff --git a/arch/arm/mach-at91/at91cap9_devices.c b/arch/arm/mach-at91/at91cap9_devices.c
 index c50fad9..9c2f302 100644
 --- a/arch/arm/mach-at91/at91cap9_devices.c
@@ -1084,7 +1118,7 @@ index bc0546d..3ee71dd 100644
  	.cle		= 22,
  //	.det_pin	= ... not connected
 diff --git a/arch/avr32/Kconfig b/arch/avr32/Kconfig
-index 28e0caf..66d9d99 100644
+index 28e0caf..accbec0 100644
 --- a/arch/avr32/Kconfig
 +++ b/arch/avr32/Kconfig
 @@ -47,6 +47,9 @@ config RWSEM_GENERIC_SPINLOCK
@@ -1124,7 +1158,17 @@ index 28e0caf..66d9d99 100644
  
  choice
  	prompt "Boot loader type"
-@@ -180,6 +189,10 @@ config NMI_DEBUGGING
+@@ -142,6 +151,9 @@ config PHYS_OFFSET
+ 
+ source "kernel/Kconfig.preempt"
+ 
++config QUICKLIST
++	def_bool y
++
+ config HAVE_ARCH_BOOTMEM_NODE
+ 	def_bool n
+ 
+@@ -180,6 +192,10 @@ config NMI_DEBUGGING
  	  be dumped to the console when a Non-Maskable Interrupt
  	  happens.
  
@@ -1135,7 +1179,7 @@ index 28e0caf..66d9d99 100644
  # FPU emulation goes here
  
  source "kernel/Kconfig.hz"
-@@ -196,6 +209,11 @@ endmenu
+@@ -196,6 +212,11 @@ endmenu
  
  menu "Power management options"
  
@@ -1339,7 +1383,7 @@ index beead86..edecee0 100644
  obj-$(CONFIG_BOARD_ATSTK1004)	+= atstk1004.o
 +obj-$(CONFIG_BOARD_ATSTK1006)	+= atstk1002.o
 diff --git a/arch/avr32/boards/atstk1000/atstk1002.c b/arch/avr32/boards/atstk1000/atstk1002.c
-index 000eb42..90de256 100644
+index 000eb42..9c60c41 100644
 --- a/arch/avr32/boards/atstk1000/atstk1002.c
 +++ b/arch/avr32/boards/atstk1000/atstk1002.c
 @@ -1,7 +1,7 @@
@@ -1483,7 +1527,7 @@ index 000eb42..90de256 100644
  #endif
  	at32_add_device_usba(0, NULL);
 +#ifdef CONFIG_BOARD_ATSTK100X_ENABLE_AC97
-+	at32_add_device_ac97c(0);
++	at32_add_device_ac97c(0, NULL);
 +#else
 +	at32_add_device_abdac(0);
 +#endif
@@ -1499,7 +1543,7 @@ index 000eb42..90de256 100644
  	atstk1000_setup_j2_leds();
  	atstk1002_setup_extdac();
 diff --git a/arch/avr32/boards/atstk1000/atstk1003.c b/arch/avr32/boards/atstk1000/atstk1003.c
-index a0b223d..e66f845 100644
+index a0b223d..45eb697 100644
 --- a/arch/avr32/boards/atstk1000/atstk1003.c
 +++ b/arch/avr32/boards/atstk1000/atstk1003.c
 @@ -27,6 +27,13 @@
@@ -1545,7 +1589,7 @@ index a0b223d..e66f845 100644
  #endif
  	at32_add_device_usba(0, NULL);
 +#ifdef CONFIG_BOARD_ATSTK100X_ENABLE_AC97
-+	at32_add_device_ac97c(0);
++	at32_add_device_ac97c(0, NULL);
 +#else
 +	at32_add_device_abdac(0);
 +#endif
@@ -1561,7 +1605,7 @@ index a0b223d..e66f845 100644
  	atstk1000_setup_j2_leds();
  	atstk1003_setup_extdac();
 diff --git a/arch/avr32/boards/atstk1000/atstk1004.c b/arch/avr32/boards/atstk1000/atstk1004.c
-index e765a86..fc0ec4d 100644
+index e765a86..07f090d 100644
 --- a/arch/avr32/boards/atstk1000/atstk1004.c
 +++ b/arch/avr32/boards/atstk1000/atstk1004.c
 @@ -29,6 +29,13 @@
@@ -1590,7 +1634,7 @@ index e765a86..fc0ec4d 100644
 +			     fbmem_start, fbmem_size, 0);
  	at32_add_device_usba(0, NULL);
 +#ifdef CONFIG_BOARD_ATSTK100X_ENABLE_AC97
-+	at32_add_device_ac97c(0);
++	at32_add_device_ac97c(0, NULL);
 +#else
 +	at32_add_device_abdac(0);
 +#endif
@@ -5626,10 +5670,150 @@ index 0000000..fb654b3
 +}
 +EXPORT_SYMBOL(find_dma_controller);
 diff --git a/arch/avr32/kernel/entry-avr32b.S b/arch/avr32/kernel/entry-avr32b.S
-index 8cf16d7..5f31702 100644
+index 8cf16d7..2b398ca 100644
 --- a/arch/avr32/kernel/entry-avr32b.S
 +++ b/arch/avr32/kernel/entry-avr32b.S
-@@ -741,26 +741,6 @@ irq_level\level:
+@@ -74,50 +74,41 @@ exception_vectors:
+ 	.align	2
+ 	bral	do_dtlb_modified
+ 
+-	/*
+-	 * r0 :	PGD/PT/PTE
+-	 * r1 : Offending address
+-	 * r2 : Scratch register
+-	 * r3 : Cause (5, 12 or 13)
+-	 */
+ #define	tlbmiss_save	pushm	r0-r3
+ #define tlbmiss_restore	popm	r0-r3
+ 
+-	.section .tlbx.ex.text,"ax",@progbits
++	.org	0x50
+ 	.global	itlb_miss
+ itlb_miss:
+ 	tlbmiss_save
+ 	rjmp	tlb_miss_common
+ 
+-	.section .tlbr.ex.text,"ax",@progbits
++	.org	0x60
+ dtlb_miss_read:
+ 	tlbmiss_save
+ 	rjmp	tlb_miss_common
+ 
+-	.section .tlbw.ex.text,"ax",@progbits
++	.org	0x70
+ dtlb_miss_write:
+ 	tlbmiss_save
+ 
+ 	.global	tlb_miss_common
++	.align	2
+ tlb_miss_common:
+ 	mfsr	r0, SYSREG_TLBEAR
+ 	mfsr	r1, SYSREG_PTBR
+ 
+-	/* Is it the vmalloc space? */
+-	bld	r0, 31
+-	brcs	handle_vmalloc_miss
+-
+-	/* First level lookup */
++	/*
++	 * First level lookup: The PGD contains virtual pointers to
++	 * the second-level page tables, but they may be NULL if not
++	 * present.
++	 */
+ pgtbl_lookup:
+ 	lsr	r2, r0, PGDIR_SHIFT
+ 	ld.w	r3, r1[r2 << 2]
+ 	bfextu	r1, r0, PAGE_SHIFT, PGDIR_SHIFT - PAGE_SHIFT
+-	bld	r3, _PAGE_BIT_PRESENT
+-	brcc	page_table_not_present
+-
+-	/* Translate to virtual address in P1. */
+-	andl	r3, 0xf000
+-	sbr	r3, 31
++	cp.w	r3, 0
++	breq	page_table_not_present
+ 
+ 	/* Second level lookup */
+ 	ld.w	r2, r3[r1 << 2]
+@@ -148,16 +139,55 @@ pgtbl_lookup:
+ 	tlbmiss_restore
+ 	rete
+ 
+-handle_vmalloc_miss:
+-	/* Simply do the lookup in init's page table */
++	/* The slow path of the TLB miss handler */
++	.align	2
++page_table_not_present:
++	/* Do we need to synchronize with swapper_pg_dir? */
++	bld	r0, 31
++	brcs	sync_with_swapper_pg_dir
++
++page_not_present:
++	tlbmiss_restore
++	sub	sp, 4
++	stmts	--sp, r0-lr
++	rcall	save_full_context_ex
++	mfsr	r12, SYSREG_ECR
++	mov	r11, sp
++	rcall	do_page_fault
++	rjmp	ret_from_exception
++
++	.align	2
++sync_with_swapper_pg_dir:
++	/*
++	 * If swapper_pg_dir contains a non-NULL second-level page
++	 * table pointer, copy it into the current PGD. If not, we
++	 * must handle it as a full-blown page fault.
++	 *
++	 * Jumping back to pgtbl_lookup causes an unnecessary lookup,
++	 * but it is guaranteed to be a cache hit, it won't happen
++	 * very often, and we absolutely do not want to sacrifice any
++	 * performance in the fast path in order to improve this.
++	 */
+ 	mov	r1, lo(swapper_pg_dir)
+ 	orh	r1, hi(swapper_pg_dir)
++	ld.w	r3, r1[r2 << 2]
++	cp.w	r3, 0
++	breq	page_not_present
++	mfsr	r1, SYSREG_PTBR
++	st.w	r1[r2 << 2], r3
+ 	rjmp	pgtbl_lookup
+ 
++	/*
++	 * We currently have two bytes left at this point until we
++	 * crash into the system call handler...
++	 *
++	 * Don't worry, the assembler will let us know.
++	 */
++
+ 
+ 	/* ---                    System Call                    --- */
+ 
+-	.section .scall.text,"ax",@progbits
++	.org	0x100
+ system_call:
+ #ifdef CONFIG_PREEMPT
+ 	mask_interrupts
+@@ -266,18 +296,6 @@ syscall_exit_work:
+ 	brcc	syscall_exit_cont
+ 	rjmp	enter_monitor_mode
+ 
+-	/* The slow path of the TLB miss handler */
+-page_table_not_present:
+-page_not_present:
+-	tlbmiss_restore
+-	sub	sp, 4
+-	stmts	--sp, r0-lr
+-	rcall	save_full_context_ex
+-	mfsr	r12, SYSREG_ECR
+-	mov	r11, sp
+-	rcall	do_page_fault
+-	rjmp	ret_from_exception
+-
+ 	/* This function expects to find offending PC in SYSREG_RAR_EX */
+ 	.type	save_full_context_ex, @function
+ 	.align	2
+@@ -741,26 +759,6 @@ irq_level\level:
  
  	.section .irq.text,"ax",@progbits
  
@@ -5711,10 +5895,10 @@ index 5616a00..c5b11f9 100644
  		 regs->pc, regs->lr, regs->sp);
  
 diff --git a/arch/avr32/kernel/time.c b/arch/avr32/kernel/time.c
-index 36a46c3..00a9862 100644
+index 36a46c3..abd954f 100644
 --- a/arch/avr32/kernel/time.c
 +++ b/arch/avr32/kernel/time.c
-@@ -1,16 +1,12 @@
+@@ -1,233 +1,147 @@
  /*
   * Copyright (C) 2004-2007 Atmel Corporation
   *
@@ -5728,13 +5912,25 @@ index 36a46c3..00a9862 100644
 -
  #include <linux/clk.h>
 -#include <linux/clocksource.h>
+-#include <linux/time.h>
+-#include <linux/module.h>
 +#include <linux/clockchips.h>
- #include <linux/time.h>
- #include <linux/module.h>
++#include <linux/init.h>
  #include <linux/interrupt.h>
-@@ -27,207 +23,133 @@
- #include <asm/io.h>
- #include <asm/sections.h>
+ #include <linux/irq.h>
+-#include <linux/kernel_stat.h>
+-#include <linux/errno.h>
+-#include <linux/init.h>
+-#include <linux/profile.h>
+-#include <linux/sysdev.h>
+-#include <linux/err.h>
++#include <linux/kernel.h>
++#include <linux/time.h>
+ 
+-#include <asm/div64.h>
+ #include <asm/sysreg.h>
+-#include <asm/io.h>
+-#include <asm/sections.h>
  
 -/* how many counter cycles in a jiffy? */
 -static u32 cycles_per_jiffy;
@@ -5780,20 +5976,20 @@ index 36a46c3..00a9862 100644
 - * By default we provide the null RTC ops
 - */
 -static unsigned long null_rtc_get_time(void)
-+static irqreturn_t timer_interrupt(int irq, void *dev_id)
- {
+-{
 -	return mktime(2007, 1, 1, 0, 0, 0);
 -}
 -
 -static int null_rtc_set_time(unsigned long sec)
--{
++static irqreturn_t timer_interrupt(int irq, void *dev_id)
+ {
 -	return 0;
 -}
-+	struct clock_event_device *evdev = dev_id;
- 
+-
 -static unsigned long (*rtc_get_time)(void) = null_rtc_get_time;
 -static int (*rtc_set_time)(unsigned long) = null_rtc_set_time;
--
++	struct clock_event_device *evdev = dev_id;
+ 
 -static void avr32_timer_ack(void)
 -{
 -	u32 count;
@@ -6024,6 +6220,36 @@ index 36a46c3..00a9862 100644
  }
 -
 -device_initcall(init_timer_sysfs);
+diff --git a/arch/avr32/kernel/vmlinux.lds.S b/arch/avr32/kernel/vmlinux.lds.S
+index 481cfd4..5d25d8e 100644
+--- a/arch/avr32/kernel/vmlinux.lds.S
++++ b/arch/avr32/kernel/vmlinux.lds.S
+@@ -68,14 +68,6 @@ SECTIONS
+ 		_evba = .;
+ 		_text = .;
+ 		*(.ex.text)
+-		. = 0x50;
+-		*(.tlbx.ex.text)
+-		. = 0x60;
+-		*(.tlbr.ex.text)
+-		. = 0x70;
+-		*(.tlbw.ex.text)
+-		. = 0x100;
+-		*(.scall.text)
+ 		*(.irq.text)
+ 		KPROBES_TEXT
+ 		TEXT_TEXT
+@@ -107,6 +99,10 @@ SECTIONS
+ 		 */
+ 		*(.data.init_task)
+ 
++		/* Then, the page-aligned data */
++		. = ALIGN(PAGE_SIZE);
++		*(.data.page_aligned)
++
+ 		/* Then, the cacheline aligned data */
+ 		. = ALIGN(L1_CACHE_BYTES);
+ 		*(.data.cacheline_aligned)
 diff --git a/arch/avr32/lib/io-readsb.S b/arch/avr32/lib/io-readsb.S
 index 2be5da7..cb2d869 100644
 --- a/arch/avr32/lib/io-readsb.S
@@ -6135,7 +6361,7 @@ index 7c4987f..0000000
 -}
 -arch_initcall(pdc_init);
 diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
-index 7678fee..d23797d 100644
+index 7678fee..c880d2f 100644
 --- a/arch/avr32/mach-at32ap/at32ap700x.c
 +++ b/arch/avr32/mach-at32ap/at32ap700x.c
 @@ -6,11 +6,13 @@
@@ -6511,7 +6737,27 @@ index 7678fee..d23797d 100644
   *  USART
   * -------------------------------------------------------------------- */
  
-@@ -989,7 +1228,9 @@ static struct clk atmel_twi0_pclk = {
+@@ -951,7 +1190,8 @@ at32_add_device_spi(unsigned int id, struct spi_board_info *b, unsigned int n)
+ 	switch (id) {
+ 	case 0:
+ 		pdev = &atmel_spi0_device;
+-		select_peripheral(PA(0),  PERIPH_A, 0);	/* MISO	 */
++		/* pullup MISO so a level is always defined */
++		select_peripheral(PA(0),  PERIPH_A, AT32_GPIOF_PULLUP);
+ 		select_peripheral(PA(1),  PERIPH_A, 0);	/* MOSI	 */
+ 		select_peripheral(PA(2),  PERIPH_A, 0);	/* SCK	 */
+ 		at32_spi_setup_slaves(0, b, n, spi0_pins);
+@@ -959,7 +1199,8 @@ at32_add_device_spi(unsigned int id, struct spi_board_info *b, unsigned int n)
+ 
+ 	case 1:
+ 		pdev = &atmel_spi1_device;
+-		select_peripheral(PB(0),  PERIPH_B, 0);	/* MISO  */
++		/* pullup MISO so a level is always defined */
++		select_peripheral(PB(0),  PERIPH_B, AT32_GPIOF_PULLUP);
+ 		select_peripheral(PB(1),  PERIPH_B, 0);	/* MOSI  */
+ 		select_peripheral(PB(5),  PERIPH_B, 0);	/* SCK   */
+ 		at32_spi_setup_slaves(1, b, n, spi1_pins);
+@@ -989,7 +1230,9 @@ static struct clk atmel_twi0_pclk = {
  	.index		= 2,
  };
  
@@ -6522,7 +6768,7 @@ index 7678fee..d23797d 100644
  {
  	struct platform_device *pdev;
  
-@@ -1009,6 +1250,9 @@ struct platform_device *__init at32_add_device_twi(unsigned int id)
+@@ -1009,6 +1252,9 @@ struct platform_device *__init at32_add_device_twi(unsigned int id)
  
  	atmel_twi0_pclk.dev = &pdev->dev;
  
@@ -6532,7 +6778,7 @@ index 7678fee..d23797d 100644
  	platform_device_add(pdev);
  	return pdev;
  
-@@ -1032,7 +1276,8 @@ static struct clk atmel_mci0_pclk = {
+@@ -1032,7 +1278,8 @@ static struct clk atmel_mci0_pclk = {
  	.index		= 9,
  };
  
@@ -6542,7 +6788,7 @@ index 7678fee..d23797d 100644
  {
  	struct platform_device *pdev;
  
-@@ -1041,11 +1286,15 @@ struct platform_device *__init at32_add_device_mci(unsigned int id)
+@@ -1041,11 +1288,15 @@ struct platform_device *__init at32_add_device_mci(unsigned int id)
  
  	pdev = platform_device_alloc("atmel_mci", id);
  	if (!pdev)
@@ -6560,7 +6806,7 @@ index 7678fee..d23797d 100644
  
  	select_peripheral(PA(10), PERIPH_A, 0);	/* CLK	 */
  	select_peripheral(PA(11), PERIPH_A, 0);	/* CMD	 */
-@@ -1054,12 +1303,19 @@ struct platform_device *__init at32_add_device_mci(unsigned int id)
+@@ -1054,12 +1305,19 @@ struct platform_device *__init at32_add_device_mci(unsigned int id)
  	select_peripheral(PA(14), PERIPH_A, 0);	/* DATA2 */
  	select_peripheral(PA(15), PERIPH_A, 0);	/* DATA3 */
  
@@ -6581,7 +6827,7 @@ index 7678fee..d23797d 100644
  	platform_device_put(pdev);
  	return NULL;
  }
-@@ -1097,7 +1353,8 @@ static struct clk atmel_lcdfb0_pixclk = {
+@@ -1097,7 +1355,8 @@ static struct clk atmel_lcdfb0_pixclk = {
  
  struct platform_device *__init
  at32_add_device_lcdc(unsigned int id, struct atmel_lcdfb_info *data,
@@ -6591,7 +6837,7 @@ index 7678fee..d23797d 100644
  {
  	struct platform_device *pdev;
  	struct atmel_lcdfb_info *info;
-@@ -1124,37 +1381,77 @@ at32_add_device_lcdc(unsigned int id, struct atmel_lcdfb_info *data,
+@@ -1124,37 +1383,77 @@ at32_add_device_lcdc(unsigned int id, struct atmel_lcdfb_info *data,
  	switch (id) {
  	case 0:
  		pdev = &atmel_lcdfb0_device;
@@ -6700,7 +6946,7 @@ index 7678fee..d23797d 100644
  
  		clk_set_parent(&atmel_lcdfb0_pixclk, &pll0);
  		clk_set_rate(&atmel_lcdfb0_pixclk, clk_get_rate(&pll0));
-@@ -1351,9 +1648,39 @@ static struct clk usba0_hclk = {
+@@ -1351,9 +1650,39 @@ static struct clk usba0_hclk = {
  	.index		= 6,
  };
  
@@ -6740,7 +6986,7 @@ index 7678fee..d23797d 100644
  	struct platform_device *pdev;
  
  	if (id != 0)
-@@ -1367,13 +1694,20 @@ at32_add_device_usba(unsigned int id, struct usba_platform_data *data)
+@@ -1367,13 +1696,20 @@ at32_add_device_usba(unsigned int id, struct usba_platform_data *data)
  					  ARRAY_SIZE(usba0_resource)))
  		goto out_free_pdev;
  
@@ -6767,7 +7013,7 @@ index 7678fee..d23797d 100644
  
  	usba0_pclk.dev = &pdev->dev;
  	usba0_hclk.dev = &pdev->dev;
-@@ -1526,6 +1860,58 @@ fail:
+@@ -1526,6 +1862,58 @@ fail:
  #endif
  
  /* --------------------------------------------------------------------
@@ -6826,7 +7072,64 @@ index 7678fee..d23797d 100644
   * AC97C
   * -------------------------------------------------------------------- */
  static struct resource atmel_ac97c0_resource[] __initdata = {
-@@ -1683,6 +2069,7 @@ struct clk *at32_clock_list[] = {
+@@ -1540,9 +1928,11 @@ static struct clk atmel_ac97c0_pclk = {
+ 	.index		= 10,
+ };
+ 
+-struct platform_device *__init at32_add_device_ac97c(unsigned int id)
++struct platform_device *__init
++at32_add_device_ac97c(unsigned int id, struct ac97c_platform_data *data)
+ {
+ 	struct platform_device *pdev;
++	struct ac97c_platform_data _data;
+ 
+ 	if (id != 0)
+ 		return NULL;
+@@ -1553,19 +1943,37 @@ struct platform_device *__init at32_add_device_ac97c(unsigned int id)
+ 
+ 	if (platform_device_add_resources(pdev, atmel_ac97c0_resource,
+ 				ARRAY_SIZE(atmel_ac97c0_resource)))
+-		goto err_add_resources;
++		goto fail;
+ 
+-	select_peripheral(PB(20), PERIPH_B, 0);	/* SYNC	*/
+-	select_peripheral(PB(21), PERIPH_B, 0);	/* SDO	*/
+-	select_peripheral(PB(22), PERIPH_B, 0);	/* SDI	*/
+-	select_peripheral(PB(23), PERIPH_B, 0);	/* SCLK	*/
++	if (!data) {
++		data = &_data;
++		memset(data, 0, sizeof(struct ac97c_platform_data));
++		data->reset_pin = GPIO_PIN_NONE;
++	}
++
++	data->dma_rx_periph_id = 3;
++	data->dma_tx_periph_id = 4;
++	data->dma_controller_id = 0;
++
++	if (platform_device_add_data(pdev, data,
++				sizeof(struct ac97c_platform_data)))
++		goto fail;
++
++	select_peripheral(PB(20), PERIPH_B, 0);	/* SDO	*/
++	select_peripheral(PB(21), PERIPH_B, 0);	/* SYNC	*/
++	select_peripheral(PB(22), PERIPH_B, 0);	/* SCLK	*/
++	select_peripheral(PB(23), PERIPH_B, 0);	/* SDI	*/
++
++	/* TODO: gpio_is_valid(data->reset_pin) with kernel 2.6.26. */
++	if (data->reset_pin != GPIO_PIN_NONE)
++		at32_select_gpio(data->reset_pin, 0);
+ 
+ 	atmel_ac97c0_pclk.dev = &pdev->dev;
+ 
+ 	platform_device_add(pdev);
+ 	return pdev;
+ 
+-err_add_resources:
++fail:
+ 	platform_device_put(pdev);
+ 	return NULL;
+ }
+@@ -1683,6 +2091,7 @@ struct clk *at32_clock_list[] = {
  	&hmatrix_clk,
  	&ebi_clk,
  	&hramc_clk,
@@ -6834,7 +7137,7 @@ index 7678fee..d23797d 100644
  	&smc0_pclk,
  	&smc0_mck,
  	&pdc_hclk,
-@@ -1694,7 +2081,10 @@ struct clk *at32_clock_list[] = {
+@@ -1694,7 +2103,10 @@ struct clk *at32_clock_list[] = {
  	&pio2_mck,
  	&pio3_mck,
  	&pio4_mck,
@@ -6846,7 +7149,7 @@ index 7678fee..d23797d 100644
  	&atmel_usart0_usart,
  	&atmel_usart1_usart,
  	&atmel_usart2_usart,
-@@ -1730,16 +2120,7 @@ struct clk *at32_clock_list[] = {
+@@ -1730,16 +2142,7 @@ struct clk *at32_clock_list[] = {
  };
  unsigned int at32_nr_clocks = ARRAY_SIZE(at32_clock_list);
  
@@ -6864,7 +7167,7 @@ index 7678fee..d23797d 100644
  {
  	u32 cpu_mask = 0, hsb_mask = 0, pba_mask = 0, pbb_mask = 0;
  	int i;
-@@ -1794,4 +2175,36 @@ void __init at32_clock_init(void)
+@@ -1794,4 +2197,36 @@ void __init at32_clock_init(void)
  	pm_writel(HSB_MASK, hsb_mask);
  	pm_writel(PBA_MASK, pba_mask);
  	pm_writel(PBB_MASK, pbb_mask);
@@ -7761,6 +8064,19 @@ index 38a8fa3..a0abc5e 100644
  		if (!label)
  			continue;
  
+diff --git a/arch/avr32/mach-at32ap/pio.h b/arch/avr32/mach-at32ap/pio.h
+index 7795116..9484dfc 100644
+--- a/arch/avr32/mach-at32ap/pio.h
++++ b/arch/avr32/mach-at32ap/pio.h
+@@ -57,7 +57,7 @@
+ 
+ /* Bitfields in IFDR */
+ 
+-/* Bitfields in ISFR */
++/* Bitfields in IFSR */
+ 
+ /* Bitfields in SODR */
+ 
 diff --git a/arch/avr32/mach-at32ap/pm-at32ap700x.S b/arch/avr32/mach-at32ap/pm-at32ap700x.S
 new file mode 100644
 index 0000000..0a53ad3
@@ -8499,7 +8815,7 @@ index 1026586..0000000
 -	return IRQ_NONE;
 -}
 diff --git a/arch/avr32/mm/init.c b/arch/avr32/mm/init.c
-index 480760b..5ee1e40 100644
+index 480760b..3f90a87 100644
 --- a/arch/avr32/mm/init.c
 +++ b/arch/avr32/mm/init.c
 @@ -11,6 +11,7 @@
@@ -8510,8 +8826,16 @@ index 480760b..5ee1e40 100644
  #include <linux/bootmem.h>
  #include <linux/pagemap.h>
  #include <linux/nodemask.h>
-@@ -28,15 +29,13 @@ DEFINE_PER_CPU(struct mmu_gather, mmu_gathers);
- pgd_t swapper_pg_dir[PTRS_PER_PGD];
+@@ -23,20 +24,20 @@
+ #include <asm/setup.h>
+ #include <asm/sections.h>
+ 
++#define __page_aligned	__attribute__((section(".data.page_aligned")))
++
+ DEFINE_PER_CPU(struct mmu_gather, mmu_gathers);
+ 
+-pgd_t swapper_pg_dir[PTRS_PER_PGD];
++pgd_t swapper_pg_dir[PTRS_PER_PGD] __page_aligned;
  
  struct page *empty_zero_page;
 +EXPORT_SYMBOL(empty_zero_page);
@@ -8527,6 +8851,361 @@ index 480760b..5ee1e40 100644
  void show_mem(void)
  {
  	int total = 0, reserved = 0, cached = 0;
+@@ -109,19 +110,9 @@ void __init paging_init(void)
+ 	zero_page = alloc_bootmem_low_pages_node(NODE_DATA(0),
+ 						 PAGE_SIZE);
+ 
+-	{
+-		pgd_t *pg_dir;
+-		int i;
+-
+-		pg_dir = swapper_pg_dir;
+-		sysreg_write(PTBR, (unsigned long)pg_dir);
+-
+-		for (i = 0; i < PTRS_PER_PGD; i++)
+-			pgd_val(pg_dir[i]) = 0;
+-
+-		enable_mmu();
+-		printk ("CPU: Paging enabled\n");
+-	}
++	sysreg_write(PTBR, (unsigned long)swapper_pg_dir);
++	enable_mmu();
++	printk ("CPU: Paging enabled\n");
+ 
+ 	for_each_online_node(nid) {
+ 		pg_data_t *pgdat = NODE_DATA(nid);
+diff --git a/arch/avr32/mm/tlb.c b/arch/avr32/mm/tlb.c
+index b835257..e8af5e2 100644
+--- a/arch/avr32/mm/tlb.c
++++ b/arch/avr32/mm/tlb.c
+@@ -11,21 +11,21 @@
+ 
+ #include <asm/mmu_context.h>
+ 
+-#define _TLBEHI_I	0x100
++/* TODO: Get the correct number from the CONFIG1 system register */
++#define NR_TLB_ENTRIES 32
+ 
+-void show_dtlb_entry(unsigned int index)
++static void show_dtlb_entry(unsigned int index)
+ {
+-	unsigned int tlbehi, tlbehi_save, tlbelo, mmucr, mmucr_save;
++	u32 tlbehi, tlbehi_save, tlbelo, mmucr, mmucr_save;
+ 	unsigned long flags;
+ 
+ 	local_irq_save(flags);
+ 	mmucr_save = sysreg_read(MMUCR);
+ 	tlbehi_save = sysreg_read(TLBEHI);
+-	mmucr = mmucr_save & 0x13;
+-	mmucr |= index << 14;
++	mmucr = SYSREG_BFINS(DRP, index, mmucr_save);
+ 	sysreg_write(MMUCR, mmucr);
+ 
+-	asm volatile("tlbr" : : : "memory");
++	__builtin_tlbr();
+ 	cpu_sync_pipeline();
+ 
+ 	tlbehi = sysreg_read(TLBEHI);
+@@ -33,15 +33,17 @@ void show_dtlb_entry(unsigned int index)
+ 
+ 	printk("%2u: %c %c %02x   %05x %05x %o  %o  %c %c %c %c\n",
+ 	       index,
+-	       (tlbehi & 0x200)?'1':'0',
+-	       (tlbelo & 0x100)?'1':'0',
+-	       (tlbehi & 0xff),
+-	       (tlbehi >> 12), (tlbelo >> 12),
+-	       (tlbelo >> 4) & 7, (tlbelo >> 2) & 3,
+-	       (tlbelo & 0x200)?'1':'0',
+-	       (tlbelo & 0x080)?'1':'0',
+-	       (tlbelo & 0x001)?'1':'0',
+-	       (tlbelo & 0x002)?'1':'0');
++	       SYSREG_BFEXT(TLBEHI_V, tlbehi) ? '1' : '0',
++	       SYSREG_BFEXT(G, tlbelo) ? '1' : '0',
++	       SYSREG_BFEXT(ASID, tlbehi),
++	       SYSREG_BFEXT(VPN, tlbehi) >> 2,
++	       SYSREG_BFEXT(PFN, tlbelo) >> 2,
++	       SYSREG_BFEXT(AP, tlbelo),
++	       SYSREG_BFEXT(SZ, tlbelo),
++	       SYSREG_BFEXT(TLBELO_C, tlbelo) ? 'C' : ' ',
++	       SYSREG_BFEXT(B, tlbelo) ? 'B' : ' ',
++	       SYSREG_BFEXT(W, tlbelo) ? 'W' : ' ',
++	       SYSREG_BFEXT(TLBELO_D, tlbelo) ? 'D' : ' ');
+ 
+ 	sysreg_write(MMUCR, mmucr_save);
+ 	sysreg_write(TLBEHI, tlbehi_save);
+@@ -54,29 +56,33 @@ void dump_dtlb(void)
+ 	unsigned int i;
+ 
+ 	printk("ID  V G ASID VPN   PFN   AP SZ C B W D\n");
+-	for (i = 0; i < 32; i++)
++	for (i = 0; i < NR_TLB_ENTRIES; i++)
+ 		show_dtlb_entry(i);
+ }
+ 
+-static unsigned long last_mmucr;
+-
+-static inline void set_replacement_pointer(unsigned shift)
++static void update_dtlb(unsigned long address, pte_t pte)
+ {
+-	unsigned long mmucr, mmucr_save;
++	u32 tlbehi;
++	u32 mmucr;
+ 
+-	mmucr = mmucr_save = sysreg_read(MMUCR);
++	/*
++	 * We're not changing the ASID here, so no need to flush the
++	 * pipeline.
++	 */
++	tlbehi = sysreg_read(TLBEHI);
++	tlbehi = SYSREG_BF(ASID, SYSREG_BFEXT(ASID, tlbehi));
++	tlbehi |= address & MMU_VPN_MASK;
++	tlbehi |= SYSREG_BIT(TLBEHI_V);
++	sysreg_write(TLBEHI, tlbehi);
+ 
+ 	/* Does this mapping already exist? */
+-	__asm__ __volatile__(
+-		"	tlbs\n"
+-		"	mfsr %0, %1"
+-		: "=r"(mmucr)
+-		: "i"(SYSREG_MMUCR));
++	__builtin_tlbs();
++	mmucr = sysreg_read(MMUCR);
+ 
+ 	if (mmucr & SYSREG_BIT(MMUCR_N)) {
+ 		/* Not found -- pick a not-recently-accessed entry */
+-		unsigned long rp;
+-		unsigned long tlbar = sysreg_read(TLBARLO);
++		unsigned int rp;
++		u32 tlbar = sysreg_read(TLBARLO);
+ 
+ 		rp = 32 - fls(tlbar);
+ 		if (rp == 32) {
+@@ -84,30 +90,14 @@ static inline void set_replacement_pointer(unsigned shift)
+ 			sysreg_write(TLBARLO, -1L);
+ 		}
+ 
+-		mmucr &= 0x13;
+-		mmucr |= (rp << shift);
+-
++		mmucr = SYSREG_BFINS(DRP, rp, mmucr);
+ 		sysreg_write(MMUCR, mmucr);
+ 	}
+ 
+-	last_mmucr = mmucr;
+-}
+-
+-static void update_dtlb(unsigned long address, pte_t pte, unsigned long asid)
+-{
+-	unsigned long vpn;
+-
+-	vpn = (address & MMU_VPN_MASK) | _TLBEHI_VALID | asid;
+-	sysreg_write(TLBEHI, vpn);
+-	cpu_sync_pipeline();
+-
+-	set_replacement_pointer(14);
+-
+ 	sysreg_write(TLBELO, pte_val(pte) & _PAGE_FLAGS_HARDWARE_MASK);
+ 
+ 	/* Let's go */
+-	asm volatile("nop\n\ttlbw" : : : "memory");
+-	cpu_sync_pipeline();
++	__builtin_tlbw();
+ }
+ 
+ void update_mmu_cache(struct vm_area_struct *vma,
+@@ -120,39 +110,40 @@ void update_mmu_cache(struct vm_area_struct *vma,
+ 		return;
+ 
+ 	local_irq_save(flags);
+-	update_dtlb(address, pte, get_asid());
++	update_dtlb(address, pte);
+ 	local_irq_restore(flags);
+ }
+ 
+-void __flush_tlb_page(unsigned long asid, unsigned long page)
++static void __flush_tlb_page(unsigned long asid, unsigned long page)
+ {
+-	unsigned long mmucr, tlbehi;
++	u32 mmucr, tlbehi;
+ 
+-	page |= asid;
+-	sysreg_write(TLBEHI, page);
+-	cpu_sync_pipeline();
+-	asm volatile("tlbs");
++	/*
++	 * Caller is responsible for masking out non-PFN bits in page
++	 * and changing the current ASID if necessary. This means that
++	 * we don't need to flush the pipeline after writing TLBEHI.
++	 */
++	tlbehi = page | asid;
++	sysreg_write(TLBEHI, tlbehi);
++
++	__builtin_tlbs();
+ 	mmucr = sysreg_read(MMUCR);
+ 
+ 	if (!(mmucr & SYSREG_BIT(MMUCR_N))) {
+-		unsigned long tlbarlo;
+-		unsigned long entry;
++		unsigned int entry;
++		u32 tlbarlo;
+ 
+ 		/* Clear the "valid" bit */
+-		tlbehi = sysreg_read(TLBEHI);
+-		tlbehi &= ~_TLBEHI_VALID;
+ 		sysreg_write(TLBEHI, tlbehi);
+-		cpu_sync_pipeline();
+ 
+ 		/* mark the entry as "not accessed" */
+-		entry = (mmucr >> 14) & 0x3f;
++		entry = SYSREG_BFEXT(DRP, mmucr);
+ 		tlbarlo = sysreg_read(TLBARLO);
+-		tlbarlo |= (0x80000000 >> entry);
++		tlbarlo |= (0x80000000UL >> entry);
+ 		sysreg_write(TLBARLO, tlbarlo);
+ 
+ 		/* update the entry with valid bit clear */
+-		asm volatile("tlbw");
+-		cpu_sync_pipeline();
++		__builtin_tlbw();
+ 	}
+ }
+ 
+@@ -190,17 +181,22 @@ void flush_tlb_range(struct vm_area_struct *vma, unsigned long start,
+ 
+ 		local_irq_save(flags);
+ 		size = (end - start + (PAGE_SIZE - 1)) >> PAGE_SHIFT;
++
+ 		if (size > (MMU_DTLB_ENTRIES / 4)) { /* Too many entries to flush */
+ 			mm->context = NO_CONTEXT;
+ 			if (mm == current->mm)
+ 				activate_context(mm);
+ 		} else {
+-			unsigned long asid = mm->context & MMU_CONTEXT_ASID_MASK;
+-			unsigned long saved_asid = MMU_NO_ASID;
++			unsigned long asid;
++			unsigned long saved_asid;
++
++			asid = mm->context & MMU_CONTEXT_ASID_MASK;
++			saved_asid = MMU_NO_ASID;
+ 
+ 			start &= PAGE_MASK;
+ 			end += (PAGE_SIZE - 1);
+ 			end &= PAGE_MASK;
++
+ 			if (mm != current->mm) {
+ 				saved_asid = get_asid();
+ 				set_asid(asid);
+@@ -218,33 +214,34 @@ void flush_tlb_range(struct vm_area_struct *vma, unsigned long start,
+ }
+ 
+ /*
+- * TODO: If this is only called for addresses > TASK_SIZE, we can probably
+- * skip the ASID stuff and just use the Global bit...
++ * This function depends on the pages to be flushed having the G
++ * (global) bit set in their pte. This is true for all
++ * PAGE_KERNEL(_RO) pages.
+  */
+ void flush_tlb_kernel_range(unsigned long start, unsigned long end)
+ {
+ 	unsigned long flags;
+ 	int size;
+ 
+-	local_irq_save(flags);
+ 	size = (end - start + (PAGE_SIZE - 1)) >> PAGE_SHIFT;
+ 	if (size > (MMU_DTLB_ENTRIES / 4)) { /* Too many entries to flush */
+ 		flush_tlb_all();
+ 	} else {
+-		unsigned long asid = init_mm.context & MMU_CONTEXT_ASID_MASK;
+-		unsigned long saved_asid = get_asid();
++		unsigned long asid;
++
++		local_irq_save(flags);
++		asid = get_asid();
+ 
+ 		start &= PAGE_MASK;
+ 		end += (PAGE_SIZE - 1);
+ 		end &= PAGE_MASK;
+-		set_asid(asid);
++
+ 		while (start < end) {
+ 			__flush_tlb_page(asid, start);
+ 			start += PAGE_SIZE;
+ 		}
+-		set_asid(saved_asid);
++		local_irq_restore(flags);
+ 	}
+-	local_irq_restore(flags);
+ }
+ 
+ void flush_tlb_mm(struct mm_struct *mm)
+@@ -280,7 +277,7 @@ static void *tlb_start(struct seq_file *tlb, loff_t *pos)
+ {
+ 	static unsigned long tlb_index;
+ 
+-	if (*pos >= 32)
++	if (*pos >= NR_TLB_ENTRIES)
+ 		return NULL;
+ 
+ 	tlb_index = 0;
+@@ -291,7 +288,7 @@ static void *tlb_next(struct seq_file *tlb, void *v, loff_t *pos)
+ {
+ 	unsigned long *index = v;
+ 
+-	if (*index >= 31)
++	if (*index >= NR_TLB_ENTRIES - 1)
+ 		return NULL;
+ 
+ 	++*pos;
+@@ -313,16 +310,16 @@ static int tlb_show(struct seq_file *tlb, void *v)
+ 	if (*index == 0)
+ 		seq_puts(tlb, "ID  V G ASID VPN   PFN   AP SZ C B W D\n");
+ 
+-	BUG_ON(*index >= 32);
++	BUG_ON(*index >= NR_TLB_ENTRIES);
+ 
+ 	local_irq_save(flags);
+ 	mmucr_save = sysreg_read(MMUCR);
+ 	tlbehi_save = sysreg_read(TLBEHI);
+-	mmucr = mmucr_save & 0x13;
+-	mmucr |= *index << 14;
++	mmucr = SYSREG_BFINS(DRP, *index, mmucr_save);
+ 	sysreg_write(MMUCR, mmucr);
+ 
+-	asm volatile("tlbr" : : : "memory");
++	/* TLBR might change the ASID */
++	__builtin_tlbr();
+ 	cpu_sync_pipeline();
+ 
+ 	tlbehi = sysreg_read(TLBEHI);
+@@ -334,16 +331,18 @@ static int tlb_show(struct seq_file *tlb, void *v)
+ 	local_irq_restore(flags);
+ 
+ 	seq_printf(tlb, "%2lu: %c %c %02x   %05x %05x %o  %o  %c %c %c %c\n",
+-	       *index,
+-	       (tlbehi & 0x200)?'1':'0',
+-	       (tlbelo & 0x100)?'1':'0',
+-	       (tlbehi & 0xff),
+-	       (tlbehi >> 12), (tlbelo >> 12),
+-	       (tlbelo >> 4) & 7, (tlbelo >> 2) & 3,
+-	       (tlbelo & 0x200)?'1':'0',
+-	       (tlbelo & 0x080)?'1':'0',
+-	       (tlbelo & 0x001)?'1':'0',
+-	       (tlbelo & 0x002)?'1':'0');
++		   *index,
++		   SYSREG_BFEXT(TLBEHI_V, tlbehi) ? '1' : '0',
++		   SYSREG_BFEXT(G, tlbelo) ? '1' : '0',
++		   SYSREG_BFEXT(ASID, tlbehi),
++		   SYSREG_BFEXT(VPN, tlbehi) >> 2,
++		   SYSREG_BFEXT(PFN, tlbelo) >> 2,
++		   SYSREG_BFEXT(AP, tlbelo),
++		   SYSREG_BFEXT(SZ, tlbelo),
++		   SYSREG_BFEXT(TLBELO_C, tlbelo) ? '1' : '0',
++		   SYSREG_BFEXT(B, tlbelo) ? '1' : '0',
++		   SYSREG_BFEXT(W, tlbelo) ? '1' : '0',
++		   SYSREG_BFEXT(TLBELO_D, tlbelo) ? '1' : '0');
+ 
+ 	return 0;
+ }
 diff --git a/arch/avr32/oprofile/op_model_avr32.c b/arch/avr32/oprofile/op_model_avr32.c
 index e2f876b..df42325 100644
 --- a/arch/avr32/oprofile/op_model_avr32.c
@@ -10225,10 +10904,10 @@ index 3877c87..e80ea72 100644
  
 diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
 new file mode 100644
-index 0000000..4bc59aa
+index 0000000..bef61bb
 --- /dev/null
 +++ b/drivers/mmc/host/atmel-mci.c
-@@ -0,0 +1,1220 @@
+@@ -0,0 +1,1234 @@
 +/*
 + * Atmel MultiMedia Card Interface driver
 + *
@@ -10308,6 +10987,7 @@ index 0000000..4bc59aa
 +	struct clk		*mck;
 +	struct platform_device	*pdev;
 +
++	int pending_stop;
 +#ifdef CONFIG_DEBUG_FS
 +	struct dentry		*debugfs_root;
 +	struct dentry		*debugfs_regs;
@@ -11097,6 +11777,12 @@ index 0000000..4bc59aa
 +		data->bytes_xfered = data->blocks * data->blksz;
 +		atmci_data_complete(host, data);
 +	}
++	/* See if there is a pending STOP which can be sent */
++	if (host->pending_stop && mci_cmd_is_complete(host)) {
++		host->pending_stop = 0;
++		if (mrq->stop && !mci_set_stop_sent_is_completed(host))
++			send_stop_cmd(host->mmc, mrq->data, 0);
++	}
 +}
 +
 +static void atmci_cmd_interrupt(struct mmc_host *mmc, u32 status)
@@ -11149,9 +11835,16 @@ index 0000000..4bc59aa
 +	 * drivers) or when interrupts are disabled for a long time.
 +	 */
 +	mci_set_dma_complete(host);
-+	if (data->stop && mci_cmd_is_complete(host)
-+			&& !mci_set_stop_sent_is_completed(host))
-+		send_stop_cmd(host->mmc, data, 0);
++
++	if (data->stop) {
++		if (!mci_cmd_is_complete(host)) {
++			/* Just remember a STOP must be sent */
++			host->pending_stop = 1;
++		} else if (!mci_set_stop_sent_is_completed(host)) {
++			send_stop_cmd(host->mmc, data, 0);
++			host->pending_stop = 0;
++		}
++	}
 +
 +	/*
 +	 * Regardless of what the documentation says, we have to wait
@@ -14592,11 +15285,61 @@ index 0000000..010bdfd
 +MODULE_LICENSE("GPL");
 +MODULE_DESCRIPTION("Driver for SMC PCMCIA interface");
 +MODULE_AUTHOR("Hans-Christian Egtvedt <hcegtvedt@atmel.com>");
+diff --git a/drivers/rtc/rtc-at32ap700x.c b/drivers/rtc/rtc-at32ap700x.c
+index 42244f1..536505f 100644
+--- a/drivers/rtc/rtc-at32ap700x.c
++++ b/drivers/rtc/rtc-at32ap700x.c
+@@ -262,6 +262,7 @@ static int __init at32_rtc_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	platform_set_drvdata(pdev, rtc);
++	device_init_wakeup(&pdev->dev, 1);
+ 
+ 	dev_info(&pdev->dev, "Atmel RTC for AT32AP700x at %08lx irq %ld\n",
+ 			(unsigned long)rtc->regs, rtc->irq);
+@@ -281,6 +282,8 @@ static int __exit at32_rtc_remove(struct platform_device *pdev)
+ {
+ 	struct rtc_at32ap700x *rtc = platform_get_drvdata(pdev);
+ 
++	device_init_wakeup(&pdev->dev, 0);
++
+ 	free_irq(rtc->irq, rtc);
+ 	iounmap(rtc->regs);
+ 	rtc_device_unregister(rtc->rtc);
 diff --git a/drivers/serial/atmel_serial.c b/drivers/serial/atmel_serial.c
-index 55492fa..51f6efc 100644
+index 55492fa..06ec24d 100644
 --- a/drivers/serial/atmel_serial.c
 +++ b/drivers/serial/atmel_serial.c
-@@ -1440,6 +1440,15 @@ static struct uart_driver atmel_uart = {
+@@ -957,6 +957,20 @@ static void atmel_shutdown(struct uart_port *port)
+ }
+ 
+ /*
++ * Flush any TX data submitted for DMA. Called when the TX circular
++ * buffer is reset.
++ */
++static void atmel_flush_buffer(struct uart_port *port)
++{
++	struct atmel_uart_port *atmel_port = to_atmel_uart_port(port);
++
++	if (atmel_use_dma_tx(port)) {
++		UART_PUT_TCR(port, 0);
++		atmel_port->pdc_tx.ofs = 0;
++	}
++}
++
++/*
+  * Power / Clock management.
+  */
+ static void atmel_serial_pm(struct uart_port *port, unsigned int state,
+@@ -1190,6 +1204,7 @@ static struct uart_ops atmel_pops = {
+ 	.break_ctl	= atmel_break_ctl,
+ 	.startup	= atmel_startup,
+ 	.shutdown	= atmel_shutdown,
++	.flush_buffer	= atmel_flush_buffer,
+ 	.set_termios	= atmel_set_termios,
+ 	.type		= atmel_type,
+ 	.release_port	= atmel_release_port,
+@@ -1440,6 +1455,15 @@ static struct uart_driver atmel_uart = {
  };
  
  #ifdef CONFIG_PM
@@ -14612,7 +15355,7 @@ index 55492fa..51f6efc 100644
  static int atmel_serial_suspend(struct platform_device *pdev,
  				pm_message_t state)
  {
-@@ -1447,7 +1456,7 @@ static int atmel_serial_suspend(struct platform_device *pdev,
+@@ -1447,7 +1471,7 @@ static int atmel_serial_suspend(struct platform_device *pdev,
  	struct atmel_uart_port *atmel_port = to_atmel_uart_port(port);
  
  	if (device_may_wakeup(&pdev->dev)
@@ -14621,6 +15364,19 @@ index 55492fa..51f6efc 100644
  		enable_irq_wake(port->irq);
  	else {
  		uart_suspend_port(&atmel_uart, port);
+diff --git a/drivers/serial/serial_core.c b/drivers/serial/serial_core.c
+index db9920e..7ff7a1e 100644
+--- a/drivers/serial/serial_core.c
++++ b/drivers/serial/serial_core.c
+@@ -552,6 +552,8 @@ static void uart_flush_buffer(struct tty_struct *tty)
+ 
+ 	spin_lock_irqsave(&port->lock, flags);
+ 	uart_circ_clear(&state->info->xmit);
++	if (port->ops->flush_buffer)
++		port->ops->flush_buffer(port);
+ 	spin_unlock_irqrestore(&port->lock, flags);
+ 	tty_wakeup(tty);
+ }
 diff --git a/drivers/spi/atmel_spi.c b/drivers/spi/atmel_spi.c
 index 1749a27..291c7a6 100644
 --- a/drivers/spi/atmel_spi.c
@@ -47819,7 +48575,7 @@ index dc189f0..6296922 100644
   /* I2C*/
  extern void __init at91_add_device_i2c(struct i2c_board_info *devices, int nr_devices);
 diff --git a/include/asm-avr32/arch-at32ap/board.h b/include/asm-avr32/arch-at32ap/board.h
-index 7597b0b..13e6d28 100644
+index 7597b0b..5b2f7b6 100644
 --- a/include/asm-avr32/arch-at32ap/board.h
 +++ b/include/asm-avr32/arch-at32ap/board.h
 @@ -8,6 +8,12 @@
@@ -47850,12 +48606,13 @@ index 7597b0b..13e6d28 100644
  struct platform_device *
  at32_add_device_usba(unsigned int id, struct usba_platform_data *data);
  
-@@ -68,8 +73,17 @@ struct platform_device *at32_add_device_pwm(u32 mask);
+@@ -68,9 +73,27 @@ struct platform_device *at32_add_device_pwm(u32 mask);
  struct platform_device *
  at32_add_device_ssc(unsigned int id, unsigned int flags);
  
 -struct platform_device *at32_add_device_twi(unsigned int id);
 -struct platform_device *at32_add_device_mci(unsigned int id);
+-struct platform_device *at32_add_device_ac97c(unsigned int id);
 +struct i2c_board_info;
 +struct platform_device *at32_add_device_twi(unsigned int id,
 +					    struct i2c_board_info *b,
@@ -47867,10 +48624,20 @@ index 7597b0b..13e6d28 100644
 +};
 +struct platform_device *
 +at32_add_device_mci(unsigned int id, struct mci_platform_data *data);
- struct platform_device *at32_add_device_ac97c(unsigned int id);
++
++struct ac97c_platform_data {
++	unsigned short dma_rx_periph_id;
++	unsigned short dma_tx_periph_id;
++	unsigned short dma_controller_id;
++	int reset_pin;
++};
++struct platform_device *
++at32_add_device_ac97c(unsigned int id, struct ac97c_platform_data *data);
++
  struct platform_device *at32_add_device_abdac(unsigned int id);
  
-@@ -84,4 +98,20 @@ struct platform_device *
+ struct cf_platform_data {
+@@ -84,4 +107,20 @@ struct platform_device *
  at32_add_device_cf(unsigned int id, unsigned int extint,
  		struct cf_platform_data *data);
  
@@ -48479,6 +49246,18 @@ index 9315724..c563b77 100644
  #endif
  
  #endif /* __ASM_AVR32_IOCTLS_H */
+diff --git a/include/asm-avr32/mmu_context.h b/include/asm-avr32/mmu_context.h
+index c37c391..27ff234 100644
+--- a/include/asm-avr32/mmu_context.h
++++ b/include/asm-avr32/mmu_context.h
+@@ -13,7 +13,6 @@
+ #define __ASM_AVR32_MMU_CONTEXT_H
+ 
+ #include <asm/tlbflush.h>
+-#include <asm/pgalloc.h>
+ #include <asm/sysreg.h>
+ #include <asm-generic/mm_hooks.h>
+ 
 diff --git a/include/asm-avr32/page.h b/include/asm-avr32/page.h
 index 5582968..cbbc5ca 100644
 --- a/include/asm-avr32/page.h
@@ -48511,6 +49290,189 @@ index 0f5f134..a32a023 100644
 +#include <asm-generic/pci-dma-compat.h>
 +
  #endif /* __ASM_AVR32_PCI_H__ */
+diff --git a/include/asm-avr32/pgalloc.h b/include/asm-avr32/pgalloc.h
+index 51fc1f6..6408213 100644
+--- a/include/asm-avr32/pgalloc.h
++++ b/include/asm-avr32/pgalloc.h
+@@ -8,65 +8,79 @@
+ #ifndef __ASM_AVR32_PGALLOC_H
+ #define __ASM_AVR32_PGALLOC_H
+ 
+-#include <asm/processor.h>
+-#include <linux/threads.h>
+-#include <linux/slab.h>
+-#include <linux/mm.h>
++#include <linux/quicklist.h>
++#include <asm/page.h>
++#include <asm/pgtable.h>
+ 
+-#define pmd_populate_kernel(mm, pmd, pte) \
+-	set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(pte)))
++#define QUICK_PGD	0	/* Preserve kernel mappings over free */
++#define QUICK_PT	1	/* Zero on free */
+ 
+-static __inline__ void pmd_populate(struct mm_struct *mm, pmd_t *pmd,
++static inline void pmd_populate_kernel(struct mm_struct *mm,
++				       pmd_t *pmd, pte_t *pte)
++{
++	set_pmd(pmd, __pmd((unsigned long)pte));
++}
++
++static inline void pmd_populate(struct mm_struct *mm, pmd_t *pmd,
+ 				    pgtable_t pte)
+ {
+-	set_pmd(pmd, __pmd(_PAGE_TABLE + page_to_phys(pte)));
++	set_pmd(pmd, __pmd((unsigned long)page_address(pte)));
+ }
+ #define pmd_pgtable(pmd) pmd_page(pmd)
+ 
++static inline void pgd_ctor(void *x)
++{
++	pgd_t *pgd = x;
++
++	memcpy(pgd + USER_PTRS_PER_PGD,
++		swapper_pg_dir + USER_PTRS_PER_PGD,
++		(PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
++}
++
+ /*
+  * Allocate and free page tables
+  */
+-static __inline__ pgd_t *pgd_alloc(struct mm_struct *mm)
++static inline pgd_t *pgd_alloc(struct mm_struct *mm)
+ {
+-	return kcalloc(USER_PTRS_PER_PGD, sizeof(pgd_t), GFP_KERNEL);
++	return quicklist_alloc(QUICK_PGD, GFP_KERNEL | __GFP_REPEAT, pgd_ctor);
+ }
+ 
+ static inline void pgd_free(struct mm_struct *mm, pgd_t *pgd)
+ {
+-	kfree(pgd);
++	quicklist_free(QUICK_PGD, NULL, pgd);
+ }
+ 
+ static inline pte_t *pte_alloc_one_kernel(struct mm_struct *mm,
+ 					  unsigned long address)
+ {
+-	pte_t *pte;
+-
+-	pte = (pte_t *)get_zeroed_page(GFP_KERNEL | __GFP_REPEAT);
+-
+-	return pte;
++	return quicklist_alloc(QUICK_PT, GFP_KERNEL | __GFP_REPEAT, NULL);
+ }
+ 
+-static inline struct page *pte_alloc_one(struct mm_struct *mm,
++static inline pgtable_t pte_alloc_one(struct mm_struct *mm,
+ 					 unsigned long address)
+ {
+-	struct page *pte;
++	struct page *page;
++	void *pg;
+ 
+-	pte = alloc_page(GFP_KERNEL | __GFP_REPEAT | __GFP_ZERO);
+-	if (!pte)
++	pg = quicklist_alloc(QUICK_PT, GFP_KERNEL | __GFP_REPEAT, NULL);
++	if (!pg)
+ 		return NULL;
+-	pgtable_page_ctor(pte);
+-	return pte;
++
++	page = virt_to_page(pg);
++	pgtable_page_ctor(page);
++
++	return page;
+ }
+ 
+ static inline void pte_free_kernel(struct mm_struct *mm, pte_t *pte)
+ {
+-	free_page((unsigned long)pte);
++	quicklist_free(QUICK_PT, NULL, pte);
+ }
+ 
+ static inline void pte_free(struct mm_struct *mm, pgtable_t pte)
+ {
+ 	pgtable_page_dtor(pte);
+-	__free_page(pte);
++	quicklist_free_page(QUICK_PT, NULL, pte);
+ }
+ 
+ #define __pte_free_tlb(tlb,pte)				\
+@@ -75,6 +89,10 @@ do {							\
+ 	tlb_remove_page((tlb), pte);			\
+ } while (0)
+ 
+-#define check_pgt_cache() do { } while(0)
++static inline void check_pgt_cache(void)
++{
++	quicklist_trim(QUICK_PGD, NULL, 25, 16);
++	quicklist_trim(QUICK_PT, NULL, 25, 16);
++}
+ 
+ #endif /* __ASM_AVR32_PGALLOC_H */
+diff --git a/include/asm-avr32/pgtable.h b/include/asm-avr32/pgtable.h
+index 3ae7b54..cad34af 100644
+--- a/include/asm-avr32/pgtable.h
++++ b/include/asm-avr32/pgtable.h
+@@ -129,13 +129,6 @@ extern struct page *empty_zero_page;
+ 
+ #define _PAGE_FLAGS_CACHE_MASK	(_PAGE_CACHABLE | _PAGE_BUFFER | _PAGE_WT)
+ 
+-/* TODO: Check for saneness */
+-/* User-mode page table flags (to be set in a pgd or pmd entry) */
+-#define _PAGE_TABLE		(_PAGE_PRESENT | _PAGE_TYPE_SMALL | _PAGE_RW \
+-				 | _PAGE_USER | _PAGE_ACCESSED | _PAGE_DIRTY)
+-/* Kernel-mode page table flags */
+-#define _KERNPG_TABLE		(_PAGE_PRESENT | _PAGE_TYPE_SMALL | _PAGE_RW \
+-				 | _PAGE_ACCESSED | _PAGE_DIRTY)
+ /* Flags that may be modified by software */
+ #define _PAGE_CHG_MASK		(PTE_MASK | _PAGE_ACCESSED | _PAGE_DIRTY \
+ 				 | _PAGE_FLAGS_CACHE_MASK)
+@@ -254,10 +247,14 @@ static inline pte_t pte_mkyoung(pte_t pte)
+ }
+ 
+ #define pmd_none(x)	(!pmd_val(x))
+-#define pmd_present(x)	(pmd_val(x) & _PAGE_PRESENT)
+-#define pmd_clear(xp)	do { set_pmd(xp, __pmd(0)); } while (0)
+-#define	pmd_bad(x)	((pmd_val(x) & (~PAGE_MASK & ~_PAGE_USER))	\
+-			 != _KERNPG_TABLE)
++#define pmd_present(x)	(pmd_val(x))
++
++static inline void pmd_clear(pmd_t *pmdp)
++{
++	set_pmd(pmdp, __pmd(0));
++}
++
++#define	pmd_bad(x)	(pmd_val(x) & ~PAGE_MASK)
+ 
+ /*
+  * Permanent address of a page. We don't support highmem, so this is
+@@ -295,19 +292,16 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
+ 
+ #define page_pte(page)	page_pte_prot(page, __pgprot(0))
+ 
+-#define pmd_page_vaddr(pmd)					\
+-	((unsigned long) __va(pmd_val(pmd) & PAGE_MASK))
+-
+-#define pmd_page(pmd)	(phys_to_page(pmd_val(pmd)))
++#define pmd_page_vaddr(pmd)	pmd_val(pmd)
++#define pmd_page(pmd)		(virt_to_page(pmd_val(pmd)))
+ 
+ /* to find an entry in a page-table-directory. */
+-#define pgd_index(address) (((address) >> PGDIR_SHIFT) & (PTRS_PER_PGD-1))
+-#define pgd_offset(mm, address) ((mm)->pgd+pgd_index(address))
+-#define pgd_offset_current(address)				\
+-	((pgd_t *)__mfsr(SYSREG_PTBR) + pgd_index(address))
++#define pgd_index(address)	(((address) >> PGDIR_SHIFT)	\
++				 & (PTRS_PER_PGD - 1))
++#define pgd_offset(mm, address)	((mm)->pgd + pgd_index(address))
+ 
+ /* to find an entry in a kernel page-table-directory */
+-#define pgd_offset_k(address) pgd_offset(&init_mm, address)
++#define pgd_offset_k(address)	pgd_offset(&init_mm, address)
+ 
+ /* Find an entry in the third-level page table.. */
+ #define pte_index(address)				\
 diff --git a/include/asm-avr32/serial.h b/include/asm-avr32/serial.h
 new file mode 100644
 index 0000000..5ecaebc
@@ -48541,6 +49503,18 @@ index 07049f6..df68631 100644
 +#define TIF_FREEZE		29
  #define TIF_DEBUG		30	/* debugging enabled */
  #define TIF_USERSPACE		31      /* true if FS sets userspace */
+ 
+diff --git a/include/asm-avr32/tlbflush.h b/include/asm-avr32/tlbflush.h
+index 5bc7c88..bf90a78 100644
+--- a/include/asm-avr32/tlbflush.h
++++ b/include/asm-avr32/tlbflush.h
+@@ -26,7 +26,6 @@ extern void flush_tlb_mm(struct mm_struct *mm);
+ extern void flush_tlb_range(struct vm_area_struct *vma, unsigned long start,
+ 			    unsigned long end);
+ extern void flush_tlb_page(struct vm_area_struct *vma, unsigned long page);
+-extern void __flush_tlb_page(unsigned long asid, unsigned long page);
+ 
+ extern void flush_tlb_kernel_range(unsigned long start, unsigned long end);
  
 diff --git a/include/asm-avr32/xor.h b/include/asm-avr32/xor.h
 new file mode 100644
@@ -48825,6 +49799,18 @@ index b84b848..29edeec 100644
  extern int write_inode_now(struct inode *, int);
  extern int filemap_fdatawrite(struct address_space *);
  extern int filemap_flush(struct address_space *);
+diff --git a/include/linux/serial_core.h b/include/linux/serial_core.h
+index 289942f..596aa1f 100644
+--- a/include/linux/serial_core.h
++++ b/include/linux/serial_core.h
+@@ -188,6 +188,7 @@ struct uart_ops {
+ 	void		(*break_ctl)(struct uart_port *, int ctl);
+ 	int		(*startup)(struct uart_port *);
+ 	void		(*shutdown)(struct uart_port *);
++	void		(*flush_buffer)(struct uart_port *);
+ 	void		(*set_termios)(struct uart_port *, struct ktermios *new,
+ 				       struct ktermios *old);
+ 	void		(*pm)(struct uart_port *, unsigned int state,
 diff --git a/include/linux/usb/atmel_usba_udc.h b/include/linux/usb/atmel_usba_udc.h
 new file mode 100644
 index 0000000..6311fa2
@@ -49273,11 +50259,24 @@ index 3885e70..06ed78a 100644
  		}
 diff --git a/localversion-atmel b/localversion-atmel
 new file mode 100644
-index 0000000..b90deba
+index 0000000..9916d6a
 --- /dev/null
 +++ b/localversion-atmel
 @@ -0,0 +1 @@
-+.atmel.1
++.atmel.2
+diff --git a/mm/Kconfig b/mm/Kconfig
+index 0016ebd..819e676 100644
+--- a/mm/Kconfig
++++ b/mm/Kconfig
+@@ -187,7 +187,7 @@ config BOUNCE
+ config NR_QUICK
+ 	int
+ 	depends on QUICKLIST
+-	default "2" if SUPERH
++	default "2" if SUPERH || AVR32
+ 	default "1"
+ 
+ config VIRT_TO_BUS
 diff --git a/sound/Kconfig b/sound/Kconfig
 index b2a2db4..29a9979 100644
 --- a/sound/Kconfig
@@ -49332,10 +50331,10 @@ index 0000000..5d87d0e
 +obj-$(CONFIG_SND_ATMEL_AC97)	+= snd-atmel-ac97.o
 diff --git a/sound/avr32/ac97c.c b/sound/avr32/ac97c.c
 new file mode 100644
-index 0000000..87f8a43
+index 0000000..c25adcf
 --- /dev/null
 +++ b/sound/avr32/ac97c.c
-@@ -0,0 +1,914 @@
+@@ -0,0 +1,951 @@
 +/*
 + * Driver for the Atmel AC97 controller
 + *
@@ -49348,6 +50347,7 @@ index 0000000..87f8a43
 +#include <linux/clk.h>
 +#include <linux/delay.h>
 +#include <linux/dma-mapping.h>
++#include <linux/gpio.h>
 +#include <linux/init.h>
 +#include <linux/interrupt.h>
 +#include <linux/module.h>
@@ -49355,7 +50355,6 @@ index 0000000..87f8a43
 +#include <linux/mutex.h>
 +#include <linux/io.h>
 +
-+#include <sound/driver.h>
 +#include <sound/core.h>
 +#include <sound/initval.h>
 +#include <sound/pcm.h>
@@ -49363,6 +50362,7 @@ index 0000000..87f8a43
 +#include <sound/ac97_codec.h>
 +#include <sound/memalloc.h>
 +
++#include <asm/arch/board.h>
 +#include <asm/dma-controller.h>
 +
 +#include "ac97c.h"
@@ -49375,6 +50375,7 @@ index 0000000..87f8a43
 +	struct dma_request_cyclic req_rx;
 +	unsigned short rx_periph_id;
 +	unsigned short tx_periph_id;
++	unsigned short controller;
 +};
 +
 +struct atmel_ac97 {
@@ -49389,6 +50390,7 @@ index 0000000..87f8a43
 +	struct snd_ac97_bus *ac97_bus;
 +	int opened;
 +	int period;
++	int reset_pin;
 +	u64 cur_format;
 +	unsigned int cur_rate;
 +	struct clk *mck;
@@ -50030,6 +51032,14 @@ index 0000000..87f8a43
 +
 +static void snd_atmel_ac97_reset(struct atmel_ac97 *chip)
 +{
++	/* TODO: gpio_is_valid(data->reset_pin) with kernel 2.6.26. */
++	if (chip->reset_pin >= 0) {
++		gpio_set_value(chip->reset_pin, 0);
++		/* AC97 v2.2 specifications says minimum 1 us. */
++		udelay(5);
++		gpio_set_value(chip->reset_pin, 1);
++	}
++
 +	ac97c_writel(chip, MR, AC97C_MR_WRST);
 +	mdelay(1);
 +	ac97c_writel(chip, MR, AC97C_MR_ENA);
@@ -50065,6 +51075,7 @@ index 0000000..87f8a43
 +		.read	= snd_atmel_ac97_read,
 +	};
 +	struct atmel_ac97 *chip = get_chip(card);
++	struct ac97c_platform_data *pdata;
 +	struct resource *regs;
 +	struct clk *mck;
 +	int err;
@@ -50072,6 +51083,26 @@ index 0000000..87f8a43
 +	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 +	if (!regs)
 +		return -ENXIO;
++
++	pdata = pdev->dev.platform_data;
++	if (!pdata)
++		return -ENXIO;
++
++	chip->reset_pin = pdata->reset_pin;
++
++	/* TODO: gpio_is_valid(data->reset_pin) with kernel 2.6.26. */
++	if (chip->reset_pin >= 0) {
++		if (gpio_request(chip->reset_pin, chip->card->shortname)) {
++			dev_dbg(&pdev->dev, "ac97: reset pin not available\n");
++			chip->reset_pin = -1;
++		} else {
++			gpio_direction_output(chip->reset_pin, 1);
++		}
++	}
++
++	chip->dma.rx_periph_id = pdata->dma_rx_periph_id;
++	chip->dma.tx_periph_id = pdata->dma_tx_periph_id;
++	chip->dma.controller = pdata->dma_controller_id;
 +
 +	mck = clk_get(&pdev->dev, "pclk");
 +	if (IS_ERR(mck))
@@ -50111,7 +51142,9 @@ index 0000000..87f8a43
 +			THIS_MODULE, sizeof(struct atmel_ac97));
 +	if (!card)
 +		goto out;
++
 +	chip = get_chip(card);
++	chip->reset_pin = -1;
 +
 +	err = snd_atmel_ac97_create(card, pdev);
 +	if (err)
@@ -50127,22 +51160,18 @@ index 0000000..87f8a43
 +	if (err)
 +		goto out_free_card;
 +
-+	/* TODO: Get this information from the platform device */
-+	chip->dma.req_tx.req.dmac = find_dma_controller(0);
++	chip->dma.req_tx.req.dmac = find_dma_controller(chip->dma.controller);
 +	if (!chip->dma.req_tx.req.dmac) {
 +		dev_dbg(&chip->pdev->dev, "DMA controller for TX missing\n");
 +		err = -ENODEV;
 +		goto out_free_card;
 +	}
-+	chip->dma.req_rx.req.dmac = find_dma_controller(0);
++	chip->dma.req_rx.req.dmac = find_dma_controller(chip->dma.controller);
 +	if (!chip->dma.req_rx.req.dmac) {
 +		dev_dbg(&chip->pdev->dev, "DMA controller for RX missing\n");
 +		err = -ENODEV;
 +		goto out_free_card;
 +	}
-+
-+	chip->dma.rx_periph_id = 3;
-+	chip->dma.tx_periph_id = 4;
 +
 +	ch = dma_alloc_channel(chip->dma.req_tx.req.dmac);
 +	if (ch < 0) {
@@ -50185,6 +51214,9 @@ index 0000000..87f8a43
 +	return 0;
 +
 +out_free_card:
++	/* TODO: gpio_is_valid(data->reset_pin) with kernel 2.6.26. */
++	if (chip->reset_pin >= 0)
++		gpio_free(chip->reset_pin);
 +	snd_card_free(card);
 +out:
 +	return err;
@@ -50204,7 +51236,7 @@ index 0000000..87f8a43
 +
 +static int snd_atmel_ac97_resume(struct platform_device *pdev)
 +{
-+	struct snd_card *card = dev_get_drvdata(pdev);
++	struct snd_card *card = platform_get_drvdata(pdev);
 +	struct atmel_ac97 *chip = card->private_data;
 +
 +	clk_enable(chip->mck);
@@ -50219,7 +51251,11 @@ index 0000000..87f8a43
 +static int __devexit snd_atmel_ac97_remove(struct platform_device *pdev)
 +{
 +	struct snd_card *card = platform_get_drvdata(pdev);
++	struct atmel_ac97 *chip = get_chip(card);
 +
++	/* TODO: gpio_is_valid(data->reset_pin) with kernel 2.6.26. */
++	if (chip->reset_pin >= 0)
++		gpio_free(chip->reset_pin);
 +	snd_card_free(card);
 +	platform_set_drvdata(pdev, NULL);
 +	return 0;
