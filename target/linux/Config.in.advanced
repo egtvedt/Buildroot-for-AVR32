@@ -32,7 +32,7 @@ if BR2_KERNEL_LINUX_ADVANCED
 # --- These 'constants' requires regular maintenance, so put them first
 config BR2_KERNEL_PATCH_LEVEL
 	string
-	default "9" if BR2_LINUX_2_6_25 && BR2_KERNEL_ADD_LATEST_MINORPATCH
+	default "10" if BR2_LINUX_2_6_25 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "7" if BR2_LINUX_2_6_24 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "17" if BR2_LINUX_2_6_23 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "19" if BR2_LINUX_2_6_22 && BR2_KERNEL_ADD_LATEST_MINORPATCH
@@ -42,7 +42,7 @@ config BR2_KERNEL_PATCH_LEVEL
 
 config BR2_KERNEL_CURRENT_VERSION
 	string
-	default "2.6.25.6"
+	default "2.6.25.10"
 
 config BR2_KERNEL_NEXT_VERSION
 	string
@@ -133,9 +133,9 @@ choice
 	  Select the specific Linux version you want to use
 
 config BR2_LINUX_2_6_STABLE
-	bool "The latest stable Linux kernel (2.6.25.6)"
+	bool "The latest stable Linux kernel (2.6.25.10)"
 	help
-	  Linux 2.6.25.6
+	  Linux 2.6.25.10
 
 config BR2_LINUX_2_6_25
 	bool "Linux 2.6.25"
