@@ -23,7 +23,8 @@ $(TIFF_DIR)/.unpacked: $(DL_DIR)/$(TIFF_SOURCE)
 	$(CONFIG_UPDATE) $(TIFF_DIR)/config
 	touch $(TIFF_DIR)/.unpacked
 
-$(TIFF_DIR)/.configured: $(TIFF_DIR)/.unpacked
+$(TIFF_DIR)/.configured: $(TIFF_DIR)/.unpacked \
+	$(STAGING_DIR)/usr/lib/libjpeg.a $(STAGING_DIR)/usr/lib/libz.so
 	(cd $(TIFF_DIR); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_OPTS) \
 		$(TARGET_CONFIGURE_ARGS) \
@@ -56,20 +57,22 @@ $(TIFF_DIR)/.configured: $(TIFF_DIR)/.unpacked
 
 $(TIFF_DIR)/libtiff/.libs/libtiff.a: $(TIFF_DIR)/.configured
 	$(MAKE) -C $(TIFF_DIR)
-	touch -c $(TIFF_DIR)/libtiff/.libs/libtiff.a
+	touch -c $@
 
-$(STAGING_DIR)/usr/lib/libtiff.so.$(TIFF_VERSION): $(TIFF_DIR)/libtiff/.libs/libtiff.a
+$(STAGING_DIR)/usr/lib/libtiff.so: $(TIFF_DIR)/libtiff/.libs/libtiff.a
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(TIFF_DIR) install
 	$(SED) "s,^libdir=.*,libdir=\'$(STAGING_DIR)/usr/lib\',g" $(STAGING_DIR)/usr/lib/libtiff.la
-	touch -c $(STAGING_DIR)/usr/lib/libtiff.so.$(TIFF_VERSION)
+	touch -c $@
 
-$(TARGET_DIR)/usr/lib/libtiff.so.$(TIFF_VERSION): $(STAGING_DIR)/usr/lib/libtiff.so.$(TIFF_VERSION)
+$(TARGET_DIR)/usr/lib/libtiff.so: $(STAGING_DIR)/usr/lib/libtiff.so
 	cp -dpf $(STAGING_DIR)/usr/lib/libtiff.so* $(TARGET_DIR)/usr/lib/
-	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libtiff.so.$(TIFF_VERSION)
+	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
 
-tiff: uclibc zlib jpeg $(TARGET_DIR)/usr/lib/libtiff.so.$(TIFF_VERSION)
+tiff: uclibc $(TARGET_DIR)/usr/lib/libtiff.so
 
 tiff-clean:
+	-rm -f $(TARGET_DIR)/usr/lib/libtiff.so*
+	-$(MAKE) -C $(TIFF_DIR) DESTDIR=$(STAGING_DIR) uninstall
 	-$(MAKE) -C $(TIFF_DIR) clean
 
 tiff-dirclean:
