@@ -1,0 +1,104 @@
+Index: lsdldoom-1.4.4.4/src/d_main.c
+===================================================================
+--- lsdldoom-1.4.4.4.orig/src/d_main.c	2008-07-21 10:33:34.000000000 +0200
++++ lsdldoom-1.4.4.4/src/d_main.c	2008-07-21 10:36:16.000000000 +0200
+@@ -230,6 +230,7 @@
+     case GS_LEVEL:
+       V_SetPalette(0); // cph - use default (basic) palette  
+     default:
++      break;
+     }
+ 
+     switch (gamestate) {
+@@ -243,6 +244,7 @@
+       D_PageDrawer();
+       break;
+     default:
++      break;
+     }
+   } else if (gametic) { // In a level
+     boolean redrawborderstuff;
+Index: lsdldoom-1.4.4.4/src/g_game.c
+===================================================================
+--- lsdldoom-1.4.4.4.orig/src/g_game.c	2008-07-21 10:33:34.000000000 +0200
++++ lsdldoom-1.4.4.4/src/g_game.c	2008-07-21 10:34:06.000000000 +0200
+@@ -875,6 +875,7 @@
+     case GS_INTERMISSION:
+       WI_End();
+     default:
++      break;
+     }
+     prevgamestate = gamestate;
+   }
+Index: lsdldoom-1.4.4.4/src/p_maputl.h
+===================================================================
+--- lsdldoom-1.4.4.4.orig/src/p_maputl.h	2008-07-21 10:33:40.000000000 +0200
++++ lsdldoom-1.4.4.4/src/p_maputl.h	2008-07-21 10:46:35.000000000 +0200
+@@ -82,7 +82,7 @@
+ void    P_SetThingPosition(mobj_t *thing);
+ boolean P_BlockLinesIterator (int x, int y, boolean func(line_t *));
+ boolean P_BlockThingsIterator(int x, int y, boolean func(mobj_t *));
+-boolean ThingIsOnLine(const mobj_t *t, const line_t *l);  /* killough 3/15/98 */
++boolean CONSTFUNC ThingIsOnLine(const mobj_t *t, const line_t *l);  /* killough 3/15/98 */
+ boolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
+                        int flags, boolean trav(intercept_t *));
+ 
+Index: lsdldoom-1.4.4.4/src/r_segs.c
+===================================================================
+--- lsdldoom-1.4.4.4.orig/src/r_segs.c	2008-07-21 10:33:35.000000000 +0200
++++ lsdldoom-1.4.4.4/src/r_segs.c	2008-07-21 10:35:47.000000000 +0200
+@@ -47,9 +47,9 @@
+ // killough 1/6/98: replaced globals with statics where appropriate
+ 
+ // True if any of the segs textures might be visible.
+-static boolean  segtextured;
+-static boolean  markfloor;      // False if the back side is the same plane.
+-static boolean  markceiling;
++boolean         segtextured;
++boolean         markfloor;      // False if the back side is the same plane.
++boolean         markceiling;
+ static boolean  maskedtexture;
+ static int      toptexture;
+ static int      bottomtexture;
+@@ -65,8 +65,8 @@
+ //
+ // regular wall
+ //
+-static int      rw_x;
+-static int      rw_stopx;
++int             rw_x;
++int             rw_stopx;
+ static angle_t  rw_centerangle;
+ static fixed_t  rw_offset;
+ static fixed_t  rw_scale;
+Index: lsdldoom-1.4.4.4/src/wi_stuff.c
+===================================================================
+--- lsdldoom-1.4.4.4.orig/src/wi_stuff.c	2008-07-21 10:33:35.000000000 +0200
++++ lsdldoom-1.4.4.4/src/wi_stuff.c	2008-07-21 10:45:41.000000000 +0200
+@@ -368,7 +368,7 @@
+ static const patch_t  * frags;
+ 
+ // Time sucks.
+-static const patch_t  * time;
++static const patch_t  * witime;
+ static const patch_t  * par;
+ static const patch_t  * sucks;
+ 
+@@ -806,7 +806,7 @@
+ 
+ static void WI_drawTimeStats(int cnt_time, int cnt_total_time, int cnt_par)
+ {
+-  V_DrawMemPatch(SP_TIMEX, SP_TIMEY, FB, time, NULL, VPT_STRETCH);
++  V_DrawMemPatch(SP_TIMEX, SP_TIMEY, FB, witime, NULL, VPT_STRETCH);
+   WI_drawTime(320/2 - SP_TIMEX, SP_TIMEY, cnt_time);
+ 
+   V_DrawMemPatch(SP_TIMEX, (SP_TIMEY+200)/2, FB, total, NULL, VPT_STRETCH);
+@@ -1790,7 +1790,7 @@
+   { "WIOSTI", &items },
+   { "WIFRGS", &frags },
+   { "WICOLON",&colon },
+-  { "WITIME", &time  },
++  { "WITIME", &witime  },
+   { "WISUCKS",&sucks },
+   { "WIPAR",  &par   },
+   { "WIKILRS",&killers},

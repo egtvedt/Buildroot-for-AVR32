@@ -1,0 +1,9 @@
+config BR2_PACKAGE_LSDLDOOM
+	bool "lsdldoom"
+	depends on BR2_PACKAGE_SDL
+	help
+	  This is the linux version of the popular doom game using the SDL
+	  library, lsdldoom is an alternative to the lxdoom package.
+
+	  It is recommended to add the SDL_mixer package for audio support, but
+	  it is not required.

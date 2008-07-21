@@ -489,6 +489,7 @@ menuconfig BR2_GAMES
 	  Support for games
 
 if BR2_GAMES
+source "package/lsdldoom/Config.in"
 source "package/lxdoom/Config.in"
 source "package/ace_of_penguins/Config.in"
 source "package/gnuchess/Config.in"
