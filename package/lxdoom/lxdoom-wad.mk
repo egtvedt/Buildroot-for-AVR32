@@ -15,14 +15,14 @@ $(DL_DIR)/$(LXDOOM_WAD_SOURCE):
 $(LXDOOM_WAD_DIR)/.unpacked: $(DL_DIR)/$(LXDOOM_WAD_SOURCE)
 	mkdir -p $(LXDOOM_WAD_DIR)
 	cp -f $(DL_DIR)/$(LXDOOM_WAD_SOURCE) $(LXDOOM_WAD_DIR)
-	gunzip -d $(LXDOOM_WAD_DIR)/$(LXDOOM_WAD_SOURCE) 
+	gunzip -d $(LXDOOM_WAD_DIR)/$(LXDOOM_WAD_SOURCE)
 	touch $@
 
-$(LXDOOM_WAD_DIR)/.installed: $(LXDOOM_WAD_DIR)/.unpacked
-	cp -f $(LXDOOM_WAD_DIR)/* $(TARGET_DIR)/usr/games
-	touch $@
+$(TARGET_DIR)/usr/share/games/doom/doom1.wad: $(LXDOOM_WAD_DIR)/.unpacked
+	mkdir -p $(TARGET_DIR)/usr/share/games/doom
+	cp -f $(LXDOOM_WAD_DIR)/doom-$(LXDOOM_WAD_VERSION).wad $@
 
-lxdoom-wad: lxdoom $(LXDOOM_WAD_DIR)/.installed
+lxdoom-wad: uclibc $(TARGET_DIR)/usr/share/games/doom/doom1.wad
 
 #############################################################
 #
