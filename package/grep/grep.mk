@@ -33,17 +33,7 @@ $(GNUGREP_DIR)/.configured: $(GNUGREP_DIR)/.unpacked
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
-		--prefix=/usr \
-		--exec-prefix=/usr \
-		--bindir=/usr/bin \
-		--sbindir=/usr/sbin \
-		--libdir=/lib \
-		--libexecdir=/usr/lib \
-		--sysconfdir=/etc \
-		--datadir=/usr/share \
-		--localstatedir=/var \
-		--mandir=/usr/man \
-		--infodir=/usr/info \
+		--prefix=/ \
 		$(DISABLE_NLS) \
 		$(DISABLE_LARGEFILE) \
 		--disable-perl-regexp \
@@ -54,21 +44,17 @@ $(GNUGREP_DIR)/.configured: $(GNUGREP_DIR)/.unpacked
 $(GNUGREP_DIR)/$(GNUGREP_BINARY): $(GNUGREP_DIR)/.configured
 	$(MAKE) -C $(GNUGREP_DIR)
 
-# This stuff is needed to work around GNU make deficiencies
-grep-target_binary: $(GNUGREP_DIR)/$(GNUGREP_BINARY)
-	@if [ -L $(TARGET_DIR)/$(GNUGREP_TARGET_BINARY) ]; then \
-		rm -f $(TARGET_DIR)/$(GNUGREP_TARGET_BINARY); fi
-	@if [ ! -f $(GNUGREP_DIR)/$(GNUGREP_BINARY) -o $(TARGET_DIR)/$(GNUGREP_TARGET_BINARY) -ot \
-	$(GNUGREP_DIR)/$(GNUGREP_BINARY) ]; then \
-	    set -x; \
-	    rm -f $(TARGET_DIR)/bin/grep $(TARGET_DIR)/bin/egrep $(TARGET_DIR)/bin/fgrep; \
-	    cp -a $(GNUGREP_DIR)/src/grep $(GNUGREP_DIR)/src/egrep \
-		$(GNUGREP_DIR)/src/fgrep $(TARGET_DIR)/bin/; fi
+$(TARGET_DIR)/$(GNUGREP_TARGET_BINARY): $(GNUGREP_DIR)/$(GNUGREP_BINARY)
+	for i in egrep fgrep grep; do \
+		$(INSTALL) $(GNUGREP_DIR)/src/$$i $(@D); \
+	done
+	$(STRIPCMD) $(STRIP_STRIP_ALL) $@
 
-grep: uclibc gettext libintl grep-target_binary
-
+grep: uclibc $(if $(BR2_ENABLE_LOCALE),gettext libintl) \
+	 $(TARGET_DIR)/$(GNUGREP_TARGET_BINARY)
+	echo deps: $^
 grep-clean:
-	$(MAKE) DESTDIR=$(TARGET_DIR) -C $(GNUGREP_DIR) uninstall
+	rm -f $(addprefix $(TARGET_DIR)/bin/,egrep fgrep grep)
 	-$(MAKE) -C $(GNUGREP_DIR) clean
 
 grep-dirclean:
