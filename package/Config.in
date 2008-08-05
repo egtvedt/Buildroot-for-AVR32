@@ -4,13 +4,11 @@ source "package/busybox/Config.in"
 
 comment "The minimum needed to build a uClibc development system"
 
+if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/bash/Config.in"
 source "package/bzip2/Config.in"
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/coreutils/Config.in"
-endif
 source "package/diffutils/Config.in"
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/findutils/Config.in"
 endif
 source "package/flex/Config.in"
@@ -32,7 +30,7 @@ endif
 #	bool "Common Applications"
 #	default y
 #	help
-#	  A set of applications, utilities and libraries for 
+#	  A set of applications, utilities and libraries for
 #	  text processing, toolchain generation and other things.
 
 
@@ -69,11 +67,12 @@ source "package/bootutils/Config.in"
 endif
 source "package/cups/Config.in"
 source "package/customize/Config.in"
+if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/dash/Config.in"
+endif
 source "package/file/Config.in"
 source "package/gamin/Config.in"
 source "package/icu/Config.in"
-source "package/ipkg/Config.in"
 source "package/kexec/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/less/Config.in"
@@ -98,15 +97,11 @@ source "package/modutils/Config.in"
 endif
 source "package/ng-spice-rework/Config.in"
 source "package/popt/Config.in"
-source "package/portage/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/procps/Config.in"
 endif
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/psmisc/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
-source "package/rpm/Config.in"
 endif
 source "package/screen/Config.in"
 source "package/startup-notification/Config.in"
@@ -116,14 +111,8 @@ if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/sysklogd/Config.in"
 # busybox has init and the runit stuff
 source "package/sysvinit/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/tinylogin/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/util-linux/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/which/Config.in"
 endif
 
@@ -442,6 +431,20 @@ endif
 source "package/lzo/Config.in"
 source "package/lzma/Config.in"
 source "package/zlib/Config.in"
+endif
+
+menuconfig BR2_PACKAGEMGRS_SUPPORT
+	bool "Package managers"
+	default y
+	help
+	  Support for package managers like rpm, portage, ipkg, ..
+
+if BR2_PACKAGEMGRS_SUPPORT
+source "package/ipkg/Config.in"
+source "package/portage/Config.in"
+if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
+source "package/rpm/Config.in"
+endif
 endif
 
 menuconfig BR2_SCRIPTING_SUPPORT

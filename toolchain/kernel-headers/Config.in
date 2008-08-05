@@ -6,7 +6,7 @@ comment "Kernel Header Options"
 
 choice
 	prompt "Kernel Headers"
-	default BR2_KERNEL_HEADERS_2_6_25
+	default BR2_KERNEL_HEADERS_2_6_26
 
 	help
 	  Select the version of kernel header files you wish to use.
@@ -16,33 +16,9 @@ choice
 	  For the snapshot, you have to provide the
 	  linux-2.6.tar.bz2 tarball in your download dir.
 
-	config BR2_KERNEL_HEADERS_2_4_25
-		depends on !BR2_avr32 && !BR2_nios2 && BR2_DEPRECATED
-		bool "Linux 2.4.25 kernel headers"
-
-	config BR2_KERNEL_HEADERS_2_4_27
-		depends on !BR2_avr32 && !BR2_nios2 && BR2_DEPRECATED
-		bool "Linux 2.4.27 kernel headers"
-
-	config BR2_KERNEL_HEADERS_2_4_29
-		depends on !BR2_avr32 && !BR2_avr32 && !BR2_nios2 && BR2_DEPRECATED
-		bool "Linux 2.4.29 kernel headers"
-
 	config BR2_KERNEL_HEADERS_2_4_31
 		depends on !BR2_avr32 && !BR2_nios2 && BR2_DEPRECATED
 		bool "Linux 2.4.31 kernel headers"
-
-	config BR2_KERNEL_HEADERS_2_6_9
-		depends on !BR2_avr32 && BR2_DEPRECATED
-		bool "Linux 2.6.9 kernel headers"
-
-	config BR2_KERNEL_HEADERS_2_6_11
-		depends on !BR2_avr32 && BR2_DEPRECATED
-		bool "Linux 2.6.11 kernel headers"
-
-	config BR2_KERNEL_HEADERS_2_6_12
-		depends on !BR2_avr32 && !BR2_nios2 && BR2_DEPRECATED
-		bool "Linux 2.6.12 kernel headers"
 
 	config BR2_KERNEL_HEADERS_2_6_20_4
 		depends on !BR2_avr32 && !BR2_nios2 && BR2_DEPRECATED
@@ -77,11 +53,15 @@ choice
 		bool "Linux 2.6.23.x kernel headers"
 
 	config BR2_KERNEL_HEADERS_2_6_24
-		depends on BR2_RECENT
+		depends on BR2_DEPRECATED
 		bool "Linux 2.6.24.x kernel headers"
 
 	config BR2_KERNEL_HEADERS_2_6_25
+		depends on BR2_RECENT
 		bool "Linux 2.6.25.x kernel headers"
+
+	config BR2_KERNEL_HEADERS_2_6_26
+		bool "Linux 2.6.26.x kernel headers"
 
 	config BR2_KERNEL_HEADERS_SNAP
 		bool "Linux 2.6 snapshot"
@@ -117,13 +97,7 @@ config BR2_KERNEL_HEADERS_PATCH_DIR
 
 config BR2_DEFAULT_KERNEL_HEADERS
 	string
-	default "2.4.25"	if BR2_KERNEL_HEADERS_2_4_25
-	default "2.4.27"	if BR2_KERNEL_HEADERS_2_4_27
-	default "2.4.29"	if BR2_KERNEL_HEADERS_2_4_29
 	default "2.4.31"	if BR2_KERNEL_HEADERS_2_4_31
-	default "2.6.9"		if BR2_KERNEL_HEADERS_2_6_9
-	default "2.6.11"	if BR2_KERNEL_HEADERS_2_6_11
-	default "2.6.12"	if BR2_KERNEL_HEADERS_2_6_12
 	default "2.6.20.4"	if BR2_KERNEL_HEADERS_2_6_20_4
 	default "2.6.20.20"	if BR2_KERNEL_HEADERS_2_6_20
 	default "2.6.21.5"	if BR2_KERNEL_HEADERS_2_6_21_5
@@ -134,5 +108,6 @@ config BR2_DEFAULT_KERNEL_HEADERS
 	default "2.6.23"	if BR2_KERNEL_HEADERS_2_6_23
 	default "2.6.24.7"	if BR2_KERNEL_HEADERS_2_6_24
 	default "2.6.25.10"	if BR2_KERNEL_HEADERS_2_6_25
+	default "2.6.26"	if BR2_KERNEL_HEADERS_2_6_26
 	default "2.6"		if BR2_KERNEL_HEADERS_SNAP
 

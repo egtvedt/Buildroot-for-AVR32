@@ -110,9 +110,7 @@ INFLATE.tgz = $(ZCAT)
 INFLATE.tar = cat
 
 # MESSAGE Macro -- display a message in bold type
-MESSAGE = @echo $(TERM_BOLD); \
-	echo ">>> $($(PKG)_NAME) $($(PKG)_VERSION) $(1)"; \
-	echo $(TERM_RESET)
+MESSAGE = @echo "$(TERM_BOLD)>>> $($(PKG)_NAME) $($(PKG)_VERSION) $(1)$(TERM_RESET)"
 TERM_BOLD = #$(shell tput bold)
 TERM_RESET = #$(shell tput rmso)
 
@@ -157,7 +155,7 @@ $(BUILD_DIR)/%/.stamp_extracted:
 # if the package uses libtool, patch it for cross-compiling in buildroot
 	for i in `find $(@D) -name ltmain.sh`; do \
 		toolchain/patch-kernel.sh $${i%/*} package buildroot-libtool.patch; \
-	done 
+	done
 	$(Q)touch $@
 
 # Patch
@@ -174,7 +172,7 @@ $(BUILD_DIR)/%/.stamp_patched:
 	    toolchain/patch-kernel.sh $(@D) $($(PKG)_DIR_PREFIX)/$($(PKG)_NAME) $(NAMEVER)\*.patch $(NAMEVER)\*.patch.$(ARCH) || exit 1; \
 	  else \
 	    toolchain/patch-kernel.sh $(@D) $($(PKG)_DIR_PREFIX)/$($(PKG)_NAME) $($(PKG)_NAME)\*.patch $($(PKG)_NAME)\*.patch.$(ARCH) || exit 1; \
-	    if test -d package/$($(PKG)_DIR_PREFIX)/$($(PKG)_NAME)/$(NAMEVER); then \
+	    if test -d $($(PKG)_DIR_PREFIX)/$($(PKG)_NAME)/$(NAMEVER); then \
 	      toolchain/patch-kernel.sh $(@D) $($(PKG)_DIR_PREFIX)/$($(PKG)_NAME)/$(NAMEVER) \*.patch \*.patch.$(ARCH) || exit 1; \
 	    fi; \
 	  fi; \
@@ -215,6 +213,7 @@ $(BUILD_DIR)/%/.stamp_configured:
 		--prefix=/usr \
 		--exec-prefix=/usr \
 		--sysconfdir=/etc \
+		$(if $(findstring s,$(MAKEFLAGS)),--quiet,)
 		$($(PKG)_CONF_OPT)
 	$(Q)touch $@
 
