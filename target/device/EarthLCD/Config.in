@@ -1,0 +1,30 @@
+menuconfig BR2_TARGET_EARTHLCD
+	bool "EarthLCD boards"
+	depends on BR2_avr32
+
+if BR2_TARGET_EARTHLCD
+
+choice
+	prompt "Board support"
+	default BR2_TARGET_EARTHLCD_FAVR_32_EZKIT
+	help
+	  Select the specific EarthLCD board for the target system.
+
+config BR2_TARGET_EARTHLCD_FAVR_32_EZKIT
+	bool "EarthLCD Favr-32 kit"
+	help
+	  The EarthLCD Favr-32 CPU module mounted on the ezLCD-101 motherboard.
+
+endchoice
+
+config BR2_BOARD_NAME
+	string
+	default "favr-32-ezkit" if BR2_TARGET_EARTHLCD_FAVR_32_EZKIT
+
+config BR2_BOARD_PATH
+	string "EarthLCD board repository"
+	default "target/device/EarthLCD/$(BR2_BOARD_NAME)"
+	help
+	  Path to directory containing EarthLCD board configurations.
+
+endif

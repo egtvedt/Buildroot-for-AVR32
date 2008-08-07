@@ -1,0 +1,6 @@
+ifeq ($(BR2_TARGET_EARTHLCD),y)
+
+# Include board specific makefiles
+include target/device/EarthLCD/*/Makefile.in
+
+endif

@@ -1,0 +1,6 @@
+ifeq ($(strip $(BR2_TARGET_EARTHLCD_FAVR_32_EZKIT)),y)
+FAVR_32_EZKIT_PATH=target/device/EarthLCD/favr-32-ezkit
+
+TARGET_SKELETON=$(FAVR_32_EZKIT_PATH)/target_skeleton
+TARGET_DEVICE_TABLE=$(FAVR_32_EZKIT_PATH)/device_table.txt
+endif

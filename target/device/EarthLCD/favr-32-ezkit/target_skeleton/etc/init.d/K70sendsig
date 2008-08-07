@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "Terminating all remaining processes"
+
+killall -q -15 syslogd klogd telnetd dropbear proftpd ntpd inetd httpd smbd nmbd dnsmasq
