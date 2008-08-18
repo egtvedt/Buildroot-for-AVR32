@@ -81,8 +81,8 @@ config LINUX26_LATEST_MM_VERSION
 	default "2.6.27-rc1-mm1" if BR2_KERNEL_ADD_LATEST_MM_PATCH
 
 config BR2_KERNEL_SITE
-	string
-	default "http://ftp.kernel.org/pub/linux/kernel/v2.6/"
+	string "kernel site"
+	default "http://ftp.kernel.org/pub/linux/kernel/v2.6"
 
 config BR2_MM_PATCH_SITE
 	string
