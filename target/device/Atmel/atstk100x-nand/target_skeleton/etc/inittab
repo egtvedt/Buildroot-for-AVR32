@@ -22,7 +22,7 @@ ttyS0::respawn:-/bin/sh
 
 # Uncomment this to run a getty on the first serial port.
 #ttyS0::respawn:/sbin/getty -L ttyS0 115200 vt100
-ttyS2::respawn:/sbin/getty -L ttyS2 115200 vt100
+#ttyS2::respawn:/sbin/getty -L ttyS2 115200 vt100
 
 # Run a script on shutdown.
 ::shutdown:/etc/init.d/rcK
