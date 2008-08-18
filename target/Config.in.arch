@@ -193,6 +193,8 @@ config BR2_at32ap7001
 	bool "AT32AP7001"
 config BR2_at32ap7002
 	bool "AT32AP7002"
+config BR2_at32ap7200
+	bool "AT32AP7200"
 endchoice
 
 
