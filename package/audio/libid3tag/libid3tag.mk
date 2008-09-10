@@ -17,7 +17,7 @@ $(DL_DIR)/$(LIBID3TAG_SOURCE):
 
 $(LIBID3TAG_DIR)/.unpacked: $(DL_DIR)/$(LIBID3TAG_SOURCE)
 	$(LIBID3TAG_CAT) $(DL_DIR)/$(LIBID3TAG_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	toolchain/patch-kernel.sh $(LIBID3TAG_DIR) package/libid3tag/ libid3tag-$(LIBID3TAG_VERSION)\*.patch\*
+	toolchain/patch-kernel.sh $(LIBID3TAG_DIR) package/audio/libid3tag/ libid3tag-$(LIBID3TAG_VERSION)\*.patch\*
 	$(CONFIG_UPDATE) $(LIBID3TAG_DIR)
 	touch $@
 
@@ -46,7 +46,7 @@ $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN): $(STAGING_DIR)/$(LIBID3TAG_TARGET_BIN)
 	cp -dpf $(STAGING_DIR)/usr/lib/libid3tag.so* $(TARGET_DIR)/usr/lib/
 	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libid3tag.so*
 
-libid3tag: uclibc zlib libmad $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN)
+libid3tag: uclibc zlib $(TARGET_DIR)/$(LIBID3TAG_TARGET_BIN)
 
 libid3tag-source: $(DL_DIR)/$(LIBID3TAG_SOURCE)
 
