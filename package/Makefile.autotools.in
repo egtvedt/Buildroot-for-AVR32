@@ -192,17 +192,15 @@ endif
 $(BUILD_DIR)/%/.stamp_autoconfigured:
 	$(call MESSAGE,"Running autoreconf")
 	$(Q)cd $(@D)/$($(PKG)_SUBDIR) && $(AUTORECONF)
+# if the package uses libtool, patch it for cross-compiling in buildroot
+	$(Q)for i in `find $(@D)/$($(PKG)_SUBDIR) -name ltmain.sh`; do \
+		toolchain/patch-kernel.sh $${i%/*} package buildroot-libtool.patch; \
+		done
 	$(Q)touch $@
 
 # Configuring
 $(BUILD_DIR)/%/.stamp_configured:
 	$(call MESSAGE,"Configuring")
-	$(Q)if test "$($(PKG)_AUTORECONF)" = "YES"; then \
-		cd $(@D)/$($(PKG)_SUBDIR) && $(AUTORECONF); \
-		for i in `find $(@D)/$($(PKG)_SUBDIR) -name ltmain.sh`; do \
-			../../toolchain/patch-kernel.sh $${i%/*} ../../package buildroot-libtool.patch; \
-		done \
-	fi
 	cd $(@D)/$($(PKG)_SUBDIR) && rm -f config.cache && \
 	$(TARGET_CONFIGURE_OPTS) \
 	$(TARGET_CONFIGURE_ARGS) \
@@ -249,14 +247,15 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 
 $(BUILD_DIR)/%/.stamp_cleaned:
 	$(call MESSAGE,"Cleaning up")
-	-$($(PKG)_MAKE_ENV) $(MAKE)  $($(PKG)_UNINSTALL_STAGING_OPT) -C $(@D)/$($(PKG)_SUBDIR)
-	-$($(PKG)_MAKE_ENV) $(MAKE)  $($(PKG)_UNINSTALL_TARGET_OPT) -C $(@D)/$($(PKG)_SUBDIR)
 	-$($(PKG)_MAKE_ENV) $(MAKE)  $($(PKG)_CLEAN_OPT) -C $(@D)/$($(PKG)_SUBDIR)
+	rm -f $(@D)/.stamp_built
 
 $(BUILD_DIR)/%/.stamp_uninstalled:
 	$(call MESSAGE,"Uninstalling")
 	$($(PKG)_MAKE_ENV) $(MAKE) $($(PKG)_UNINSTALL_STAGING_OPT) -C $(@D)/$($(PKG)_SUBDIR)
+	rm -f $(@D)/.stamp_staging_installed
 	$($(PKG)_MAKE_ENV) $(MAKE) $($(PKG)_UNINSTALL_TARGET_OPT) -C $(@D)/$($(PKG)_SUBDIR)
+	rm -f $(@D)/.stamp_target_installed
 
 $(BUILD_DIR)/%/.stamp_dircleaned:
 	rm -Rf $(@D)
@@ -365,7 +364,8 @@ $(1)-source:		$$($(2)_TARGET_SOURCE)
 # non-build targets
 $(1)-uninstall:	$(1)-configure $$($(2)_TARGET_UNINSTALL)
 
-$(1)-clean:		$$($(2)_TARGET_CLEAN)
+$(1)-clean:		$(1)-uninstall \
+			$$($(2)_TARGET_CLEAN)
 
 $(1)-dirclean:		$$($(2)_TARGET_DIRCLEAN)
 
