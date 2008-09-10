@@ -19,7 +19,7 @@
     usage and documentation by Thomas Petazzoni. Contributions from
     Karsten Kruse, Ned Ludd, Martin Herren and others. </p>
 
-    <p><small>$LastChangedDate: 2008-07-17 13:01:44 -0700 (Thu, 17 Jul 2008) $</small></p>
+    <p><small>$LastChangedDate: 2008-08-31 13:23:47 -0700 (Sun, 31 Aug 2008) $</small></p>
 
     <ul>
 
@@ -216,6 +216,20 @@
 </pre>
     <p>You can now disconnect or copy the content of your <code>dl</code> 
     directory to the build-host. </p>
+
+    <h3><a name="building_out_of_tree" id="building_out_of_tree"></a>
+    Building out-of-tree</h3>
+
+    <p>Buildroot supports building out of tree with a syntax similar
+    to the Linux kernel. To use it, add O=&lt;directory&gt; to the
+    make command line, E.G.:</p>
+
+<pre>
+ $ make O=/tmp/build
+</pre>
+
+    <p>And all the output files will be located under
+    <code>/tmp/build</code>.</p>
 
     <h3><a name="environment_variables" id="environment_variables"></a>
     Environment variables</h3>
