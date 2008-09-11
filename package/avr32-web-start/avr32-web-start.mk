@@ -10,7 +10,7 @@ AVR32_WEB_START_BOARDNAME:=$(shell echo "$(strip $(BR2_BOARD_NAME))" | tr "[:low
 
 $(AVR32_WEB_START_SOURCE)/$(AVR32_WEB_START_TARGET):
 
-$(PROJECT_BUILD_DIR)/.avr32_web_start_installed: $(AVR32_WEB_START_SOURCE)/$(AVR32_WEB_START_TARGET)
+$(PROJECT_BUILD_DIR)/autotools-stamps/avr32_web_start_installed: $(AVR32_WEB_START_SOURCE)/$(AVR32_WEB_START_TARGET)
 	mkdir -p $(TARGET_DIR)/www
 	cp -dpf $(AVR32_WEB_START_SOURCE)/index.html $(TARGET_DIR)/www/
 	cp -dpf $(AVR32_WEB_START_SOURCE)/avr32_web_start.css $(TARGET_DIR)/www/
@@ -33,7 +33,7 @@ endif
 	ln -sf $(AVR32_WEB_START_TARGET) $(TARGET_DIR)/www/index.asp
 	touch $@
 
-avr32-web-start: busybox $(PROJECT_BUILD_DIR)/.avr32_web_start_installed
+avr32-web-start: busybox $(PROJECT_BUILD_DIR)/autotools-stamps/avr32_web_start_installed
 
 avr32-web-start-clean:
 	rm -f $(TARGET_DIR)/www/$(AVR32_WEB_START_TARGET)
