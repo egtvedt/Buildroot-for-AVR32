@@ -153,6 +153,7 @@ $(TARGET_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.installed
 	mkdir -p $(TARGET_DIR)/etc/avahi
 	mkdir -p $(TARGET_DIR)/etc/init.d
 	mkdir -p $(TARGET_DIR)/var/lib
+	mkdir -p $(TARGET_DIR)/usr/sbin
 	mkdir -p $(TARGET_DIR)/usr/share/udhcpc
 	cp -af $(STAGING_DIR)/etc/avahi/avahi-autoipd.action $(TARGET_DIR)/etc/avahi/
 	cp -af package/avahi/busybox-udhcpc-default.script $(TARGET_DIR)/usr/share/udhcpc/default.script
@@ -163,7 +164,9 @@ $(TARGET_DIR)/usr/sbin/avahi-autoipd: $(AVAHI_DIR)/.installed
 	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
 
 $(TARGET_DIR)/usr/sbin/avahi-daemon: $(AVAHI_DIR)/.installed
-	mkdir -p $(TARGET_DIR)/etc/avahi/services $(TARGET_DIR)/usr/lib
+	mkdir -p $(TARGET_DIR)/etc/avahi/services
+	mkdir -p $(TARGET_DIR)/usr/lib
+	mkdir -p $(TARGET_DIR)/usr/sbin
 	cp -dpf $(STAGING_DIR)/usr/lib/libavahi-*.so* $(TARGET_DIR)/usr/lib/
 	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libavahi-*.so*
 	cp -af $(STAGING_DIR)/etc/avahi/avahi-daemon.conf $(TARGET_DIR)/etc/avahi/
