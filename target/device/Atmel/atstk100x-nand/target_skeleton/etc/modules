@@ -1,2 +1,5 @@
 snd-at73c213
 snd-pcm-oss
+snd-mixer-oss
+leds-gpio
+ledtrig-heartbeat
