@@ -359,7 +359,7 @@ endif
 	mkdir -p $(TARGET_DIR)/usr/lib $(TARGET_DIR)/usr/sbin
 	touch $@
 
-$(PROJECT_BUILD_DIR)/.gcc_libs_installed: $(GCC_BUILD_DIR2)/.installed
+$(PROJECT_BUILD_DIR)/autotools-stamps/gcc_libs_installed: $(GCC_BUILD_DIR2)/.installed
 ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
 	# These are in /lib, so...
 	rm -rf $(TARGET_DIR)/usr/lib/libgcc_s*.so*
@@ -384,6 +384,7 @@ ifeq ($(BR2_INSTALL_LIBGCJ),y)
 	cp -dpf $(STAGING_DIR)/usr/lib/security/classpath.security \
 		$(TARGET_DIR)/usr/lib/security/
 endif
+	mkdir -p $(@D)
 	touch $@
 
 cross_compiler:=$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc
@@ -411,7 +412,7 @@ gcc-dirclean: gcc_initial-dirclean
 #############################################################
 GCC_BUILD_DIR3:=$(BUILD_DIR)/gcc-$(GCC_VERSION)-target
 
-$(GCC_BUILD_DIR3)/.prepared: $(PROJECT_BUILD_DIR)/.gcc_libs_installed $(GCC_TARGET_PREREQ)
+$(GCC_BUILD_DIR3)/.prepared: $(PROJECT_BUILD_DIR)/autotools-stamps/gcc_libs_installed $(GCC_TARGET_PREREQ)
 	mkdir -p $(GCC_BUILD_DIR3)
 	touch $@
 
