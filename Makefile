@@ -384,6 +384,9 @@ rootclean: binclean
 			rm -f $${dotfile};		\
 		fi;					\
 	done
+	@if [ -d "$(PROJECT_BUILD_DIR)/autotools-stamps" ]; then \
+		rm -rf "$(PROJECT_BUILD_DIR)/autotools-stamps"; \
+	fi
 
 stagingclean: rootclean
 	rm -rf $(STAGING_DIR)
