@@ -38,6 +38,7 @@
 #/dev/shm	d	755	0	0	-	-	-	-	-
 /tmp		d	1777	0	0	-	-	-	-	-
 /etc		d	755	0	0	-	-	-	-	-
+/etc/modprobe.d	d	755	0	0	-	-	-	-	-
 /sys		d	755	0	0	-	-	-	-	-
 /config		d	755	0	0	-	-	-	-	-
 /proc		d	755	0	0	-	-	-	-	-
