@@ -194,12 +194,13 @@ if [ -z "$COMPILER" ]; then
 	exit 1
 fi
 
-COMPILER_VERSION=$($COMPILER --version 2>&1 | $XSED -e 's/^.*(.CC) \([0-9\.]\)/\1/g' -e "s/[-\ ].*//g" -e '1q')
-if [ -z "$COMPILER_VERSION" ]; then
-	echo "gcc installed:					FALSE"
-	/bin/echo -e "\n\nYou must install 'gcc' on your build machine\n"
-	exit 1
-fi
+COMPILER_VERSION=$($COMPILER -v 2>&1 | $XSED -n '/^gcc version/p' |
+	$XSED -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q')
+if [ -z "$COMPILER_VERSION" ] ; then
+	echo "gcc installed:		    FALSE"
+	/bin/echo -e "\n\nYou must install 'gcc' on your build machine\n";
+	exit 1;
+fi;
 COMPILER_MAJOR=$(echo $COMPILER_VERSION | $XSED -e "s/\..*//g")
 COMPILER_MINOR=$(echo $COMPILER_VERSION | $XSED -e "s/^$COMPILER_MAJOR\.//g" -e "s/\..*//g")
 if [ $COMPILER_MAJOR -lt 3 -o $COMPILER_MAJOR -eq 2 -a $COMPILER_MINOR -lt 95 ]; then
@@ -223,10 +224,12 @@ if [ -z "$CXXCOMPILER" ]; then
 	echo "C++ Compiler installed:				FALSE"
 	/bin/echo -e "\nYou may have to install 'g++' on your build machine\n"
 	#exit 1
-else
-	CXXCOMPILER_VERSION=$($CXXCOMPILER --version 2>&1 | $XSED -e 's/^.*(.CC) \([0-9\.]\)/\1/g' -e "s/[-\ ].*//g" -e '1q')
-	if [ -z "$CXXCOMPILER_VERSION" ]; then
-		echo "c++ installed:					FALSE"
+fi
+if [ ! -z "$CXXCOMPILER" ] ; then
+	CXXCOMPILER_VERSION=$($CXXCOMPILER -v 2>&1 | $XSED -n '/^gcc version/p' |
+		$XSED -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q')
+	if [ -z "$CXXCOMPILER_VERSION" ] ; then
+		echo "c++ installed:		    FALSE"
 		/bin/echo -e "\nYou may have to install 'g++' on your build machine\n"
 		#exit 1
 	fi

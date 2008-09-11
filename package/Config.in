@@ -10,13 +10,11 @@ source "package/busybox/Config.in"
 
 comment "The minimum needed to build a uClibc development system"
 
+if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/bash/Config.in"
 source "package/bzip2/Config.in"
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/coreutils/Config.in"
-endif
 source "package/diffutils/Config.in"
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/findutils/Config.in"
 endif
 source "package/flex/Config.in"
@@ -38,7 +36,7 @@ endif
 #	bool "Common Applications"
 #	default y
 #	help
-#	  A set of applications, utilities and libraries for 
+#	  A set of applications, utilities and libraries for
 #	  text processing, toolchain generation and other things.
 
 
@@ -75,15 +73,17 @@ source "package/bootutils/Config.in"
 endif
 source "package/cups/Config.in"
 source "package/customize/Config.in"
+if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/dash/Config.in"
+endif
 source "package/file/Config.in"
 source "package/gamin/Config.in"
 source "package/icu/Config.in"
-source "package/ipkg/Config.in"
 source "package/kexec/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/less/Config.in"
 endif
+source "package/libconfig/Config.in"
 source "package/libdaemon/Config.in"
 source "package/libelf/Config.in"
 source "package/libevent/Config.in"
@@ -104,15 +104,11 @@ source "package/modutils/Config.in"
 endif
 source "package/ng-spice-rework/Config.in"
 source "package/popt/Config.in"
-source "package/portage/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/procps/Config.in"
 endif
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/psmisc/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
-source "package/rpm/Config.in"
 endif
 source "package/screen/Config.in"
 source "package/startup-notification/Config.in"
@@ -122,14 +118,8 @@ if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/sysklogd/Config.in"
 # busybox has init and the runit stuff
 source "package/sysvinit/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/tinylogin/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/util-linux/Config.in"
-endif
-if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
 source "package/which/Config.in"
 endif
 
@@ -233,6 +223,7 @@ source "package/ttcp/Config.in"
 #endif
 source "package/udpcast/Config.in"
 source "package/vpnc/Config.in"
+source "package/vsftpd/Config.in"
 source "package/vtun/Config.in"
 source "package/webif/Config.in"
 if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
@@ -257,6 +248,7 @@ source "package/devmem2/Config.in"
 source "package/dm/Config.in"
 source "package/dmraid/Config.in"
 source "package/e2fsprogs/Config.in"
+source "package/eeprog/Config.in"
 source "package/fconfig/Config.in"
 source "package/fis/Config.in"
 source "package/fuse/Config.in"
@@ -299,28 +291,8 @@ source "package/wipe/Config.in"
 source "package/xfsprogs/Config.in"
 endif
 
-menuconfig BR2_AUDIO_SUPPORT
-	bool "Audio libraries and applications"
-	default y
-	help
-	  Support for audio libraries and applications
-
-if BR2_AUDIO_SUPPORT
-source "package/alsa-lib/Config.in"
-source "package/alsa-utils/Config.in"
-source "package/asterisk/Config.in"
-source "package/aumix/Config.in"
-source "package/faad2/Config.in"
-source "package/libid3tag/Config.in"
-source "package/libmad/Config.in"
-source "package/libogg/Config.in"
-source "package/libsndfile/Config.in"
-source "package/libvorbis/Config.in"
-source "package/madplay/Config.in"
-source "package/mpg123/Config.in"
-source "package/speex/Config.in"
-source "package/festival/Config.in"
-endif
+# Audio support
+source "package/audio/Config.in"
 
 menuconfig BR2_GRAPHIC_SUPPORT
 	bool "Graphic libraries and applications (graphic/text)"
@@ -340,12 +312,15 @@ source "package/dialog/Config.in"
 
 comment "graphic libraries"
 source "package/directfb/Config.in"
+source "package/fbdump/Config.in"
 source "package/fusion/Config.in"
 source "package/imagemagick/Config.in"
 source "package/jpeg/Config.in"
 source "package/libart/Config.in"
 source "package/libpng/Config.in"
 source "package/libungif/Config.in"
+source "package/lite/Config.in"
+source "package/pixman/Config.in"
 source "package/sdl/Config.in"
 source "package/sdl_image/Config.in"
 source "package/sdl_mixer/Config.in"
@@ -370,10 +345,12 @@ config BR2_PACKAGE_XSERVER_none
 	default y
 config BR2_PACKAGE_XSERVER_xorg
 	bool "modular xorg"
-	depends on !BR2_PACKAGE_XSERVER_none
+	depends on BR2_USE_WCHAR # && BR2_ENABLE_LOCALE
+# depending on BR2_ENABLE_LOCALE gives a recursion error with dbus
+comment "xorg requires a toolchain with LOCALE and WCHAR support"
+	depends on !(BR2_USE_WCHAR && BR2_ENABLE_LOCALE)
 config BR2_PACKAGE_XSERVER_tinyx
 	bool "tinyx"
-	depends on !BR2_PACKAGE_XSERVER_none
 endmenu
 
 config BR2_X11_PREFIX
@@ -417,6 +394,7 @@ source "package/alsamixergui/Config.in"
 source "package/dillo/Config.in"
 source "package/docker/Config.in"
 source "package/gqview/Config.in"
+source "package/gtkperf/Config.in"
 source "package/leafpad/Config.in"
 source "package/midori/Config.in"
 source "package/pcmanfm/Config.in"
@@ -448,6 +426,20 @@ endif
 source "package/lzo/Config.in"
 source "package/lzma/Config.in"
 source "package/zlib/Config.in"
+endif
+
+menuconfig BR2_PACKAGEMGRS_SUPPORT
+	bool "Package managers"
+	default y
+	help
+	  Support for package managers like rpm, portage, ipkg, ..
+
+if BR2_PACKAGEMGRS_SUPPORT
+source "package/ipkg/Config.in"
+source "package/portage/Config.in"
+if !BR2_PACKAGE_BUSYBOX_HIDE_OTHERS
+source "package/rpm/Config.in"
+endif
 endif
 
 menuconfig BR2_SCRIPTING_SUPPORT
@@ -482,20 +474,7 @@ endif
 # java support
 source "package/java/Config.in"
 
-menuconfig BR2_GAMES
-	bool "Games"
-	default y
-	help
-	  Support for games
-
-if BR2_GAMES
-source "package/lxdoom/Config.in"
-source "package/ace_of_penguins/Config.in"
-source "package/gnuchess/Config.in"
-source "package/xboard/Config.in"
-source "package/rubix/Config.in"
-source "package/magiccube4d/Config.in"
-source "package/vice/Config.in"
-endif
+# various games packages
+source "package/games/Config.in"
 
 endmenu

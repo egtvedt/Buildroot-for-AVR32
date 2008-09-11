@@ -11,7 +11,7 @@ choice
 
 config BR2_TOOLCHAIN_BUILDROOT
 	bool "Buildroot toolchain"
-  
+
 config BR2_TOOLCHAIN_EXTERNAL
 	bool "External binary toolchain"
 

@@ -3,7 +3,7 @@
 # U-Boot
 #
 #############################################################
-U_BOOT_VERSION:=1.3.2
+U_BOOT_VERSION:=1.3.4
 U_BOOT_SOURCE:=u-boot-$(U_BOOT_VERSION).tar.bz2
 U_BOOT_SITE:=ftp://ftp.denx.de/pub/u-boot
 U_BOOT_DIR:=$(PROJECT_BUILD_DIR)/u-boot-$(U_BOOT_VERSION)
@@ -34,7 +34,7 @@ define insert_define
 @echo "#ifdef $(strip $(1))" >> $(U_BOOT_INC_CONF_FILE)
 @echo "#undef $(strip $(1))" >> $(U_BOOT_INC_CONF_FILE)
 @echo "#endif" >> $(U_BOOT_INC_CONF_FILE)
-@echo "#define $(strip $(1)) $(2)" >> $(U_BOOT_INC_CONF_FILE)
+@echo '#define $(strip $(1)) $(2)' >> $(U_BOOT_INC_CONF_FILE)
 endef
 
 $(DL_DIR)/$(U_BOOT_SOURCE):
@@ -77,36 +77,36 @@ $(U_BOOT_DIR)/.header_modified: $(U_BOOT_DIR)/.configured
 	@echo "#ifndef __BR2_ADDED_CONFIG_H" >> $(U_BOOT_INC_CONF_FILE)
 	@echo "#define __BR2_ADDED_CONFIG_H" >> $(U_BOOT_INC_CONF_FILE)
 ifneq ($(strip $(BR2_PROJECT)),"")
-	$(call insert_define, "CONFIG_HOSTNAME", $(BR2_PROJECT))
+	$(call insert_define, CONFIG_HOSTNAME, $(BR2_PROJECT))
 endif
 ifneq ($(strip $(BR2_TARGET_UBOOT_SERVERIP)),"")
-	$(call insert_define, "CONFIG_SERVERIP", $(BR2_TARGET_UBOOT_SERVERIP))
+	$(call insert_define, CONFIG_SERVERIP, $(BR2_TARGET_UBOOT_SERVERIP))
 endif
 
 ifneq ($(strip $(BR2_TARGET_UBOOT_IPADDR)),"")
-	$(call insert_define, "CONFIG_IPADDR", $(BR2_TARGET_UBOOT_IPADDR))
+	$(call insert_define, CONFIG_IPADDR, $(BR2_TARGET_UBOOT_IPADDR))
 ifneq ($(strip $(BR2_TARGET_UBOOT_GATEWAY)),"")
-	$(call insert_define, "CONFIG_GATEWAYIP", $(BR2_TARGET_UBOOT_GATEWAY))
+	$(call insert_define, CONFIG_GATEWAYIP, $(BR2_TARGET_UBOOT_GATEWAY))
 endif
 ifneq ($(strip $(BR2_TARGET_UBOOT_NETMASK)),"")
-	$(call insert_define, "CONFIG_NETMASK", $(BR2_TARGET_UBOOT_NETMASK))
+	$(call insert_define, CONFIG_NETMASK, $(BR2_TARGET_UBOOT_NETMASK))
 endif
 endif # end BR2_TARGET_U_BOOT_IPADDR
 
 ifneq ($(strip $(BR2_TARGET_UBOOT_ETHADDR)),"")
-	$(call insert_define, "CONFIG_ETHADDR", $(BR2_TARGET_UBOOT_ETHADDR))
+	$(call insert_define, CONFIG_ETHADDR, $(BR2_TARGET_UBOOT_ETHADDR))
 endif
 ifneq ($(strip $(BR2_TARGET_UBOOT_ETH1ADDR)),"")
-	$(call insert_define "CONFIG_ETH2ADDR", $(BR2_TARGET_UBOOT_ETH1ADDR))
+	$(call insert_define, CONFIG_ETH2ADDR, $(BR2_TARGET_UBOOT_ETH1ADDR))
 endif
 ifneq ($(strip $(BR2_TARGET_UBOOT_BOOTARGS)),"")
-	$(call insert_define "CONFIG_BOOTARGS", $(BR2_TARGET_UBOOT_BOOTARGS))
+	$(call insert_define, CONFIG_BOOTARGS, $(BR2_TARGET_UBOOT_BOOTARGS))
 endif
 ifneq ($(strip $(BR2_TARGET_UBOOT_BOOTCMD)),"")
-	$(call insert_define "CONFIG_BOOTCOMMAND", $(BR2_TARGET_UBOOT_BOOTCMD))
+	$(call insert_define, CONFIG_BOOTCOMMAND, $(BR2_TARGET_UBOOT_BOOTCMD))
 endif
-ifneq ($(strip $(BR2_TARGET_UBOOT_SILENT)),"")
-	$(call insert_define "CONFIG_SILENT_CONSOLE", "")
+ifeq ($(strip $(BR2_TARGET_UBOOT_SILENT)),y)
+	$(call insert_define, CONFIG_SILENT_CONSOLE,)
 endif
 	@echo "#endif /* __BR2_ADDED_CONFIG_H */" >> $(U_BOOT_INC_CONF_FILE)
 	touch $@
@@ -124,7 +124,8 @@ $(BINARIES_DIR)/$(U_BOOT_BIN): $(U_BOOT_DIR)/$(U_BOOT_BIN)
 $(TARGET_DIR)/usr/bin/mkimage: $(U_BOOT_DIR)/$(U_BOOT_BIN)
 	mkdir -p $(@D)
 	$(TARGET_CC) -I$(U_BOOT_DIR)/include -DUSE_HOSTCC -o $@ \
-		$(U_BOOT_DIR)/tools/mkimage.c $(U_BOOT_DIR)/tools/crc32.c
+		$(U_BOOT_DIR)/tools/mkimage.c \
+		$(addprefix $(U_BOOT_DIR)/tools/,crc32.c image.c md5.c sha1.c fdt*.c)
 	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $@
 
 $(TARGET_DIR)/usr/sbin/fw_printenv: $(U_BOOT_DIR)/$(U_BOOT_BIN)

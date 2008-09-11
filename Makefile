@@ -351,7 +351,7 @@ _source-check:
 
 external-deps:
 	@$(MAKE) -Bs BR2_WGET=$(TOPDIR)/toolchain/wget-show-external-deps.sh \
-	source
+		SPIDER=--spider source
 
 #############################################################
 #
@@ -362,10 +362,10 @@ binclean:
 	rm -rf $(BINARIES_DIR)
 
 clean: $(TARGETS_CLEAN)
-	rm -rf $(STAGING_DIR) $(TARGET_DIR) $(IMAGE)
+	rm -rf $(STAGING_DIR) $(TARGET_DIR) $(IMAGE) $(PROJECT_BUILD_DIR)/.root $(PROJECT_BUILD_DIR)/autotools-stamps
 
 dirclean: $(TARGETS_DIRCLEAN)
-	rm -rf $(STAGING_DIR) $(TARGET_DIR) $(IMAGE)
+	rm -rf $(STAGING_DIR) $(TARGET_DIR) $(IMAGE) $(PROJECT_BUILD_DIR)/.root $(PROJECT_BUILD_DIR)/autotools-stamps
 
 distclean:
 ifeq ($(DL_DIR),$(BASE_DIR)/dl)
@@ -501,7 +501,7 @@ prepatch:	gcc-patched binutils-patched gdb-patched uclibc-patched
 log:	.lognr.$(PROJECT)
 	@expr `cat .lognr.$(PROJECT)` + 1 > .lognr.$(PROJECT)	
 	@echo Creating $(PROJECT)-`cat .lognr.$(PROJECT)`.log
-	@$(MAKE) > $(PROJECT)-`cat .lognr.$(PROJECT)`.log 2>&1 
+	@$(MAKE) > $(PROJECT)-`cat .lognr.$(PROJECT)`.log 2>&1
 
 
 cross: $(BASE_TARGETS)

@@ -3,7 +3,7 @@
 # python
 #
 #############################################################
-PYTHON_VERSION=2.4.2
+PYTHON_VERSION=2.4.5
 PYTHON_VERSION_SHORT=2.4
 PYTHON_SOURCE:=Python-$(PYTHON_VERSION).tar.bz2
 PYTHON_SITE:=http://python.org/ftp/python/$(PYTHON_VERSION)
@@ -12,6 +12,7 @@ PYTHON_CAT:=$(BZCAT)
 PYTHON_BINARY:=python
 PYTHON_TARGET_BINARY:=usr/bin/python
 PYTHON_DEPS:=
+PYTHON_SITE_PACKAGE_DIR=$(TARGET_DIR)/usr/lib/python$(PYTHON_VERSION_SHORT)/site-packages
 
 BR2_PYTHON_DISABLED_MODULES=dbm zipfile
 
@@ -124,6 +125,7 @@ $(TARGET_DIR)/$(PYTHON_TARGET_BINARY): $(PYTHON_DIR)/$(PYTHON_BINARY)
 ifneq ($(BR2_PACKAGE_PYTHON_SSL),y)
 	export PYTHON_DISABLE_SSL=1
 endif
+	rm -rf $(PYTHON_DIR)/Lib/test
 	LD_LIBRARY_PATH=$(STAGING_DIR)/lib
 	$(MAKE) CC=$(TARGET_CC) -C $(PYTHON_DIR) install \
 		DESTDIR=$(TARGET_DIR) CROSS_COMPILE=yes \
@@ -131,7 +133,8 @@ endif
 		PYTHON_MODULES_LIB=$(STAGING_DIR)/lib \
 		PYTHON_DISABLE_MODULES="$(BR2_PYTHON_DISABLED_MODULES)" \
 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen && \
-	rm $(TARGET_DIR)/usr/bin/python?.? && \
+	rm $(TARGET_DIR)/usr/bin/python && \
+	ln -s python$(PYTHON_VERSION_SHORT) $(TARGET_DIR)/usr/bin/python && \
 	rm $(TARGET_DIR)/usr/bin/idle && \
 	rm $(TARGET_DIR)/usr/bin/pydoc && \
 	find $(TARGET_DIR)/usr/lib/ -name '*.pyo' -exec rm {} \; && \

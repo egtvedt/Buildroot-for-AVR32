@@ -9,7 +9,7 @@ ATK_SITE = ftp://ftp.gtk.org/pub/gtk/v2.10/dependencies
 ATK_AUTORECONF = NO
 ATK_INSTALL_STAGING = YES
 ATK_INSTALL_TARGET = YES
-ATK_INSTALL_STAGING_OPT = DESTDIR=$(STAGING_DIR) LDFLAGS=-L$(STAGING_DIR)/usr/lib install 
+ATK_INSTALL_STAGING_OPT = DESTDIR=$(STAGING_DIR) LDFLAGS=-L$(STAGING_DIR)/usr/lib install
 
 ATK_CONF_ENV = ac_cv_func_posix_getpwuid_r=yes \
 		glib_cv_stack_grows=no glib_cv_uscore=no \
@@ -40,7 +40,7 @@ ATK_CONF_ENV = ac_cv_func_posix_getpwuid_r=yes \
 		gl_cv_func_mkstemp_limitations=no ac_cv_func_working_mktime=yes \
 		jm_cv_func_working_re_compile_pattern=yes ac_use_included_regex=no \
 		gl_cv_c_restrict=no ac_cv_path_GLIB_GENMARSHAL=$(HOST_GLIB)/bin/glib-genmarshal \
-		ac_cv_prog_F77=no ac_cv_prog_CXX=no 
+		ac_cv_prog_F77=no ac_cv_prog_CXX=no
 
 ifneq ($(BR2_PACKAGE_XSERVER_none),y)
 ATK_CONF_OPT_X = --with-x \
@@ -50,17 +50,10 @@ else
 ATK_CONF_OPT_X = --without-x
 endif
 
-ATK_CONF_OPT = --target=$(GNU_TARGET_NAME) --host=$(REAL_GNU_TARGET_NAME) \
-		--build=$(GNU_HOST_NAME) --prefix=/usr \
-		--exec-prefix=/usr --bindir=/usr/bin \
-		--sbindir=/usr/sbin --libdir=/usr/lib \
-		--libexecdir=/usr/lib --sysconfdir=/etc \
-		--datadir=/usr/share --localstatedir=/var \
-		--includedir=/usr/include --mandir=/usr/man \
-		--infodir=/usr/info --enable-shared \
+ATK_CONF_OPT =  --enable-shared \
 		--enable-static $(ATK_CONF_OPT_X) \
 		--disable-glibtest --enable-explicit-deps=no \
-		--disable-debug 
+		--disable-debug
 
 ATK_DEPENDENCIES = libglib2 pkgconfig
 
