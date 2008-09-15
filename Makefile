@@ -282,7 +282,11 @@ dirs: $(DL_DIR) $(TOOL_BUILD_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
 $(BASE_TARGETS): dirs
 
 world: dependencies dirs target-host-info $(BASE_TARGETS) $(TARGETS_ALL)
-
+	@echo
+	@echo "Build complete"
+	@echo
+	@echo "Root file system files are in directory '$(BINARIES_DIR)'"
+	@echo
 
 .PHONY: all world dirs clean dirclean distclean source \
 	$(BASE_TARGETS) $(TARGETS) $(TARGETS_ALL) \
