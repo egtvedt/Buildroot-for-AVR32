@@ -1,0 +1,48 @@
+From 87a04bd25ece1f0f9cd30f820a8628314999bd01 Mon Sep 17 00:00:00 2001
+From: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+Date: Fri, 12 Sep 2008 14:34:23 +0200
+Subject: [PATCH 1/1] Fix varargs in prctl syscall
+
+prctl is defined to use varargs in the header file, but implemented to use
+varargs in the source. This patch properly handles the variodic argument before
+the syscall is passed to the kernel.
+
+Signed-off-by: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+---
+ libc/sysdeps/linux/common/prctl.c |   22 +++++++++++++++++++---
+ 1 files changed, 19 insertions(+), 3 deletions(-)
+
+diff --git a/libc/sysdeps/linux/common/prctl.c b/libc/sysdeps/linux/common/prctl.c
+index 4853867..ac7ea6e 100644
+--- a/libc/sysdeps/linux/common/prctl.c
++++ b/libc/sysdeps/linux/common/prctl.c
+@@ -8,7 +8,23 @@
+  */
+ 
+ #include <sys/syscall.h>
++#include <sys/prctl.h>
+ #include <stdarg.h>
+-/* psm: including sys/prctl.h would depend on kernel headers */
+-extern int prctl (int, long, long, long, long);
+-_syscall5(int, prctl, int, option, long, arg2, long, arg3, long, arg4, long, arg5);
++#define __NR___syscall_prctl __NR_prctl
++static inline _syscall5(int, __syscall_prctl, int, option, long, arg2, long,
++		arg3, long, arg4, long, arg5);
++
++int prctl(int option, ...) {
++	long arg2 = 0;
++	va_list ap;
++
++	va_start(ap, option);
++
++	if (option != PR_GET_KEEPCAPS && option != PR_GET_TIMING &&
++			option != PR_GET_ENDIAN)
++		arg2 = va_arg(ap, long);
++
++	va_end(ap);
++
++	return __syscall_prctl(option, arg2, 0, 0, 0);
++}
+-- 
+1.5.4.3
+
