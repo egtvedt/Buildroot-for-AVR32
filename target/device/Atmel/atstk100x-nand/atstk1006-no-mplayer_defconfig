@@ -1,5 +1,6 @@
 #
 # Automatically generated make config: don't edit
+# Thu Sep 11 15:02:32 2008
 #
 BR2_HAVE_DOT_CONFIG=y
 BR2_VERSION="atmel.2.2.0-snapshot"
@@ -69,6 +70,7 @@ BR2_BOARD_NAME="atstk100x-nand"
 #
 BR2_TARGET_ATMEL_COPYTO=""
 BR2_BOARD_PATH="target/device/Atmel/$(BR2_BOARD_NAME)"
+# BR2_TARGET_EARTHLCD is not set
 # BR2_TARGET_VALKA is not set
 
 #
@@ -269,9 +271,10 @@ BR2_PACKAGE_BUSYBOX=y
 # BR2_BUSYBOX_VERSION_1_8_X is not set
 # BR2_BUSYBOX_VERSION_1_9_X is not set
 # BR2_BUSYBOX_VERSION_1_10_X is not set
-BR2_BUSYBOX_VERSION_1_11_X=y
+# BR2_BUSYBOX_VERSION_1_11_X is not set
+BR2_BUSYBOX_VERSION_1_12_X=y
 # BR2_PACKAGE_BUSYBOX_SNAPSHOT is not set
-BR2_BUSYBOX_VERSION="1.11.1"
+BR2_BUSYBOX_VERSION="1.12.0"
 BR2_PACKAGE_BUSYBOX_FULLINSTALL=y
 BR2_PACKAGE_BUSYBOX_CONFIG="$(BR2_BOARD_PATH)/busybox.config"
 BR2_PACKAGE_BUSYBOX_HIDE_OTHERS=y
@@ -320,6 +323,7 @@ BR2_PACKAGE_FILE=y
 # BR2_PACKAGE_GAMIN is not set
 # BR2_PACKAGE_ICU is not set
 # BR2_PACKAGE_KEXEC is not set
+# BR2_PACKAGE_LIBCONFIG is not set
 BR2_PACKAGE_LIBDAEMON=y
 # BR2_PACKAGE_LIBELF is not set
 # BR2_PACKAGE_LIBEVENT is not set
@@ -358,11 +362,11 @@ BR2_PACKAGE_AVAHI_AUTOIPD=y
 # BR2_PACKAGE_LIBCURL is not set
 # BR2_PACKAGE_DNSMASQ is not set
 BR2_PACKAGE_DROPBEAR=y
-# BR2_PACKAGE_ETHTOOL is not set
+BR2_PACKAGE_ETHTOOL=y
 BR2_PACKAGE_HASERL=y
 # BR2_PACKAGE_HASERL_VERSION_0_8_X is not set
 BR2_PACKAGE_HASERL_VERSION_0_9_X=y
-BR2_PACKAGE_HASERL_VERSION="0.9.23"
+BR2_PACKAGE_HASERL_VERSION="0.9.24"
 # BR2_PACKAGE_IFPLUGD is not set
 # BR2_PACKAGE_IRDA_UTILS is not set
 # BR2_PACKAGE_IPERF is not set
@@ -445,6 +449,7 @@ BR2_BLOCKDEV_SUPPORT=y
 # BR2_PACKAGE_DM is not set
 # BR2_PACKAGE_DMRAID is not set
 # BR2_PACKAGE_E2FSPROGS is not set
+# BR2_PACKAGE_EEPROG is not set
 # BR2_PACKAGE_FCONFIG is not set
 # BR2_PACKAGE_FIS is not set
 # BR2_PACKAGE_LIBFUSE is not set
@@ -527,6 +532,7 @@ BR2_PACKAGE_ALSA_UTILS_APLAY=y
 #
 # BR2_PACKAGE_AUMIX is not set
 # BR2_PACKAGE_FAAD2 is not set
+# BR2_PACKAGE_LIBID3TAG is not set
 # BR2_PACKAGE_LIBMAD is not set
 # BR2_PACKAGE_LIBOGG is not set
 # BR2_PACKAGE_LIBSNDFILE is not set
@@ -561,11 +567,13 @@ BR2_PACKAGE_NCURSES=y
 # graphic libraries
 #
 # BR2_PACKAGE_DIRECTFB is not set
+# BR2_PACKAGE_FBDUMP is not set
 # BR2_PACKAGE_IMAGEMAGICK is not set
 BR2_PACKAGE_JPEG=y
 # BR2_PACKAGE_LIBART is not set
 BR2_PACKAGE_LIBPNG=y
 BR2_PACKAGE_LIBUNGIF=y
+# BR2_PACKAGE_PIXMAN is not set
 # BR2_PACKAGE_SDL is not set
 BR2_PACKAGE_TIFF=y
 
@@ -618,24 +626,21 @@ BR2_PACKAGE_QTOPIA4_SVG=y
 # X Window System server
 #
 BR2_PACKAGE_XSERVER_none=y
+
+#
+# xorg requires a toolchain with LOCALE and WCHAR support
+#
+# BR2_PACKAGE_XSERVER_tinyx is not set
 BR2_X11_PREFIX="/usr"
 
 #
 # X libraries and helper libraries
 #
-
-#
-# atk		- disabled (requires libglib2)
-#
+# BR2_PACKAGE_ATK is not set
 # BR2_PACKAGE_PANGO is not set
 # BR2_PACKAGE_LIBDRM is not set
 # BR2_PACKAGE_LIBGLIB12 is not set
 # BR2_PACKAGE_LIBGLIB2 is not set
-# BR2_PACKAGE_LIBSEXY is not set
-
-#
-# fltk		- disabled (requires Xorg(7))
-#
 # BR2_PACKAGE_OPENMOTIF is not set
 # BR2_PACKAGE_FONTCONFIG is not set
 # BR2_PACKAGE_FREETYPE is not set
@@ -646,10 +651,6 @@ BR2_PACKAGE_TSLIB=y
 # X Window managers
 #
 # BR2_PACKAGE_MATCHBOX is not set
-
-#
-# blackbox		- disabled (requires Xorg(7))
-#
 
 #
 # X applications
@@ -767,6 +768,7 @@ BR2_KERNEL_SITE="http://ftp.kernel.org/pub/linux/kernel/v2.6/"
 BR2_MM_PATCH_SITE="http://ftp.kernel.org/pub/linux/kernel/people/akpm/patches/2.6"
 BR2_RC_MM_PATCH_DIR="$(BR2_KERNEL_NEXT_VERSION)-rc$(BR2_KERNEL_RC_LEVEL)/2.6.$(BR2_KERNEL_NEXT_VERSION)-rc$(BR2_KERNEL_RC_LEVEL)-mm$(BR2_KERNEL_MM_LEVEL)"
 BR2_LINUX_2_6_STABLE=y
+# BR2_LINUX_2_6_26 is not set
 # BR2_LINUX_2_6_25 is not set
 # BR2_LINUX_2_6_24 is not set
 # BR2_LINUX_2_6_23 is not set
@@ -777,8 +779,8 @@ BR2_LINUX_2_6_STABLE=y
 # BR2_LINUX_2_6_21_5 is not set
 # BR2_LINUX_2_6_21 is not set
 # BR2_LINUX_2_6_20 is not set
-# BR2_LINUX_2_6_26 is not set
 # BR2_LINUX_2_6_27 is not set
+# BR2_LINUX_2_6_28 is not set
 # BR2_LINUX26_CUSTOM is not set
 
 #
