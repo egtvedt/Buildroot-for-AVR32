@@ -1,0 +1,63 @@
+Index: linux-2.6.25.10/arch/avr32/configs/atstk1002_defconfig
+===================================================================
+--- linux-2.6.25.10.orig/arch/avr32/configs/atstk1002_defconfig	2008-09-11 15:44:06.000000000 +0200
++++ linux-2.6.25.10/arch/avr32/configs/atstk1002_defconfig	2008-09-11 15:45:59.000000000 +0200
+@@ -131,9 +131,9 @@
+ # CONFIG_BOARD_ATSTK1006 is not set
+ # CONFIG_BOARD_ATSTK100X_CUSTOM is not set
+ # CONFIG_BOARD_ATSTK100X_SPI1 is not set
+-# CONFIG_BOARD_ATSTK1000_J2_LED is not set
++CONFIG_BOARD_ATSTK1000_J2_LED=y
+ # CONFIG_BOARD_ATSTK1000_J2_LED8 is not set
+-# CONFIG_BOARD_ATSTK1000_J2_RGB is not set
++CONFIG_BOARD_ATSTK1000_J2_RGB=y
+ CONFIG_BOARD_ATSTK1000_EXTDAC=y
+ # CONFIG_BOARD_ATSTK100X_ENABLE_AC97 is not set
+ # CONFIG_BOARD_ATSTK1000_CF_HACKS is not set
+Index: linux-2.6.25.10/arch/avr32/configs/atstk1003_defconfig
+===================================================================
+--- linux-2.6.25.10.orig/arch/avr32/configs/atstk1003_defconfig	2008-09-11 15:44:06.000000000 +0200
++++ linux-2.6.25.10/arch/avr32/configs/atstk1003_defconfig	2008-09-11 15:46:15.000000000 +0200
+@@ -134,9 +134,9 @@
+ # CONFIG_BOARD_ATSTK1006 is not set
+ # CONFIG_BOARD_ATSTK100X_CUSTOM is not set
+ # CONFIG_BOARD_ATSTK100X_SPI1 is not set
+-# CONFIG_BOARD_ATSTK1000_J2_LED is not set
++CONFIG_BOARD_ATSTK1000_J2_LED=y
+ # CONFIG_BOARD_ATSTK1000_J2_LED8 is not set
+-# CONFIG_BOARD_ATSTK1000_J2_RGB is not set
++CONFIG_BOARD_ATSTK1000_J2_RGB=y
+ CONFIG_BOARD_ATSTK1000_EXTDAC=y
+ # CONFIG_BOARD_ATSTK100X_ENABLE_AC97 is not set
+ # CONFIG_BOARD_ATSTK1000_CF_HACKS is not set
+Index: linux-2.6.25.10/arch/avr32/configs/atstk1004_defconfig
+===================================================================
+--- linux-2.6.25.10.orig/arch/avr32/configs/atstk1004_defconfig	2008-09-11 15:44:06.000000000 +0200
++++ linux-2.6.25.10/arch/avr32/configs/atstk1004_defconfig	2008-09-11 15:46:59.000000000 +0200
+@@ -99,7 +99,9 @@
+ # CONFIG_BOARD_ATSTK1006 is not set
+ # CONFIG_BOARD_ATSTK100X_CUSTOM is not set
+ # CONFIG_BOARD_ATSTK100X_SPI1 is not set
+-# CONFIG_BOARD_ATSTK1000_J2_LED is not set
++CONFIG_BOARD_ATSTK1000_J2_LED=y
++# CONFIG_BOARD_ATSTK1000_J2_LED8 is not set
++CONFIG_BOARD_ATSTK1000_J2_RGB=y
+ CONFIG_BOARD_ATSTK1000_EXTDAC=y
+ # CONFIG_BOARD_ATSTK100X_ENABLE_AC97 is not set
+ # CONFIG_BOARD_ATSTK1000_CF_HACKS is not set
+Index: linux-2.6.25.10/arch/avr32/configs/atstk1006_defconfig
+===================================================================
+--- linux-2.6.25.10.orig/arch/avr32/configs/atstk1006_defconfig	2008-09-11 15:44:06.000000000 +0200
++++ linux-2.6.25.10/arch/avr32/configs/atstk1006_defconfig	2008-09-11 15:47:14.000000000 +0200
+@@ -131,9 +131,9 @@
+ CONFIG_BOARD_ATSTK1006=y
+ # CONFIG_BOARD_ATSTK100X_CUSTOM is not set
+ # CONFIG_BOARD_ATSTK100X_SPI1 is not set
+-# CONFIG_BOARD_ATSTK1000_J2_LED is not set
++CONFIG_BOARD_ATSTK1000_J2_LED=y
+ # CONFIG_BOARD_ATSTK1000_J2_LED8 is not set
+-# CONFIG_BOARD_ATSTK1000_J2_RGB is not set
++CONFIG_BOARD_ATSTK1000_J2_RGB=y
+ CONFIG_BOARD_ATSTK1000_EXTDAC=y
+ # CONFIG_BOARD_ATSTK100X_ENABLE_AC97 is not set
+ # CONFIG_BOARD_ATSTK1000_CF_HACKS is not set
