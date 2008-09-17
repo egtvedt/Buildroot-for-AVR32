@@ -1,0 +1,30 @@
+Index: linux-2.6.25.10/arch/avr32/kernel/syscall-stubs.S
+===================================================================
+--- linux-2.6.25.10.orig/arch/avr32/kernel/syscall-stubs.S	2008-09-17 08:17:07.000000000 +0200
++++ linux-2.6.25.10/arch/avr32/kernel/syscall-stubs.S	2008-09-17 08:18:30.000000000 +0200
+@@ -109,3 +109,12 @@
+ 	rcall	sys_epoll_pwait
+ 	sub	sp, -4
+ 	popm	pc
++
++	.global __sys_sync_file_range
++	.type	__sys_sync_file_range,@function
++__sys_sync_file_range:
++	pushm	lr
++	st.w	--sp, ARG6
++	rcall	sys_sync_file_range
++	sub	sp, -4
++	popm	pc
+Index: linux-2.6.25.10/arch/avr32/kernel/syscall_table.S
+===================================================================
+--- linux-2.6.25.10.orig/arch/avr32/kernel/syscall_table.S	2008-09-17 13:05:16.000000000 +0200
++++ linux-2.6.25.10/arch/avr32/kernel/syscall_table.S	2008-09-17 13:05:19.000000000 +0200
+@@ -275,7 +275,7 @@
+ 	.long	sys_set_robust_list
+ 	.long	sys_get_robust_list	/* 260 */
+ 	.long	__sys_splice
+-	.long	sys_sync_file_range
++	.long	__sys_sync_file_range
+ 	.long	sys_tee
+ 	.long	sys_vmsplice
+ 	.long	__sys_epoll_pwait	/* 265 */
