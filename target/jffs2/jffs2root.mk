@@ -33,8 +33,8 @@ endif
 
 JFFS2_OPTS += -s $(BR2_TARGET_ROOTFS_JFFS2_PAGESIZE)
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_NOCLEANMARKER),y)
-JFFS2_OPTS += --no-cleanmarkers
-SUMTOOL_OPTS += --no-cleanmarkers
+JFFS2_OPTS += -n
+SUMTOOL_OPTS += -n
 endif
 
 JFFS2_TARGET := $(strip $(subst ",,$(BR2_TARGET_ROOTFS_JFFS2_OUTPUT)))

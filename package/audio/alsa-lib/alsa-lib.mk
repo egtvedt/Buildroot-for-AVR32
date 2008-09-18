@@ -41,7 +41,6 @@ $(ALSA_LIB_DIR)/.configured: $(ALSA_LIB_DIR)/.unpacked
 		--host=$(GNU_TARGET_NAME) \
 		--build=$(GNU_HOST_NAME) \
 		--prefix=/usr \
-		--with-versioned=no \
 		--sysconfdir=/etc \
 		--enable-shared \
 		--enable-static \
