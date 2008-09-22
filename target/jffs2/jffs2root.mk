@@ -5,30 +5,30 @@
 #############################################################
 
 ifneq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP)),y)
-JFFS2_OPTS := --eraseblock=$(strip $(BR2_TARGET_ROOTFS_JFFS2_EBSIZE))
+JFFS2_OPTS := -e $(strip $(BR2_TARGET_ROOTFS_JFFS2_EBSIZE))
 SUMTOOL_OPTS := $(JFFS2_OPTS)
 
 ifeq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_PAD)),y)
 ifneq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_PADSIZE)),0x0)
-JFFS2_OPTS += --pad=$(strip $(BR2_TARGET_ROOTFS_JFFS2_PADSIZE))
+JFFS2_OPTS += -p $(strip $(BR2_TARGET_ROOTFS_JFFS2_PADSIZE))
 else
-JFFS2_OPTS += --pad
+JFFS2_OPTS += -p
 endif
 SUMTOOL_OPTS += -p
 endif
 
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_SQUASH),y)
-JFFS2_OPTS += --squash
+JFFS2_OPTS += -q
 endif
 
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_LE),y)
-JFFS2_OPTS += --little-endian
-SUMTOOL_OPTS += --little-endian
+JFFS2_OPTS += -l
+SUMTOOL_OPTS += -l
 endif
 
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_BE),y)
-JFFS2_OPTS += --big-endian
-SUMTOOL_OPTS += --big-endian
+JFFS2_OPTS += -b
+SUMTOOL_OPTS += -b
 endif
 
 JFFS2_OPTS += -s $(BR2_TARGET_ROOTFS_JFFS2_PAGESIZE)
@@ -46,13 +46,13 @@ endif
 else # BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP
 
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_BE),y)
-JFFS2_OPTS := --big-endian
+JFFS2_OPTS := -b
 else
-JFFS2_OPTS := --little-endian
+JFFS2_OPTS := -l
 endif
 
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_SQUASH),y)
-JFFS2_OPTS += --squash
+JFFS2_OPTS += -q
 endif
 
 JFFS2_TARGET_MULTI := $(strip $(subst ",,$(BR2_TARGET_ROOTFS_JFFS2_OUTPUT)))
