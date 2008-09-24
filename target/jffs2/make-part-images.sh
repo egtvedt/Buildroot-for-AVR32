@@ -216,26 +216,26 @@ get_partition_jffs2_options()
 	local pad_size=`echo ${partition_info} | awk '{print $7}'`
 
 	partition_jffs2_options="${partition_jffs2_options}\
-				 --pagesize=${page_size}\
-				 --eraseblock=${erase_size}"
+				 -s ${page_size}\
+				 -e ${erase_size}"
 
 	if [ ${cleanmarkers} -eq 0 ]; then
 		partition_jffs2_options="${partition_jffs2_options}\
-					 --no-cleanmarkers"
+					 -n"
 	fi
 
 	if [ ${device_file} -eq 1 ]; then
 		partition_jffs2_options="${partition_jffs2_options}\
-					 --devtable=${device_table_file}"
+					 -D ${device_table_file}"
 	fi
 
 	if [ "${pad_size}" = "-1" ]; then
 		:
 	elif [ "${pad_size}" = "0" ] || [ "${pad_size}" = "0x0" ]; then
-		partition_jffs2_options="${partition_jffs2_options} --pad"
+		partition_jffs2_options="${partition_jffs2_options} -p"
 	else
 		partition_jffs2_options="${partition_jffs2_options}\
-					 --pad=${pad_size}"
+					 -p ${pad_size}"
 	fi
 
 	# Remove annoing tabs in partition_jffs2_options
@@ -313,13 +313,13 @@ create_jffs2_image()
 	# The root file system has another root directory than the others.
 	if [ "${partition_name}" = "root" ]; then
 		echo "${mkfsjffs2} ${partition_jffs2_options}"\
-			"--root=${tmpdir}/${partition_name}"\
-			"--output=${output_base}-${partition_name}"\
+			"-r ${tmpdir}/${partition_name}"\
+			"-o ${output_base}-${partition_name}"\
 			>> ${staging_dir}/_fakeroot.rootfs.jffs2.${partition_name}
 	else
 		echo "${mkfsjffs2} ${partition_jffs2_options}"\
-			"--root=${target_dir}/${partition_path}"\
-			"--output=${output_base}-${partition_name}"\
+			"-r ${target_dir}/${partition_path}"\
+			"-o ${output_base}-${partition_name}"\
 			>> ${staging_dir}/_fakeroot.rootfs.jffs2.${partition_name}
 	fi
 
