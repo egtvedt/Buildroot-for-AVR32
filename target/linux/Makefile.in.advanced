@@ -144,8 +144,8 @@ LINUX26_BINLOC:=arch/$(KERNEL_ARCH)/boot/images/$(LINUX26_FORMAT)
 else
 LINUX26_BINLOC:=arch/$(KERNEL_ARCH)/boot/$(LINUX26_FORMAT)
 endif
-KERNEL_EXT:=.gz
 endif
+KERNEL_EXT:=.gz
 endif
 
 # --------------
@@ -169,7 +169,7 @@ endif
 
 # -----------------------------------------------------------------------------
 # File name for the Linux kernel binary
-#LINUX26_KERNEL_NAME:=$(BOARD_NAME)-linux-$(LINUX26_VERSION)-$(DATE)$(KERNEL_EXT)
+#LINUX26_KERNEL_NAME:=$(BOARD_NAME)-linux-$(LINUX26_VERSION)$(ROOTFS_SUFFIX)$(KERNEL_EXT)
 LINUX26_KERNEL_NAME:=$(LINUX26_FORMAT)
 
 
@@ -178,8 +178,7 @@ BOARD_NAME=$(ARCH)
 endif
 
 ifndef LINUX26_KERNEL
-#LINUX26_KERNEL:=$(BINARIES_DIR)/$(BOARD_NAME)-linux-$(LINUX26_VERSION)-$(DATE)$(KERNEL_EXT)
-LINUX26_KERNEL:=$(BINARIES_DIR)/$(BOARD_NAME)-linux-kernel-$(LINUX26_VERSION)
+LINUX26_KERNEL:=$(BINARIES_DIR)/$(BOARD_NAME)-linux-$(LINUX26_VERSION)-$(ROOTFS_SUFFIX)$(KERNEL_EXT)
 endif
 
 # for packages that need it
