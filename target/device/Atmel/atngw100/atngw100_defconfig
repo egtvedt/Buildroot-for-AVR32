@@ -1,6 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Thu Sep 11 15:02:46 2008
+# Thu Sep 25 10:19:24 2008
 #
 BR2_HAVE_DOT_CONFIG=y
 BR2_VERSION="atmel.2.2.0-snapshot"
@@ -324,6 +324,7 @@ BR2_PACKAGE_PKGCONFIG=y
 # BR2_PACKAGE_ICU is not set
 # BR2_PACKAGE_KEXEC is not set
 # BR2_PACKAGE_LIBCONFIG is not set
+# BR2_PACKAGE_LIBCONFUSE is not set
 BR2_PACKAGE_LIBDAEMON=y
 # BR2_PACKAGE_LIBELF is not set
 # BR2_PACKAGE_LIBEVENT is not set
