@@ -85,10 +85,6 @@ else
 UCLIBC_NOT_TARGET_ENDIAN:=LITTLE
 endif
 
-ifeq ($(strip $(BR2_CROSS_TOOLCHAIN_TARGET_UTILS)),y)
-UCLIBC_TARGETS+=$(TARGET_DIR)/usr/bin/ldd
-endif
-
 UCLIBC_ARM_TYPE:=CONFIG_$(strip $(subst ",, $(BR2_ARM_TYPE)))
 #"))
 UCLIBC_SPARC_TYPE:=CONFIG_SPARC_$(strip $(subst ",, $(BR2_SPARC_TYPE)))
@@ -552,7 +548,7 @@ ifeq ($(strip $(BR2_CROSS_TOOLCHAIN_TARGET_UTILS)),y)
 endif
 	touch -c $@
 
-UCLIBC_TARGETS+=$(TARGET_DIR)/lib/libc.so.0
+UCLIBC_TARGETS=$(TARGET_DIR)/lib/libc.so.0
 endif
 
 uclibc: $(cross_compiler) $(STAGING_DIR)/usr/lib/libc.a $(UCLIBC_TARGETS)
@@ -617,7 +613,7 @@ else
 endif
 	touch -c $@
 
-uclibc_target: cross_compiler uclibc $(TARGET_DIR)/usr/lib/libc.a
+uclibc_target: cross_compiler uclibc $(TARGET_DIR)/usr/lib/libc.a $(TARGET_DIR)/usr/bin/ldd
 
 uclibc_target-clean:
 	rm -rf $(TARGET_DIR)/usr/include \
