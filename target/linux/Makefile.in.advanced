@@ -169,7 +169,6 @@ endif
 
 # -----------------------------------------------------------------------------
 # File name for the Linux kernel binary
-#LINUX26_KERNEL_NAME:=$(BOARD_NAME)-linux-$(LINUX26_VERSION)$(ROOTFS_SUFFIX)$(KERNEL_EXT)
 LINUX26_KERNEL_NAME:=$(LINUX26_FORMAT)
 
 
@@ -452,7 +451,7 @@ $(TARGET_DIR)/boot/uclibc.config: $(UCLIBC_DIR)/.config
 
 $(TARGET_DIR)/boot/busybox.config: $(BUSYBOX_DIR)/.config
 	mkdir -p $(TARGET_DIR)/boot
-	cp -dpf .config $(TARGET_DIR)/boot/busybox.config
+	cp -dpf $(BUSYBOX_DIR)/.config $(TARGET_DIR)/boot/busybox.config
 
 /tftpboot/$(LINUX26_KERNEL_NAME): $(LINUX26_KERNEL)
 	-mkdir -p /tftpboot

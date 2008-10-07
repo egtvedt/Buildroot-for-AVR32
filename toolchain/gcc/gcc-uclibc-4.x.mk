@@ -359,7 +359,7 @@ endif
 	mkdir -p $(TARGET_DIR)/usr/lib $(TARGET_DIR)/usr/sbin
 	touch $@
 
-$(PROJECT_BUILD_DIR)/autotools-stamps/gcc_libs_installed: $(GCC_BUILD_DIR2)/.installed
+$(PROJECT_BUILD_DIR)/autotools-stamps/gcc_libs_target_installed: $(GCC_BUILD_DIR2)/.installed
 ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
 	# These are in /lib, so...
 	rm -rf $(TARGET_DIR)/usr/lib/libgcc_s*.so*
@@ -369,6 +369,7 @@ ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
 endif
 ifeq ($(BR2_INSTALL_LIBSTDCPP),y)
 ifeq ($(BR2_GCC_SHARED_LIBGCC),y)
+	mkdir -p $(TARGET_DIR)/usr/lib
 	-cp -dpf $(STAGING_DIR)/usr/$(REAL_GNU_TARGET_NAME)/lib/libstdc++.so* \
 		$(TARGET_DIR)/usr/lib/
 	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/lib/libstdc++.so*
@@ -389,8 +390,8 @@ endif
 
 cross_compiler:=$(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-gcc
 cross_compiler gcc: uclibc-configured binutils gcc_initial \
-	$(LIBFLOAT_TARGET) uclibc \
-	$(GCC_BUILD_DIR2)/.installed $(GCC_BUILD_DIR2)/.libs_installed \
+	$(LIBFLOAT_TARGET) uclibc $(GCC_BUILD_DIR2)/.installed \
+	$(PROJECT_BUILD_DIR)/autotools-stamps/gcc_libs_target_installed \
 	$(GCC_TARGETS)
 
 gcc-source: $(DL_DIR)/$(GCC_SOURCE)
@@ -412,7 +413,7 @@ gcc-dirclean: gcc_initial-dirclean
 #############################################################
 GCC_BUILD_DIR3:=$(BUILD_DIR)/gcc-$(GCC_VERSION)-target
 
-$(GCC_BUILD_DIR3)/.prepared: $(PROJECT_BUILD_DIR)/autotools-stamps/gcc_libs_installed $(GCC_TARGET_PREREQ)
+$(GCC_BUILD_DIR3)/.prepared: $(PROJECT_BUILD_DIR)/autotools-stamps/gcc_libs_target_installed $(GCC_TARGET_PREREQ)
 	mkdir -p $(GCC_BUILD_DIR3)
 	touch $@
 
