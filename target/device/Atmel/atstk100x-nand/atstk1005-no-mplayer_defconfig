@@ -1,6 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Tue Oct  7 11:01:57 2008
+# Wed Oct  8 09:06:46 2008
 #
 BR2_HAVE_DOT_CONFIG=y
 BR2_VERSION="atmel.2.2.1"
@@ -36,7 +36,7 @@ BR2_ENDIAN="BIG"
 #
 # Project Options
 #
-BR2_PROJECT="atstk1005"
+BR2_PROJECT="atstk1005-no-mplayer"
 BR2_HOSTNAME="stk1000.example.net"
 BR2_BANNER="ATSTK1005 ($(DATE))"
 
@@ -260,12 +260,16 @@ BR2_CROSS_TOOLCHAIN_TARGET_UTILS=y
 #
 
 #
-# AVR32 stuff
+# AVR32 packages
 #
 BR2_PACKAGE_AVR32_WEB_START=y
 BR2_PACKAGE_AVR32_WEB_START_GPIO=y
 BR2_PACKAGE_AVR32_WIKI_DOCS=y
 # BR2_PACKAGE_AVR32_WIKI_DOCS_ROOT_INDEX_FILE is not set
+
+#
+# Packages
+#
 BR2_PACKAGE_BUSYBOX=y
 # BR2_BUSYBOX_VERSION_1_2_2_1 is not set
 # BR2_BUSYBOX_VERSION_1_6_1 is not set
@@ -687,9 +691,6 @@ BR2_PACKAGE_TSLIB=y
 # Video libraries/codecs and applications
 #
 # BR2_PACKAGE_MPLAYER is not set
-# BR2_PACKAGE_MPLAYER_FAAD_INTERNAL_FLOAT is not set
-# BR2_PACKAGE_MPLAYER_FAAD_INTERNAL_FIXED is not set
-# BR2_PACKAGE_MPLAYER_FAAD_EXTERNAL is not set
 # BR2_PACKAGE_VLC is not set
 BR2_COMPRESSOR_SUPPORT=y
 BR2_PACKAGE_LZO=y
