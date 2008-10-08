@@ -25,7 +25,7 @@ config BR2_TARGET_AVR32_ATSTK1002
 	  The Atmel ATSTK1000 + ATSTK1002 AVR32 Development Board.
 
 config BR2_TARGET_AVR32_ATSTK1005
-	bool "Atmel ATSTK1000/5 AVR32 development board support"
+	bool "Atmel ATSTK1000/5 AVR32 development board support (EXPERIMENTAL)"
 	depends on BR2_at32ap7200
 	select BR2_PACKAGE_LINUX
 	help
