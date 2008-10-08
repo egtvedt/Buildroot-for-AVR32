@@ -4,6 +4,8 @@ if BR2_avr32
 comment "AVR32 packages"
 source "package/avr32-web-start/Config.in"
 source "package/avr32-wiki-docs/Config.in"
+# AVR32 Studio exported package
+comment "Packages"
 endif
 
 source "package/busybox/Config.in"
