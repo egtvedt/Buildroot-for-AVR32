@@ -1,3 +1,10 @@
+ifeq ($(strip $(BR2_TARGET_AVR32_ATSTK1005)),y)
+ATSTK1006_PATH=target/device/Atmel/atstk100x-nand
+
+TARGET_SKELETON=$(ATSTK1006_PATH)/target_skeleton
+TARGET_DEVICE_TABLE=$(ATSTK1006_PATH)/device_table.txt
+endif
+
 ifeq ($(strip $(BR2_TARGET_AVR32_ATSTK1006)),y)
 ATSTK1006_PATH=target/device/Atmel/atstk100x-nand
 

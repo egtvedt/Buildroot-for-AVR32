@@ -1,0 +1,63 @@
+--- linux-2.6.27-rc6/arch/avr32/configs/atstk1005_defconfig	2008-10-07 15:17:21.000000000 +0200
++++ linux-2.6.27-rc6.new/arch/avr32/configs/atstk1005_defconfig	2008-10-07 15:16:21.000000000 +0200
+@@ -595,7 +595,7 @@ CONFIG_SLHC=m
+ #
+ # Input device support
+ #
+-CONFIG_INPUT=m
++CONFIG_INPUT=y
+ # CONFIG_INPUT_FF_MEMLESS is not set
+ CONFIG_INPUT_POLLDEV=m
+ 
+@@ -642,7 +642,11 @@ CONFIG_MOUSE_GPIO=m
+ #
+ # Character devices
+ #
+-# CONFIG_VT is not set
++CONFIG_VT=y
++CONFIG_CONSOLE_TRANSLATIONS=y
++CONFIG_VT_CONSOLE=y
++CONFIG_HW_CONSOLE=y
++# CONFIG_VT_HW_CONSOLE_BINDING is not set
+ CONFIG_DEVKMEM=y
+ # CONFIG_SERIAL_NONSTANDARD is not set
+ 
+@@ -841,6 +845,12 @@ CONFIG_LCD_LTV350QV=y
+ # Display device support
+ #
+ # CONFIG_DISPLAY_SUPPORT is not set
++
++#
++# Console display driver support
++#
++CONFIG_DUMMY_CONSOLE=y
++# CONFIG_FRAMEBUFFER_CONSOLE is not set
+ # CONFIG_LOGO is not set
+ CONFIG_SOUND=m
+ CONFIG_SND=m
+@@ -871,7 +881,24 @@ CONFIG_SND_USB_AUDIO=m
+ # CONFIG_SND_USB_CAIAQ is not set
+ # CONFIG_SND_SOC is not set
+ # CONFIG_SOUND_PRIME is not set
+-# CONFIG_HID_SUPPORT is not set
++CONFIG_HID_SUPPORT=y
++CONFIG_HID=m
++# CONFIG_HID_DEBUG is not set
++# CONFIG_HIDRAW is not set
++
++#
++# USB Input Devices
++#
++CONFIG_USB_HID=m
++# CONFIG_USB_HIDINPUT_POWERBOOK is not set
++# CONFIG_HID_FF is not set
++# CONFIG_USB_HIDDEV is not set
++
++#
++# USB HID Boot Protocol drivers
++#
++# CONFIG_USB_KBD is not set
++# CONFIG_USB_MOUSE is not set
+ CONFIG_USB_SUPPORT=y
+ CONFIG_USB_ARCH_HAS_HCD=y
+ CONFIG_USB_ARCH_HAS_OHCI=y
