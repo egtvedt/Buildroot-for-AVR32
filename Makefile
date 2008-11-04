@@ -122,7 +122,8 @@ HOSTCPP:=$(shell $(CONFIG_SHELL) -c "which $(HOSTCPP)" || type -p $(HOSTCPP) || 
 HOSTLD:=$(shell $(CONFIG_SHELL) -c "which $(HOSTLD)" || type -p $(HOSTLD) || echo ld)
 HOSTLN:=$(shell $(CONFIG_SHELL) -c "which $(HOSTLN)" || type -p $(HOSTLN) || echo ln)
 HOSTNM:=$(shell $(CONFIG_SHELL) -c "which $(HOSTNM)" || type -p $(HOSTNM) || echo nm)
-HOST_GLIB_BIN:=`dirname $(shell $(CONFIG_SHELL) -c "which glib-genmarshal" || echo /usr/bin/glib-genmarshal)`
+# ignore version in staging_dir
+HOST_GLIB_BIN:=`dirname $(shell $(CONFIG_SHELL) -c "(which -a glib-genmarshal; echo /usr/bin/glib-genmarshal)|grep -v staging_dir|head -n 1")`
 HOST_GLIB:=$(shell $(CONFIG_SHELL) -c "dirname $(HOST_GLIB_BIN)" || echo /usr)
 
 
@@ -202,7 +203,7 @@ PREFERRED_LIB_FLAGS:=--enable-static --enable-shared
 ifeq ($(BR2_TOOLCHAIN_SOURCE),y)
 BASE_TARGETS:=uclibc-configured binutils cross_compiler uclibc-target-utils kernel-headers
 else
-BASE_TARGETS:=uclibc kernel-headers
+BASE_TARGETS:=uclibc
 endif
 TARGETS:=
 
