@@ -65,12 +65,73 @@ else
 QTOPIA4_CONFIGURE+= -no-qt3support
 endif
 
-ifeq ($(BR2_PACKAGE_TSLIB),y)
-QTOPIA4_CONFIGURE+= -qt-mouse-tslib
+
+### Display drivers
+ifeq ($(BR2_PACKAGE_QTOPIA4_GFX_LINUXFB),y)
+QTOPIA4_CONFIGURE += -qt-gfx-linuxfb
+else
+QTOPIA4_CONFIGURE += -no-gfx-linuxfb
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_GFX_TRANSFORMED),y)
+QTOPIA4_CONFIGURE += -qt-gfx-transformed
+else
+QTOPIA4_CONFIGURE += -no-gfx-transformed
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_GFX_QVFB),y)
+QTOPIA4_CONFIGURE += -qt-gfx-qvfb
+else
+QTOPIA4_CONFIGURE += -no-gfx-qvfb
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_GFX_VNC),y)
+QTOPIA4_CONFIGURE += -qt-gfx-vnc
+else
+QTOPIA4_CONFIGURE += -no-gfx-vnc
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_GFX_MULTISCREEN),y)
+QTOPIA4_CONFIGURE += -qt-gfx-multiscreen
+else
+QTOPIA4_CONFIGURE += -no-gfx-multiscreen
+endif
+
+### Mouse drivers
+ifeq ($(BR2_PACKAGE_QTOPIA4_MOUSE_PC),y)
+QTOPIA4_CONFIGURE += -qt-mouse-pc
+else
+QTOPIA4_CONFIGURE += -no-mouse-pc
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_MOUSE_BUS),y)
+QTOPIA4_CONFIGURE += -qt-mouse-bus
+else
+QTOPIA4_CONFIGURE += -no-mouse-bus
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_MOUSE_LINUXTP),y)
+QTOPIA4_CONFIGURE += -qt-mouse-linuxtp
+else
+QTOPIA4_CONFIGURE += -no-mouse-linuxtp
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_MOUSE_YOPY),y)
+QTOPIA4_CONFIGURE += -qt-mouse-yopy
+else
+QTOPIA4_CONFIGURE += -no-mouse-yopy
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_MOUSE_VR41XX),y)
+QTOPIA4_CONFIGURE += -qt-mouse-vr41xx
+else
+QTOPIA4_CONFIGURE += -no-mouse-vr41xx
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_MOUSE_TSLIB),y)
+QTOPIA4_CONFIGURE += -qt-mouse-tslib
 QTOPIA4_DEP_LIBS+=tslib
 QTOPIA4_TSLIB_DEB="-D TSLIBMOUSEHANDLER_DEBUG"
 QTOPIA4_TSLIB_DEB:=$(strip $(subst ",, $(QTOPIA4_TSLIB_DEB)))
 #"))
+else
+QTOPIA4_CONFIGURE += -no-mouse-tslib
+endif
+ifeq ($(BR2_PACKAGE_QTOPIA4_MOUSE_QVFB),y)
+QTOPIA4_CONFIGURE += -qt-mouse-qvfb
+else
+QTOPIA4_CONFIGURE += -no-mouse-qvfb
 endif
 
 ifeq ($(BR2_PACKAGE_QTOPIA4_DEBUG),y)
@@ -151,7 +212,7 @@ QTOPIA4_CONFIGURE+= -qt-freetype
 else
 ifeq ($(BR2_PACKAGE_QTOPIA4_SYSTEMFREETYPE),y)
 QTOPIA4_CONFIGURE+= -system-freetype
-QTOPIA4_CONFIGURE+= -I $(FREETYPE_DIR)/include
+QTOPIA4_CONFIGURE+= -I $(STAGING_DIR)/usr/include/freetype2/
 QTOPIA4_DEP_LIBS+=freetype
 else
 QTOPIA4_CONFIGURE+= -no-freetype
@@ -218,6 +279,7 @@ QTOPIA4_CONFIGURE:=$(strip $(subst ",, $(QTOPIA4_CONFIGURE)))
 BR2_PACKAGE_QTOPIA4_EMB_PLATFORM:=$(strip $(subst ",, $(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)))
 #"))
 
+QTOPIA4_QMAKE_CONF:=$(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
 
 # Variable for other Qt applications to use
 QTOPIA4_QMAKE:=$(STAGING_DIR)/usr/bin/qmake -spec qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++
@@ -243,19 +305,29 @@ endif
 	$(SED) 's/^CFG_XINERAMA=auto/CFG_XINERAMA=no/' $(QTOPIA4_TARGET_DIR)/configure
 	#$(SED) 's,-O2,$(TARGET_CFLAGS),' $(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
         # Fix compiler path
-	$(SED) '\,QMAKE_CC *=, c\QMAKE_CC = $(TARGET_CC)' $(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
-	$(SED) '\,QMAKE_CXX *=, c\QMAKE_CXX = $(TARGET_CXX)' $(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
-	$(SED) '\,QMAKE_LINK *=, c\QMAKE_LINK = $(TARGET_CXX)' $(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
-	$(SED) '\,QMAKE_LINK_SHLIB *=, c\QMAKE_LINK_SHLIB = $(TARGET_CXX)' $(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
-	$(SED) '\,QMAKE_AR *=, c\QMAKE_AR = $(TARGET_CROSS)ar cqs' $(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
-	$(SED) '\,QMAKE_RANLIB *=, c\QMAKE_RANLIB = $(TARGET_RANLIB)' $(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
-	$(SED) '\,QMAKE_STRIP *=, c\QMAKE_STRIP = $(TARGET_CROSS)strip' $(QTOPIA4_TARGET_DIR)/mkspecs/qws/linux-$(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM)-g++/qmake.conf
+	$(SED) '\,QMAKE_CC[ 	]*=, c\QMAKE_CC = $(TARGET_CC)' $(QTOPIA4_QMAKE_CONF)
+	$(SED) '\,QMAKE_CXX[ 	]*=, c\QMAKE_CXX = $(TARGET_CXX)' $(QTOPIA4_QMAKE_CONF)
+	$(SED) '\,QMAKE_LINK[ 	]*=, c\QMAKE_LINK = $(TARGET_CXX)' $(QTOPIA4_QMAKE_CONF)
+	$(SED) '\,QMAKE_LINK_SHLIB[ 	]*=, c\QMAKE_LINK_SHLIB = $(TARGET_CXX)' $(QTOPIA4_QMAKE_CONF)
+	$(SED) '\,QMAKE_AR[ 	]*=, c\QMAKE_AR = $(TARGET_AR) cqs' $(QTOPIA4_QMAKE_CONF)
+	$(SED) '\,QMAKE_RANLIB[ 	]*=, c\QMAKE_RANLIB = $(TARGET_RANLIB)' $(QTOPIA4_QMAKE_CONF)
+	$(SED) '\,QMAKE_STRIP[ 	]*=, c\QMAKE_STRIP = $(TARGET_STRIP)' $(QTOPIA4_QMAKE_CONF)
+
 	-[ -f $(QTOPIA4_QCONFIG_FILE) ] && cp $(QTOPIA4_QCONFIG_FILE) \
 		$(QTOPIA4_TARGET_DIR)/$(QTOPIA4_QCONFIG_FILE_LOCATION)
+# Qt doesn't use PKG_CONFIG, it searches for pkg-config with 'which'.
+# PKG_CONFIG_SYSROOT is only used to avoid a warning from Qt's configure system
+# when cross compiling, Qt 4.4.3 is wrong here.
+# Don't use TARGET_CONFIGURE_OPTS here, qmake would be compiled for the target
+# instead of the host then.
 	(cd $(QTOPIA4_TARGET_DIR); rm -rf config.cache; \
 		PATH=$(TARGET_PATH) \
+		PKG_CONFIG_SYSROOT_DIR="$(STAGING_DIR)" \
+		PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig:$(PKG_CONFIG_PATH)" \
+		PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
 		./configure \
 		-verbose \
+		-force-pkg-config \
 		-embedded $(BR2_PACKAGE_QTOPIA4_EMB_PLATFORM) \
 		$(QTOPIA4_QCONFIG_COMMAND) \
 		$(QTOPIA4_CONFIGURE) \
@@ -270,6 +342,8 @@ endif
 		-no-rpath \
 		-nomake examples \
 		-nomake demos \
+		-I $(STAGING_DIR)/usr/include \
+		-L $(STAGING_DIR)/usr/lib \
 	)
 	touch $@
 
@@ -296,7 +370,7 @@ endif
 		cp -dpfr $(STAGING_DIR)/usr/plugins/imageformats $(TARGET_DIR)/usr/plugins/; \
 		$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/plugins/imageformats/*; \
 	fi
-ifneq ($(BR2_PACKAGE_QTOPIA4_SQL),y)
+ifneq ($(BR2_PACKAGE_QTOPIA4_SQL_MODULE),y)
 	# Remove Sql libraries, not needed
 	-rm $(TARGET_DIR)/usr/lib/libQtSql*
 endif

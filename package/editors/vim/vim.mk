@@ -36,17 +36,12 @@ $(VIM_DIR)/.patched: $(VIM_DIR)/.unpacked
 
 $(VIM_DIR)/.configured: $(VIM_DIR)/.patched
 	(cd $(VIM_DIR)/src; \
-		PATH=$(TARGET_PATH) \
-		CC="$(TARGET_CC)" \
-		CPP="$(TARGET_CPP)" \
+		$(TARGET_CONFIGURE_OPTS) \
+		$(TARGET_CONFIGURE_ARGS) \
 		CFLAGS="$(TARGET_CFLAGS)" \
 		STRIP="$(TARGET_STRIP)" \
-		PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
-		PKG_CONFIG="$(STAGING_DIR)/usr/bin/pkg-config" \
-		PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig:$(PKG_CONFIG_PATH)" \
 		PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 \
 		PKG_CONFIG_ALLOW_SYSTEM_LIBS=1 \
-        $(TARGET_CONFIGURE_ARGS) \
 		./configure --prefix=/usr \
 		--target=$(GNU_TARGET_NAME) \
 		--host=$(GNU_TARGET_NAME) \
@@ -70,13 +65,13 @@ $(VIM_DIR)/.build: $(VIM_DIR)/.configured
 
 $(TARGET_DIR)/usr/bin/vim: $(VIM_DIR)/.build
 	(cd $(VIM_DIR)/src; \
-		make DESTDIR=$(TARGET_DIR) installvimbin; \
-		make DESTDIR=$(TARGET_DIR) installlinks; \
+		$(MAKE) DESTDIR=$(TARGET_DIR) installvimbin; \
+		$(MAKE) DESTDIR=$(TARGET_DIR) installlinks; \
 	)
 ifeq ($(BR2_PACKAGE_VIM_RUNTIME),y)
 	(cd $(VIM_DIR)/src; \
-		make DESTDIR=$(TARGET_DIR) installrtbase; \
-		make DESTDIR=$(TARGET_DIR) installmacros; \
+		$(MAKE) DESTDIR=$(TARGET_DIR) installrtbase; \
+		$(MAKE) DESTDIR=$(TARGET_DIR) installmacros; \
 	)
 endif
 

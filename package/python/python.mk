@@ -78,7 +78,7 @@ $(PYTHON_DIR)/.unpacked: $(DL_DIR)/$(PYTHON_SOURCE)
 	touch $@
 
 $(PYTHON_DIR)/.patched: $(PYTHON_DIR)/.unpacked
-	toolchain/patch-kernel.sh $(PYTHON_DIR) package/python/ python\*.patch
+	toolchain/patch-kernel.sh $(PYTHON_DIR) package/python/ python-$(PYTHON_VERSION_SHORT)-\*.patch
 	touch $@
 
 $(PYTHON_DIR)/.hostpython: $(PYTHON_DIR)/.patched
@@ -117,7 +117,7 @@ ifneq ($(BR2_PACKAGE_PYTHON_SSL),y)
 endif
 	$(MAKE) CC=$(TARGET_CC) -C $(PYTHON_DIR) DESTDIR=$(TARGET_DIR) \
 		PYTHON_MODULES_INCLUDE=$(STAGING_DIR)/usr/include \
-		PYTHON_MODULES_LIB=$(STAGING_DIR)/lib \
+		PYTHON_MODULES_LIB="$(STAGING_DIR)/lib $(STAGING_DIR)/usr/lib" \
 		PYTHON_DISABLE_MODULES="$(BR2_PYTHON_DISABLED_MODULES)" \
 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen
 
@@ -130,7 +130,7 @@ endif
 	$(MAKE) CC=$(TARGET_CC) -C $(PYTHON_DIR) install \
 		DESTDIR=$(TARGET_DIR) CROSS_COMPILE=yes \
 		PYTHON_MODULES_INCLUDE=$(STAGING_DIR)/usr/include \
-		PYTHON_MODULES_LIB=$(STAGING_DIR)/lib \
+		PYTHON_MODULES_LIB="$(STAGING_DIR)/lib $(STAGING_DIR)/usr/lib" \
 		PYTHON_DISABLE_MODULES="$(BR2_PYTHON_DISABLED_MODULES)" \
 		HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen && \
 	rm $(TARGET_DIR)/usr/bin/python && \

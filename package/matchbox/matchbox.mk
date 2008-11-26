@@ -113,6 +113,7 @@ matchbox-keyboard-source: $(DL_DIR)/$(MATCHBOX_FK_SOURCE) $(DL_DIR)/$(MATCHBOX_K
 
 $(MATCHBOX_LIB_DIR)/.unpacked: $(DL_DIR)/$(MATCHBOX_LIB_SOURCE)
 	$(MATCHBOX_CAT) $(DL_DIR)/$(MATCHBOX_LIB_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	toolchain/patch-kernel.sh $(MATCHBOX_LIB_DIR) package/matchbox/ libmatchbox\*.patch
 	touch $(MATCHBOX_LIB_DIR)/.unpacked
 
 $(MATCHBOX_SNOTIFY_DIR)/.unpacked: $(DL_DIR)/$(MATCHBOX_SNOTIFY_SOURCE)
@@ -125,6 +126,7 @@ $(MATCHBOX_WM_DIR)/.unpacked: $(DL_DIR)/$(MATCHBOX_WM_SOURCE)
 
 $(MATCHBOX_SM_DIR)/.unpacked: $(DL_DIR)/$(MATCHBOX_SM_SOURCE)
 	$(MATCHBOX_CAT) $(DL_DIR)/$(MATCHBOX_SM_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	toolchain/patch-kernel.sh $(MATCHBOX_SM_DIR) package/matchbox/ mb-applet-startup-monitor\*.patch
 	touch $(MATCHBOX_SM_DIR)/.unpacked
 
 $(MATCHBOX_CN_DIR)/.unpacked: $(DL_DIR)/$(MATCHBOX_CN_SOURCE)
@@ -133,6 +135,7 @@ $(MATCHBOX_CN_DIR)/.unpacked: $(DL_DIR)/$(MATCHBOX_CN_SOURCE)
 
 $(MATCHBOX_PL_DIR)/.unpacked: $(DL_DIR)/$(MATCHBOX_PL_SOURCE)
 	$(MATCHBOX_CAT) $(DL_DIR)/$(MATCHBOX_PL_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	toolchain/patch-kernel.sh $(MATCHBOX_PL_DIR) package/matchbox/ matchbox-panel\*.patch
 	touch $(MATCHBOX_PL_DIR)/.unpacked
 
 $(MATCHBOX_DP_DIR)/.unpacked: $(DL_DIR)/$(MATCHBOX_DP_SOURCE)
@@ -214,14 +217,12 @@ endif
 $(MATCHBOX_LIB_DIR)/.configured: $(MATCHBOX_LIB_DIR)/.unpacked xlib_libXext-install-staging
 	(cd $(MATCHBOX_LIB_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share/matchbox \
@@ -241,20 +242,18 @@ $(MATCHBOX_LIB_DIR)/.configured: $(MATCHBOX_LIB_DIR)/.unpacked xlib_libXext-inst
 $(MATCHBOX_SNOTIFY_DIR)/.configured: $(MATCHBOX_SNOTIFY_DIR)/.unpacked
 	(cd $(MATCHBOX_SNOTIFY_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	lf_cv_sane_realloc=no \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share \
 	--libdir=$(STAGING_DIR)/usr/lib \
-	--includedir=$(STAGING_DIR)/usr/include \
+	--includedir=/usr/include \
 	--with-x \
 	--x-includes=$(STAGING_DIR)/usr/include/X11 \
 	--x-libraries=$(STAGING_DIR)/usr/lib \
@@ -264,14 +263,12 @@ $(MATCHBOX_SNOTIFY_DIR)/.configured: $(MATCHBOX_SNOTIFY_DIR)/.unpacked
 $(MATCHBOX_WM_DIR)/.configured: $(MATCHBOX_WM_DIR)/.unpacked
 	(cd $(MATCHBOX_WM_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share/matchbox \
@@ -291,14 +288,12 @@ $(MATCHBOX_WM_DIR)/.configured: $(MATCHBOX_WM_DIR)/.unpacked
 $(MATCHBOX_SM_DIR)/.configured: $(MATCHBOX_SM_DIR)/.unpacked
 	(cd $(MATCHBOX_SM_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share/matchbox \
@@ -317,14 +312,12 @@ $(MATCHBOX_SM_DIR)/.configured: $(MATCHBOX_SM_DIR)/.unpacked
 $(MATCHBOX_CN_DIR)/.configured: $(MATCHBOX_CN_DIR)/.unpacked
 	(cd $(MATCHBOX_CN_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share/matchbox \
@@ -342,19 +335,17 @@ $(MATCHBOX_CN_DIR)/.configured: $(MATCHBOX_CN_DIR)/.unpacked
 $(MATCHBOX_PL_DIR)/.configured: $(MATCHBOX_PL_DIR)/.unpacked
 	(cd $(MATCHBOX_PL_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share/matchbox \
-	--libdir=$(STAGING_DIR)/usr/lib \
-	--includedir=$(STAGING_DIR)/usr/include \
+	--libdir=/usr/lib \
+	--includedir=/usr/include \
 	--enable-expat \
 	--with-expat-includes=$(STAGING_DIR)/usr/include \
 	--with-expat-lib=$(STAGING_DIR)/usr/lib \
@@ -368,14 +359,12 @@ $(MATCHBOX_PL_DIR)/.configured: $(MATCHBOX_PL_DIR)/.unpacked
 $(MATCHBOX_DP_DIR)/.configured: $(MATCHBOX_DP_DIR)/.unpacked
 	(cd $(MATCHBOX_DP_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share/matchbox \
@@ -394,14 +383,12 @@ $(MATCHBOX_DP_DIR)/.configured: $(MATCHBOX_DP_DIR)/.unpacked
 $(MATCHBOX_FK_DIR)/.configured: $(MATCHBOX_FK_DIR)/.unpacked
 	(cd $(MATCHBOX_FK_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share/matchbox \
@@ -420,14 +407,12 @@ $(MATCHBOX_FK_DIR)/.configured: $(MATCHBOX_FK_DIR)/.unpacked
 $(MATCHBOX_KB_DIR)/.configured: $(MATCHBOX_KB_DIR)/.unpacked
 	(cd $(MATCHBOX_KB_DIR); rm -f config.cache; \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig" \
-	LDFLAGS="-L$(STAGING_DIR)/usr/lib" \
 	./configure \
 	--target=$(GNU_TARGET_NAME) \
 	--host=$(GNU_TARGET_NAME) \
 	--build=$(GNU_HOST_NAME) \
 	--disable-static \
-	--prefix=$(STAGING_DIR)/usr \
+	--prefix=/usr \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--datadir=/usr/share/matchbox \
@@ -486,6 +471,7 @@ $(STAGING_DIR)/usr/lib/libmb.so: $(MATCHBOX_LIB_DIR)/.compiled
 	libdir=/usr/lib \
 	includedir=/usr/include \
 	install
+	$(SED) "s:\(['= ]\)/usr:\1$(STAGING_DIR)/usr:g" $(STAGING_DIR)/usr/lib/libmb.la
 
 $(STAGING_DIR)/usr/lib/$(MATCHBOX_SNOTIFY_BIN): $(MATCHBOX_SNOTIFY_DIR)/.compiled
 	$(MAKE) -C $(MATCHBOX_SNOTIFY_DIR) DESTDIR=$(STAGING_DIR) \

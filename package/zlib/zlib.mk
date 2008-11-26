@@ -37,10 +37,10 @@ $(ZLIB_DIR)/libz.so: $(ZLIB_DIR)/.configured
 	touch -c $@
 
 $(STAGING_DIR)/usr/lib/libz.so: $(ZLIB_DIR)/libz.so
-	cp -dpf $(ZLIB_DIR)/libz.a $(STAGING_DIR)/usr/lib/
-	cp -dpf $(ZLIB_DIR)/zlib.h $(STAGING_DIR)/usr/include/
-	cp -dpf $(ZLIB_DIR)/zconf.h $(STAGING_DIR)/usr/include/
-	cp -dpf $(ZLIB_DIR)/libz.so* $(STAGING_DIR)/usr/lib/
+	$(INSTALL) -D $(ZLIB_DIR)/libz.a $(STAGING_DIR)/usr/lib/libz.a
+	$(INSTALL) -D $(ZLIB_DIR)/zlib.h $(STAGING_DIR)/usr/include/zlib.h
+	$(INSTALL) $(ZLIB_DIR)/zconf.h $(STAGING_DIR)/usr/include/
+	$(INSTALL) $(ZLIB_DIR)/libz.so* $(STAGING_DIR)/usr/lib/
 	touch -c $@
 
 $(TARGET_DIR)/usr/lib/libz.so: $(STAGING_DIR)/usr/lib/libz.so
@@ -50,10 +50,9 @@ $(TARGET_DIR)/usr/lib/libz.so: $(STAGING_DIR)/usr/lib/libz.so
 	touch -c $@
 
 $(TARGET_DIR)/usr/lib/libz.a: $(STAGING_DIR)/usr/lib/libz.so
-	mkdir -p $(TARGET_DIR)/usr/include $(TARGET_DIR)/usr/lib
-	cp -dpf $(STAGING_DIR)/usr/include/zlib.h $(TARGET_DIR)/usr/include/
-	cp -dpf $(STAGING_DIR)/usr/include/zconf.h $(TARGET_DIR)/usr/include/
-	cp -dpf $(STAGING_DIR)/usr/lib/libz.a $(TARGET_DIR)/usr/lib/
+	$(INSTALL) -D $(STAGING_DIR)/usr/include/zlib.h $(TARGET_DIR)/usr/include/zlib.h
+	$(INSTALL) $(STAGING_DIR)/usr/include/zconf.h $(TARGET_DIR)/usr/include/
+	$(INSTALL) -D $(STAGING_DIR)/usr/lib/libz.a $(TARGET_DIR)/usr/lib/libz.a
 	touch -c $@
 
 zlib-headers: $(TARGET_DIR)/usr/lib/libz.a

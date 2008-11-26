@@ -3,14 +3,12 @@
 # libgtk2.0
 #
 #############################################################
-LIBGTK2_VERSION = 2.12.6
+LIBGTK2_VERSION = 2.12.12
 LIBGTK2_SOURCE = gtk+-$(LIBGTK2_VERSION).tar.bz2
 LIBGTK2_SITE = ftp://ftp.gtk.org/pub/gtk/2.12
 LIBGTK2_AUTORECONF = NO
 LIBGTK2_INSTALL_STAGING = YES
 LIBGTK2_INSTALL_TARGET = YES
-LIBGTK2_INSTALL_STAGING_OPT = DESTDIR=$(STAGING_DIR) install
-LIBGTK2_INSTALL_TARGET_OPT = DESTDIR=$(TARGET_DIR) install
 
 LIBGTK2_CONF_ENV = ac_cv_func_posix_getpwuid_r=yes glib_cv_stack_grows=no \
 		glib_cv_uscore=no \
@@ -113,6 +111,6 @@ else
 	LIBGTK2_CONF_OPT += --without-x
 endif
 
-LIBGTK2_DEPENDENCIES = uclibc pkgconfig png jpeg tiff $(LIBGTK2_DEPENDENCIES_EXTRA) libglib2 cairo pango atk
+LIBGTK2_DEPENDENCIES = uclibc pkgconfig libpng jpeg tiff $(LIBGTK2_DEPENDENCIES_EXTRA) libglib2 cairo pango atk
 
 $(eval $(call AUTOTARGETS,package,libgtk2))

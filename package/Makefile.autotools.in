@@ -47,7 +47,7 @@
 #	install the package to the target directory
 # FOO_INSTALL_STAGING_OPT [default DESTDIR=$(STAGING_DIR) install]
 #	arguments passed to <make> while installing to the staging directory
-# FOO_INSTALL_TARGET_OPT [default DESTDIR=$(TARGET_DIR) install-exec]
+# FOO_INSTALL_TARGET_OPT [default DESTDIR=$(TARGET_DIR) install-exec/install-strip]
 #	arguments passed to <make> while installing to the target directory
 # FOO_CLEAN_OPT [default clean]
 #	arguments passed to <make> while installing to the staging directory
@@ -114,8 +114,8 @@ INFLATE.tar = cat
 
 # MESSAGE Macro -- display a message in bold type
 MESSAGE = @echo "$(TERM_BOLD)>>> $($(PKG)_NAME) $($(PKG)_VERSION) $(1)$(TERM_RESET)"
-TERM_BOLD = #$(shell tput bold)
-TERM_RESET = #$(shell tput rmso)
+TERM_BOLD := $(shell tput smso)
+TERM_RESET := $(shell tput rmso)
 
 # Utility programs used to build packages
 TAR ?= tar
@@ -125,7 +125,7 @@ TAR ?= tar
 #	ACLOCAL="$(ACLOCAL)"
 
 # Automatically detect tar --strip-path/components option
-TAR_STRIP_COMPONENTS = $(shell tar --help | grep strip-path > /dev/null ; if test $$? = 0 ; then echo '--strip-path' ; else echo '--strip-components' ; fi)
+TAR_STRIP_COMPONENTS := $(shell $(CONFIG_SHELL) -c '$(TAR) --help | grep strip-path > /dev/null ; if test $$? = 0 ; then echo '--strip-path' ; else echo '--strip-components' ; fi')
 
 ################################################################################
 # Implicit targets -- produce a stamp file for each step of a package build
@@ -225,8 +225,7 @@ $(BUILD_DIR)/%/.stamp_configured:
 		--prefix=/usr \
 		--exec-prefix=/usr \
 		--sysconfdir=/etc \
-		$(if $(findstring s,$(MAKEFLAGS)),--quiet,) \
-		$($(PKG)_CONF_OPT)
+		$(QUIET) $($(PKG)_CONF_OPT)
 	$(Q)touch $@
 
 # Build
@@ -256,7 +255,9 @@ $(PROJECT_BUILD_DIR)/autotools-stamps/%_target_installed:
 	$(if $(BR2_HAVE_INFOPAGES),,for d in info share/info; do \
 		rm -rf $(TARGET_DIR)/$$d $(TARGET_DIR)/usr/$$d; \
 	done)
-	$(Q)mkdir -p $(@D)
+	$(if $(BR2_HAVE_DOCUMENTATION),,for d in doc share/doc; do \
+		rm -rf $(TARGET_DIR)/$$d $(TARGET_DIR)/usr/$$d; \
+	done)
 	touch $@
 
 $(BUILD_DIR)/%/.stamp_cleaned:
@@ -308,7 +309,11 @@ $(2)_MAKE_OPT			?=
 $(2)_INSTALL_STAGING		?= NO
 $(2)_INSTALL_TARGET		?= YES
 $(2)_INSTALL_STAGING_OPT	?= DESTDIR=$$(STAGING_DIR) install
+ifeq ($(BR2_ENABLE_DEBUG),y)
 $(2)_INSTALL_TARGET_OPT		?= DESTDIR=$$(TARGET_DIR)  install-exec
+else
+$(2)_INSTALL_TARGET_OPT		?= DESTDIR=$$(TARGET_DIR)  install-strip
+endif
 $(2)_CLEAN_OPT			?= clean
 $(2)_UNINSTALL_STAGING_OPT	?= DESTDIR=$$(STAGING_DIR) uninstall
 $(2)_UNINSTALL_TARGET_OPT	?= DESTDIR=$$(TARGET_DIR)  uninstall
