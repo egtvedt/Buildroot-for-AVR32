@@ -45,6 +45,7 @@ $(MPLAYER_DIR)/.configured: $(MPLAYER_DIR)/.unpacked
 		--enable-fbdev \
 		$(MPLAYER_ENDIAN) \
 		--disable-mpdvdkit \
+		--disable-ivtv \
 		--disable-tv \
 		--enable-dynamic-plugins \
 	)
@@ -59,7 +60,7 @@ $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY): $(MPLAYER_DIR)/$(MPLAYER_BINARY)
 	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
 	touch -c $@
 
-mplayer: uclibc libmad $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
+mplayer: uclibc $(if $(BR2_PACKAGE_LIBMAD),libmad) $(if $(BR2_PACKAGE_ALSA_LIB),alsa-lib) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
 
 mplayer-source: $(DL_DIR)/$(MPLAYER_SOURCE)
 
@@ -76,6 +77,6 @@ mplayer-dirclean:
 # Toplevel Makefile options
 #
 #############################################################
-ifeq ($(strip $(BR2_PACKAGE_MPLAYER)),y)
+ifeq ($(BR2_PACKAGE_MPLAYER),y)
 TARGETS+=mplayer
 endif
