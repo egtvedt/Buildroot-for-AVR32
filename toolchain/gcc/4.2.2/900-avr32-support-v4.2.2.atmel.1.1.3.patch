@@ -1,6 +1,5 @@
-diff -Nrup gcc-4.2.2/configure.in gcc-4.2.2.atmel.1.1.2/configure.in
---- gcc-4.2.2/configure.in	2007-09-15 02:42:24.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/configure.in	2008-11-25 09:44:55.000000000 +0100
+--- a/configure.in
++++ b/configure.in
 @@ -503,6 +503,9 @@ case "${target}" in
    arm-*-riscix*)
      noconfigdirs="$noconfigdirs ld target-libgloss ${libgcj}"
@@ -11,9 +10,8 @@ diff -Nrup gcc-4.2.2/configure.in gcc-4.2.2.atmel.1.1.2/configure.in
    avr-*-*)
      noconfigdirs="$noconfigdirs target-libiberty target-libstdc++-v3 ${libgcj}"
      ;;
-diff -Nrup gcc-4.2.2/gcc/builtins.c gcc-4.2.2.atmel.1.1.2/gcc/builtins.c
---- gcc-4.2.2/gcc/builtins.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/builtins.c	2008-11-25 09:42:08.000000000 +0100
+--- a/gcc/builtins.c
++++ b/gcc/builtins.c
 @@ -9223,7 +9223,7 @@ validate_arglist (tree arglist, ...)
  
    do
@@ -23,9 +21,8 @@ diff -Nrup gcc-4.2.2/gcc/builtins.c gcc-4.2.2.atmel.1.1.2/gcc/builtins.c
        switch (code)
  	{
  	case 0:
-diff -Nrup gcc-4.2.2/gcc/calls.c gcc-4.2.2.atmel.1.1.2/gcc/calls.c
---- gcc-4.2.2/gcc/calls.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/calls.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/calls.c
++++ b/gcc/calls.c
 @@ -3447,7 +3447,7 @@ emit_library_call_value_1 (int retval, r
    for (; count < nargs; count++)
      {
@@ -35,9 +32,8 @@ diff -Nrup gcc-4.2.2/gcc/calls.c gcc-4.2.2.atmel.1.1.2/gcc/calls.c
  
        /* We cannot convert the arg value to the mode the library wants here;
  	 must do it earlier where we know the signedness of the arg.  */
-diff -Nrup gcc-4.2.2/gcc/c-incpath.c gcc-4.2.2.atmel.1.1.2/gcc/c-incpath.c
---- gcc-4.2.2/gcc/c-incpath.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/c-incpath.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/c-incpath.c
++++ b/gcc/c-incpath.c
 @@ -347,6 +347,18 @@ add_path (char *path, int chain, int cxx
    char* c;
    for (c = path; *c; c++)
@@ -57,10 +53,9 @@ diff -Nrup gcc-4.2.2/gcc/c-incpath.c gcc-4.2.2.atmel.1.1.2/gcc/c-incpath.c
  #endif
  
    p = XNEW (cpp_dir);
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32.c
---- gcc-4.2.2/gcc/config/avr32/avr32.c	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32.c	2008-11-25 09:41:55.000000000 +0100
-@@ -0,0 +1,7878 @@
+--- /dev/null
++++ b/gcc/config/avr32/avr32.c
+@@ -0,0 +1,7915 @@
 +/*
 +   Target hooks and helper functions for AVR32.
 +   Copyright 2003-2006 Atmel Corporation.
@@ -464,7 +459,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +#define TARGET_SECONDARY_RELOAD avr32_secondary_reload
 +
 +enum reg_class
-+avr32_secondary_reload (bool in_p, rtx x, enum reg_class class,
++avr32_secondary_reload (bool in_p, rtx x, enum reg_class class ATTRIBUTE_UNUSED,
 +                        enum machine_mode mode, secondary_reload_info *sri)
 +{
 +
@@ -1212,7 +1207,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +{
 +  const struct builtin_description *d;
 +  unsigned int i;
-+  enum insn_code icode;
++  enum insn_code icode = 0;
 +  tree fndecl = TREE_OPERAND (TREE_OPERAND (exp, 0), 0);
 +  tree arglist = TREE_OPERAND (exp, 1);
 +  tree arg0, arg1, arg2;
@@ -3624,7 +3619,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +  Set the register used for passing the first argument to a function.
 +*/
 +void
-+avr32_init_cumulative_args (CUMULATIVE_ARGS * cum, tree fntype,
++avr32_init_cumulative_args (CUMULATIVE_ARGS * cum, 
++                            tree fntype ATTRIBUTE_UNUSED,
 +                            rtx libname ATTRIBUTE_UNUSED,
 +                            tree fndecl ATTRIBUTE_UNUSED)
 +  {
@@ -4515,8 +4511,15 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +void
 +avr32_notice_update_cc (rtx exp, rtx insn)
 +{
-+
-+  switch (get_attr_cc (insn))
++  enum attr_cc attr_cc = get_attr_cc (insn);
++  
++  if ( attr_cc == CC_SET_Z_IF_NOT_V2 )
++    if (TARGET_V2_INSNS)
++      attr_cc = CC_NONE;
++    else
++      attr_cc = CC_SET_Z;
++  
++  switch (attr_cc)
 +    {
 +    case CC_CALL_SET:
 +      CC_STATUS_INIT;
@@ -4565,6 +4568,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +        rtx cmp_op0, cmp_op1;
 +        rtx cond;
 +        rtx dest;
++        rtx next_insn = next_nonnote_insn (insn);
 +
 +        if ( GET_CODE (exp) == COND_EXEC )
 +          {
@@ -4616,6 +4620,32 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +	    cc_status.mdep.value = cmp;
 +            cc_status.mdep.cond_exec_cmp_clobbered = 0;
 +	  }
++
++
++        /* Check if we have a COND_EXEC insn which updates one
++           of the registers in the compare status. */
++        if (REG_P (dest)
++            && (reg_mentioned_p (dest, cmp_op0)
++                || reg_mentioned_p (dest, cmp_op1))
++            && GET_CODE (exp) == COND_EXEC )
++          cc_status.mdep.cond_exec_cmp_clobbered = 1;
++        
++        if ( cc_status.mdep.cond_exec_cmp_clobbered 
++             && GET_CODE (exp) == COND_EXEC
++             && next_insn != NULL
++             && INSN_P (next_insn)
++             && !(GET_CODE (PATTERN (next_insn)) == COND_EXEC
++                  && rtx_equal_p (XEXP (COND_EXEC_TEST (PATTERN (next_insn)), 0), cmp_op0)
++                  && rtx_equal_p (XEXP (COND_EXEC_TEST (PATTERN (next_insn)), 1), cmp_op1)
++                  && (GET_CODE (COND_EXEC_TEST (PATTERN (next_insn))) == GET_CODE (cond)
++                      || GET_CODE (COND_EXEC_TEST (PATTERN (next_insn))) == reverse_condition (GET_CODE (cond)))) )
++          {
++            /* We have a sequence of conditional insns where the compare status has been clobbered
++               since the compare no longer reflects the content of the values to compare. */
++            CC_STATUS_INIT;
++            cc_status.mdep.cond_exec_cmp_clobbered = 1;
++          }
++        
 +      }
 +      break;
 +    case CC_FPCOMPARE:
@@ -7862,8 +7892,6 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +  /* Convert gcc run-time function names to AVR32 ABI names */
 +
 +  /* Double-precision floating-point arithmetic. */
-+  set_optab_libfunc (sdiv_optab, DFmode, "__avr32_f64_div");
-+  set_optab_libfunc (smul_optab, DFmode, "__avr32_f64_mul");
 +  set_optab_libfunc (neg_optab, DFmode, NULL);
 +
 +  /* Double-precision comparisons.  */
@@ -7924,6 +7952,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +  /* Floating point library functions which have fast versions. */
 +  if ( TARGET_FAST_FLOAT )
 +    {
++      set_optab_libfunc (sdiv_optab, DFmode, "__avr32_f64_div_fast");
++      set_optab_libfunc (smul_optab, DFmode, "__avr32_f64_mul_fast");
 +      set_optab_libfunc (add_optab, DFmode, "__avr32_f64_add_fast");
 +      set_optab_libfunc (sub_optab, DFmode, "__avr32_f64_sub_fast");
 +      set_optab_libfunc (add_optab, SFmode, "__avr32_f32_add_fast");
@@ -7932,6 +7962,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +    }
 +  else
 +    {
++      set_optab_libfunc (sdiv_optab, DFmode, "__avr32_f64_div");
++      set_optab_libfunc (smul_optab, DFmode, "__avr32_f64_mul");
 +      set_optab_libfunc (add_optab, DFmode, "__avr32_f64_add");
 +      set_optab_libfunc (sub_optab, DFmode, "__avr32_f64_sub");
 +      set_optab_libfunc (add_optab, SFmode, "__avr32_f32_add");
@@ -7939,9 +7971,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.c gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +      set_optab_libfunc (sdiv_optab, SFmode, "__avr32_f32_div");
 +    }
 +}
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-elf.h gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32-elf.h
---- gcc-4.2.2/gcc/config/avr32/avr32-elf.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32-elf.h	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/avr32-elf.h
 @@ -0,0 +1,84 @@
 +/*
 +   Elf specific definitions.
@@ -8027,9 +8058,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-elf.h gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        builtin_define ("__AVR32_FAST_FLOAT__");                \
 +    }								\
 +  while (0)
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.h gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32.h
---- gcc-4.2.2/gcc/config/avr32/avr32.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32.h	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/avr32.h
 @@ -0,0 +1,3347 @@
 +/*
 +   Definitions of target machine for AVR32.
@@ -11378,9 +11408,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.h gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +#endif
 +
 +#endif
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32.md
---- gcc-4.2.2/gcc/config/avr32/avr32.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32.md	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/avr32.md
 @@ -0,0 +1,4893 @@
 +;;   AVR32 machine description file.
 +;;   Copyright 2003-2006 Atmel Corporation.
@@ -11409,7 +11438,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.1.2/gcc/config/
 +  (const_string "alu"))
 +
 +
-+(define_attr "cc" "none,set_vncz,set_ncz,set_cz,set_z,bld,compare,cmp_cond_insn,clobber,call_set,fpcompare,from_fpcc"
++(define_attr "cc" "none,set_vncz,set_ncz,set_cz,set_z,set_z_if_not_v2,bld,compare,cmp_cond_insn,clobber,call_set,fpcompare,from_fpcc"
 +  (const_string "none"))
 +
 +
@@ -11937,7 +11966,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.1.2/gcc/config/
 +  
 +  [(set_attr "length" "2,4,4,8,4,4,8")
 +   (set_attr "type" "alu,alu,alu,alu2,load,store,load")
-+   (set_attr "cc" "none,none,none,set_z,none,none,clobber")])
++   (set_attr "cc" "none,none,set_z_if_not_v2,set_z,none,none,clobber")])
 +
 +
 +(define_expand "reload_out_rmw_memory_operand"
@@ -16275,14 +16304,12 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.md gcc-4.2.2.atmel.1.1.2/gcc/config/
 +
 +;; Load the FP coprAocessor patterns
 +(include "fpcp.md")
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-modes.def gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32-modes.def
---- gcc-4.2.2/gcc/config/avr32/avr32-modes.def	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32-modes.def	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/avr32-modes.def
 @@ -0,0 +1 @@
 +VECTOR_MODES (INT, 4);        /*            V4QI V2HI */
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.opt gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32.opt
---- gcc-4.2.2/gcc/config/avr32/avr32.opt	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32.opt	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/avr32.opt
 @@ -0,0 +1,86 @@
 +; Options for the ATMEL AVR32 port of the compiler.
 +
@@ -16370,9 +16397,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32.opt gcc-4.2.2.atmel.1.1.2/gcc/config
 +Signal that all data is in range for the Atomic Read-Modify-Write memory instructions, and that
 +gcc can safely generate these whenever possible. 
 +
-diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-protos.h gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32-protos.h
---- gcc-4.2.2/gcc/config/avr32/avr32-protos.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/avr32-protos.h	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/avr32-protos.h
 @@ -0,0 +1,196 @@
 +/*
 +   Prototypes for exported functions defined in avr32.c
@@ -16570,9 +16596,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/avr32-protos.h gcc-4.2.2.atmel.1.1.2/gcc/c
 +
 +
 +#endif /* AVR32_PROTOS_H */
-diff -Nrup gcc-4.2.2/gcc/config/avr32/crti.asm gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/crti.asm
---- gcc-4.2.2/gcc/config/avr32/crti.asm	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/crti.asm	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/crti.asm
 @@ -0,0 +1,64 @@
 +/*
 +   Init/fini stuff for AVR32.
@@ -16638,9 +16663,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/crti.asm gcc-4.2.2.atmel.1.1.2/gcc/config/
 +1:	.long	0b - _GLOBAL_OFFSET_TABLE_		
 +2:	
 +
-diff -Nrup gcc-4.2.2/gcc/config/avr32/crtn.asm gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/crtn.asm
---- gcc-4.2.2/gcc/config/avr32/crtn.asm	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/crtn.asm	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/crtn.asm
 @@ -0,0 +1,44 @@
 +/*   Copyright (C) 2001 Free Software Foundation, Inc.
 +    Written By Nick Clifton
@@ -16686,9 +16710,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/crtn.asm gcc-4.2.2.atmel.1.1.2/gcc/config/
 +	.section	".fini"
 +	ldm	sp++, r6, pc
 +		
-diff -Nrup gcc-4.2.2/gcc/config/avr32/fpcp.md gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/fpcp.md
---- gcc-4.2.2/gcc/config/avr32/fpcp.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/fpcp.md	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/fpcp.md
 @@ -0,0 +1,551 @@
 +;;   AVR32 machine description file for Floating-Point instructions.
 +;;   Copyright 2003-2006 Atmel Corporation.
@@ -17241,18 +17264,33 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/fpcp.md gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +  [(set_attr "type" "fstm")
 +   (set_attr "length" "4")
 +   (set_attr "cc" "none")])
-diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/lib1funcs.S
---- gcc-4.2.2/gcc/config/avr32/lib1funcs.S	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/lib1funcs.S	2008-11-25 09:41:55.000000000 +0100
-@@ -0,0 +1,2628 @@
+--- /dev/null
++++ b/gcc/config/avr32/lib1funcs.S
+@@ -0,0 +1,2874 @@
++/* Macro for moving immediate value to register. */	
++.macro mov_imm	reg, imm
++.if	(((\imm & 0xfffff) == \imm) || ((\imm | 0xfff00000) == \imm))
++	mov	\reg, \imm
++#if __AVR32_UC__ >= 2
++.elseif	((\imm & 0xffff) == 0)
++	movh	\reg, hi(\imm)
 +
++#endif
++.else
++	mov	\reg, lo(\imm)
++	orh	\reg, hi(\imm)
++.endif
++.endm
++	
++	
++	 
 +/* Adjust the unpacked double number if it is a subnormal number.
 +   The exponent and mantissa pair are stored
 +   in [mant_hi,mant_lo] and [exp]. A register with the correct sign bit in
 +   the MSB is passed in [sign]. Needs two scratch
 +   registers [scratch1] and [scratch2]. An adjusted and packed double float
 +   is present in [mant_hi,mant_lo] after macro has executed */
-+.macro  adjust_subnormal_df     exp, mant_lo, mant_hi, sign, scratch1, scratch2
++.macro  adjust_subnormal_df     exp, mant_lo, mant_hi, sign, scratch1, scratch2 
 +        /* We have an exponent which is <=0 indicating a subnormal number
 +           As it should be stored as if the exponent was 1 (although the
 +           exponent field is all zeros to indicate a subnormal number)
@@ -17266,19 +17304,19 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        mov     \mant_hi, 0
 +        mov     \mant_lo, 0
 +        rjmp    52f
-+50:
++50:     
 +        sub     \exp,-10                /* do the shift to position the
 +                                           mantissa at the same time
 +                                           note! this does not include the
 +                                           final 1 step shift to add the sign */
-+
++ 
 +        /* when shifting, save all shifted out bits in [scratch2]. we may need to
 +           look at them to make correct rounding. */
-+
++ 
 +        rsub    \scratch1,\exp,32       /* get inverted shift count */
 +        cp.w    \exp,32                 /* handle shifts >= 32 separately */
 +        brhs    51f
-+
++ 
 +        /* small (<32) shift amount, both words are part of the shift */
 +        lsl     \scratch2,\mant_lo,\scratch1               /* save bits to shift out from lsw*/
 +        lsl     \scratch1,\mant_hi,\scratch1               /* get bits from msw destined for lsw*/
@@ -17286,7 +17324,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        lsr     \mant_hi,\mant_hi,\exp                     /* shift down msw */
 +        or      \mant_hi,\scratch1                         /* add bits from msw with prepared lsw */
 +        rjmp    50f
-+
++ 
 +        /* large (>=32) shift amount, only lsw will have bits left after shift.
 +           note that shift operations will use ((shift count) mod 32) so
 +           we do not need to subtract 32 from shift count. */
@@ -17296,20 +17334,20 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        mov     \mant_lo,\mant_hi                          /* msw -> lsw (i.e. "shift 32 first") */
 +        mov     \mant_hi,0                                 /* clear msw */
 +        lsr     \mant_lo,\mant_lo,\exp                     /* make rest of shift inside lsw */
-+
++ 
 +50:
 +        /* result is almost ready to return, except that least significant bit
 +           and the part we already shifted out may cause the result to be
 +           rounded */
 +        bld     \mant_lo,0                   /* get bit to be shifted out */
 +        brcc    51f                          /* if bit was 0, no rounding */
-+
++ 
 +        /* msb of part to remove is 1, so rounding depends on rest of bits */
 +        tst     \scratch2,\scratch2                   /* get shifted out tail */
 +        brne    50f     /* if rest > 0, do round */
 +        bld     \mant_lo,1                   /* we have to look at lsb in result */
 +        brcc    51f   /* if lsb is 0, don't round */
-+
++ 
 +50:
 +        /* subnormal result requires rounding
 +           rounding may cause subnormal to become smallest normal number
@@ -17317,33 +17355,33 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +           we got by rippling a one bit up from mantissa into exponent field. */
 +        sub     \mant_lo,-1
 +        subcc   \mant_hi,-1
-+
++ 
 +51:
 +        /* shift and return packed double with correct sign */
 +        rol     \sign
 +        ror     \mant_hi
-+        ror     \mant_lo
-+52:
++        ror     \mant_lo        
++52:     
 +.endm
-+
-+
++ 
++ 
 +/* Adjust subnormal single float number with exponent [exp]
 +   and mantissa [mant] and round.    */
 +.macro  adjust_subnormal_sf     sf, exp, mant, sign, scratch
 +        /* subnormal number */
 +        rsub    \exp,\exp, 1            /* shift amount */
 +        cp.w    \exp, 25
-+        movhs   \mant, 0
++        movhs   \mant, 0                
 +        brhs    90f                     /* Return zero */
 +        rsub    \scratch, \exp, 32
 +        lsl     \scratch, \mant,\scratch/* Check if there are any bits set
 +                                           in the bits discarded in the mantissa */
-+        srne    \scratch                /* If so set the lsb of the shifted mantissa */
++        srne    \scratch                /* If so set the lsb of the shifted mantissa */ 
 +        lsr     \mant,\mant,\exp        /* Shift the mantissa */
 +        or      \mant, \scratch         /* Round lsb if any bits were shifted out  */
 +        /* Rounding :   For explaination, see round_sf. */
 +        mov     \scratch, 0x7f          /* Set rounding constant */
-+        bld     \mant, 8
++        bld     \mant, 8                
 +        subeq   \scratch, -1            /* For odd numbers use rounding constant 0x80 */
 +        add     \mant, \scratch         /* Add rounding constant to mantissa */
 +        /* We can't overflow because mantissa is at least shifted one position
@@ -17355,19 +17393,19 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Rotate in sign */
 +        lsl     \sign, 1
 +        ror     \sf
-+90:
++90:     
 +.endm
-+
-+
++ 
++ 
 +/* Round the unpacked df number with exponent [exp] and
 +   mantissa [mant_hi, mant_lo]. Uses scratch register
 +   [scratch] */
 +.macro  round_df        exp, mant_lo, mant_hi, scratch
 +        mov     \scratch, 0x3ff         /* Rounding constant */
-+        bld     \mant_lo,11             /* Check if lsb in the final result is
++        bld     \mant_lo,11             /* Check if lsb in the final result is  
 +                                           set */
 +        subeq   \scratch, -1            /* Adjust rounding constant to 0x400
-+                                           if rounding 0.5 upwards */
++                                           if rounding 0.5 upwards */   
 +        add     \mant_lo, \scratch      /* Round */
 +        acr     \mant_hi                /* If overflowing we know that
 +                                           we have all zeros in the bits not
@@ -17376,11 +17414,11 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +                                           two since we had an implicit bit
 +                                           which is lost + the extra overflow bit */
 +        subcs   \exp, -2                /* Update exponent */
-+.endm
-+
++.endm           
++ 
 +/* Round single float number stored in [mant] and [exp] */
 +.macro  round_sf        exp, mant, scratch
-+        /* Round:
++        /* Round:       
 +                For 0.5 we round to nearest even integer
 +                for all other cases we round to nearest integer.
 +                This means that if the digit left of the "point" (.)
@@ -17395,121 +17433,38 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        bld     \mant, 8
 +        subeq   \scratch, -1    /* Rounding constant should be 0x80 */
 +        add     \mant, \scratch
-+        subcs   \exp, -2        /* Adjust exponent if we overflowed */
++        subcs   \exp, -2        /* Adjust exponent if we overflowed */          
 +.endm
-+
-+/* Scale mantissa [mant_hi, mant_lo] with amount [shift_count].
-+   Uses scratch registers [scratch1] and [scratch2] */
-+.macro  scale_df        shift_count, mant_lo, mant_hi, scratch1, scratch2
-+        /* Scale [mant_hi, mant_lo] with shift_amount.
-+           Must not forget the sticky bits we intend to shift out. */
-+
-+        rsub    \scratch1,\shift_count,32/* get (32 - shift count)
-+                                           (if shift count > 32 we get a
-+                                           negative value, but that will
-+                                           work as well in the code below.) */
-+
-+        cp.w    \shift_count,32          /* handle shifts >= 32 separately */
-+        brhs    70f
-+
-+        /* small (<32) shift amount, both words are part of the shift
-+           first remember whether part that is lost contains any 1 bits ... */
-+        lsl     \scratch2,\mant_lo,\scratch1  /*shift away bits that are part of
-+                                                final mantissa. only part that goes
-+                                                to scratch2 are bits that will be lost */
-+
-+        /* ... and now to the actual shift */
-+        lsl     \scratch1,\mant_hi,\scratch1  /* get bits from msw destined for lsw*/
-+        lsr     \mant_lo,\mant_lo,\shift_count   /* shift down lsw of mantissa */
-+        lsr     \mant_hi,\mant_hi,\shift_count   /* shift down msw of mantissa */
-+        or      \mant_lo,\scratch1               /* combine these bits with prepared lsw*/
-+        rjmp    71f
-+
-+        /* large (>=32) shift amount, only lsw will have bits left after shift.
-+           note that shift operations will use ((shift count) mod 32) so
-+           we do not need to subtract 32 from shift count. */
-+70:
-+        /* first remember whether part that is lost contains any 1 bits ... */
-+        lsl     \scratch2,\mant_hi,\scratch1   /* save all lost bits from msw */
-+        or      \scratch2,\mant_lo             /* also save lost bits (all) from lsw
-+                                                  now scratch2<>0 if we lose any bits */
-+
-+        /* ... and now to the actual shift */
-+        mov     \mant_lo,\mant_hi             /* msw -> lsw (i.e. "shift 32 first")*/
-+        mov     \mant_hi,0                    /* clear msw */
-+        lsr     \mant_lo,\mant_lo,\shift_count /* make rest of shift inside lsw*/
-+
-+71:
-+        cp.w    \scratch2,0                    /* if any '1' bit in part we lost ...*/
-+        breq    70f
-+
-+        sbr     \mant_lo,0                    /* ... we need to set sticky bit*/
-+70:
-+.endm
-+
-+/* Unpack exponent and mantissa from the double number
-+   stored in [df_hi,df_lo]. The exponent is stored in [exp]
-+   while the mantissa is stored in [df_hi,df_lo]. */
-+
-+.macro  unpack_df               exp, df_lo, df_hi
-+        lsr     \exp, \df_hi,21               /* Extract exponent */
-+        lsl     \df_hi,10                     /* Get mantissa */
-+        or      \df_hi,\df_hi,\df_lo>>21
-+        lsl     \df_lo,11
-+
-+        neg     \exp                          /* Fix implicit bit */
-+        bst     \df_hi,31
-+        subeq   \exp,1
-+        neg     \exp                          /* negate back exponent */
-+        .endm
-+
-+/* Unpack exponent and mantissa from the single float number
-+   stored in [sf]. The exponent is stored in [exp]
-+   while the mantissa is stored in [sf]. */
-+.macro  unpack_sf               exp, sf
-+        lsr     \exp, \sf, 24
-+        brne    80f
-+        /* Fix subnormal number */
-+        lsl     \sf,7
-+        clz     \exp,\sf
-+        lsl     \sf,\sf,\exp
-+        rsub    \exp,\exp,1
-+        rjmp    81f
-+80:
-+        lsl     \sf,7
-+        sbr     \sf, 31 /*Implicit bit*/
-+81:
-+.endm
-+
-+
-+
++ 
++                 
++ 
 +/* Pack a single float number stored in [mant] and [exp]
 +   into a single float number in [sf]  */
 +.macro  pack_sf sf, exp, mant
 +        bld     \mant,31                  /* implicit bit to z */
 +        subne   \exp,1                   /* if subnormal (implicit bit 0)
 +                                          adjust exponent to storage format */
-+
++        
 +        lsr     \sf, \mant, 7
 +        bfins   \sf, \exp, 24, 8
-+.endm
-+
++.endm   
++ 
 +/* Pack exponent [exp] and mantissa [mant_hi, mant_lo]
 +   into [df_hi, df_lo].  [df_hi] is shifted
 +   one bit up so the sign bit can be shifted into it */
-+
++        
 +.macro  pack_df         exp, mant_lo, mant_hi, df_lo, df_hi
 +        bld     \mant_hi,31                  /* implicit bit to z */
 +        subne   \exp,1                   /* if subnormal (implicit bit 0)
 +                                          adjust exponent to storage format */
-+
++ 
 +        lsr     \mant_lo,11                  /* shift back lsw */
 +        or      \df_lo,\mant_lo,\mant_hi<<21          /* combine with low bits from msw */
 +        lsl     \mant_hi,1                   /* get rid of implicit bit */
 +        lsr     \mant_hi,11                  /* shift back msw except for one step*/
 +        or      \df_hi,\mant_hi,\exp<<21          /* combine msw with exponent */
 +.endm
-+
++ 
 +/* Normalize single float number stored in [mant] and [exp]
 +   using scratch register [scratch] */
 +.macro  normalize_sf    exp, mant, scratch
@@ -17518,15 +17473,15 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        sub     \exp, \scratch
 +        lsl     \mant, \mant, \scratch
 +.endm
-+
++ 
 +/* Normalize the exponent and mantissa pair stored
 +   in [mant_hi,mant_lo] and [exp]. Needs two scratch
 +   registers [scratch1] and [scratch2]. */
 +.macro  normalize_df            exp, mant_lo, mant_hi, scratch1, scratch2
 +        clz     \scratch1,\mant_hi     /* Check if we have zeros in high bits */
 +        breq    80f                     /* No need for scaling if no zeros in high bits */
-+        brcs    81f                     /* Check for all zeros */
-+
++        brcs    81f                     /* Check for all zeros */           
++ 
 +        /* shift amount is smaller than 32, and involves both msw and lsw*/
 +        rsub    \scratch2,\scratch1,32  /* shift mantissa */
 +        lsl     \mant_hi,\mant_hi,\scratch1
@@ -17534,20 +17489,19 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        or      \mant_hi,\scratch2
 +        lsl     \mant_lo,\mant_lo,\scratch1
 +        sub     \exp,\scratch1          /* adjust exponent */
-+        rjmp    80f                     /* Finished */
++        rjmp    80f                     /* Finished */  
 +81:
 +        /* shift amount is greater than 32 */
 +        clz     \scratch1,\mant_lo      /* shift mantissa */
 +        movcs   \scratch1, 0
 +        subcc   \scratch1,-32
-+        mov     \mant_hi,\mant_lo
-+        lsl     \mant_hi,\mant_hi,\scratch1
++        lsl     \mant_hi,\mant_lo,\scratch1
 +        mov     \mant_lo,0
 +        sub     \exp,\scratch1          /* adjust exponent */
-+80:
++80:     
 +.endm
-+
-+
++        
++ 
 +/* Fast but approximate multiply of two 64-bit numbers to give a 64 bit result.
 +   The multiplication of [al]x[bl] is discarded.
 +   Operands in [ah], [al], [bh], [bl].
@@ -17559,140 +17513,225 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        mulu.d  \rl, \ah, \bh
 +        add     \rl, \sh
 +        acr     \rh
-+.endm
-+
-+
-+
-+
-+#ifdef L_avr32_f64_mul
++.endm           
++ 
++ 
++        
++#if defined(L_avr32_f64_mul) || defined(L_avr32_f64_mul_fast)
 +        .align  2
++#if defined(L_avr32_f64_mul)
 +        .global __avr32_f64_mul
 +        .type  __avr32_f64_mul,@function
-+
-+
 +__avr32_f64_mul:
-+        or      r12, r10, r11 << 1
-+        breq   __avr32_f64_mul_op1_zero
++#else 
++        .global __avr32_f64_mul_fast
++        .type  __avr32_f64_mul_fast,@function
++__avr32_f64_mul_fast:
++#endif                
++        or      r12, r10, r11 << 1 
++        breq   __avr32_f64_mul_op1_zero        
 +
-+        stm     --sp, r5,r6,r7,lr
++#if defined(L_avr32_f64_mul)
++	pushm	r4-r7, lr
++#else
++        stm     --sp, r5,r6,r7,lr       
++#endif
++
++#define AVR32_F64_MUL_OP1_INT_BITS 1
++#define AVR32_F64_MUL_OP2_INT_BITS 10
++#define AVR32_F64_MUL_RES_INT_BITS 11
++	
 +        /* op1 in {r11,r10}*/
 +        /* op2 in {r9,r8}*/
 +        eor     lr, r11, r9             /* MSB(lr) = Sign(op1) ^ Sign(op2) */
-+
-+        /* Unpack op1 */
++ 
++        /* Unpack op1 to 1.63 format*/        
 +        /* exp: r7 */
 +        /* sf:  r11, r10 */
-+        lsr     r7, r11, 20 /* Extract exponent */
++	bfextu	r7, r11, 20, 11 /* Extract exponent */
 +
-+        lsl     r11, 11 /* Extract mantissa, leave room for implicit bit */
-+        or      r11, r11, r10>>21
-+        lsl     r10, 11
-+        sbr     r11, 31 /* Insert implicit bit */
++	mov	r5, 1
 +
-+        cbr     r7, 11       /* Clear sign bit */
 +        /* Check if normalization is needed */
-+        breq    __avr32_f64_mul_op1_subnormal /*If number is subnormal, normalize it */
++        breq    __avr32_f64_mul_op1_subnormal /*If number is subnormal, normalize it */ 
 +
-+22:
-+        /* Unpack op2 */
++        lsl     r11, (12-AVR32_F64_MUL_OP1_INT_BITS-1) /* Extract mantissa, leave room for implicit bit */ 
++        or      r11, r11, r10>>(32-(12-AVR32_F64_MUL_OP1_INT_BITS-1))
++        lsl     r10, (12-AVR32_F64_MUL_OP1_INT_BITS-1)
++	bfins	r11, r5, 32 - (1 + AVR32_F64_MUL_OP1_INT_BITS), 1 + AVR32_F64_MUL_OP1_INT_BITS /* Insert implicit bit */
++
++
++22:     
++        /* Unpack op2 to 10.54 format */
 +        /* exp: r6 */
 +        /* sf:  r9, r8 */
-+        lsr     r6, r9, 20 /* Extract exponent */
++	bfextu	r6, r9, 20, 11 /* Extract exponent */
 +
-+        lsl     r9, 11 /* Extract mantissa, leave room for implicit bit */
-+        or      r9, r9, r8>>21
-+        lsl     r8, 11
-+        sbr     r9, 31 /* Insert implicit bit */
-+
-+        cbr     r6, 11       /* Clear sign bit */
 +        /* Check if normalization is needed */
-+        breq    __avr32_f64_mul_op2_subnormal /*If number is subnormal, normalize it */
-+23:
++        breq    __avr32_f64_mul_op2_subnormal /*If number is subnormal, normalize it */ 
 +
++	lsl	r8, 1 /* Extract mantissa, leave room for implicit bit */
++	rol	r9	
++	bfins	r9, r5, 32 - (1 + AVR32_F64_MUL_OP2_INT_BITS), 1 + AVR32_F64_MUL_OP2_INT_BITS /* Insert implicit bit */
++
++23:     
++ 
 +        /* Check if any operands are NaN or INF */
 +        cp      r7, 0x7ff
 +        breq    __avr32_f64_mul_op_nan_or_inf /* Check op1 for NaN or Inf */
 +        cp      r6, 0x7ff
 +        breq    __avr32_f64_mul_op_nan_or_inf  /* Check op2 for NaN or Inf */
-+
-+
++ 
++ 
 +        /* Calculate new exponent in r12*/
 +        add     r12, r7, r6
 +        sub     r12, (1023-1)
++ 
++#if defined(L_avr32_f64_mul)
++	/* Do the multiplication.
++           Place result in [r11, r10, r7, r6]. The result is in 11.117 format.  */
++        mulu.d  r4, r11, r8
++        macu.d  r4, r10, r9
++        mulu.d  r6, r10, r8
++        mulu.d  r10, r11, r9
++	add	r7, r4
++	adc	r10, r10, r5	
++	acr	r11
++#else
++	/* Do the multiplication using approximate calculation. discard the al x bl
++	   calculation.
++           Place result in [r11, r10, r7]. The result is in 11.85 format.  */
 +
 +        /* Do the multiplication using approximate calculation.
 +         Place result in r11, r10. Use r7, r6 as scratch registers */
-+        mul_approx_df        r11 /*ah*/, r10 /*al*/, r9 /*bh*/, r8 /*bl*/, r11 /*rh*/, r10 /*rl*/, r7 /*sh*/, r6 /*sl*/
-+
-+        /* Check if result is zero */
-+        breq    __avr32_f64_mul_res_subnormal
-+
++        mulu.d  r6, r11, r8
++        macu.d  r6, r10, r9
++        mulu.d  r10, r11, r9
++        add     r10, r7
++        acr     r11
++#endif 
 +        /* Adjust exponent and mantissa */
-+        /* [r12]:exp, [r11, r10]:mant, [r9,r8,r7]:scratch*/
-+        /* Mantissa may be of the format 0.xxxx or 1.xxxx. */
++        /* [r12]:exp, [r11, r10]:mant [r7, r6]:sticky bits */
++        /* Mantissa may be of the format 00000000000.0xxx or 00000000000.1xxx. */
 +        /* In the first case, shift one pos to left.*/
-+        sub     r9, r12, 1
-+        mov     r8, r11
-+        lsl     r7, r10, 1
-+        rol     r8
-+        bld     r11, 31
-+        movne   r12, r9
-+        movne   r11, r8
-+        movne   r10, r7
-+        cp      r12, 0
-+        breq    __avr32_f64_mul_res_subnormal /*Result was subnormal. Flush-to-zero and return zero*/
-+
++        bld     r11, 32-AVR32_F64_MUL_RES_INT_BITS-1
++	breq	0f	
++	lsl	r7, 1
++	rol	r10
++	rol	r11
++	sub	r12, 1
++0:	
++        cp      r12, 0  
++        brle    __avr32_f64_mul_res_subnormal /*Result was subnormal.*/
++ 
 +        /* Check for Inf. */
 +        cp.w    r12, 0x7ff
 +        brge    __avr32_f64_mul_res_inf
 +
++	/* Insert exponent. */
++	bfins	r11, r12, 20, 11  
++
 +        /* Result was not subnormal. Perform rounding. */
-+        /* Because of performance optimization, we have no sticky bit, */
-+        /* so round-to-even won't work as specified in the IEEE standard.*/
-+        /* [r12]:exp, [r11, r10]:mant */
-+        /* Mantissa is in 0.64 format. Round by adding 1<<(64-(52+2))=1<<10*/
-+        /* That is, 1 in the MSB of the part that will be discarded in final packing.*/
-+        mov     r9, (1<<10)
-+        add     r10, r9
-+        acr     r11
-+        /* Adjust exponent if we overflowed.*/
-+        subcs   r12, -1
++        /* For the fast version we discard the sticky bits and always round
++	   the halfwaycase up. */
++24:	
++#if defined(L_avr32_f64_mul)
++	or	r6, r6, r10 << 31 /* Or in parity bit into stickybits */
++	or	r7, r7, r6 >> 1   /* Or together sticky and still make the msb 
++				     of r7 represent the halfway bit. */
++	eorh	r7, 0x8000	  /* Toggle halfway bit. */
++	/* We should now round up by adding one for the following cases:
 +
++		halfway   sticky|parity  round-up
++		   0            x           no
++		   1            0           no
++	           1            1           yes
 +
-+        /* Pack final result*/
-+        /* Input:        [r12]:exp, [r11, r10]:mant */
-+        /* Result in [r11,r10] */
-+        /* Insert mantissa */
-+        cbr     r11, 31 /*Clear implicit bit*/
-+        lsr     r10, 11
-+        or      r10, r10, r11<<21
-+        lsr     r11, 11
-+        /* Insert exponent and sign bit*/
-+        or      r11, r11, r12<<20
++	   Since we have inverted the halfway bit we can use the satu instruction
++           by saturating to 1 bit to implement this. 
++	*/ 
++	satu	r7 >> 0, 1
++#else
++	lsr	r7, 31
++#endif	
++	add	r10, r7
++	acr	r11	
++        
++        /* Insert sign bit*/
 +        bld     lr, 31
 +        bst     r11, 31
-+
++        
 +        /* Return result in [r11,r10] */
++#if defined(L_avr32_f64_mul)
++	popm	r4-r7, pc
++#else
 +        ldm     sp++, r5, r6, r7,pc
-+
-+
++#endif
++ 
++ 
 +__avr32_f64_mul_op1_subnormal:
-+        cbr     r11, 31 /* Clear implicit bit. */
-+        normalize_df    r7 /*exp*/, r10, r11 /*Mantissa*/, r5, r12 /*scratch*/
++	andh	r11, 0x000f /* Remove sign bit and exponent */
++        clz     r12, r10    /* Count leading zeros in lsw */
++        clz     r6, r11     /* Count leading zeros in msw */
++        subcs	r12, -32 + AVR32_F64_MUL_OP1_INT_BITS 
++	movcs	r6, r12
++	subcc	r6, AVR32_F64_MUL_OP1_INT_BITS
++	cp.w	r6, 32
++	brge	0f
++		
++        /* shifting involves both msw and lsw*/
++        rsub    r12, r6, 32  /* shift mantissa */
++        lsl     r11, r11, r6
++        lsr     r12, r10, r12
++        or      r11, r12
++        lsl     r10, r10, r6
++	sub	r6, 12-AVR32_F64_MUL_OP1_INT_BITS
++        sub     r7, r6          /* adjust exponent */
++        rjmp    22b             /* Finished */  
++0:
++        /* msw is zero so only need to consider lsw */
++        lsl     r11, r10, r6
++	breq	__avr32_f64_mul_res_zero
++        mov     r10, 0
++	sub	r6, 12-AVR32_F64_MUL_OP1_INT_BITS
++        sub     r7, r6            /* adjust exponent */
 +        rjmp    22b
 +
++ 
 +__avr32_f64_mul_op2_subnormal:
-+        cbr     r9, 31 /* Clear implicit bit. */
-+        normalize_df    r6 /*exp*/, r8, r9 /*Mantissa*/, r5, r12 /*scratch*/
++	andh	r9, 0x000f  /* Remove sign bit and exponent */
++        clz     r12, r8    /* Count leading zeros in lsw */
++        clz     r5, r9     /* Count leading zeros in msw */
++        subcs	r12, -32 + AVR32_F64_MUL_OP2_INT_BITS 
++	movcs	r5, r12
++	subcc	r5, AVR32_F64_MUL_OP2_INT_BITS
++	cp.w	r5, 32
++	brge	0f
++		
++        /* shifting involves both msw and lsw*/
++        rsub    r12, r5, 32  /* shift mantissa */
++        lsl     r9, r9, r5
++        lsr     r12, r8, r12
++        or      r9, r12
++        lsl     r8, r8, r5
++	sub	r5, 12 - AVR32_F64_MUL_OP2_INT_BITS
++        sub     r6, r5          /* adjust exponent */
++        rjmp    23b             /* Finished */  
++0:
++        /* msw is zero so only need to consider lsw */
++        lsl     r9, r8, r5
++	breq	__avr32_f64_mul_res_zero
++        mov     r8, 0
++	sub	r5, 12 - AVR32_F64_MUL_OP2_INT_BITS
++        sub     r6, r5            /* adjust exponent */
 +        rjmp    23b
-+
-+
++                
++ 
 +__avr32_f64_mul_op_nan_or_inf:
 +        /* Same code for OP1 and OP2*/
 +        /* Since we are here, at least one of the OPs were NaN or INF*/
-+        /* Shift out implicit bit of both operands' mantissa */
-+        lsl     r11, 1
-+        lsl     r9, 1
++	andh	r9, 0x000f  /* Remove sign bit and exponent */
++	andh	r11, 0x000f  /* Remove sign bit and exponent */
 +        /* Merge the regs in each operand to check for zero*/
 +        or      r11, r10 /* op1 */
 +        or      r9, r8 /* op2 */
@@ -17709,36 +17748,88 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        cp      r9, 0
 +        breq    __avr32_f64_mul_res_inf /*op2 was also INF*/
 +        rjmp    __avr32_f64_mul_res_nan /*op2 was NaN*/
-+
++ 
 +__avr32_f64_mul_op1_not_naninf:
 +        /* op1 was not NaN nor INF. Then op2 must be NaN or INF*/
 +        cp      r9, 0
 +        breq    __avr32_f64_mul_res_inf /*op2 was INF, return INF*/
 +        rjmp   __avr32_f64_mul_res_nan /*else return NaN*/
-+
-+__avr32_f64_mul_res_subnormal:/* Multiply result was subnormal. Return zero. */
++        
++__avr32_f64_mul_res_subnormal:/* Multiply result was subnormal. */
++#if defined(L_avr32_f64_mul)
++	/* Check how much we must scale down the mantissa. */
++	neg	r12
++	sub	r12, -1     /* We do no longer have an implicit bit. */
++	satu	r12 >> 0, 6 /* Saturate shift amount to max 63. */
++	cp.w	r12, 32
++	brge	0f
++	/* Shift amount <32 */
++	rsub	r8, r12, 32
++	or	r6, r7 
++	lsr	r7, r7, r12
++	lsl	r9, r10, r8
++	or	r7, r9
++	lsr	r10, r10, r12
++	lsl	r9, r11, r8
++	or	r10, r9
++	lsr	r11, r11, r12
++	rjmp	24b
++0:
++	/* Shift amount >=32 */
++	rsub	r8, r12, 32
++	moveq	r9, 0
++	breq	0f
++	lsl	r9, r11, r8
++0:	
++	or	r6, r7
++	or	r6, r6, r10 << 1 
++	lsr	r10, r10, r12
++	or	r7, r9, r10
++	lsr	r10, r11, r12
++	mov	r11, 0	
++	rjmp	24b				
++#else
++	/* Flush to zero for the fast version. */
 +        mov     r11, lr /*Get correct sign*/
 +        andh    r11, 0x8000, COH
 +        mov     r10, 0
 +        ldm     sp++, r5, r6, r7,pc
++#endif
 +
++__avr32_f64_mul_res_zero:/* Multiply result is zero. */
++        mov     r11, lr /*Get correct sign*/
++        andh    r11, 0x8000, COH
++        mov     r10, 0
++#if defined(L_avr32_f64_mul)
++	popm	r4-r7, pc
++#else
++        ldm     sp++, r5, r6, r7,pc
++#endif
++ 
 +__avr32_f64_mul_res_nan:        /* Return NaN. */
 +        mov     r11, -1
 +        mov     r10, -1
++#if defined(L_avr32_f64_mul)
++	popm	r4-r7, pc
++#else
 +        ldm     sp++, r5, r6, r7,pc
-+
++#endif
++        
 +__avr32_f64_mul_res_inf:        /* Return INF. */
-+        mov     r11, 0
-+        orh     r11, 0x7ff0
++	mov	r11, 0xfff00000
 +        bld     lr, 31
 +        bst     r11, 31
 +        mov     r10, 0
++#if defined(L_avr32_f64_mul)
++	popm	r4-r7, pc
++#else
 +        ldm     sp++, r5, r6, r7,pc
++#endif
 +
 +__avr32_f64_mul_op1_zero:
 +        /* Get sign */
 +        eor     r11, r11, r9
-+        andh    r11, 0x8000, COH
++        andh    r11, 0x8000, COH  
 +        /* Check if op2 is Inf or NaN. */
 +        bfextu  r12, r9, 20, 11
 +        cp.w    r12, 0x7ff
@@ -17747,12 +17838,12 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        mov     r10, -1
 +        mov     r11, -1
 +        ret     r12
++         
 +
-+
-+
++ 
 +#endif
-+
-+
++                
++ 
 +#if  defined(L_avr32_f64_addsub) || defined(L_avr32_f64_addsub_fast)
 +        .align  2
 +
@@ -17764,36 +17855,36 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        .global __avr32_f64_sub_fast
 +        .type  __avr32_f64_sub_fast,@function
 +__avr32_f64_sub_fast:
-+#else
++#else	
 +        .global __avr32_f64_sub
 +        .type  __avr32_f64_sub,@function
 +__avr32_f64_sub:
 +#endif
-+
++        
 +        /* op1 in {r11,r10}*/
 +        /* op2 in {r9,r8}*/
 +
 +#if  defined(L_avr32_f64_addsub_fast)
 +        /* If op2 is zero just return op1 */
 +        or      r12, r8, r9 << 1
-+        reteq   r12
++        reteq   r12 
 +#endif
-+
++ 
 +        /* Check signs */
 +        eor     r12, r11, r9
 +        /* Different signs, use addition. */
 +        brmi    __avr32_f64_add_from_sub
-+
++ 
 +        stm     --sp, r5, r6, r7, lr
-+
++ 
 +        /* Get sign of op1 into r12 */
 +        mov     r12, r11
-+        andh    r12, 0x8000, COH
-+
++        andh    r12, 0x8000, COH                
++ 
 +        /* Remove sign from operands */
 +        cbr     r11, 31
 +        cbr     r9, 31
-+
++ 
 +        /* Put the largest number in [r11, r10]
 +           and the smallest number in [r9, r8] */
 +        cp      r10, r8
@@ -17807,29 +17898,29 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        mov     r10, r8
 +        mov     r8, r7
 +        eorh    r12, 0x8000 /* Invert sign in r12*/
-+1:
-+        /* Unpack largest operand - opH */
++1:      
++        /* Unpack largest operand - opH */      
 +        /* exp: r7 */
 +        /* sf:  r11, r10 */
 +        lsr     r7, r11, 20 /* Extract exponent */
-+        lsl     r11, 11 /* Extract mantissa, leave room for implicit bit */
++        lsl     r11, 11 /* Extract mantissa, leave room for implicit bit */ 
 +        or      r11, r11, r10>>21
 +        lsl     r10, 11
 +        sbr     r11, 31 /* Insert implicit bit */
-+
-+
++ 
++        
 +        /* Unpack smallest operand - opL */
 +        /* exp: r6 */
 +        /* sf:  r9, r8 */
 +        lsr     r6, r9, 20 /* Extract exponent */
 +        breq    __avr32_f64_sub_opL_subnormal /* If either zero or subnormal */
-+        lsl     r9, 11 /* Extract mantissa, leave room for implicit bit */
++        lsl     r9, 11 /* Extract mantissa, leave room for implicit bit */ 
 +        or      r9, r9, r8>>21
 +        lsl     r8, 11
 +        sbr     r9, 31 /* Insert implicit bit */
++ 
 +
-+
-+__avr32_f64_sub_opL_subnormal_done:
++__avr32_f64_sub_opL_subnormal_done:     
 +        /* opH is NaN or Inf. */
 +        cp.w    r7, 0x7ff
 +        breq    __avr32_f64_sub_opH_nan_or_inf
@@ -17837,25 +17928,25 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Get shift amount to scale mantissa of op2. */
 +        rsub    r6, r7
 +        breq    __avr32_f64_sub_shift_done /* No need to shift, exponents are equal*/
-+
++ 
 +        /* Scale mantissa [r9, r8] with amount [r6].
 +        Uses scratch registers [r5] and [lr].
 +        In IEEE mode:Must not forget the sticky bits we intend to shift out. */
-+
++ 
 +        rsub    r5,r6,32 /* get (32 - shift count)
 +                            (if shift count > 32 we get a
 +                            negative value, but that will
 +                            work as well in the code below.) */
-+
++ 
 +        cp.w    r6,32       /* handle shifts >= 32 separately */
 +        brhs    __avr32_f64_sub_longshift
-+
++ 
 +        /* small (<32) shift amount, both words are part of the shift
 +           first remember whether part that is lost contains any 1 bits ... */
 +        lsl     lr,r8,r5  /* shift away bits that are part of
 +                             final mantissa. only part that goes
 +                             to lr are bits that will be lost */
-+
++ 
 +        /* ... and now to the actual shift */
 +        lsl     r5,r9,r5  /* get bits from msw destined for lsw*/
 +        lsr     r8,r8,r6  /* shift down lsw of mantissa */
@@ -17866,29 +17957,30 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        srne    lr
 +        or      r8, lr     /* ... we need to set sticky bit*/
 +#endif
-+
-+__avr32_f64_sub_shift_done:
++        
++__avr32_f64_sub_shift_done:     
 +        /* Now subtract the mantissas. */
 +        sub     r10, r8
 +        sbc     r11, r11, r9
-+
++ 
 +        /* Normalize the exponent and mantissa pair stored in
 +        [r11,r10] and exponent in [r7]. Needs two scratch registers [r6] and [lr]. */
 +        clz     r6,r11     /* Check if we have zeros in high bits */
 +        breq    __avr32_f64_sub_longnormalize_done  /* No need for scaling if no zeros in high bits */
 +        brcs    __avr32_f64_sub_longnormalize
-+
++ 
++	
 +        /* shift amount is smaller than 32, and involves both msw and lsw*/
 +        rsub    lr,r6,32  /* shift mantissa */
 +        lsl     r11,r11,r6
 +        lsr     lr,r10,lr
 +        or      r11,lr
 +        lsl     r10,r10,r6
++ 
 +        sub     r7,r6    /* adjust exponent */
 +        brle    __avr32_f64_sub_subnormal_result
-+
-+__avr32_f64_sub_longnormalize_done:
-+
++__avr32_f64_sub_longnormalize_done:     
++        
 +#if defined(L_avr32_f64_addsub)
 +        /* Insert the bits we will remove from the mantissa r9[31:21] */
 +        lsl     r9, r10, (32 - 11)
@@ -17896,92 +17988,117 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Keep the last bit shifted out. */
 +        bfextu  r9, r10, 10, 1
 +#endif
-+
++ 
 +        /* Pack final result*/
 +        /* Input: [r7]:exp, [r11, r10]:mant, [r12]:sign in MSB */
 +        /* Result in [r11,r10] */
 +        /* Insert mantissa */
-+        cbr     r11, 31 /*Clear implicit bit*/
 +        lsr     r10, 11
 +        or      r10, r10, r11<<21
 +        lsr     r11, 11
 +        /* Insert exponent and sign bit*/
-+        or      r11, r11, r7<<20
-+        bld     r12, 31
-+        bst     r11, 31
-+
-+        /* Round */
++	bfins	r11, r7, 20, 11
++        or      r11, r12
++        
++        /* Round */     
 +__avr32_f64_sub_round:
 +#if defined(L_avr32_f64_addsub)
-+        mov     r7, 0
-+        sbr     r7, 31
++	mov_imm	r7, 0x80000000
 +        bld     r10, 0
-+        subne   r7, -1
-+
++        subne   r7, -1  
++ 
 +        cp.w    r9, r7
 +        srhs    r9
 +#endif
 +        add     r10, r9
 +        acr     r11
-+
++        
 +        /* Return result in [r11,r10] */
 +        ldm     sp++, r5, r6, r7,pc
-+
-+
-+
++ 
++ 
++ 
 +__avr32_f64_sub_opL_subnormal:
 +        /* Extract the of mantissa */
-+        lsl     r9, 11 /* Extract mantissa, leave room for implicit bit */
++        lsl     r9, 11 /* Extract mantissa, leave room for implicit bit */ 
 +        or      r9, r9, r8>>21
 +        lsl     r8, 11
-+
++ 
 +        /* Set exponent to 1 if we do not have a zero. */
 +        or      lr, r9, r8
 +        movne   r6,1
-+
++	
 +        /* Check if opH is also subnormal. If so, clear implicit bit in r11*/
 +        rsub    lr, r7, 0
 +        moveq   r7,1
 +        bst     r11, 31
-+
++	
 +        /* Check if op1 is zero, if so set exponent to 0. */
 +        or      lr, r11, r10
 +        moveq   r7,0
-+
++	                 
 +        rjmp    __avr32_f64_sub_opL_subnormal_done
-+
-+__avr32_f64_sub_opH_nan_or_inf:
++ 
++__avr32_f64_sub_opH_nan_or_inf: 
 +        /* Check if opH is NaN, if so return NaN */
 +        cbr     r11, 31
 +        or      lr, r11, r10
 +        brne    __avr32_f64_sub_return_nan
-+
++ 
 +        /* opH is Inf. */
 +        /* Check if opL is Inf. or NaN */
 +        cp.w    r6, 0x7ff
-+        breq    __avr32_f64_sub_opL_nan_or_inf
++        breq    __avr32_f64_sub_return_nan
++	/* Return infinity with correct sign. */	
++	or      r11, r12, r7 << 20
 +        ldm     sp++, r5, r6, r7, pc/* opL not Inf or NaN, return opH */
-+__avr32_f64_sub_opL_nan_or_inf:
-+        cbr     r9, 31
-+        or      lr, r9, r8
-+        brne    __avr32_f64_sub_return_nan
-+        mov     r10, 0  /* Generate Inf in r11, r10 */
-+        mov     r11, 0
-+        orh     r11, 0x7ff0
-+        ldm     sp++, r5, r6, r7, pc/* opL Inf, return Inf */
-+__avr32_f64_sub_return_nan:
++__avr32_f64_sub_return_nan:     
 +        mov     r10, -1 /* Generate NaN in r11, r10 */
 +        mov     r11, -1
 +        ldm     sp++, r5, r6, r7, pc/* opL Inf or NaN, return NaN */
-+
-+
++ 
++ 
 +__avr32_f64_sub_subnormal_result:
++#if defined(L_avr32_f64_addsub)
++	/* Check how much we must scale down the mantissa. */
++	neg	r7
++	sub	r7, -1     /* We do no longer have an implicit bit. */
++	satu	r7 >> 0, 6 /* Saturate shift amount to max 63. */
++	cp.w	r7, 32
++	brge	0f
++	/* Shift amount <32 */
++	rsub	r8, r7, 32
++	lsl	r9, r10, r8
++	srne	r6
++	lsr	r10, r10, r7
++	or	r10, r6		/* Sticky bit from the
++				   part that was shifted out. */
++	lsl	r9, r11, r8
++	or	r10, r10, r9
++	lsr	r11, r10, r7
++	/* Set exponent */
++	mov	r7, 0
++	rjmp	__avr32_f64_sub_longnormalize_done
++0:
++	/* Shift amount >=32 */
++	rsub	r8, r7, 64
++	lsl	r9, r11, r8
++	or	r9, r10
++	srne	r6
++	lsr	r10, r11, r7
++	or	r10, r6		/* Sticky bit from the
++				   part that was shifted out. */
++	mov	r11, 0
++	/* Set exponent */
++	mov	r7, 0
++	rjmp	__avr32_f64_sub_longnormalize_done
++#else
 +        /* Just flush subnormals to zero. */
 +        mov     r10, 0
 +        mov     r11, 0
++#endif
 +        ldm     sp++, r5, r6, r7, pc
-+
-+
++ 
 +__avr32_f64_sub_longshift:
 +        /* large (>=32) shift amount, only lsw will have bits left after shift.
 +           note that shift operations will use ((shift count=r6) mod 32) so
@@ -17989,40 +18106,44 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Saturate the shift amount to 63. If the amount
 +           is any larger op2 is insignificant. */
 +        satu    r6 >> 0, 6
++	
 +#if defined(L_avr32_f64_addsub)
 +        /* first remember whether part that is lost contains any 1 bits ... */
++	moveq	lr, r8	   /* If shift amount is 32, no bits from msw are lost. */
++	breq	0f
 +        lsl     lr,r9,r5   /* save all lost bits from msw */
 +        or      lr,r8      /* also save lost bits (all) from lsw
 +                              now lr != 0 if we lose any bits */
-+#endif
++#endif  
++0:	
 +        /* ... and now to the actual shift */
-+        mov     r8,r9      /* msw -> lsw (i.e. "shift 32 first")*/
++        lsr     r8,r9,r6   /* Move msw to lsw and shift. */
 +        mov     r9,0       /* clear msw */
-+        lsr     r8,r8,r6   /* make rest of shift inside lsw*/
 +#if defined(L_avr32_f64_addsub)
 +        cp.w    lr,0       /* if any '1' bit in part we lost ...*/
-+        sreq    lr
-+        or     r8, lr      /* ... we need to set sticky bit*/
++        srne    lr
++        or      r8, lr      /* ... we need to set sticky bit*/
 +#endif
 +        rjmp    __avr32_f64_sub_shift_done
-+
++ 
 +__avr32_f64_sub_longnormalize:
 +        /* shift amount is greater than 32 */
 +        clz     r6,r10      /* shift mantissa */
-+        /* If the resulting mantissa is zero the result is
++        /* If the resulting mantissa is zero the result is 
 +           zero so force exponent to zero. */
 +        movcs   r7, 0
 +        movcs   r6, 0
++        movcs   r12, 0  /* Also clear sign bit. A zero result from subtraction
++			   always is +0.0 */
 +        subcc   r6,-32
-+        mov     r11,r10
-+        lsl     r11,r11,r6
++        lsl     r11,r10,r6
 +        mov     r10,0
 +        sub     r7,r6          /* adjust exponent */
 +        brle    __avr32_f64_sub_subnormal_result
 +        rjmp    __avr32_f64_sub_longnormalize_done
-+
-+
-+
++        
++ 
++        
 +	 .align  2
 +__avr32_f64_add_from_sub:
 +        /* Switch sign on op2 */
@@ -18032,70 +18153,65 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        .global __avr32_f64_add_fast
 +        .type  __avr32_f64_add_fast,@function
 +__avr32_f64_add_fast:
-+#else
++#else	
 +        .global __avr32_f64_add
 +        .type  __avr32_f64_add,@function
 +__avr32_f64_add:
 +#endif
-+
++        
 +        /* op1 in {r11,r10}*/
 +        /* op2 in {r9,r8}*/
-+
++ 
 +#if defined(L_avr32_f64_addsub_fast)
 +        /* If op2 is zero just return op1 */
 +        or      r12, r8, r9 << 1
-+        reteq   r12
++        reteq   r12 
 +#endif
 +
 +        /* Check signs */
 +        eor     r12, r11, r9
 +        /* Different signs, use subtraction. */
 +        brmi    __avr32_f64_sub_from_add
-+
++ 
 +        stm     --sp, r5, r6, r7, lr
-+
++ 
 +        /* Get sign of op1 into r12 */
 +        mov     r12, r11
-+        andh    r12, 0x8000, COH
-+
++        andh    r12, 0x8000, COH                
++ 
 +        /* Remove sign from operands */
 +        cbr     r11, 31
 +        cbr     r9, 31
-+
++ 
 +        /* Put the number with the largest exponent in [r11, r10]
 +           and the number with the smallest exponent in [r9, r8] */
 +        cp      r11, r9
-+        brhs    1f /* Skip swap if operands already correctly ordered*/
-+        /* Operands were not correctly ordered, swap them*/
++        brhs    1f /* Skip swap if operands already correctly ordered */
++        /* Operands were not correctly ordered, swap them */
 +        mov     r7, r11
 +        mov     r11, r9
 +        mov     r9, r7
 +        mov     r7, r10
 +        mov     r10, r8
 +        mov     r8, r7
-+1:
-+        /* Unpack largest operand - opH */
++1:      
++	mov	lr, 0 /* Set sticky bits to zero */
++        /* Unpack largest operand - opH */      
 +        /* exp: r7 */
 +        /* sf:  r11, r10 */
-+        lsr     r7, r11, 20 /* Extract exponent */
-+        lsl     r11, 11 /* Extract mantissa, leave room for implicit bit */
-+        or      r11, r11, r10>>21
-+        lsl     r10, 11
-+        sbr     r11, 31 /* Insert implicit bit */
-+
-+
++	bfextu	R7, R11, 20, 11 /* Extract exponent */
++	bfextu	r11, r11, 0, 20 /* Extract mantissa */
++        sbr     r11, 20 /* Insert implicit bit */
++ 
 +        /* Unpack smallest operand - opL */
 +        /* exp: r6 */
 +        /* sf:  r9, r8 */
-+        lsr     r6, r9, 20 /* Extract exponent */
-+        breq    __avr32_f64_add_opL_subnormal /* If either zero or subnormal */
-+        lsl     r9, 11 /* Extract mantissa, leave room for implicit bit */
-+        or      r9, r9, r8>>21
-+        lsl     r8, 11
-+        sbr     r9, 31 /* Insert implicit bit */
++	bfextu	R6, R9, 20, 11	/* Extract exponent */
++	breq	__avr32_f64_add_op2_subnormal
++	bfextu	r9, r9, 0, 20   /* Extract mantissa */
++        sbr     r9, 20		/* Insert implicit bit */
 +
-+
-+__avr32_f64_add_opL_subnormal_done:
++2:		 
 +        /* opH is NaN or Inf. */
 +        cp.w    r7, 0x7ff
 +        breq    __avr32_f64_add_opH_nan_or_inf
@@ -18103,7 +18219,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Get shift amount to scale mantissa of op2. */
 +        rsub    r6, r7
 +        breq    __avr32_f64_add_shift_done /* No need to shift, exponents are equal*/
-+
++ 
 +        /* Scale mantissa [r9, r8] with amount [r6].
 +        Uses scratch registers [r5] and [lr].
 +        In IEEE mode:Must not forget the sticky bits we intend to shift out. */
@@ -18111,123 +18227,91 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +                            (if shift count > 32 we get a
 +                            negative value, but that will
 +                            work as well in the code below.) */
-+
++ 
 +        cp.w    r6,32       /* handle shifts >= 32 separately */
 +        brhs    __avr32_f64_add_longshift
-+
++ 
 +        /* small (<32) shift amount, both words are part of the shift
 +           first remember whether part that is lost contains any 1 bits ... */
 +        lsl     lr,r8,r5  /* shift away bits that are part of
 +                             final mantissa. only part that goes
 +                             to lr are bits that will be lost */
-+
++ 
 +        /* ... and now to the actual shift */
 +        lsl     r5,r9,r5  /* get bits from msw destined for lsw*/
 +        lsr     r8,r8,r6  /* shift down lsw of mantissa */
 +        lsr     r9,r9,r6  /* shift down msw of mantissa */
 +        or      r8,r5     /* combine these bits with prepared lsw*/
-+#if defined(L_avr32_f64_addsub)
-+        cp.w    lr,0      /* if any '1' bit in part we lost ...*/
-+        srne    lr
-+        or      r8, lr     /* ... we need to set sticky bit*/
-+#endif
-+
-+__avr32_f64_add_shift_done:
++        
++__avr32_f64_add_shift_done:     
 +        /* Now add the mantissas. */
 +        add     r10, r8
 +        adc     r11, r11, r9
 +
 +        /* Check if we overflowed. */
-+        brcs    __avr32_f64_add_res_of
++	bld	r11, 21 
++        breq	__avr32_f64_add_res_of:
 +
-+__avr32_f64_add_res_of_done:
-+
-+#if defined(L_avr32_f64_addsub)
-+        /* Insert the bits we will remove from the mantissa r9[31:21] */
-+        lsl     r9, r10, (32 - 11)
-+#else
-+        /* Keep the last bit shifted out. */
-+        bfextu  r9, r10, 10, 1
-+#endif
-+
++__avr32_f64_add_res_of_done:    
++        
 +        /* Pack final result*/
 +        /* Input: [r7]:exp, [r11, r10]:mant, [r12]:sign in MSB */
 +        /* Result in [r11,r10] */
-+        /* Insert mantissa */
-+        cbr     r11, 31 /*Clear implicit bit*/
-+        lsr     r10, 11
-+        or      r10, r10, r11<<21
-+        lsr     r11, 11
 +        /* Insert exponent and sign bit*/
-+        or      r11, r11, r7<<20
-+        bld     r12, 31
-+        bst     r11, 31
-+
-+        /* Round */
++	bfins	r11, r7, 20, 11
++	or	r11, r12
++        
++        /* Round */     
 +__avr32_f64_add_round:
 +#if defined(L_avr32_f64_addsub)
-+        mov     r7, 0
-+        sbr     r7, 31
-+        bld     r10, 0
-+        subne   r7, -1
++	bfextu	r12, r10, 0, 1 /* Extract parity bit.*/
++	or	lr, r12	       /* or it together with the sticky bits. */	
++	eorh	lr, 0x8000     /* Toggle round bit. */	
++	/* We should now round up by adding one for the following cases:
 +
-+        cp.w    r9, r7
-+        srhs    r9
++		halfway   sticky|parity  round-up
++		   0            x           no
++		   1            0           no
++	           1            1           yes
++
++	   Since we have inverted the halfway bit we can use the satu instruction
++           by saturating to 1 bit to implement this. 
++	*/ 
++	satu	lr >> 0, 1
++#else
++	lsr	lr, 31
 +#endif
-+        add     r10, r9
++        add     r10, lr
 +        acr     r11
-+
++        
 +        /* Return result in [r11,r10] */
 +        ldm     sp++, r5, r6, r7,pc
-+
-+
-+
-+__avr32_f64_add_opL_subnormal:
-+        /* Extract the of mantissa */
-+        lsl     r9, 11 /* Extract mantissa, leave room for implicit bit */
-+        or      r9, r9, r8>>21
-+        lsl     r8, 11
-+
-+        /* Set exponent to 1 if we do not have a zero. */
-+        or      lr, r9, r8
-+        movne   r6,1
-+
-+        /* Check if opH is also subnormal. If so, clear implicit bit in r11*/
-+        rsub    lr, r7, 0
-+        moveq   r7,1
-+        bst     r11, 31
-+
-+        /* Check if op1 is zero, if so set exponent to 0. */
-+        or      lr, r11, r10
-+        moveq   r7,0
-+
-+        rjmp    __avr32_f64_add_opL_subnormal_done
-+
-+__avr32_f64_add_opH_nan_or_inf:
++ 
++  
++__avr32_f64_add_opH_nan_or_inf: 
 +        /* Check if opH is NaN, if so return NaN */
-+        cbr     r11, 31
++        cbr     r11, 20
 +        or      lr, r11, r10
 +        brne    __avr32_f64_add_return_nan
-+
++ 
 +        /* opH is Inf. */
 +        /* Check if opL is Inf. or NaN */
 +        cp.w    r6, 0x7ff
 +        breq    __avr32_f64_add_opL_nan_or_inf
 +        ldm     sp++, r5, r6, r7, pc/* opL not Inf or NaN, return opH */
 +__avr32_f64_add_opL_nan_or_inf:
-+        cbr     r9, 31
++        cbr     r9, 20
 +        or      lr, r9, r8
 +        brne    __avr32_f64_add_return_nan
 +        mov     r10, 0  /* Generate Inf in r11, r10 */
-+        mov     r11, 0
-+        orh     r11, 0x7ff0
++	mov_imm r11, 0x7ff00000
 +        ldm     sp++, r5, r6, r7, pc/* opL Inf, return Inf */
-+__avr32_f64_add_return_nan:
++__avr32_f64_add_return_nan:     
 +        mov     r10, -1 /* Generate NaN in r11, r10 */
 +        mov     r11, -1
 +        ldm     sp++, r5, r6, r7, pc/* opL Inf or NaN, return NaN */
-+
-+
++ 
++ 
 +__avr32_f64_add_longshift:
 +        /* large (>=32) shift amount, only lsw will have bits left after shift.
 +           note that shift operations will use ((shift count=r6) mod 32) so
@@ -18235,52 +18319,76 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Saturate the shift amount to 63. If the amount
 +           is any larger op2 is insignificant. */
 +        satu    r6 >> 0, 6
-+#if defined(L_avr32_f64_addsub)
++	/* If shift amount is 32 there are no bits from the msw that are lost. */
++	moveq	lr, r8
++	breq	0f	
 +        /* first remember whether part that is lost contains any 1 bits ... */
 +        lsl     lr,r9,r5   /* save all lost bits from msw */
++#if defined(L_avr32_f64_addsub)
++	cp.w	r8, 0
++	srne	r8	
 +        or      lr,r8      /* also save lost bits (all) from lsw
 +                              now lr != 0 if we lose any bits */
-+#endif
++#endif  
++0:	
 +        /* ... and now to the actual shift */
-+        mov     r8,r9      /* msw -> lsw (i.e. "shift 32 first")*/
++        lsr     r8,r9,r6   /* msw -> lsw and make rest of shift inside lsw*/
 +        mov     r9,0       /* clear msw */
-+        lsr     r8,r8,r6   /* make rest of shift inside lsw*/
-+#if defined(L_avr32_f64_addsub)
-+        cp.w    lr,0       /* if any '1' bit in part we lost ...*/
-+        sreq    lr
-+        or     r8, lr      /* ... we need to set sticky bit*/
-+#endif
 +        rjmp    __avr32_f64_add_shift_done
-+
++ 
 +__avr32_f64_add_res_of:
-+        /* We overflowed. Increase exponent and shift mantissa.*/
-+        /* [r7]:exp, [r11, r10]:mant */
-+        ror     r11
-+        lsr     r10, 1
-+        sub     r7, -1
-+
++	/* We overflowed. Scale down mantissa by shifting right one position. */
++	or	lr, lr, lr << 1 /* Remember stickybits*/
++	lsr	r11, 1
++	ror	r10
++	ror	lr
++	sub	r7, -1	/* Increment exponent */
++ 
 +        /* Clear mantissa to set result to Inf if the exponent is 255. */
 +        cp.w    r7, 0x7ff
 +        moveq   r10, 0
 +        moveq   r11, 0
++        moveq   lr, 0
 +        rjmp    __avr32_f64_add_res_of_done
++        
++__avr32_f64_add_op2_subnormal:	
++	/* Set epxponent to 1 */
++	mov	r6, 1
 +
++	/* Check if op2 is also subnormal. */
++	cp.w	r7, 0
++	brne	2b
 +
++	cbr	r11, 20
++	/* Both operands are subnormal. Just addd the mantissas
++	   and the exponent will automatically be set to 1 if
++	   we overflow into a normal number. */
++	add	r10, r8
++	adc	r11, r11, r9
++
++	/* Add sign bit */
++	or	r11, r12
++	
++        /* Return result in [r11,r10] */
++        ldm     sp++, r5, r6, r7,pc
++	
++			
++	 
 +#endif
-+
++ 
 +#ifdef L_avr32_f64_to_u32
 +        /* This goes into L_fixdfsi */
 +#endif
-+
-+
++        
++ 
 +#ifdef L_avr32_f64_to_s32
 +        .global __avr32_f64_to_u32
 +        .type  __avr32_f64_to_u32,@function
 +__avr32_f64_to_u32:
 +        cp.w    r11, 0
 +        retmi   0       /* Negative returns 0 */
-+
-+        /* Fallthrough to df to signed si conversion */
++ 
++        /* Fallthrough to df to signed si conversion */ 
 +        .global __avr32_f64_to_s32
 +        .type  __avr32_f64_to_s32,@function
 +__avr32_f64_to_s32:
@@ -18288,8 +18396,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        lsr     r12,21                  /* extract exponent*/
 +        sub     r12,1023                /* convert to unbiased exponent.*/
 +        retlo   0                       /* too small exponent implies zero. */
-+
-+1:
++ 
++1:      
 +        rsub    r12,r12,31              /* shift count = 31 - exponent */
 +        mov     r9,r11                  /* save sign for later...*/
 +        lsl     r11,11                  /* remove exponent and sign*/
@@ -18300,13 +18408,13 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        retcc   r11                     /* if positive, we are done */
 +        neg     r11                     /* if negative float, negate result */
 +        ret     r11
-+
++ 
 +#endif  /* L_fixdfsi*/
-+
++ 
 +#ifdef L_avr32_f64_to_u64
 +        /* Actual function is in L_fixdfdi */
 +#endif
-+
++        
 +#ifdef L_avr32_f64_to_s64
 +        .global __avr32_f64_to_u64
 +        .type  __avr32_f64_to_u64,@function
@@ -18316,9 +18424,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        movmi   r10, 0
 +        movmi   r11, 0
 +        retmi   r11
-+
-+
-+
++ 
++        
++ 
 +        /* Fallthrough */
 +        .global __avr32_f64_to_s64
 +        .type  __avr32_f64_to_s64,@function
@@ -18330,19 +18438,19 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        movlo   r10, 0
 +        movlo   r11, 0
 +        retlo   r11
-+
++ 
 +        mov     r8,r11                  /* save sign for later...*/
-+1:
++1:      
 +        lsl     r11,11                  /* remove exponent */
 +        sbr     r11,31                  /* add implicit bit*/
 +        or      r11,r11,r10>>21         /* get rest of bits from lsw of double*/
 +        lsl     r10,11                  /* align lsw correctly as well */
 +        rsub    r9,r9,63                /* shift count = 63 - exponent */
 +        breq    1f
-+
++ 
 +        cp.w    r9,32                   /* is shift count more than one reg? */
 +        brhs    0f
-+
++ 
 +        mov     r12,r11                 /* save msw */
 +        lsr     r10,r10,r9              /* small shift count, shift down lsw */
 +        lsr     r11,r11,r9              /* small shift count, shift down msw */
@@ -18350,27 +18458,27 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        lsl     r12,r12,r9              /* align part to move from msw to lsw */
 +        or      r10,r12                 /* combine to get new lsw */
 +        rjmp    1f
-+
++ 
 +0:
 +        lsr     r10,r11,r9              /* large shift count,only lsw get bits
 +                                           note that shift count is modulo 32*/
 +        mov     r11,0                   /* msw will be 0 */
-+
++ 
 +1:
 +        lsl     r8,1                    /* sign -> carry */
 +        retcc   r11                     /* if positive, we are done */
-+
++ 
 +        neg     r11                     /* if negative float, negate result */
 +        neg     r10
 +        scr     r11
-+        ret     r11
-+
++        ret     r11 
++ 
 +#endif
-+
++ 
 +#ifdef L_avr32_u32_to_f64
 +        /* Code located in L_floatsidf */
 +#endif
-+
++        
 +#ifdef L_avr32_s32_to_f64
 +        .global __avr32_u32_to_f64
 +        .type  __avr32_u32_to_f64,@function
@@ -18378,94 +18486,98 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        sub     r11, r12, 0 /* Move to r11 and force Z flag to be updated */
 +        mov     r12, 0      /* always positive */
 +        rjmp    0f          /* Jump to common code for floatsidf */
-+
++        
 +        .global __avr32_s32_to_f64
 +        .type  __avr32_s32_to_f64,@function
 +__avr32_s32_to_f64:
 +        mov     r11, r12        /* Keep original value in r12 for sign */
 +        abs     r11             /* Absolute value if r12 */
-+0:
++0:      
 +        mov     r10,0           /* let remaining bits be zero */
 +        reteq   r11             /* zero long will return zero float */
-+
++ 
 +        pushm   lr
 +        mov     r9,31+1023              /* set exponent */
-+
++                
 +        normalize_df    r9 /*exp*/, r10, r11 /* mantissa */, r8, lr /* scratch */
-+
++ 
 +        /* Check if a subnormal result was created */
 +        cp.w    r9, 0
 +        brgt    0f
-+
++        
 +        adjust_subnormal_df     r9 /* exp */, r10, r11 /* Mantissa */, r12 /*sign*/, r8, lr /* scratch */
 +        popm    pc
 +0:
-+
++        
 +        /* Round result */
 +        round_df        r9 /*exp*/, r10, r11 /* Mantissa */, r8 /*scratch*/
 +        cp.w    r9,0x7ff
 +        brlt    0f
 +        /*Return infinity */
 +        mov     r10, 0
-+        mov     r11, 0
-+        orh     r11, 0xffe0
++	mov_imm	r11, 0xffe00000
 +        rjmp    __floatsidf_return_op1
-+
++        
 +0:
-+
++ 
 +        /* Pack */
 +        pack_df r9 /*exp*/, r10, r11 /* mantissa */, r10, r11 /* Output df number*/
-+__floatsidf_return_op1:
++__floatsidf_return_op1: 
 +        lsl     r12,1                  /* shift in sign bit */
 +        ror     r11
-+
++ 
 +        popm    pc
 +#endif
-+
-+
++ 
++ 
 +#ifdef L_avr32_f32_cmp_eq
 +        .global __avr32_f32_cmp_eq
 +        .type  __avr32_f32_cmp_eq,@function
-+__avr32_f32_cmp_eq:
++__avr32_f32_cmp_eq:     
 +        cp.w    r12, r11
-+        breq    0f
++        breq    0f      
 +        /* If not equal check for +/-0 */
 +        /* Or together the two values and shift out the sign bit.
 +           If the result is zero, then the two values are both zero. */
 +        or      r12, r11
 +        lsl     r12, 1
-+        sreq    r12
-+        ret     r12
-+0:
++        reteq   1
++        ret     0
++0:                      
 +        /* Numbers were equal. Check for NaN or Inf */
-+        mov     r11, 0
-+        orh     r11, 0xff00
++	mov_imm	r11, 0xff000000
 +        lsl     r12, 1
 +        cp.w    r12, r11
-+        srls    r12     /* 0 if NaN, 1 otherwise */
-+        ret     r12
++        retls   1     /* 0 if NaN, 1 otherwise */
++        ret     0     
 +#endif
-+
++        
 +#if defined(L_avr32_f32_cmp_ge) || defined(L_avr32_f32_cmp_lt)
 +#ifdef L_avr32_f32_cmp_ge
 +        .global __avr32_f32_cmp_ge
 +        .type  __avr32_f32_cmp_ge,@function
 +__avr32_f32_cmp_ge:
-+#endif
++#endif  
 +#ifdef L_avr32_f32_cmp_lt
 +        .global __avr32_f32_cmp_lt
 +        .type  __avr32_f32_cmp_lt,@function
 +__avr32_f32_cmp_lt:
-+#endif
++#endif  
 +        lsl     r10, r12, 1     /* Remove sign bits */
 +        lsl     r9, r11, 1
-+        mov     r8, 0
-+        orh     r8, 0xff00
++	subfeq	r10, 0
++#ifdef L_avr32_f32_cmp_ge
++	reteq	1		/* Both number are zero. Return true. */
++#endif	
++#ifdef L_avr32_f32_cmp_lt
++	reteq	0		/* Both number are zero. Return false. */
++#endif	
++	mov_imm	r8, 0xff000000
 +        cp.w    r10, r8
-+        rethi   0               /* Op0 is NaN */
++        rethi   0               /* Op0 is NaN */                
 +        cp.w    r9, r8
 +        rethi   0               /* Op1 is Nan */
-+
++ 
 +        eor     r8, r11, r12
 +        bld     r12, 31
 +#ifdef L_avr32_f32_cmp_ge
@@ -18476,37 +18588,39 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +#endif
 +        retmi   r8      /* Return if signs are different */
 +        brcs    0f      /* Both signs negative? */
-+
++ 
 +        /* Both signs positive */
 +        cp.w    r12, r11
 +#ifdef L_avr32_f32_cmp_ge
-+        srhs    r12
++        reths    1
++        retlo    0
 +#endif
 +#ifdef L_avr32_f32_cmp_lt
-+        srlo    r12
++        reths    0
++        retlo    1
 +#endif
-+        retal   r12
 +0:
 +        /* Both signs negative */
 +        cp.w    r11, r12
 +#ifdef L_avr32_f32_cmp_ge
-+        srhs    r12
++        reths    1
++        retlo    0
 +#endif
 +#ifdef L_avr32_f32_cmp_lt
-+        srlo    r12
++        reths    0
++        retlo    1
 +#endif
-+        retal   r12
 +#endif
-+
-+
++        
++ 
 +#ifdef L_avr32_f64_cmp_eq
 +        .global __avr32_f64_cmp_eq
 +        .type  __avr32_f64_cmp_eq,@function
-+__avr32_f64_cmp_eq:
++__avr32_f64_cmp_eq:     
 +        cp.w    r10,r8
 +        cpc     r11,r9
 +        breq    0f
-+
++        
 +        /* Args were not equal*/
 +        /* Both args could be zero with different sign bits */
 +        lsl     r11,1                   /* get rid of sign bits */
@@ -18514,153 +18628,178 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        or      r11,r10                 /* Check if all bits are zero */
 +        or      r11,r9
 +        or      r11,r8
-+        sreq    r12                     /* If all zeros the arguments are equal
++        reteq   1                       /* If all zeros the arguments are equal
 +                                           so return 1 else return 0 */
-+        ret     r12
-+0:
++        ret     0
++0:      
 +        /* check for NaN */
 +        lsl     r11,1
-+        mov     r12, 0
-+        orh     r12, 0xffe0
++	mov_imm	r12, 0xffe00000
 +        cp.w    r10,0
 +        cpc     r11,r12                 /* check if nan or inf */
-+        srls    r12                     /* If Arg is NaN return 0 else 1*/
-+        ret     r12                     /* Return  */
-+
++        retls   1                       /* If Arg is NaN return 0 else 1*/
++        ret     0                       /* Return  */
++ 
 +#endif
-+
-+
++ 
++ 
 +#if   defined(L_avr32_f64_cmp_ge) || defined(L_avr32_f64_cmp_lt)
-+
++ 
 +#ifdef L_avr32_f64_cmp_ge
 +        .global __avr32_f64_cmp_ge
 +        .type  __avr32_f64_cmp_ge,@function
 +__avr32_f64_cmp_ge:
-+#endif
++#endif  
 +#ifdef L_avr32_f64_cmp_lt
 +        .global __avr32_f64_cmp_lt
 +        .type  __avr32_f64_cmp_lt,@function
 +__avr32_f64_cmp_lt:
-+#endif
-+
++#endif  
++ 
 +        /* compare magnitude of op1 and op2 */
-+        pushm   lr
-+
 +        lsl     r11,1                   /* Remove sign bit of op1 */
-+        srcs    lr                      /* Sign op1 to lsb of lr*/
++        srcs    r12                     /* Sign op1 to lsb of r12*/
++	subfeq	r10, 0
++	breq	3f			/* op1 zero */
 +        lsl     r9,1                    /* Remove sign bit of op2 */
-+        rol     lr                      /* Sign op2 to lsb of lr, sign bit op1 bit 1 of lr*/
-+
++        rol     r12                     /* Sign op2 to lsb of lr, sign bit op1 bit 1 of r12*/
++	
++ 
 +        /* Check for Nan */
-+        mov     r12, 0
-+        orh     r12, 0xffe0
++	pushm	lr
++	mov_imm	lr, 0xffe00000
 +        cp.w    r10,0
-+        cpc     r11,r12
-+        movhi   r12, 0  /* Return false for NaN */
++        cpc     r11,lr
 +        brhi    0f      /* We have NaN */
 +        cp.w    r8,0
-+        cpc     r9,r12
-+        movhi   r12, 0  /* Return false for NaN */
++        cpc     r9,lr
 +        brhi    0f      /* We have NaN */
-+
-+        cp.w    lr,3                   /* both operands negative ?*/
++	popm	lr
++ 
++        cp.w    r12,3                   /* both operands negative ?*/    
 +        breq    1f
-+
-+        cp.w    lr,1                   /* both operands positive? */
++ 
++        cp.w    r12,1                   /* both operands positive? */
 +        brlo    2f
-+
++ 
 +        /* Different signs. If sign of op1 is negative the difference
 +           between op1 and op2 will always be negative, and if op1 is
-+           positive the difference will always be positive */
++           positive the difference will always be positive */           
 +#ifdef L_avr32_f64_cmp_ge
-+        sreq    r12
++	reteq	1
++	retne	0
 +#endif
 +#ifdef L_avr32_f64_cmp_lt
-+        srne    r12
++	reteq	0
++	retne	1
 +#endif
-+        popm    pc
-+
-+
++  
 +2:
 +        /* Both operands positive. Just compute the difference */
 +        cp.w    r10,r8
 +        cpc     r11,r9
 +#ifdef L_avr32_f64_cmp_ge
-+        srhs    r12
++	reths	1
++	retlo	0
 +#endif
 +#ifdef L_avr32_f64_cmp_lt
-+        srlo    r12
++	reths	0
++	retlo	1
 +#endif
-+        popm    pc
-+
++                
 +1:
 +        /* Both operands negative. Compute the difference with operands switched */
 +        cp     r8,r10
 +        cpc    r9,r11
 +#ifdef L_avr32_f64_cmp_ge
-+        srhs    r12
++	reths	1
++	retlo	0
 +#endif
 +#ifdef L_avr32_f64_cmp_lt
-+        srlo    r12
-+#endif
-+0:
-+        popm    pc
++	reths	0
++	retlo	1
 +#endif
 +
-+
-+
-+#ifdef L_avr32_f64_div
++0:      
++        popm    pc, r12=0
++#endif
++ 
++3:
++        lsl     r9,1                   /* Remove sign bit of op1 */
++#ifdef L_avr32_f64_cmp_ge
++        srcs    r12		       /* If op2 is negative then op1 >= op2. */	
++#endif
++#ifdef L_avr32_f64_cmp_lt
++        srcc    r12		       /* If op2 is positve then op1 <= op2. */
++#endif
++	subfeq	r8, 0		       
++#ifdef L_avr32_f64_cmp_ge
++	reteq	1		       /* Both operands are zero. Return true. */
++#endif
++#ifdef L_avr32_f64_cmp_lt
++	reteq	0		       /* Both operands are zero. Return false. */
++#endif
++	ret	r12
++				        
++ 
++#if defined(L_avr32_f64_div) || defined(L_avr32_f64_div_fast)
 +        .align  2
++
++#if defined(L_avr32_f64_div_fast)
++        .global __avr32_f64_div_fast
++        .type  __avr32_f64_div_fast,@function
++__avr32_f64_div_fast:
++#else
 +        .global __avr32_f64_div
 +        .type  __avr32_f64_div,@function
-+
 +__avr32_f64_div:
-+        stm     --sp, r0, r1, r2, r3, r4, r5, r6, r7,lr
++#endif
++        stm     --sp, r0, r1, r2, r3, r4, r5, r6, r7,lr 
 +        /* op1 in {r11,r10}*/
 +        /* op2 in {r9,r8}*/
 +        eor     lr, r11, r9             /* MSB(lr) = Sign(op1) ^ Sign(op2) */
-+
-+
-+        /* Unpack op1 to 2.62 format*/
++ 
++        
++        /* Unpack op1 to 2.62 format*/  
 +        /* exp: r7 */
 +        /* sf:  r11, r10 */
 +        lsr     r7, r11, 20 /* Extract exponent */
-+
-+        lsl     r11, 9 /* Extract mantissa, leave room for implicit bit */
++                
++        lsl     r11, 9 /* Extract mantissa, leave room for implicit bit */ 
 +        or      r11, r11, r10>>23
 +        lsl     r10, 9
 +        sbr     r11, 29 /* Insert implicit bit */
 +        andh    r11, 0x3fff /*Mask last part of exponent since we use 2.62 format*/
-+
++ 
 +        cbr     r7, 11       /* Clear sign bit */
 +        /* Check if normalization is needed */
 +        breq    11f /*If number is subnormal, normalize it */
-+22:
++22:     
 +        cp      r7, 0x7ff
-+        brhs    2f  /* Check op1 for NaN or Inf */
++        brge    2f  /* Check op1 for NaN or Inf */
 +
 +        /* Unpack op2 to 2.62 format*/
 +        /* exp: r6 */
 +        /* sf:  r9, r8 */
 +        lsr     r6, r9, 20 /* Extract exponent */
-+
-+        lsl     r9, 9 /* Extract mantissa, leave room for implicit bit */
++                
++        lsl     r9, 9 /* Extract mantissa, leave room for implicit bit */ 
 +        or      r9, r9, r8>>23
 +        lsl     r8, 9
 +        sbr     r9, 29 /* Insert implicit bit */
 +        andh    r9, 0x3fff /*Mask last part of exponent since we use 2.62 format*/
-+
++ 
 +        cbr     r6, 11       /* Clear sign bit */
 +        /* Check if normalization is needed */
 +        breq    13f /*If number is subnormal, normalize it */
-+23:
++23:             
 +        cp      r6, 0x7ff
-+        brhs    3f  /* Check op2 for NaN or Inf */
++        brge    3f  /* Check op2 for NaN or Inf */
 +
 +        /* Calculate new exponent */
 +        sub     r7, r6
 +        sub     r7,-1023
-+
++ 
 +        /* Divide */
 +        /* Approximating 1/d with the following recurrence: */
 +        /* R[j+1] = R[j]*(2-R[j]*d) */
@@ -18671,10 +18810,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Initial guess :       r3, r2 */
 +        /* New approximations :  r3, r2 */
 +        /* op1 = Dividend (2.62 format) : r11, r10 */
-+
-+        mov     r12, 1 /* Load TWO */
-+        brev    r12
-+
++ 
++	mov_imm	r12, 0x80000000
++         
 +        /* Load initial guess, using look-up table */
 +        /* Initial guess is of format 01.XY, where XY is constructed as follows: */
 +        /* Let d be of following format: 00.1xy....., then XY=~xy */
@@ -18684,12 +18822,12 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* For d=00.111 = 0,875 -> initial guess=01.11 = 1,0  */
 +        /* r2 is also part of the reg pair forming initial guess, but it*/
 +        /* is kept uninitialized to save one cycle since it has so low significance*/
-+
++ 
 +        lsr     r3, r12, 1
 +        bfextu  r4, r9, 27, 2
 +        com     r4
 +        bfins   r3, r4, 28, 2
-+
++ 
 +        /* First approximation */
 +        /* Approximating to 32 bits */
 +        /* r5 = R[j]*d */
@@ -18699,7 +18837,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* r3 = R[j]*(2-R[j]*d) */
 +        mulu.d  r4, r3, r5
 +        lsl     r3, r5, 2
-+
++         
 +        /* Second approximation */
 +        /* Approximating to 32 bits */
 +        /* r5 = R[j]*d */
@@ -18709,7 +18847,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* r3 = R[j]*(2-R[j]*d) */
 +        mulu.d  r4, r3, r5
 +        lsl     r3, r5, 2
-+
++         
 +        /* Third approximation */
 +        /* Approximating to 32 bits */
 +        /* r5 = R[j]*d */
@@ -18719,7 +18857,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* r3 = R[j]*(2-R[j]*d) */
 +        mulu.d  r4, r3, r5
 +        lsl     r3, r5, 2
-+
++ 
 +        /* Fourth approximation */
 +        /* Approximating to 64 bits */
 +        /* r5,r4 = R[j]*d */
@@ -18735,8 +18873,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        lsl    r3, r5, 2
 +        or     r3, r3, r4>>30
 +        lsl    r2, r4, 2
-+
-+
++ 
++ 
 +        /* Fifth approximation */
 +        /* Approximating to 64 bits */
 +        /* r5,r4 = R[j]*d */
@@ -18752,66 +18890,101 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        lsl    r3, r5, 2
 +        or     r3, r3, r4>>30
 +        lsl    r2, r4, 2
-+
-+
++ 
++ 
 +        /* Multiply with dividend to get quotient */
 +        mul_approx_df        r3 /*ah*/, r2 /*al*/, r11 /*bh*/, r10 /*bl*/, r3 /*rh*/, r2 /*rl*/, r1 /*sh*/, r0 /*sl*/
-+
-+        /* Shift by 3 to get result in 1.63 format, as required by the exponent. */
-+        /* Note that 1.63 format is already used by the exponent in r7, since */
-+        /* a bias of 1023 was added to the result exponent, even though the implicit */
-+        /* bit was inserted. This gives the exponent an additional bias of 1, which */
-+        /* supports 1.63 format. */
-+        lsl     r3, r3, 3
-+        or      r3, r3, r2>>29
-+        lsl     r2, r2, 3
-+
++ 
++ 
 +        /* To increase speed, this result is not corrected before final rounding.*/
 +        /* This may give a difference to IEEE compliant code of 1 ULP.*/
-+
++		
++ 
 +        /* Adjust exponent and mantissa */
-+        /* r7:exp, [r3, r2]:mant, [r12,r11,r10]:scratch*/
++        /* r7:exp, [r3, r2]:mant, [r5, r4]:scratch*/
 +        /* Mantissa may be of the format 0.xxxx or 1.xxxx. */
 +        /* In the first case, shift one pos to left.*/
-+        sub     r10, r7, 1
-+        mov     r12, r3
-+        lsl     r11, r2, 1
-+        rol     r12
-+        bld     r3, 31
-+        movne   r7, r10
-+        movne   r3, r12
-+        movne   r2, r11
-+        cp      r7, 0
-+        breq    15f /*Result was subnormal. Flush-to-zero and return zero*/
++        bld     r3, 31-3
++	breq	0f
++	lsl	r2, 1
++	rol	r3
++	sub	r7, 1
++#if defined(L_avr32_f64_div)
++	/* We must scale down the dividend to 5.59 format. */
++	lsr	r10, 3
++	or	r10, r10, r11 << 29
++	lsr	r11, 3
++	rjmp    1f
++#endif	
++0:	
++#if defined(L_avr32_f64_div)
++	/* We must scale down the dividend to 6.58 format. */
++	lsr	r10, 4
++	or	r10, r10, r11 << 28
++	lsr	r11, 4
++1:	
++#endif
++        cp      r7, 0   
++        brle    __avr32_f64_div_res_subnormal /* Result was subnormal. */
++ 
++ 
++#if defined(L_avr32_f64_div)
++	/* In order to round correctly we calculate the remainder:	
++	   Remainder = dividend[11:r10] - divisor[r9:r8]*quotient[r3:r2] 
++	   for the case when the quotient is halfway between the round-up
++	   value and the round down value. If the remainder then is negative
++	   it means that the quotient was to big and that it should not be
++           rounded up, if the remainder is positive the quotient was to small
++	   and we need to round up. If the remainder is zero it means that the
++	   quotient is exact but since we need to remove the guard bit we should
++	   round to even. */
 +
-+        /* Result was not subnormal. Perform rounding. */
-+        /* Note that the tie case (for round-to-even) can not occur in division. */
-+        /* [r7]:exp, [r3, r2]:mant */
-+        /* Mantissa is in 0.64 format. Round by adding 1<<(64-(52+2))=1<<10*/
-+        mov     r12, (1<<10)
-+        add     r2, r12
-+        acr     r3
-+        /* Adjust exponent if we overflowed.*/
-+        subcs   r7, -1
++	/* Truncate and add guard bit. */
++	andl	r2, 0xff00
++	orl	r2, 0x0080	
++	
++
++	/* Now do the multiplication. The quotient has the format 4.60
++	   while the divisor has the format 2.62 which gives a result
++	   of 6.58 */
++        mulu.d  r0, r3, r8
++        macu.d  r0, r2, r9
++        mulu.d  r4, r2, r8
++        mulu.d  r8, r3, r9
++	add	r5, r0
++	adc	r8, r8, r1	
++	acr	r9
 +
 +
-+
-+        /* Pack final result*/
-+        /* Input:        [r7]:exp, [r3, r2]:mant */
-+        /* Result in [r11,r10] */
-+        /* Insert exponent and sign bit*/
-+        lsl     r11, r7, 20
++	/* Check if remainder is positive, negative or equal. */
++	bfextu	r12, r2, 8, 1  /* Get parity bit into bit 0 of r0 */ 
++	cp	r4, 0
++	cpc	r5
++__avr32_f64_div_round_subnormal:	
++	cpc	r8, r10
++	cpc	r9, r11
++	srlo	r6	/* Remainder positive:	 we need to round up.*/
++	moveq	r6, r12  /* Remainder zero:	 round up if mantissa odd. */
++#else
++	bfextu	r6, r2, 7, 1  /* Get guard bit */ 	
++#endif
++	/* Final packing, scale down mantissa. */
++	lsr	r10, r2, 8
++        or      r10, r10, r3<<24
++        lsr     r11, r3, 8
++	/* Insert exponent and sign bit*/
++	bfins	r11, r7, 20, 11
 +        bld     lr, 31
 +        bst     r11, 31
-+        /* Insert mantissa */
-+        cbr     r3, 31 /*Clear implicit bit*/
-+        or      r11, r11, r3>>11
-+        lsr     r10, r2, 11
-+        or      r10, r10, r3<<21
++
++	/* Final rounding */
++	add	r10, r6
++	acr	r11		
++	        
 +        /* Return result in [r11,r10] */
 +        ldm     sp++, r0, r1, r2, r3, r4, r5, r6, r7,pc
-+
-+
++ 
++                
 +2:
 +        /* Op1 is NaN or inf */
 +        andh    r11, 0x000f /* Extract mantissa */
@@ -18823,19 +18996,18 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        cp      r6, 0x7ff
 +        brne    17f     /* Inf/number gives inf, return inf */
 +        rjmp    16f     /* The rest gives NaN*/
-+
-+3:
++        
++3:      
 +        /* Op1 is a valid number. Op 2 is NaN or inf */
 +        andh    r9, 0x000f /* Extract mantissa */
 +        or      r9, r8
 +        brne    16f     /* Return NaN if op2 is NaN */
 +        rjmp    15f     /* Op2 was inf, return zero*/
-+
++                
 +11:     /* Op1 was denormal. Fix it. */
-+        lsl     r11, 2
-+        or      r11, r11, r10 >> 30
-+        lsl     r10, 2
-+        cbr     r11, 31
++        lsl     r11, 3
++        or      r11, r11, r10 >> 29
++        lsl     r10, 3
 +        /* Check if op1 is zero. */
 +        or      r4, r10, r11
 +        breq    __avr32_f64_div_op1_zero
@@ -18844,34 +19016,101 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        or      r10, r10, r11 << 30
 +        lsr     r11, 2
 +        rjmp    22b
-+
-+
++ 
++ 
 +13:     /* Op2 was denormal. Fix it */
-+        lsl     r9, 2
-+        or      r9, r9, r8 >> 30
-+        lsl     r8, 2
-+        cbr     r9, 31
++        lsl     r9, 3
++        or      r9, r9, r8 >> 29
++        lsl     r8, 3
 +        /* Check if op2 is zero. */
 +        or      r4, r9, r8
 +        breq    17f     /* Divisor is zero -> return Inf */
-+        normalize_df    r6 /*exp*/, r8, r9 /*Mantissa*/, r4, r5 /*scratch*/
++        normalize_df    r6 /*exp*/, r8, r9 /*Mantissa*/, r4, r5 /*scratch*/     
 +        lsr     r8, 2
 +        or      r8, r8, r9 << 30
 +        lsr     r9, 2
 +        rjmp    23b
++        
++ 
++__avr32_f64_div_res_subnormal:/* Divide result was subnormal. */
++#if defined(L_avr32_f64_div)
++	/* Check how much we must scale down the mantissa. */
++	neg	r7
++	sub	r7, -1     /* We do no longer have an implicit bit. */
++	satu	r7 >> 0, 6 /* Saturate shift amount to max 63. */
++	cp.w	r7, 32
++	brge	0f
++	/* Shift amount <32 */
++	/* Scale down quotient */
++	rsub	r6, r7, 32
++	lsr	r2, r2, r7
++	lsl	r12, r3, r6
++	or	r2, r12
++	lsr	r3, r3, r7
++	/* Scale down the dividend to match the scaling of the quotient. */
++	lsl	r1, r10, r6
++	lsr	r10, r10, r7
++	lsl	r12, r11, r6
++	or	r10, r12
++	lsr	r11, r11, r7
++	mov	r0, 0
++	rjmp	1f
++0:
++	/* Shift amount >=32 */
++	rsub	r6, r7, 32
++	moveq	r0, 0
++	moveq	r12, 0
++	breq	0f
++	lsl	r0, r10, r6
++	lsl	r12, r11, r6
++0:	
++	lsr	r2, r3, r7
++	mov	r3, 0
++	/* Scale down the dividend to match the scaling of the quotient. */
++	lsr	r1, r10, r7
++	or	r1, r12
++	lsr	r10, r11, r7
++	mov	r11, 0
++1:	
++	/* Start performing the same rounding as done for normal numbers
++	   but this time we have scaled the quotient and dividend and hence
++	   need a little different comparison. */
++	/* Truncate and add guard bit. */
++	andl	r2, 0xff00
++	orl	r2, 0x0080	
++	
++	/* Now do the multiplication. */
++        mulu.d  r6, r3, r8
++        macu.d  r6, r2, r9
++        mulu.d  r4, r2, r8
++        mulu.d  r8, r3, r9
++	add	r5, r6
++	adc	r8, r8, r7	
++	acr	r9
 +
++	/* Set exponent to 0 */
++	mov	r7, 0	
 +
-+15:     /* Divide result was subnormal. Return zero. */
++	/* Check if remainder is positive, negative or equal. */
++	bfextu	r12, r2, 8, 1  /* Get parity bit into bit 0 of r0 */ 
++	cp	r4, r0
++	cpc	r5, r1
++	/* Now the rest of the rounding is the same as for normals. */
++	rjmp	__avr32_f64_div_round_subnormal
++	
++#endif
++15:	
++	/* Flush to zero for the fast version. */
 +        mov     r11, lr /*Get correct sign*/
 +        andh    r11, 0x8000, COH
 +        mov     r10, 0
 +        ldm     sp++, r0, r1, r2, r3, r4, r5, r6, r7,pc
-+
++	 
 +16:     /* Return NaN. */
 +        mov     r11, -1
 +        mov     r10, -1
 +        ldm     sp++, r0, r1, r2, r3, r4, r5, r6, r7,pc
-+
++        
 +17:     /* Return INF. */
 +        mov     r11, lr /*Get correct sign*/
 +        andh    r11, 0x8000, COH
@@ -18888,13 +19127,13 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Check if divisor is Inf or NaN */
 +        or      r5, r8, r9 << 12
 +        breq    15b             /* Divisor is inf -> return zero */
-+        rjmp    16b             /* Return NaN */
++        rjmp    16b             /* Return NaN */                
++        
++        
++        
 +
-+
-+
-+
-+#endif
-+
++#endif  
++                
 +#if defined(L_avr32_f32_addsub) || defined(L_avr32_f32_addsub_fast)
 +
 +        .align  2
@@ -18910,24 +19149,24 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        .global __avr32_f32_sub
 +        .type  __avr32_f32_sub,@function
 +__avr32_f32_sub:
-+#endif
-+
++#endif 
++ 
 +        /* Check signs */
 +        eor     r8, r11, r12
 +        /* Different signs, use subtraction. */
 +        brmi    __avr32_f32_add_from_sub
-+
++ 
 +        /* Get sign of op1 */
 +        mov     r8, r12
-+        andh    r12, 0x8000, COH
-+
++        andh    r12, 0x8000, COH                
++ 
 +        /* Remove sign from operands */
 +        cbr     r11, 31
 +#if defined(L_avr32_f32_addsub_fast)
 +        reteq   r8      /* If op2 is zero return op1 */
 +#endif
 +        cbr     r8, 31
-+
++ 
 +        /* Put the number with the largest exponent in r10
 +           and the number with the smallest exponent in r9 */
 +        max     r10, r8, r11
@@ -18935,160 +19174,170 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        cp      r10, r8 /*If largest operand (in R10) is not equal to op1*/
 +        subne   r12, 1 /* Subtract 1 from sign, which will invert MSB of r12*/
 +        andh    r12, 0x8000, COH /*Mask all but MSB*/
-+
++ 
 +        /* Unpack exponent and mantissa of op1 */
 +        lsl     r8, r10, 8
 +        sbr     r8, 31  /* Set implicit bit. */
-+        lsr     r10, 23
-+
++        lsr     r10, 23 
++                
 +        /* op1 is NaN or Inf. */
 +        cp.w    r10, 0xff
 +        breq    __avr32_f32_sub_op1_nan_or_inf
-+
++        
 +        /* Unpack exponent and mantissa of op2 */
 +        lsl     r11, r9, 8
 +        sbr     r11, 31  /* Set implicit bit. */
-+        lsr     r9, 23
-+
++        lsr     r9, 23  
++ 
 +#if defined(L_avr32_f32_addsub)
 +        /* Keep sticky bit for correct IEEE rounding */
 +        st.w    --sp, r12
-+
++ 
 +        /* op2 is either zero or subnormal. */
 +        breq    __avr32_f32_sub_op2_subnormal
-+0:
++0:      
 +        /* Get shift amount to scale mantissa of op2. */
-+        rsub    r9, r10
++        sub     r12, r10, r9                 
 +
++	breq	__avr32_f32_sub_shift_done
++ 
 +        /* Saturate the shift amount to 31. If the amount
 +           is any larger op2 is insignificant. */
-+        satu    r9 >> 0, 5
++        satu    r12 >> 0, 5      
++
++        /* Put the remaining bits into r9.*/
++        rsub    r9, r12, 32
++        lsl     r9, r11, r9
++	
++	/* If the remaining bits are non-zero then we must subtract one
++	   more from opL.  */
++	subne	r8, 1
++	srne	r9	/* LSB of r9 represents sticky bits. */
 +
 +        /* Shift mantissa of op2 to same decimal point as the mantissa
 +           of op1. */
-+        lsr     r12, r11, r9
++        lsr     r11, r11, r12
++ 
 +
-+        /* Put the remainding bits into r11[23:..].*/
-+        rsub    r9, r9, (32-8)
-+        lsl     r11, r11, r9
-+
++__avr32_f32_sub_shift_done:	
 +        /* Now subtract the mantissas. */
-+        sub     r8, r12
-+
++        sub     r8, r11
++ 
 +        ld.w    r12, sp++
-+
++ 
 +        /* Normalize resulting mantissa. */
-+        clz     r9, r8
-+        lsl     r8, r8, r9
-+        sub     r10, r9
++        clz     r11, r8
++
++	retcs	0
++        lsl     r8, r8, r11
++        sub     r10, r11
 +        brle    __avr32_f32_sub_subnormal_result
 +
-+        /* Insert the bits we will remove from the mantissa into r11[31:24] */
-+        bfins   r11, r8, 24, 8
++        /* Insert the bits we will remove from the mantissa into r9[31:24] */
++	or	r9, r9, r8 << 24
 +#else
 +        /* Ignore sticky bit to simplify and speed up rounding */
 +        /* op2 is either zero or subnormal. */
 +        breq    __avr32_f32_sub_op2_subnormal
-+0:
++0:      
 +        /* Get shift amount to scale mantissa of op2. */
-+        rsub    r9, r10
-+
++        rsub    r9, r10                 
++ 
 +        /* Saturate the shift amount to 31. If the amount
 +           is any larger op2 is insignificant. */
-+        satu    r9 >> 0, 5
-+
++        satu    r9 >> 0, 5      
++ 
 +        /* Shift mantissa of op2 to same decimal point as the mantissa
 +           of op1. */
 +        lsr     r11, r11, r9
-+
++ 
 +        /* Now subtract the mantissas. */
 +        sub     r8, r11
-+
++ 
 +        /* Normalize resulting mantissa. */
 +        clz     r9, r8
++	retcs	0
 +        lsl     r8, r8, r9
 +        sub     r10, r9
-+        brle    __avr32_f32_sub_subnormal_result
++        brle    __avr32_f32_sub_subnormal_result        
 +#endif
-+
++        
 +        /* Pack result. */
 +        or      r12, r12, r8 >> 8
-+        bfins   r12, r10, 23, 8
-+
-+        /* Round */
++        bfins   r12, r10, 23, 8         
++ 
++        /* Round */     
 +__avr32_f32_sub_round:
 +#if defined(L_avr32_f32_addsub)
-+        mov     r10, 0
-+        sbr     r10, 31
++	mov_imm	r10, 0x80000000
 +        bld     r12, 0
-+        subne   r10, -1
-+        cp.w    r11, r10
++        subne   r10, -1 
++        cp.w    r9, r10
 +        subhs   r12, -1
 +#else
-+        bld     r8, 7
++        bld     r8, 7 
 +        acr     r12
-+#endif
-+
-+        ret     r12
-+
-+
++#endif  
++        
++        ret     r12     
++ 
++ 
 +__avr32_f32_sub_op2_subnormal:
 +        /* Fix implicit bit and adjust exponent of subnormals. */
 +        cbr     r11, 31
 +        /* Set exponent to 1 if we do not have a zero. */
 +        movne   r9,1
-+
++ 
 +        /* Check if op1 is also subnormal. */
 +        cp.w    r10, 0
 +        brne    0b
-+
++ 
 +        cbr     r8, 31
 +         /* If op1 is not zero set exponent to 1. */
 +        movne   r10,1
-+
++                
 +        rjmp    0b
-+
-+__avr32_f32_sub_op1_nan_or_inf:
++ 
++__avr32_f32_sub_op1_nan_or_inf: 
 +        /* Check if op1 is NaN, if so return NaN */
 +        lsl     r11, r8, 1
 +        retne   -1
-+
++ 
 +        /* op1 is Inf. */
 +        bfins   r12, r10, 23, 8 /* Generate Inf in r12 */
-+
++ 
 +        /* Check if op2 is Inf. or NaN */
 +        lsr     r11, r9, 23
 +        cp.w    r11, 0xff
 +        retne   r12             /* op2 not Inf or NaN, return op1 */
-+
++ 
 +        ret     -1              /* op2 Inf or NaN, return NaN */
-+
++ 
 +__avr32_f32_sub_subnormal_result:
 +        /* Check if the number is so small that
 +           it will be represented with zero. */
 +        rsub    r10, r10, 9
-+        rsub    r9, r10, 32
++        rsub    r11, r10, 32
 +        retcs   0
-+
++ 
 +        /* Shift the mantissa into the correct position.*/
 +        lsr     r10, r8, r10
 +        /* Add sign bit. */
-+        or      r10, r12
++        or      r12, r10
 +
 +        /* Put the shifted out bits in the most significant part
 +           of r8. */
-+        lsl     r8, r8, r9
-+
++        lsl     r8, r8, r11
++ 
 +#if defined(L_avr32_f32_addsub)
-+        /* Add all the remainder bits used for rounding into r11 */
-+        andh    r11, 0x00FF
-+        or      r11, r8
++        /* Add all the remainder bits used for rounding into r9 */
++        or      r9, r8
 +#else
-+        lsr     r8, 24
++        lsr     r8, 24 
 +#endif
 +        rjmp    __avr32_f32_sub_round
-+
-+
++ 
++                                
 +        .align  2
 +
 +__avr32_f32_add_from_sub:
@@ -19103,161 +19352,162 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        .global __avr32_f32_add
 +        .type  __avr32_f32_add,@function
 +__avr32_f32_add:
-+#endif
-+
++#endif 
++	
 +        /* Check signs */
 +        eor     r8, r11, r12
 +        /* Different signs, use subtraction. */
 +        brmi    __avr32_f32_sub_from_add
-+
++ 
 +        /* Get sign of op1 */
 +        mov     r8, r12
-+        andh    r12, 0x8000, COH
-+
++        andh    r12, 0x8000, COH                
++ 
 +        /* Remove sign from operands */
 +        cbr     r11, 31
 +#if defined(L_avr32_f32_addsub_fast)
 +        reteq   r8      /* If op2 is zero return op1 */
 +#endif
 +        cbr     r8, 31
-+
++ 
 +        /* Put the number with the largest exponent in r10
 +           and the number with the smallest exponent in r9 */
 +        max     r10, r8, r11
 +        min     r9, r8, r11
-+
++ 
 +        /* Unpack exponent and mantissa of op1 */
 +        lsl     r8, r10, 8
 +        sbr     r8, 31  /* Set implicit bit. */
-+        lsr     r10, 23
-+
++        lsr     r10, 23 
++                
 +        /* op1 is NaN or Inf. */
 +        cp.w    r10, 0xff
 +        breq    __avr32_f32_add_op1_nan_or_inf
-+
++        
 +        /* Unpack exponent and mantissa of op2 */
 +        lsl     r11, r9, 8
 +        sbr     r11, 31  /* Set implicit bit. */
-+        lsr     r9, 23
-+
++        lsr     r9, 23  
++ 
 +#if defined(L_avr32_f32_addsub)
-+        /* Keep sticky bit for correct IEEE rounding */
-+        st.w    --sp, r12
-+
 +        /* op2 is either zero or subnormal. */
 +        breq    __avr32_f32_add_op2_subnormal
-+0:
++0:      
++        /* Keep sticky bit for correct IEEE rounding */
++        st.w    --sp, r12
++ 
 +        /* Get shift amount to scale mantissa of op2. */
-+        rsub    r9, r10
-+
++        rsub    r9, r10                 
++ 
 +        /* Saturate the shift amount to 31. If the amount
 +           is any larger op2 is insignificant. */
-+        satu    r9 >> 0, 5
-+
++        satu    r9 >> 0, 5      
++ 
 +        /* Shift mantissa of op2 to same decimal point as the mantissa
 +           of op1. */
 +        lsr     r12, r11, r9
-+
++ 
 +        /* Put the remainding bits into r11[23:..].*/
 +        rsub    r9, r9, (32-8)
 +        lsl     r11, r11, r9
 +        /* Insert the bits we will remove from the mantissa into r11[31:24] */
 +        bfins   r11, r12, 24, 8
-+
++ 
 +        /* Now add the mantissas. */
 +        add     r8, r12
-+
++ 
 +        ld.w    r12, sp++
 +#else
 +        /* Ignore sticky bit to simplify and speed up rounding */
 +        /* op2 is either zero or subnormal. */
 +        breq    __avr32_f32_add_op2_subnormal
-+0:
++0:      
 +        /* Get shift amount to scale mantissa of op2. */
-+        rsub    r9, r10
-+
++        rsub    r9, r10                 
++ 
 +        /* Saturate the shift amount to 31. If the amount
 +           is any larger op2 is insignificant. */
-+        satu    r9 >> 0, 5
-+
++        satu    r9 >> 0, 5      
++ 
 +        /* Shift mantissa of op2 to same decimal point as the mantissa
 +           of op1. */
 +        lsr     r11, r11, r9
-+
++ 
 +        /* Now add the mantissas. */
 +        add     r8, r11
-+
++        
 +#endif
 +        /* Check if we overflowed. */
 +        brcs    __avr32_f32_add_res_of
-+1:
++1:      
 +        /* Pack result. */
 +        or      r12, r12, r8 >> 8
-+        bfins   r12, r10, 23, 8
-+
-+        /* Round */
++        bfins   r12, r10, 23, 8         
++ 
++        /* Round */     
 +#if defined(L_avr32_f32_addsub)
-+        mov     r10, 0
-+        sbr     r10, 31
++	mov_imm	r10, 0x80000000
 +        bld     r12, 0
-+        subne   r10, -1
++        subne   r10, -1 
 +        cp.w    r11, r10
 +        subhs   r12, -1
 +#else
-+        bld     r8, 7
++        bld     r8, 7 
 +        acr     r12
-+#endif
++#endif  
 +
-+        ret     r12
-+
++        ret     r12     
++ 
 +__avr32_f32_add_op2_subnormal:
 +        /* Fix implicit bit and adjust exponent of subnormals. */
 +        cbr     r11, 31
 +        /* Set exponent to 1 if we do not have a zero. */
 +        movne   r9,1
-+
++ 
 +        /* Check if op1 is also subnormal. */
 +        cp.w    r10, 0
 +        brne    0b
-+
++	/* Both operands subnormal, just add the mantissas and 
++	   pack. If the addition of the subnormal numbers results
++	   in a normal number then the exponent will automatically
++	   be set to 1 by the addition. */
 +        cbr     r8, 31
-+        /* If op1 is not zero set exponent to 1. */
-+        movne   r10,1
-+
-+        rjmp    0b
-+
-+__avr32_f32_add_op1_nan_or_inf:
++	add	r11, r8
++	or	r12, r12, r11 >> 8
++	ret	r12
++ 
++__avr32_f32_add_op1_nan_or_inf: 
 +        /* Check if op1 is NaN, if so return NaN */
 +        lsl     r11, r8, 1
 +        retne   -1
-+
++ 
 +        /* op1 is Inf. */
 +        bfins   r12, r10, 23, 8 /* Generate Inf in r12 */
-+
++ 
 +        /* Check if op2 is Inf. or NaN */
 +        lsr     r11, r9, 23
 +        cp.w    r11, 0xff
 +        retne   r12             /* op2 not Inf or NaN, return op1 */
-+
++ 
 +        lsl     r9, 9
 +        reteq   r12             /* op2 Inf return op1 */
-+        ret     -1              /* op2 is NaN, return NaN */
-+
++        ret     -1              /* op2 is NaN, return NaN */ 
++ 
 +__avr32_f32_add_res_of:
 +        /* We overflowed. Increase exponent and shift mantissa.*/
 +        lsr     r8, 1
 +        sub     r10, -1
-+
++ 
 +        /* Clear mantissa to set result to Inf if the exponent is 255. */
 +        cp.w    r10, 255
 +        moveq   r8, 0
 +        moveq   r11, 0
-+        rjmp    1b
-+
-+
++        rjmp    1b      
++        
++        
 +#endif
 +
-+
++	
 +#if defined(L_avr32_f32_div) || defined(L_avr32_f32_div_fast)
 +	.align	2
 +
@@ -19270,46 +19520,46 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        .type  __avr32_f32_div,@function
 +__avr32_f32_div:
 +#endif
-+
++	 
 +        eor     r8, r11, r12            /* MSB(r8) = Sign(op1) ^ Sign(op2) */
-+
++ 
 +        /* Unpack */
 +        lsl     r12,1
 +        reteq   0                       /* Return zero if op1 is zero */
 +        lsl     r11,1
 +        breq    4f                      /* Check op2 for zero */
-+
-+        /* Unpack op1*/
++        
++        /* Unpack op1*/ 
 +        /* exp: r9 */
 +        /* sf:  r12 */
 +        lsr     r9, r12, 24
 +        breq    11f /*If number is subnormal*/
 +        cp      r9, 0xff
-+        brhs    2f  /* Check op1 for NaN or Inf */
++        brhs    2f  /* Check op1 for NaN or Inf */      
 +        lsl     r12, 7
 +        sbr     r12, 31 /*Implicit bit*/
-+12:
-+
++12:                     
++ 
 +        /* Unpack op2*/
 +        /* exp: r10 */
 +        /* sf:  r11 */
 +        lsr     r10, r11, 24
 +        breq    13f /*If number is subnormal*/
 +        cp      r10, 0xff
-+        brhs    3f  /* Check op2 for NaN or Inf */
-+
++        brhs    3f  /* Check op2 for NaN or Inf */      
++        
 +        lsl     r11,7
 +        sbr     r11, 31 /*Implicit bit*/
-+14:
-+
++14:     
++ 
 +        /* For UC3, store with predecrement is faster than stm */
 +        st.w    --sp, r5
 +        st.d    --sp, r6
-+
++ 
 +        /* Calculate new exponent */
 +        sub     r9, r10
 +        sub     r9,-127
-+
++ 
 +        /* Divide */
 +        /* Approximating 1/d with the following recurrence: */
 +        /* R[j+1] = R[j]*(2-R[j]*d) */
@@ -19321,12 +19571,12 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* New approximations :  r11 */
 +        /* Dividend :            r12 */
 +
-+        mov     r10, 1 /* Load TWO */
-+        brev    r10
-+
++	/* Load TWO */
++	mov_imm	r10, 0x80000000 
++         
 +        lsr     r12, 2     /* Get significand of Op1 in 2.30 format */
 +        lsr     r5, r11, 2 /* Get significand of Op2 (=d) in 2.30 format */
-+
++ 
 +        /* Load initial guess, using look-up table */
 +        /* Initial guess is of format 01.XY, where XY is constructed as follows: */
 +        /* Let d be of following format: 00.1xy....., then XY=~xy */
@@ -19334,12 +19584,12 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* For d=00.101 = 0,625 -> initial guess=01.11 = 1,5  */
 +        /* For d=00.110 = 0,75  -> initial guess=01.11 = 1,25 */
 +        /* For d=00.111 = 0,875 -> initial guess=01.11 = 1,0  */
-+
++ 
 +        lsr     r11, r10, 1
 +        bfextu  r6, r5, 27, 2
 +        com     r6
 +        bfins   r11, r6, 28, 2
-+
++ 
 +        /* First approximation */
 +        /* r7 = R[j]*d */
 +        mulu.d  r6, r11, r5
@@ -19348,7 +19598,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* r11 = R[j]*(2-R[j]*d) */
 +        mulu.d  r6, r11, r7
 +        lsl     r11, r7, 2
-+
++         
 +        /* Second approximation */
 +        /* r7 = R[j]*d */
 +        mulu.d  r6, r11, r5
@@ -19357,7 +19607,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* r11 = R[j]*(2-R[j]*d) */
 +        mulu.d  r6, r11, r7
 +        lsl     r11, r7, 2
-+
++         
 +        /* Third approximation */
 +        /* r7 = R[j]*d */
 +        mulu.d  r6, r11, r5
@@ -19366,7 +19616,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* r11 = R[j]*(2-R[j]*d) */
 +        mulu.d  r6, r11, r7
 +        lsl     r11, r7, 2
-+
++ 
 +        /* Fourth approximation */
 +        /* r7 = R[j]*d */
 +        mulu.d  r6, r11, r5
@@ -19375,75 +19625,96 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* r11 = R[j]*(2-R[j]*d) */
 +        mulu.d  r6, r11, r7
 +        lsl     r11, r7, 2
-+
-+
++ 
++ 
 +        /* Multiply with dividend to get quotient, r7 = sf(op1)/sf(op2) */
 +        mulu.d  r6, r11, r12
-+
++ 
 +        /* Shift by 3 to get result in 1.31 format, as required by the exponent. */
 +        /* Note that 1.31 format is already used by the exponent in r9, since */
 +        /* a bias of 127 was added to the result exponent, even though the implicit */
 +        /* bit was inserted. This gives the exponent an additional bias of 1, which */
 +        /* supports 1.31 format. */
-+        lsl     r10, r7, 3
++	//lsl     r10, r7, 3
 +
++	/* Adjust exponent and mantissa in case the result is of format
++	   0000.1xxx to 0001.xxx*/	
 +#if defined(L_avr32_f32_div)
-+        /* To perform correct rounding, check for nonzero remainder, */
-+        /* and set LSB in quot if remainder != 0 */
-+        /* Remainder = dividend(r12) - divisor(r5)*quotient(r10) */
-+
-+        lsl     r5, 1         /* Transform divisor from 2.30 to 1.31 format */
-+        /* Mask all bits lower than guard in quotient. */
-+        /* These bits are inexact due to approximative algorithm */
-+        andl    r10, 0xffc0
-+        /* Add 1 in least significant bit pos to make sure approximation is from above */
-+        sub     r10, -64
-+        mulu.d  r6, r5, r10
-+        /* If remainder < 0, truncated quotient is too large, so the  */
-+        /* delta added must be subtracted to get the correct truncated quotient. */
-+        sub     r12, r7      /* Calculate remainder and implicitly set flags */
-+        sublt   r10, 64
++	lsr	r12, 4	/* Scale dividend to 6.26 format to match the
++			   result of the multiplication of the divisor and 
++			   quotient to get the remainder. */
 +#endif
++	bld	r7, 31-3
++	breq	0f
++	lsl	r7, 1	
++	sub	r9, 1
++#if defined(L_avr32_f32_div)
++	lsl	r12, 1	/* Scale dividend to 5.27 format to match the
++			   result of the multiplication of the divisor and 
++			   quotient to get the remainder. */
++#endif
++0:		
++        cp      r9, 0   
++        brle    __avr32_f32_div_res_subnormal /* Result was subnormal. */
 +
++		
++#if defined(L_avr32_f32_div)
++	/* In order to round correctly we calculate the remainder:	
++	   Remainder = dividend[r12] - divisor[r5]*quotient[r7] 
++	   for the case when the quotient is halfway between the round-up
++	   value and the round down value. If the remainder then is negative
++	   it means that the quotient was to big and that it should not be
++           rounded up, if the remainder is positive the quotient was to small
++	   and we need to round up. If the remainder is zero it means that the
++	   quotient is exact but since we need to remove the guard bit we should
++	   round to even. */
++	andl	r7, 0xffe0
++	orl	r7, 0x0010
++
++	/* Now do the multiplication. The quotient has the format 4.28
++	   while the divisor has the format 2.30 which gives a result
++	   of 6.26 */
++	mulu.d	r10, r5, r7
++
++	/* Check if remainder is positive, negative or equal. */
++	bfextu	r5, r7, 5, 1  /* Get parity bit into bit 0 of r5 */ 
++	cp	r10, 0
++__avr32_f32_div_round_subnormal:	
++	cpc	r11, r12
++	srlo	r11	/* Remainder positive:	 we need to round up.*/
++	moveq	r11, r5  /* Remainder zero:	 round up if mantissa odd. */
++#else
++	bfextu	r11, r7, 4, 1  /* Get guard bit */ 	
++#endif
++                               
++        /* Pack final result*/
++        lsr     r12, r7, 5
++        bfins   r12, r9, 23, 8
 +        /* For UC3, load with postincrement is faster than ldm */
 +        ld.d    r6, sp++
 +        ld.w    r5, sp++
++        bld     r8, 31
++        bst     r12, 31
++	/* Rounding add. */
++	add	r12, r11
++        ret     r12
 +
-+        /* Adjust exponent and mantissa */
-+        /* r9:exp, r10:mant, r11:scratch*/
-+        clz     r11, r10
-+        sub     r9, r11
-+        breq    16f /*Result was subnormal*/
-+        lsl     r10, r10, r11
-+
-+        /* Result was not subnormal. Perform rounding. */
-+        /* Note that the tie case (for round-to-even) can not occur in division. */
-+        /* r9:exp, r10:mant*/
-+        sub     r10, -1*(0x80)
-+        /* Adjust exponent if we overflowed. Note that we must use {cc}
-+           since we perform the add using a sub insn. */
-+        subcc   r9, -1
-+
-+        /* Pack final result*/
-+        lsr     r12, r10, 7
-+        bfins   r12, r9, 24, 8
-+__divsf_return_op1:
++__divsf_return_op1:     
 +        lsl     r8, 1
 +        ror     r12
 +        ret     r12
-+
-+
++ 
++ 
 +2:
 +        /* Op1 is NaN or inf */
 +        retne   -1      /* Return NaN if op1 is NaN */
 +        /* Op1 is inf check op2 */
-+        mov     r9, 0xff
-+        brev    r9
++	mov_imm	r9, 0xff000000
 +        cp      r11, r9
 +        brlo    __divsf_return_op1 /* inf/number gives inf */
 +        ret     -1      /* The rest gives NaN*/
-+3:
-+        /* Op1 is NaN or inf */
++3:      
++        /* Op2 is NaN or inf */
 +        reteq   0       /* Return zero if number/inf*/
 +        ret     -1      /* Return NaN*/
 +4:
@@ -19451,166 +19722,192 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        tst     r12,r12
 +        reteq   -1      /* 0.0/0.0 is NaN */
 +        /* Nonzero/0.0 is Inf. Sign bit will be shifted in before returning*/
-+        mov     r12, 0x7ff
-+        brev    r12
++	mov_imm	r12, 0xff000000
 +        rjmp    __divsf_return_op1
-+
++                
 +11:     /* Op1 was denormal. Fix it. */
 +        lsl     r12,7
 +        clz     r9,r12
 +        lsl     r12,r12,r9
 +        rsub    r9,r9,1
 +        rjmp    12b
-+
-+13:     /* Op2 was denormal. Fix it. */
++ 
++13:     /* Op2 was denormal. Fix it. */ 
 +        lsl     r11,7
 +        clz     r10,r11
 +        lsl     r11,r11,r10
 +        rsub    r10,r10,1
 +        rjmp    14b
-+
-+
-+16:     /* Divide result was subnormal. Fix it and return. */
++        
++ 
++__avr32_f32_div_res_subnormal:     /* Divide result was subnormal */
 +#if defined(L_avr32_f32_div)
-+        lsl     r10, r10, r11 /*Perform shift required by adjustment of exponent and mantissa*/
-+        adjust_subnormal_sf     r12 /*sf*/, r9 /*exp*/, r10 /*mant*/, r8 /*sign*/,r11 /*scratch*/
++	/* Check how much we must scale down the mantissa. */
++	neg	r9
++	sub	r9, -1     /* We do no longer have an implicit bit. */
++	satu	r9 >> 0, 5 /* Saturate shift amount to max 32. */
++	/* Scale down quotient */
++	rsub	r10, r9, 32
++	lsr	r7, r7, r9
++	/* Scale down the dividend to match the scaling of the quotient. */
++	lsl	r6, r12, r10	/* Make the divident 64-bit and put the lsw in r6 */
++	lsr	r12, r12, r9
++
++	/* Start performing the same rounding as done for normal numbers
++	   but this time we have scaled the quotient and dividend and hence
++	   need a little different comparison. */
++	andl	r7, 0xffe0
++	orl	r7, 0x0010
++
++	/* Now do the multiplication. The quotient has the format 4.28
++	   while the divisor has the format 2.30 which gives a result
++	   of 6.26 */
++	mulu.d	r10, r5, r7
++
++	/* Set exponent to 0 */
++	mov	r9, 0	
++
++	/* Check if remainder is positive, negative or equal. */
++	bfextu	r5, r7, 5, 1  /* Get parity bit into bit 0 of r5 */ 
++	cp	r10, r6
++	rjmp	__avr32_f32_div_round_subnormal
++
 +#else
++        ld.d    r6, sp++
++        ld.w    r5, sp++
 +        /*Flush to zero*/
-+        mov     r12, 0
++	ret	0
 +#endif
-+        ret     r12
-+
 +#endif
-+
++ 
 +#ifdef L_avr32_f32_mul
 +        .global __avr32_f32_mul
 +        .type  __avr32_f32_mul,@function
-+
-+
++ 
++                
 +__avr32_f32_mul:
 +        mov     r8, r12
 +        eor     r12, r11                /* MSB(r8) = Sign(op1) ^ Sign(op2) */
 +        andh    r12, 0x8000, COH
-+
++        
 +        /* arrange operands so that that op1 >= op2 */
 +        cbr     r8, 31
 +        breq    __avr32_f32_mul_op1_zero
 +        cbr     r11, 31
-+
++ 
 +        /* Put the number with the largest exponent in r10
 +           and the number with the smallest exponent in r9 */
 +        max     r10, r8, r11
 +        min     r9, r8, r11
-+
++ 
 +        /* Unpack exponent and mantissa of op1 */
 +        lsl     r8, r10, 8
 +        sbr     r8, 31  /* Set implicit bit. */
-+        lsr     r10, 23
-+
++        lsr     r10, 23 
++                
 +        /* op1 is NaN or Inf. */
 +        cp.w    r10, 0xff
 +        breq    __avr32_f32_mul_op1_nan_or_inf
-+
++        
 +        /* Unpack exponent and mantissa of op2 */
 +        lsl     r11, r9, 8
 +        sbr     r11, 31  /* Set implicit bit. */
-+        lsr     r9, 23
-+
++        lsr     r9, 23  
++ 
 +        /* op2 is either zero or subnormal. */
 +        breq    __avr32_f32_mul_op2_subnormal
-+0:
++0:      
 +        /* Calculate new exponent */
 +        add     r9,r10
-+
++ 
 +        /* Do the multiplication */
 +        mulu.d  r10,r8,r11
-+
++ 
 +        /* We might need to scale up by two if the MSB of the result is
 +           zero. */
 +        lsl     r8, r11, 1
 +        movcc   r11, r8
 +        subcc   r9, 1
-+
++ 
 +        /* Put the shifted out bits of the mantissa into r10 */
 +        lsr     r10, 8
 +        bfins   r10, r11, 24, 8
-+
++                
 +        sub     r9,(127-1)              /* remove extra exponent bias */
 +        brle    __avr32_f32_mul_res_subnormal
-+
++ 
 +        /* Check for Inf. */
 +        cp.w    r9, 0xff
 +        brge    1f
-+
++ 
 +        /* Pack result. */
 +        or      r12, r12, r11 >> 8
-+        bfins   r12, r9, 23, 8
-+
-+        /* Round */
++        bfins   r12, r9, 23, 8          
++ 
++        /* Round */     
 +__avr32_f32_mul_round:
-+        mov     r8, 0
-+        sbr     r8, 31
++	mov_imm	r8, 0x80000000
 +        bld     r12, 0
-+        subne   r8, -1
-+
++        subne   r8, -1  
++ 
 +        cp.w    r10, r8
 +        subhs   r12, -1
-+
-+        ret     r12
-+
-+1:
-+        /* Return Inf */
++        
++        ret     r12     
++ 
++1:      
++        /* Return Inf */        
 +        orh     r12, 0x7f80
 +        ret     r12
-+
++ 
 +__avr32_f32_mul_op2_subnormal:
 +        cbr     r11, 31
 +        clz     r9, r11
 +        retcs   0       /* op2 is zero. Return 0 */
 +        lsl     r11, r11, r9
 +        rsub    r9, r9, 1
-+
++                
 +        /* Check if op2 is subnormal. */
 +        tst     r10, r10
 +        brne    0b
-+
-+        /* op2 is subnormal */
++ 
++        /* op2 is subnormal */  
 +        cbr     r8, 31
 +        clz     r10, r11
 +        retcs   0       /* op1 is zero. Return 0 */
 +        lsl     r8, r8, r10
 +        rsub    r10, r10, 1
-+
++                        
 +        rjmp    0b
-+
-+
++                
++ 
 +__avr32_f32_mul_op1_nan_or_inf:
 +        /* Check if op1 is NaN, if so return NaN */
 +        lsl     r11, r8, 1
 +        retne   -1
-+
++ 
 +        /* op1 is Inf. */
 +        tst     r9, r9
 +        reteq   -1      /* Inf * 0 -> NaN */
-+
++ 
 +        bfins   r12, r10, 23, 8 /* Generate Inf in r12 */
-+
++ 
 +        /* Check if op2 is Inf. or NaN */
 +        lsr     r11, r9, 23
 +        cp.w    r11, 0xff
 +        retne   r12             /* op2 not Inf or NaN, return Info */
-+
++ 
 +        lsl     r9, 9
 +        reteq   r12             /* op2 Inf return Inf */
-+        ret     -1              /* op2 is NaN, return NaN */
-+
++        ret     -1              /* op2 is NaN, return NaN */ 
++        
 +__avr32_f32_mul_res_subnormal:
 +        /* Check if the number is so small that
 +           it will be represented with zero. */
 +        rsub    r9, r9, 9
 +        rsub    r8, r9, 32
 +        retcs   0
-+
++ 
 +        /* Shift the mantissa into the correct position.*/
 +        lsr     r9, r11, r9
 +        /* Add sign bit. */
@@ -19618,9 +19915,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        /* Put the shifted out bits in the most significant part
 +           of r8. */
 +        lsl     r11, r11, r8
-+
++ 
 +        /* Add all the remainder bits used for rounding into r11 */
-+        andh    r10, 0x00FF
++        andh    r10, 0x00FF     
 +        or      r10, r11
 +        rjmp    __avr32_f32_mul_round
 +
@@ -19628,11 +19925,11 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        bfextu  r10, r11, 23, 8
 +        cp.w    r10, 0xff
 +        retne   r12
-+        reteq   -1
-+
-+#endif
-+
-+
++        reteq   -1        
++ 
++#endif  
++ 
++        
 +#ifdef L_avr32_s32_to_f32
 +        .global __avr32_s32_to_f32
 +        .type  __avr32_s32_to_f32,@function
@@ -19642,27 +19939,27 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        mov     r11, r12 /* Keep the sign */
 +        abs     r12     /* Compute the absolute value */
 +        mov     r10, 31 + 127   /* Set the correct exponent */
-+
++        
 +        /* Normalize */
-+        normalize_sf    r10 /*exp*/, r12 /*mant*/, r9 /*scratch*/
-+
++        normalize_sf    r10 /*exp*/, r12 /*mant*/, r9 /*scratch*/       
++ 
 +        /* Check for subnormal result */
 +        cp.w    r10, 0
 +        brle    __avr32_s32_to_f32_subnormal
-+
-+        round_sf        r10 /*exp*/, r12 /*mant*/, r9 /*scratch*/
++ 
++        round_sf        r10 /*exp*/, r12 /*mant*/, r9 /*scratch*/       
 +        pack_sf         r12 /*sf*/, r10 /*exp*/, r12 /*mant*/
 +        lsl     r11, 1
 +        ror     r12
-+        ret     r12
-+
++        ret     r12             
++ 
 +__avr32_s32_to_f32_subnormal:
 +        /* Adjust a subnormal result */
 +        adjust_subnormal_sf     r12/*sf*/, r10 /*exp*/, r12 /*mant*/, r11/*sign*/, r9 /*scratch*/
 +        ret     r12
-+
++        
 +#endif
-+
++ 
 +#ifdef L_avr32_u32_to_f32
 +        .global __avr32_u32_to_f32
 +        .type  __avr32_u32_to_f32,@function
@@ -19670,29 +19967,29 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        cp      r12, 0
 +        reteq   r12     /* If zero then return zero float */
 +        mov     r10, 31 + 127   /* Set the correct exponent */
-+
++        
 +        /* Normalize */
-+        normalize_sf    r10 /*exp*/, r12 /*mant*/, r9 /*scratch*/
-+
++        normalize_sf    r10 /*exp*/, r12 /*mant*/, r9 /*scratch*/       
++ 
 +        /* Check for subnormal result */
 +        cp.w    r10, 0
 +        brle    __avr32_u32_to_f32_subnormal
-+
-+        round_sf        r10 /*exp*/, r12 /*mant*/, r9 /*scratch*/
++ 
++        round_sf        r10 /*exp*/, r12 /*mant*/, r9 /*scratch*/       
 +        pack_sf         r12 /*sf*/, r10 /*exp*/, r12 /*mant*/
 +        lsr     r12,1   /* Sign bit is 0 for unsigned int */
-+        ret     r12
-+
++        ret     r12             
++ 
 +__avr32_u32_to_f32_subnormal:
 +        /* Adjust a subnormal result */
 +        mov     r8, 0
 +        adjust_subnormal_sf     r12/*sf*/,r10 /*exp*/, r12 /*mant*/,r8/*sign*/, r9 /*scratch*/
 +        ret     r12
-+
-+
++        
++        
 +#endif
-+
-+
++        
++ 
 +#ifdef L_avr32_f32_to_s32
 +        .global __avr32_f32_to_s32
 +        .type  __avr32_f32_to_s32,@function
@@ -19700,7 +19997,7 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        bfextu  r11, r12, 23, 8
 +        sub     r11,127                 /* Fix bias */
 +        retlo   0                       /* Negative exponent yields zero integer */
-+
++ 
 +        /* Shift mantissa into correct position */
 +        rsub    r11,r11,31      /* Shift amount */
 +        lsl     r10,r12,8       /* Get mantissa */
@@ -19710,9 +20007,9 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        retcc   r10             /* if positive, we are done */
 +        neg     r10             /* if negative float, negate result */
 +        ret     r10
-+
-+#endif
-+
++ 
++#endif  
++        
 +#ifdef L_avr32_f32_to_u32
 +        .global __avr32_f32_to_u32
 +        .type  __avr32_f32_to_u32,@function
@@ -19722,160 +20019,130 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib1funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +        bfextu  r11, r12, 23, 8         /* Extract exponent */
 +        sub     r11,127                 /* Fix bias */
 +        retlo   0                       /* Negative exponent yields zero integer */
-+
++ 
 +        /* Shift mantissa into correct position */
 +        rsub    r11,r11,31      /* Shift amount */
 +        lsl     r12,8           /* Get mantissa */
 +        sbr     r12,31          /* Add implicit bit */
 +        lsr     r12,r12,r11     /* Perform shift */
 +        ret     r12
-+
-+#endif
-+
++ 
++#endif  
++ 
 +#ifdef L_avr32_f32_to_f64
 +        .global __avr32_f32_to_f64
 +        .type  __avr32_f32_to_f64,@function
-+
++ 
 +__avr32_f32_to_f64:
 +        lsl     r11,r12,1               /* Remove sign bit, keep original value in r12*/
 +        moveq   r10, 0
 +        reteq   r11                     /* Return zero if input is zero */
-+
++ 
 +        bfextu  r9,r11,24,8              /* Get exponent */
 +        cp.w    r9,0xff                 /* check for NaN or inf */
 +        breq    0f
-+
++ 
 +        lsl     r11,7                   /* Convert sf mantissa to df format */
 +        mov     r10,0
-+
++ 
 +        /* Check if implicit bit should be set */
 +        cp.w    r9, 0
 +        subeq   r9,-1                    /* Adjust exponent if it was 0 */
 +        srne    r8
 +        or      r11, r11, r8 << 31      /* Set implicit bit if needed */
 +        sub     r9,(127-0x3ff)          /* Convert exponent to df format exponent */
-+
++ 
 +        /*We know that low register of mantissa is 0, and will be unaffected by normalization.*/
 +        /*We can therefore use the faster normalize_sf function instead of normalize_df.*/
 +        normalize_sf    r9 /*exp*/, r11 /*mantissa*/, r8 /*scratch*/
 +        pack_df         r9 /*exp*/, r10, r11 /*mantissa*/, r10, r11 /*df*/
-+
-+__extendsfdf_return_op1:
++ 
++__extendsfdf_return_op1:        
 +        /* Rotate in sign bit */
 +        lsl     r12, 1
 +        ror     r11
 +        ret     r11
-+
++                        
 +0:
 +        /* Inf or NaN*/
-+        mov     r10, 0
-+        orh     r10, 0xffe0
++	mov_imm	r10, 0xffe00000
 +        lsl     r11,8                   /* check mantissa */
 +        movne   r11, -1                 /* Return NaN */
 +        moveq   r11, r10                /* Return inf */
 +        rjmp    __extendsfdf_return_op1
-+#endif
-+
-+
++#endif                  
++ 
++ 
 +#ifdef L_avr32_f64_to_f32
 +        .global __avr32_f64_to_f32
 +        .type  __avr32_f64_to_f32,@function
-+
++ 
 +__avr32_f64_to_f32:
 +        /* Unpack */
 +        lsl     r9,r11,1                /* Unpack exponent */
 +        lsr     r9,21
-+
++ 
 +        reteq   0                       /* If exponent is 0 the number is so small
 +                                           that the conversion to single float gives
 +                                           zero */
-+
++ 
 +        lsl     r8,r11,10                  /* Adjust mantissa */
 +        or      r12,r8,r10>>22
-+
++ 
 +        lsl     r10,10                  /* Check if there are any remaining bits
 +                                           in the low part of the mantissa.*/
 +        neg     r10
 +        rol     r12                     /* If there were remaining bits then set lsb
 +                                           of mantissa to 1 */
-+
++ 
 +        cp      r9,0x7ff
 +        breq    2f                      /* Check for NaN or inf */
-+
++ 
 +        sub     r9,(0x3ff-127)          /* Adjust bias of exponent */
 +        sbr     r12,31                  /* set the implicit bit.*/
-+
++ 
 +        cp.w    r9, 0                   /* Check for subnormal number */
 +        brle    3f
-+
-+        round_sf        r9 /*exp*/, r12 /*mant*/, r10 /*scratch*/
++ 
++        round_sf        r9 /*exp*/, r12 /*mant*/, r10 /*scratch*/       
 +        pack_sf         r12 /*sf*/, r9 /*exp*/, r12 /*mant*/
-+__truncdfsf_return_op1:
++__truncdfsf_return_op1: 
 +        /* Rotate in sign bit */
 +        lsl     r11, 1
 +        ror     r12
-+        ret     r12
-+
++        ret     r12             
++        
 +2:
 +        /* NaN or inf */
 +        cbr     r12,31                  /* clear implicit bit */
 +        retne   -1                      /* Return NaN if mantissa not zero */
-+        mov     r12, 0
-+        orh     r12, 0xff00
++	mov_imm	r12, 0xff000000
 +        ret     r12                     /* Return inf */
-+
++ 
 +3:      /* Result is subnormal. Adjust it.*/
 +        adjust_subnormal_sf     r12/*sf*/,r9 /*exp*/, r12 /*mant*/, r11/*sign*/, r10 /*scratch*/
 +        ret     r12
-+
-+
++        
++                
 +#endif
-+
++ 
 +#if defined(L_mulsi3) && (__AVR32_UC__ == 3)
-+        .global __mulsi3
-+        .type  __mulsi3,@function
++	.global __mulsi3
++	.type __mulsi3,@function
 +
 +__mulsi3:
-+	mov	r9, 0
++	mov r9, 0
 +0:
-+	lsr     r11, 1
-+	addcs	r9, r9, r12
-+	breq	1f
-+	lsl	r12, 1
-+	rjmp	0b
++	lsr r11, 1
++	addcs r9, r9, r12
++	breq 1f
++	lsl r12, 1
++	rjmp 0b
 +1:
-+	ret	r9
++	ret r9
 +#endif
-+
-+//#if defined(L_umulsidi3) && (__AVR32_UC__ >= 2)
-+//        .global __umulsidi3
-+//        .type  __umulsidi3,@function
-+//
-+//__umulsidi3:
-+//	mov	r9, 0
-+//	mov	r8, 0
-+//	mov	r10, 0
-+//0:
-+//	lsr     r11, 1
-+//	brcs	1f
-+//	breq	2f
-+//	lsl	r12, 1
-+//	rol	r10
-+//	rjmp	0b
-+//1:
-+//	add	r8, r8, r12
-+//	adc	r9, r9, r10
-+//	lsl	r12, 1
-+//	rol	r10
-+//	rjmp	0b
-+//2:
-+//	ret	r12
-+//
-+//#endif
-+
-diff -Nrup gcc-4.2.2/gcc/config/avr32/lib2funcs.S gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/lib2funcs.S
---- gcc-4.2.2/gcc/config/avr32/lib2funcs.S	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/lib2funcs.S	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/lib2funcs.S
 @@ -0,0 +1,21 @@
 +	.align	4
 +	.global __nonlocal_goto
@@ -19898,9 +20165,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/lib2funcs.S gcc-4.2.2.atmel.1.1.2/gcc/conf
 +
 +
 +		
-diff -Nrup gcc-4.2.2/gcc/config/avr32/linux-elf.h gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/linux-elf.h
---- gcc-4.2.2/gcc/config/avr32/linux-elf.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/linux-elf.h	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/linux-elf.h
 @@ -0,0 +1,151 @@
 +/*
 +   Linux/Elf specific definitions.
@@ -20053,9 +20319,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/linux-elf.h gcc-4.2.2.atmel.1.1.2/gcc/conf
 +
 +#define LINK_GCC_C_SEQUENCE_SPEC \
 +  "%{static:--start-group} %G %L %{static:--end-group}%{!static:%G}"
-diff -Nrup gcc-4.2.2/gcc/config/avr32/predicates.md gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/predicates.md
---- gcc-4.2.2/gcc/config/avr32/predicates.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/predicates.md	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/predicates.md
 @@ -0,0 +1,419 @@
 +;;   AVR32 predicates file.
 +;;   Copyright 2003-2006 Atmel Corporation.
@@ -20476,9 +20741,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/predicates.md gcc-4.2.2.atmel.1.1.2/gcc/co
 +(define_predicate "avr32_non_rmw_nonimmediate_operand"
 +  (and (not (match_operand 0 "avr32_rmw_memory_operand"))
 +       (match_operand 0 "nonimmediate_operand")))
-diff -Nrup gcc-4.2.2/gcc/config/avr32/simd.md gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/simd.md
---- gcc-4.2.2/gcc/config/avr32/simd.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/simd.md	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/simd.md
 @@ -0,0 +1,145 @@
 +;;   AVR32 machine description file for SIMD instructions.
 +;;   Copyright 2003-2006 Atmel Corporation.
@@ -20625,9 +20889,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/simd.md gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +  "psubadd.h\t%0, %1:b, %2:b"
 +  [(set_attr "length" "4")
 +   (set_attr "type" "alu")])
-diff -Nrup gcc-4.2.2/gcc/config/avr32/sync.md gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/sync.md
---- gcc-4.2.2/gcc/config/avr32/sync.md	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/sync.md	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/sync.md
 @@ -0,0 +1,244 @@
 +;;=================================================================
 +;; Atomic operations
@@ -20873,9 +21136,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/sync.md gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +  "xchg\t%0, %p1, %2"
 +  [(set_attr "length" "4")]
 +  )
-diff -Nrup gcc-4.2.2/gcc/config/avr32/t-avr32 gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/t-avr32
---- gcc-4.2.2/gcc/config/avr32/t-avr32	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/t-avr32	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/t-avr32
 @@ -0,0 +1,77 @@
 +
 +MD_INCLUDES= 	$(srcdir)/config/avr32/avr32.md \
@@ -20893,10 +21155,10 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/t-avr32 gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +DPBIT = dp-bit.c
 +
 +LIB1ASMSRC = avr32/lib1funcs.S
-+LIB1ASMFUNCS =  _avr32_f64_mul _avr32_f64_addsub _avr32_f64_addsub_fast  _avr32_f64_to_u32 \
++LIB1ASMFUNCS =  _avr32_f64_mul _avr32_f64_mul_fast _avr32_f64_addsub _avr32_f64_addsub_fast  _avr32_f64_to_u32 \
 +                _avr32_f64_to_s32 _avr32_f64_to_u64 _avr32_f64_to_s64 _avr32_u32_to_f64 \
 +                _avr32_s32_to_f64 _avr32_f64_cmp_eq _avr32_f64_cmp_ge _avr32_f64_cmp_lt \
-+                _avr32_f32_cmp_eq _avr32_f32_cmp_ge _avr32_f32_cmp_lt _avr32_f64_div \
++                _avr32_f32_cmp_eq _avr32_f32_cmp_ge _avr32_f32_cmp_lt _avr32_f64_div _avr32_f64_div_fast \
 +                _avr32_f32_div _avr32_f32_div_fast _avr32_f32_addsub _avr32_f32_addsub_fast \
 +                _avr32_f32_mul _avr32_s32_to_f32 _avr32_u32_to_f32 _avr32_f32_to_s32 \
 +                _avr32_f32_to_u32 _avr32_f32_to_f64 _avr32_f64_to_f32 _mulsi3
@@ -20954,9 +21216,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/t-avr32 gcc-4.2.2.atmel.1.1.2/gcc/config/a
 +
 +
 +
-diff -Nrup gcc-4.2.2/gcc/config/avr32/t-elf gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/t-elf
---- gcc-4.2.2/gcc/config/avr32/t-elf	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/t-elf	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/t-elf
 @@ -0,0 +1,16 @@
 +
 +# Assemble startup files.
@@ -20974,9 +21235,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/t-elf gcc-4.2.2.atmel.1.1.2/gcc/config/avr
 +
 +LIBGCC = stmp-multilib
 +INSTALL_LIBGCC = install-multilib
-diff -Nrup gcc-4.2.2/gcc/config/avr32/uclinux-elf.h gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/uclinux-elf.h
---- gcc-4.2.2/gcc/config/avr32/uclinux-elf.h	1970-01-01 01:00:00.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/avr32/uclinux-elf.h	2008-11-25 09:41:55.000000000 +0100
+--- /dev/null
++++ b/gcc/config/avr32/uclinux-elf.h
 @@ -0,0 +1,20 @@
 +
 +/* Run-time Target Specification.  */
@@ -20998,9 +21258,8 @@ diff -Nrup gcc-4.2.2/gcc/config/avr32/uclinux-elf.h gcc-4.2.2.atmel.1.1.2/gcc/co
 +
 +#undef TARGET_DEFAULT
 +#define TARGET_DEFAULT (AVR32_FLAG_NO_INIT_GOT)
-diff -Nrup gcc-4.2.2/gcc/config/host-linux.c gcc-4.2.2.atmel.1.1.2/gcc/config/host-linux.c
---- gcc-4.2.2/gcc/config/host-linux.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config/host-linux.c	2008-11-25 09:42:07.000000000 +0100
+--- a/gcc/config/host-linux.c
++++ b/gcc/config/host-linux.c
 @@ -25,6 +25,9 @@
  #include "hosthooks.h"
  #include "hosthooks-def.h"
@@ -21011,10 +21270,9 @@ diff -Nrup gcc-4.2.2/gcc/config/host-linux.c gcc-4.2.2.atmel.1.1.2/gcc/config/ho
  
  /* Linux has a feature called exec-shield-randomize that perturbs the
     address of non-fixed mapped segments by a (relatively) small amount.
-diff -Nrup gcc-4.2.2/gcc/config.gcc gcc-4.2.2.atmel.1.1.2/gcc/config.gcc
---- gcc-4.2.2/gcc/config.gcc	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/config.gcc	2008-11-25 09:42:09.000000000 +0100
-@@ -781,6 +781,24 @@ avr-*-*)
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -789,6 +789,24 @@ avr-*-*)
  	tm_file="avr/avr.h dbxelf.h"
  	use_fixproto=yes
  	;;
@@ -21039,7 +21297,7 @@ diff -Nrup gcc-4.2.2/gcc/config.gcc gcc-4.2.2.atmel.1.1.2/gcc/config.gcc
  bfin*-elf*)
  	tm_file="${tm_file} dbxelf.h elfos.h bfin/elf.h"
          tmake_file=bfin/t-bfin-elf
-@@ -1681,6 +1699,9 @@ pdp11-*-bsd)
+@@ -1689,6 +1707,9 @@ pdp11-*-bsd)
  pdp11-*-*)
  	use_fixproto=yes
  	;;
@@ -21049,7 +21307,7 @@ diff -Nrup gcc-4.2.2/gcc/config.gcc gcc-4.2.2.atmel.1.1.2/gcc/config.gcc
  # port not yet contributed
  #powerpc-*-openbsd*)
  #	tmake_file="${tmake_file} rs6000/t-fprules rs6000/t-fprules-fpbit "
-@@ -2717,6 +2738,32 @@ case "${target}" in
+@@ -2725,6 +2746,32 @@ case "${target}" in
  		fi
  		;;
  
@@ -21082,9 +21340,8 @@ diff -Nrup gcc-4.2.2/gcc/config.gcc gcc-4.2.2.atmel.1.1.2/gcc/config.gcc
  	fr*-*-*linux*)
  		supported_defaults=cpu
  		case "$with_cpu" in
-diff -Nrup gcc-4.2.2/gcc/doc/extend.texi gcc-4.2.2.atmel.1.1.2/gcc/doc/extend.texi
---- gcc-4.2.2/gcc/doc/extend.texi	2007-03-12 23:10:12.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/doc/extend.texi	2008-11-25 09:34:58.000000000 +0100
+--- a/gcc/doc/extend.texi
++++ b/gcc/doc/extend.texi
 @@ -1981,7 +1981,7 @@ this attribute to work correctly.
  
  @item interrupt
@@ -21219,9 +21476,8 @@ diff -Nrup gcc-4.2.2/gcc/doc/extend.texi gcc-4.2.2.atmel.1.1.2/gcc/doc/extend.te
  @node Blackfin Built-in Functions
  @subsection Blackfin Built-in Functions
  
-diff -Nrup gcc-4.2.2/gcc/doc/invoke.texi gcc-4.2.2.atmel.1.1.2/gcc/doc/invoke.texi
---- gcc-4.2.2/gcc/doc/invoke.texi	2007-09-07 12:45:50.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/doc/invoke.texi	2008-11-25 09:34:58.000000000 +0100
+--- a/gcc/doc/invoke.texi
++++ b/gcc/doc/invoke.texi
 @@ -190,7 +190,7 @@ in the following sections.
  -fno-default-inline  -fvisibility-inlines-hidden @gol
  -Wabi  -Wctor-dtor-privacy @gol
@@ -21454,9 +21710,8 @@ diff -Nrup gcc-4.2.2/gcc/doc/invoke.texi gcc-4.2.2.atmel.1.1.2/gcc/doc/invoke.te
  @item -mcall-sysv-eabi
  @opindex mcall-sysv-eabi
  Specify both @option{-mcall-sysv} and @option{-meabi} options.
-diff -Nrup gcc-4.2.2/gcc/doc/md.texi gcc-4.2.2.atmel.1.1.2/gcc/doc/md.texi
---- gcc-4.2.2/gcc/doc/md.texi	2007-04-04 03:24:10.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/doc/md.texi	2008-11-25 09:34:58.000000000 +0100
+--- a/gcc/doc/md.texi
++++ b/gcc/doc/md.texi
 @@ -3,6 +3,7 @@
  @c This is part of the GCC manual.
  @c For copying conditions, see the file gcc.texi.
@@ -21546,9 +21801,8 @@ diff -Nrup gcc-4.2.2/gcc/doc/md.texi gcc-4.2.2.atmel.1.1.2/gcc/doc/md.texi
  @item AVR family---@file{config/avr/constraints.md}
  @table @code
  @item l
-diff -Nrup gcc-4.2.2/gcc/expmed.c gcc-4.2.2.atmel.1.1.2/gcc/expmed.c
---- gcc-4.2.2/gcc/expmed.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/expmed.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/expmed.c
++++ b/gcc/expmed.c
 @@ -36,6 +36,7 @@ along with GCC; see the file COPYING3.  
  #include "real.h"
  #include "recog.h"
@@ -21594,9 +21848,8 @@ diff -Nrup gcc-4.2.2/gcc/expmed.c gcc-4.2.2.atmel.1.1.2/gcc/expmed.c
  	      && (! SLOW_UNALIGNED_ACCESS (mode, MEM_ALIGN (op0))
  		  || (offset * BITS_PER_UNIT % bitsize == 0
  		      && MEM_ALIGN (op0) % bitsize == 0)))))
-diff -Nrup gcc-4.2.2/gcc/expr.c gcc-4.2.2.atmel.1.1.2/gcc/expr.c
---- gcc-4.2.2/gcc/expr.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/expr.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/expr.c
++++ b/gcc/expr.c
 @@ -3519,18 +3519,19 @@ emit_single_push_insn (enum machine_mode
      }
    else
@@ -21671,9 +21924,8 @@ diff -Nrup gcc-4.2.2/gcc/expr.c gcc-4.2.2.atmel.1.1.2/gcc/expr.c
  	    || REG_P (op0) || GET_CODE (op0) == SUBREG
  	    || (mode1 != BLKmode && ! direct_load[(int) mode1]
  		&& GET_MODE_CLASS (mode) != MODE_COMPLEX_INT
-diff -Nrup gcc-4.2.2/gcc/flow.c gcc-4.2.2.atmel.1.1.2/gcc/flow.c
---- gcc-4.2.2/gcc/flow.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/flow.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/flow.c
++++ b/gcc/flow.c
 @@ -3327,12 +3327,12 @@ not_reg_cond (rtx x)
    if (GET_CODE (x) == NOT)
      return XEXP (x, 0);
@@ -21690,9 +21942,8 @@ diff -Nrup gcc-4.2.2/gcc/flow.c gcc-4.2.2.atmel.1.1.2/gcc/flow.c
      }
    return gen_rtx_NOT (0, x);
  }
-diff -Nrup gcc-4.2.2/gcc/function.c gcc-4.2.2.atmel.1.1.2/gcc/function.c
---- gcc-4.2.2/gcc/function.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/function.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/function.c
++++ b/gcc/function.c
 @@ -2676,8 +2676,12 @@ assign_parm_setup_reg (struct assign_par
      SET_DECL_RTL (parm, parmreg);
  
@@ -21708,9 +21959,8 @@ diff -Nrup gcc-4.2.2/gcc/function.c gcc-4.2.2.atmel.1.1.2/gcc/function.c
      {
        int save_tree_used;
  
-diff -Nrup gcc-4.2.2/gcc/genemit.c gcc-4.2.2.atmel.1.1.2/gcc/genemit.c
---- gcc-4.2.2/gcc/genemit.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/genemit.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/genemit.c
++++ b/gcc/genemit.c
 @@ -121,6 +121,24 @@ max_operand_vec (rtx insn, int arg)
  }
  
@@ -21799,9 +22049,8 @@ diff -Nrup gcc-4.2.2/gcc/genemit.c gcc-4.2.2.atmel.1.1.2/gcc/genemit.c
    printf ("  start_sequence ();\n");
  
    /* The fourth operand of DEFINE_EXPAND is some code to be executed
-diff -Nrup gcc-4.2.2/gcc/genflags.c gcc-4.2.2.atmel.1.1.2/gcc/genflags.c
---- gcc-4.2.2/gcc/genflags.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/genflags.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/genflags.c
++++ b/gcc/genflags.c
 @@ -127,7 +127,6 @@ static void
  gen_proto (rtx insn)
  {
@@ -21838,9 +22087,8 @@ diff -Nrup gcc-4.2.2/gcc/genflags.c gcc-4.2.2.atmel.1.1.2/gcc/genflags.c
        else
  	puts ("(void)");
        puts ("{\n  return 0;\n}");
-diff -Nrup gcc-4.2.2/gcc/genoutput.c gcc-4.2.2.atmel.1.1.2/gcc/genoutput.c
---- gcc-4.2.2/gcc/genoutput.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/genoutput.c	2008-11-25 09:42:08.000000000 +0100
+--- a/gcc/genoutput.c
++++ b/gcc/genoutput.c
 @@ -386,7 +386,7 @@ output_insn_data (void)
  	}
  
@@ -21850,9 +22098,8 @@ diff -Nrup gcc-4.2.2/gcc/genoutput.c gcc-4.2.2.atmel.1.1.2/gcc/genoutput.c
        else
  	printf ("    0,\n");
  
-diff -Nrup gcc-4.2.2/gcc/ifcvt.c gcc-4.2.2.atmel.1.1.2/gcc/ifcvt.c
---- gcc-4.2.2/gcc/ifcvt.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/ifcvt.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/ifcvt.c
++++ b/gcc/ifcvt.c
 @@ -77,7 +77,7 @@ static int num_possible_if_blocks;
  static int num_updated_if_blocks;
  
@@ -21956,9 +22203,8 @@ diff -Nrup gcc-4.2.2/gcc/ifcvt.c gcc-4.2.2.atmel.1.1.2/gcc/ifcvt.c
    if (flag_if_conversion2)
      if_convert (1);
    return 0;
-diff -Nrup gcc-4.2.2/gcc/longlong.h gcc-4.2.2.atmel.1.1.2/gcc/longlong.h
---- gcc-4.2.2/gcc/longlong.h	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/longlong.h	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/longlong.h
++++ b/gcc/longlong.h
 @@ -226,6 +226,41 @@ UDItype __umulsidi3 (USItype, USItype);
  #define UDIV_TIME 100
  #endif /* __arm__ */
@@ -22001,9 +22247,8 @@ diff -Nrup gcc-4.2.2/gcc/longlong.h gcc-4.2.2.atmel.1.1.2/gcc/longlong.h
  #if defined (__hppa) && W_TYPE_SIZE == 32
  #define add_ssaaaa(sh, sl, ah, al, bh, bl) \
    __asm__ ("add %4,%5,%1\n\taddc %2,%3,%0"				\
-diff -Nrup gcc-4.2.2/gcc/optabs.h gcc-4.2.2.atmel.1.1.2/gcc/optabs.h
---- gcc-4.2.2/gcc/optabs.h	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/optabs.h	2008-11-25 09:42:08.000000000 +0100
+--- a/gcc/optabs.h
++++ b/gcc/optabs.h
 @@ -431,7 +431,7 @@ extern enum insn_code reload_out_optab[N
  extern GTY(()) optab code_to_optab[NUM_RTX_CODE + 1];
  
@@ -22013,9 +22258,8 @@ diff -Nrup gcc-4.2.2/gcc/optabs.h gcc-4.2.2.atmel.1.1.2/gcc/optabs.h
  
  /* Indexed by the rtx-code for a conditional (e.g. EQ, LT,...)
     gives the gen_function to make a branch to test that condition.  */
-diff -Nrup gcc-4.2.2/gcc/regrename.c gcc-4.2.2.atmel.1.1.2/gcc/regrename.c
---- gcc-4.2.2/gcc/regrename.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/regrename.c	2008-11-25 09:42:08.000000000 +0100
+--- a/gcc/regrename.c
++++ b/gcc/regrename.c
 @@ -1592,6 +1592,9 @@ copyprop_hardreg_forward_1 (basic_block 
    bool changed = false;
    rtx insn;
@@ -22087,9 +22331,8 @@ diff -Nrup gcc-4.2.2/gcc/regrename.c gcc-4.2.2.atmel.1.1.2/gcc/regrename.c
        /* For each earlyclobber operand, zap the value data.  */
        for (i = 0; i < n_ops; i++)
  	if (recog_op_alt[i][alt].earlyclobber)
-diff -Nrup gcc-4.2.2/gcc/reload.c gcc-4.2.2.atmel.1.1.2/gcc/reload.c
---- gcc-4.2.2/gcc/reload.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/reload.c	2008-11-25 09:42:08.000000000 +0100
+--- a/gcc/reload.c
++++ b/gcc/reload.c
 @@ -4574,7 +4574,7 @@ find_reloads_toplev (rtx x, int opnum, e
  	      x = mem;
  	      i = find_reloads_address (GET_MODE (x), &x, XEXP (x, 0), &XEXP (x, 0),
@@ -22099,9 +22342,8 @@ diff -Nrup gcc-4.2.2/gcc/reload.c gcc-4.2.2.atmel.1.1.2/gcc/reload.c
  		push_reg_equiv_alt_mem (regno, x);
  	      if (address_reloaded)
  		*address_reloaded = i;
-diff -Nrup gcc-4.2.2/gcc/sched-deps.c gcc-4.2.2.atmel.1.1.2/gcc/sched-deps.c
---- gcc-4.2.2/gcc/sched-deps.c	2007-09-01 17:28:30.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/sched-deps.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/sched-deps.c
++++ b/gcc/sched-deps.c
 @@ -649,7 +649,14 @@ fixup_sched_groups (rtx insn)
  
    prev_nonnote = prev_nonnote_insn (insn);
@@ -22148,9 +22390,8 @@ diff -Nrup gcc-4.2.2/gcc/sched-deps.c gcc-4.2.2.atmel.1.1.2/gcc/sched-deps.c
        /* ??? Should be recording conditions so we reduce the number of
  	 false dependencies.  */
        x = COND_EXEC_CODE (x);
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c
---- gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c	2007-08-31 09:27:40.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.c-torture/compile/20070827-1.c
++++ /dev/null
 @@ -1,20 +0,0 @@
 -/* PR rtl-optimization/33148 */
 -
@@ -22172,9 +22413,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070827-1.c gcc-4.2.2.
 -    }
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c
---- gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c	2007-09-25 17:14:42.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.c-torture/compile/20070925-1.c
++++ /dev/null
 @@ -1,22 +0,0 @@
 -/* PR tree-optimization/32694 */
 -
@@ -22198,9 +22438,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/20070925-1.c gcc-4.2.2.
 -      p++;
 -    }
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c
---- gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c	2007-09-12 09:54:17.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.c-torture/compile/pr33382.c
++++ /dev/null
 @@ -1,95 +0,0 @@
 -typedef unsigned int size_t;
 -typedef struct {
@@ -22297,9 +22536,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/compile/pr33382.c gcc-4.2.2.atm
 -	))
 -	return;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c
---- gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c	2007-08-22 10:45:58.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.c-torture/execute/pr33142.c
++++ /dev/null
 @@ -1,16 +0,0 @@
 -int abs(int j);
 -extern void abort(void);
@@ -22317,9 +22555,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33142.c gcc-4.2.2.atm
 -        abort();
 -    return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c
---- gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c	2007-09-12 09:54:17.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.c-torture/execute/pr33382.c
++++ /dev/null
 @@ -1,21 +0,0 @@
 -struct Foo {
 -  int i;
@@ -22342,9 +22579,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.c-torture/execute/pr33382.c gcc-4.2.2.atm
 -    abort();
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/20070801-1.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/20070801-1.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/20070801-1.c	2007-08-01 10:43:06.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/20070801-1.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/20070801-1.c
++++ /dev/null
 @@ -1,62 +0,0 @@
 -/* This failed on s390x due to a back end bug.  */
 -
@@ -22408,18 +22644,16 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/20070801-1.c gcc-4.2.2.atmel.1.1.2/gcc
 -      }
 -    }
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c	2005-02-19 20:48:02.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c	2008-11-25 09:36:53.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c
++++ b/gcc/testsuite/gcc.dg/cpp/mac-eol-at-eof.c
 @@ -1 +1,3 @@
 -/* Test no newline at eof warning when Mac line ending is used*//* { dg-do compile } */int main() { return 0; } 
 \ No newline at end of file
 +/* Test no newline at eof warning when Mac line ending is used*/
 +/* { dg-do compile } */
 +int main() { return 0; } 
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr32610.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/debug/pr32610.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr32610.c	2007-08-24 19:06:59.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/debug/pr32610.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/debug/pr32610.c
++++ /dev/null
 @@ -1,14 +0,0 @@
 -/* PR debug/32610 */
 -/* { dg-do compile } */
@@ -22435,9 +22669,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr32610.c gcc-4.2.2.atmel.1.1.2/
 -{
 -  foo (1);
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr33316.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/debug/pr33316.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr33316.c	2007-09-24 11:17:10.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/debug/pr33316.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/debug/pr33316.c
++++ /dev/null
 @@ -1,15 +0,0 @@
 -/* PR debug/33316 */
 -
@@ -22454,9 +22687,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/debug/pr33316.c gcc-4.2.2.atmel.1.1.2/
 -  const struct S { int d[y]; } *a = x;
 -  return a[0].d[0];
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-1.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/pr32912-1.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-1.c	2007-09-13 05:45:16.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/pr32912-1.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/pr32912-1.c
++++ /dev/null
 @@ -1,45 +0,0 @@
 -/* PR middle-end/32912 */
 -/* { dg-do run } */
@@ -22503,9 +22735,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-1.c gcc-4.2.2.atmel.1.1.2/gcc/
 -  check (f, 0);
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-2.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/pr32912-2.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-2.c	2007-09-13 05:45:16.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/pr32912-2.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/pr32912-2.c
++++ /dev/null
 @@ -1,43 +0,0 @@
 -/* { dg-do run } */
 -/* { dg-options "-O2 -w" } */
@@ -22550,9 +22781,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/pr32912-2.c gcc-4.2.2.atmel.1.1.2/gcc/
 -    }
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-3.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/sibcall-3.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-3.c	2005-07-20 08:39:38.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/sibcall-3.c	2008-11-25 09:37:35.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/sibcall-3.c
++++ b/gcc/testsuite/gcc.dg/sibcall-3.c
 @@ -5,7 +5,7 @@
     Copyright (C) 2002 Free Software Foundation Inc.
     Contributed by Hans-Peter Nilsson  <hp@bitrange.com>  */
@@ -22562,9 +22792,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-3.c gcc-4.2.2.atmel.1.1.2/gcc/
  /* { dg-options "-O2 -foptimize-sibling-calls" } */
  
  /* The option -foptimize-sibling-calls is the default, but serves as
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-4.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/sibcall-4.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-4.c	2005-07-20 08:39:38.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/sibcall-4.c	2008-11-25 09:37:35.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/sibcall-4.c
++++ b/gcc/testsuite/gcc.dg/sibcall-4.c
 @@ -5,7 +5,7 @@
     Copyright (C) 2002 Free Software Foundation Inc.
     Contributed by Hans-Peter Nilsson  <hp@bitrange.com>  */
@@ -22574,9 +22803,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/sibcall-4.c gcc-4.2.2.atmel.1.1.2/gcc/
  /* { dg-options "-O2 -foptimize-sibling-calls" } */
  
  /* The option -foptimize-sibling-calls is the default, but serves as
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/trampoline-1.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/trampoline-1.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/trampoline-1.c	2004-08-03 10:22:26.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/trampoline-1.c	2008-11-25 09:37:35.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/trampoline-1.c
++++ b/gcc/testsuite/gcc.dg/trampoline-1.c
 @@ -46,6 +46,8 @@ void foo (void)
  
  int main (void)
@@ -22586,9 +22814,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/trampoline-1.c gcc-4.2.2.atmel.1.1.2/g
 +#endif
    return 0;
  }
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413a.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/vect/pr25413a.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413a.c	2007-07-25 10:51:12.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/vect/pr25413a.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/vect/pr25413a.c
++++ /dev/null
 @@ -1,129 +0,0 @@
 -/* { dg-require-effective-target vect_double } */
 -
@@ -22719,9 +22946,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413a.c gcc-4.2.2.atmel.1.1.2/
 -/* { dg-final { scan-tree-dump-times "vector alignment may not be reachable" 1 "vect" { target { ! vect_aligned_arrays  } } } } */
 -/* { dg-final { scan-tree-dump-times "Alignment of access forced using versioning" 1 "vect" { target { ! vect_aligned_arrays } } } } */
 -/* { dg-final { cleanup-tree-dump "vect" } } */
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/vect/pr25413.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413.c	2007-07-25 10:51:12.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/vect/pr25413.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/vect/pr25413.c
++++ /dev/null
 @@ -1,38 +0,0 @@
 -/* { dg-require-effective-target vect_double } */
 -
@@ -22761,9 +22987,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/pr25413.c gcc-4.2.2.atmel.1.1.2/g
 -/* { dg-final { scan-tree-dump-times "vector alignment may not be reachable" 1 "vect" { target { ! vect_aligned_arrays } } } } */
 -/* { dg-final { scan-tree-dump-times "not vectorized: unsupported unaligned store" 1 "vect" { target { ! vect_aligned_arrays } } } } */
 -/* { dg-final { cleanup-tree-dump "vect" } } */
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c	2007-07-25 10:51:12.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/vect/vect-align-1.c
++++ /dev/null
 @@ -1,50 +0,0 @@
 -/* { dg-require-effective-target vect_int } */
 -
@@ -22815,9 +23040,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-1.c gcc-4.2.2.atmel.1.
 -/* { dg-final { scan-tree-dump-times "Alignment of access forced using versioning" 1 "vect" } } */
 -/* { dg-final { scan-tree-dump-times "vectorized 1 loops" 1 "vect" } } */
 -/* { dg-final { cleanup-tree-dump "vect" } } */
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c
---- gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c	2007-07-25 10:51:12.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.dg/vect/vect-align-2.c
++++ /dev/null
 @@ -1,46 +0,0 @@
 -/* { dg-require-effective-target vect_int } */
 -/* { dg-do run } */
@@ -22865,9 +23089,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.dg/vect/vect-align-2.c gcc-4.2.2.atmel.1.
 -/* { dg-final { scan-tree-dump-times "Alignment of access forced using versioning" 1 "vect" } } */
 -/* { dg-final { scan-tree-dump-times "vectorized 1 loops" 1 "vect" } } */
 -/* { dg-final { cleanup-tree-dump "vect" } } */
-diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.target/mips/pr33256.c gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.target/mips/pr33256.c
---- gcc-4.2.2/gcc/testsuite/gcc.target/mips/pr33256.c	2007-09-06 20:04:51.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gcc.target/mips/pr33256.c	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gcc.target/mips/pr33256.c
++++ /dev/null
 @@ -1,11 +0,0 @@
 -/* GCC used to report an ICE for this test because we generated a LO_SUM
 -   for an illegitimate constant.  */
@@ -22880,22 +23103,19 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gcc.target/mips/pr33256.c gcc-4.2.2.atmel.1.1
 -{
 -  return b (a[0]);
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/debug/const3.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/debug/const3.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/debug/const3.C	2007-08-31 09:25:20.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/debug/const3.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/debug/const3.C
++++ /dev/null
 @@ -1,3 +0,0 @@
 -/* { dg-do compile } */
 -typedef float FloatVect __attribute__((__vector_size__(16)));
 -const FloatVect Foo = { 250000000.0, 0.0, 0.0, 0.0 };
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/debug/const4.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/debug/const4.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/debug/const4.C	2007-08-31 09:25:20.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/debug/const4.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/debug/const4.C
++++ /dev/null
 @@ -1,2 +0,0 @@
 -/* { dg-do compile } */
 -const __complex__ int x = 2i;
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/expr/bitfield9.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/expr/bitfield9.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/expr/bitfield9.C	2007-07-27 23:46:33.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/expr/bitfield9.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/expr/bitfield9.C
++++ /dev/null
 @@ -1,25 +0,0 @@
 -// PR c++/32346
 -// { dg-do run }
@@ -22922,16 +23142,14 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/expr/bitfield9.C gcc-4.2.2.atmel.1.1.2
 -  s.i = 0xabcdef01;
 -  g(s);
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/ext/label6.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/ext/label6.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/ext/label6.C	2007-07-30 17:38:39.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/ext/label6.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/ext/label6.C
++++ /dev/null
 @@ -1,3 +0,0 @@
 -// PR c++/32108
 -
 -__label__ L; // { dg-error "function scopes" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/init/ref14.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/init/ref14.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/init/ref14.C	2007-09-20 12:04:19.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/init/ref14.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/init/ref14.C
++++ /dev/null
 @@ -1,11 +0,0 @@
 -// PR c++/33459
 -
@@ -22944,9 +23162,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/init/ref14.C gcc-4.2.2.atmel.1.1.2/gcc
 -{
 -  A();
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/lookup/friend11.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/lookup/friend11.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/lookup/friend11.C	2007-07-28 22:12:42.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/lookup/friend11.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/lookup/friend11.C
++++ /dev/null
 @@ -1,24 +0,0 @@
 -/* PR c++/30917 */
 -/* This used to ICE */
@@ -22972,18 +23189,16 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/lookup/friend11.C gcc-4.2.2.atmel.1.1.
 -  };
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/lookup/ns3.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/lookup/ns3.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/lookup/ns3.C	2007-08-24 19:09:50.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/lookup/ns3.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/lookup/ns3.C
++++ /dev/null
 @@ -1,5 +0,0 @@
 -// PR c++/32898
 -
 -namespace N { }
 -
 -int N::i;	// { dg-error "should have been declared inside" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/opt/nrv14.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/opt/nrv14.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/opt/nrv14.C	2007-08-20 10:10:54.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/opt/nrv14.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/opt/nrv14.C
++++ /dev/null
 @@ -1,39 +0,0 @@
 -// PR c++/32992
 -// { dg-do run }
@@ -23024,9 +23239,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/opt/nrv14.C gcc-4.2.2.atmel.1.1.2/gcc/
 -    abort ();
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/other/error16.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/other/error16.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/other/error16.C	2007-08-10 20:04:46.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/other/error16.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/other/error16.C
++++ /dev/null
 @@ -1,14 +0,0 @@
 -// PR c++/17763
 -
@@ -23042,9 +23256,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/other/error16.C gcc-4.2.2.atmel.1.1.2/
 -  Outer<int>  ab;
 -  ab.foo() == 1; // { dg-error "ab.Outer" }
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/crash37.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/parse/crash37.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/parse/crash37.C	2007-08-24 19:12:41.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/parse/crash37.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/parse/crash37.C
++++ /dev/null
 @@ -1,15 +0,0 @@
 -// PR c++/31941
 -// { dg-do compile }
@@ -23061,9 +23274,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/crash37.C gcc-4.2.2.atmel.1.1.2/
 -{
 -  return e.what ().c_str ();	// { dg-error "c_str.*S::what.*which is of non-class type" }
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/error31.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/parse/error31.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/parse/error31.C	2007-08-17 23:38:19.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/parse/error31.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/parse/error31.C
++++ /dev/null
 @@ -1,12 +0,0 @@
 -// PR c++/32190
 -
@@ -23077,9 +23289,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/parse/error31.C gcc-4.2.2.atmel.1.1.2/
 -    foo<int> m;
 -    return 0;
 -    }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/crash70.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/crash70.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/template/crash70.C	2007-08-31 11:57:50.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/crash70.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/template/crash70.C
++++ /dev/null
 @@ -1,7 +0,0 @@
 -// PR c++/32113
 -
@@ -23088,27 +23299,24 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/crash70.C gcc-4.2.2.atmel.1.1
 -template<typename T> void foo (A<&T::template i>); // { dg-error "not a template" }
 -
 -template void foo<A<0> > (A<0>); // { dg-error "does not match" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/error26.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/error26.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/template/error26.C	2007-08-18 12:07:42.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/error26.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/template/error26.C
++++ /dev/null
 @@ -1,5 +0,0 @@
 -// PR c++/32112
 -
 -template<typename> struct A;
 -
 -template<typename T> void foo (A<&T::template i>); // { dg-error "T::template i|mismatch|& T::i" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/error30.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/error30.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/template/error30.C	2007-09-05 12:40:29.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/error30.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/template/error30.C
++++ /dev/null
 @@ -1,5 +0,0 @@
 -// PR c++/33210
 -
 -template<int> struct A;
 -
 -template<template<typename> class B> A<B<int>::x> operator() (); // { dg-error "A<B<int>::x>" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial1.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/mem-partial1.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial1.C	2007-09-04 17:43:00.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/mem-partial1.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/template/mem-partial1.C
++++ /dev/null
 @@ -1,15 +0,0 @@
 -// PR c++/14032
 -
@@ -23125,9 +23333,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial1.C gcc-4.2.2.atme
 -};
 -
 -int i = outer<int>::inner<double,int>::f();
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial2.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/mem-partial2.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial2.C	2007-09-04 17:43:00.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/mem-partial2.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/template/mem-partial2.C
++++ /dev/null
 @@ -1,29 +0,0 @@
 -// PR c++/14032
 -// { dg-do run }
@@ -23158,9 +23365,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/mem-partial2.C gcc-4.2.2.atme
 -
 -  return b != true;
 -}
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/operator10.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/operator10.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/template/operator10.C	2007-07-24 11:18:39.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/operator10.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/template/operator10.C
++++ /dev/null
 @@ -1,7 +0,0 @@
 -// PR c++/30535
 -
@@ -23169,9 +23375,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/operator10.C gcc-4.2.2.atmel.
 -template<A, typename T> int operator-(A, T); // { dg-error "not a valid type" }
 -
 -int i = A() - 0; // { dg-error "no match" }
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/static31.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/static31.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/template/static31.C	2007-09-06 21:19:15.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/template/static31.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/template/static31.C
++++ /dev/null
 @@ -1,19 +0,0 @@
 -// PR c++/32674
 -
@@ -23192,9 +23397,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/template/static31.C gcc-4.2.2.atmel.1.
 -template<int N> const int A<N>::i2 = C::j;
 -template<int N> const int A<N>::i3(C::j, 5); // { dg-error "compound expression" }
 -template<int N> const int A<N>::i4 = (C::j, 7);
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/dg-torture.exp gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/torture/dg-torture.exp
---- gcc-4.2.2/gcc/testsuite/g++.dg/torture/dg-torture.exp	2007-05-30 23:17:32.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/torture/dg-torture.exp	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/torture/dg-torture.exp
++++ /dev/null
 @@ -1,7 +0,0 @@
 -# This harness is for tests that should be run at all optimisation levels.
 -
@@ -23203,9 +23407,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/dg-torture.exp gcc-4.2.2.atmel
 -dg-init
 -gcc-dg-runtest [lsort [glob $srcdir/$subdir/*.C]] ""
 -dg-finish
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/pr32563.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/torture/pr32563.C
---- gcc-4.2.2/gcc/testsuite/g++.dg/torture/pr32563.C	2007-08-22 10:07:11.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.dg/torture/pr32563.C	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/g++.dg/torture/pr32563.C
++++ /dev/null
 @@ -1,8 +0,0 @@
 -/* { dg-do compile } */
 -
@@ -23215,9 +23418,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.dg/torture/pr32563.C gcc-4.2.2.atmel.1.1.
 -} a;
 -
 -const __SIZE_TYPE__ i = (__SIZE_TYPE__)&a.c[0] - 1;
-diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90 gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90
---- gcc-4.2.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90	2005-05-29 18:03:43.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90	2008-11-25 09:40:30.000000000 +0100
+--- a/gcc/testsuite/gfortran.dg/char_pointer_assign.f90
++++ b/gcc/testsuite/gfortran.dg/char_pointer_assign.f90
 @@ -1,4 +1,4 @@
 -! { dg-do run }
 +! { dg-do run }
@@ -23251,9 +23453,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/char_pointer_assign.f90 gcc-4.2.2
    const(1:1) ="o"      ! c4(:)(1:1) = "o" is still broken
    const(4:4) ="l"      ! c4(:)(4:4) = "l" is still broken
    c4 = const
-diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90 gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90
---- gcc-4.2.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90	2007-07-22 06:05:00.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90	1970-01-01 01:00:00.000000000 +0100
+--- a/gcc/testsuite/gfortran.dg/fmt_t_5.f90
++++ /dev/null
 @@ -1,18 +0,0 @@
 -! { dg-do run }
 -! PR32678 GFortan works incorrectly when writing with FORMAT Tx
@@ -23273,9 +23474,8 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/gfortran.dg/fmt_t_5.f90 gcc-4.2.2.atmel.1.1.2
 -      close (10, status="delete")
 - 10   format (a2,t1,a1,t2,a1,t20,' x')
 -      end
-diff -Nrup gcc-4.2.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C
---- gcc-4.2.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C	2006-02-22 10:05:07.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C	2008-11-25 09:38:59.000000000 +0100
+--- a/gcc/testsuite/g++.old-deja/g++.pt/static11.C
++++ b/gcc/testsuite/g++.old-deja/g++.pt/static11.C
 @@ -2,7 +2,7 @@
  // in their dejagnu baseboard description) require that the status is
  // final when exit is entered (or main returns), and not "overruled" by a
@@ -23285,15 +23485,14 @@ diff -Nrup gcc-4.2.2/gcc/testsuite/g++.old-deja/g++.pt/static11.C gcc-4.2.2.atme
  
  // Bug: g++ was failing to destroy C<int>::a because it was using two
  // different sentry variables for construction and destruction.
-diff -Nrup gcc-4.2.2/gcc/version.c gcc-4.2.2.atmel.1.1.2/gcc/version.c
---- gcc-4.2.2/gcc/version.c	2005-03-16 07:04:10.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/gcc/version.c	2008-11-25 09:42:09.000000000 +0100
+--- a/gcc/version.c
++++ b/gcc/version.c
 @@ -8,7 +8,7 @@
     in parentheses.  You may also wish to include a number indicating
     the revision of your modified compiler.  */
  
 -#define VERSUFFIX ""
-+#define VERSUFFIX "-atmel.1.1.2.buildroot.1"
++#define VERSUFFIX "-atmel.1.1.3.buildroot.1"
  
  /* This is the location of the online document giving instructions for
     reporting bugs.  If you distribute a modified version of GCC,
@@ -23309,14 +23508,12 @@ diff -Nrup gcc-4.2.2/gcc/version.c gcc-4.2.2.atmel.1.1.2/gcc/version.c
  
 -const char version_string[] = BASEVER DATESTAMP DEVPHASE VERSUFFIX;
 +const char version_string[] = BASEVER VERSUFFIX DATESTAMP DEVPHASE;
-diff -Nrup gcc-4.2.2/LAST_UPDATED gcc-4.2.2.atmel.1.1.2/LAST_UPDATED
---- gcc-4.2.2/LAST_UPDATED	2007-10-07 23:23:17.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/LAST_UPDATED	1970-01-01 01:00:00.000000000 +0100
+--- a/LAST_UPDATED
++++ /dev/null
 @@ -1 +0,0 @@
 -Obtained from SVN: tags/gcc_4_2_2_release revision 129115
-diff -Nrup gcc-4.2.2/libcpp/po/uk.po gcc-4.2.2.atmel.1.1.2/libcpp/po/uk.po
---- gcc-4.2.2/libcpp/po/uk.po	2007-08-21 13:47:20.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libcpp/po/uk.po	1970-01-01 01:00:00.000000000 +0100
+--- a/libcpp/po/uk.po
++++ /dev/null
 @@ -1,878 +0,0 @@
 -# Ukrainian translation of cpplib.
 -# Copyright (C) 2007 Free Software Foundation, Inc.
@@ -24196,9 +24393,8 @@ diff -Nrup gcc-4.2.2/libcpp/po/uk.po gcc-4.2.2.atmel.1.1.2/libcpp/po/uk.po
 -#: traditional.c:912
 -msgid "syntax error in macro parameter list"
 -msgstr "синтаксична помилка у списку параметрів макросу"
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/copying.txt gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/copying.txt
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/copying.txt	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/copying.txt	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/copying.txt
++++ b/libjava/classpath/external/relaxngDatatype/copying.txt
 @@ -1,30 +1,30 @@
 -Copyright (c) 2001, Thai Open Source Software Center Ltd, Sun Microsystems.
 -All rights reserved.
@@ -24260,9 +24456,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/copying.txt gcc-
 +LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 +NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 +SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeBuilder.java
 @@ -1,45 +1,45 @@
 -package org.relaxng.datatype;
 -
@@ -24354,9 +24549,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	Datatype createDatatype() throws DatatypeException;
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeException.java
 @@ -1,39 +1,39 @@
 -package org.relaxng.datatype;
 -
@@ -24436,9 +24630,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +		return index;
 +	}
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/Datatype.java
 @@ -1,237 +1,237 @@
 -package org.relaxng.datatype;
 -
@@ -24914,9 +25107,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	public boolean isContextDependent();
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibraryFactory.java
 @@ -1,26 +1,26 @@
 -package org.relaxng.datatype;
 -
@@ -24970,9 +25162,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	DatatypeLibrary createDatatypeLibrary( String namespaceURI );
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeLibrary.java
 @@ -1,37 +1,37 @@
 -package org.relaxng.datatype;
 -
@@ -25048,9 +25239,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	Datatype createDatatype( String typeLocalName ) throws DatatypeException;
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/DatatypeStreamingValidator.java
 @@ -1,46 +1,46 @@
 -package org.relaxng.datatype;
 -
@@ -25144,9 +25334,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	void checkValid() throws DatatypeException;
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/DatatypeLibraryLoader.java
 @@ -1,262 +1,262 @@
 -/**
 - * Copyright (c) 2001, Thai Open Source Software Center Ltd
@@ -25672,9 +25861,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +  
 +}
 +
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/ParameterlessDatatypeBuilder.java
 @@ -1,42 +1,42 @@
 -package org.relaxng.datatype.helpers;
 -
@@ -25760,9 +25948,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +		return baseType;
 +	}
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/helpers/StreamingValidatorImpl.java
 @@ -1,55 +1,55 @@
 -package org.relaxng.datatype.helpers;
 -
@@ -25874,9 +26061,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +		this.context = context;
 +	}
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java
++++ b/libjava/classpath/external/relaxngDatatype/org/relaxng/datatype/ValidationContext.java
 @@ -1,66 +1,66 @@
 -package org.relaxng.datatype;
 -
@@ -26010,9 +26196,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/org/relaxng/data
 +	 */
 +	boolean isNotation( String notationName );
 +}
-diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/README.txt gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/README.txt
---- gcc-4.2.2/libjava/classpath/external/relaxngDatatype/README.txt	2006-03-10 14:25:35.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libjava/classpath/external/relaxngDatatype/README.txt	2008-11-25 09:44:39.000000000 +0100
+--- a/libjava/classpath/external/relaxngDatatype/README.txt
++++ b/libjava/classpath/external/relaxngDatatype/README.txt
 @@ -1,54 +1,54 @@
 -======================================================================
 -           README FILE FOR DATATYPE INTERFACES FOR RELAX NG
@@ -26122,9 +26307,8 @@ diff -Nrup gcc-4.2.2/libjava/classpath/external/relaxngDatatype/README.txt gcc-4
 +Document written by Kohsuke Kawaguchi (kohsuke.kawaguchi@sun.com)
 +======================================================================
 +END OF README
-diff -Nrup gcc-4.2.2/libstdc++-v3/acinclude.m4 gcc-4.2.2.atmel.1.1.2/libstdc++-v3/acinclude.m4
---- gcc-4.2.2/libstdc++-v3/acinclude.m4	2007-06-29 01:02:05.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/acinclude.m4	2008-11-25 09:43:05.000000000 +0100
+--- a/libstdc++-v3/acinclude.m4
++++ b/libstdc++-v3/acinclude.m4
 @@ -125,15 +125,6 @@ AC_DEFUN([GLIBCXX_CONFIGURE], [
    ## other macros from doing the same.  This should be automated.)  -pme
    need_libmath=no
@@ -26141,7 +26325,7 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/acinclude.m4 gcc-4.2.2.atmel.1.1.2/libstdc++-v
    # Find platform-specific directories containing configuration info.
    # Also possibly modify flags used elsewhere, as needed by the platform.
    GLIBCXX_CHECK_HOST
-@@ -1389,8 +1380,8 @@ AC_DEFUN([GLIBCXX_ENABLE_CLOCALE], [
+@@ -1392,8 +1383,8 @@ AC_DEFUN([GLIBCXX_ENABLE_CLOCALE], [
        #endif
        int main()
        {
@@ -26152,9 +26336,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/acinclude.m4 gcc-4.2.2.atmel.1.1.2/libstdc++-v
         	int i;
          int j;
          __locale_t        loc;
-diff -Nrup gcc-4.2.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h gcc-4.2.2.atmel.1.1.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h
---- gcc-4.2.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h	2006-12-01 13:56:23.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h	2008-11-25 09:43:02.000000000 +0100
+--- a/libstdc++-v3/config/os/gnu-linux/ctype_base.h
++++ b/libstdc++-v3/config/os/gnu-linux/ctype_base.h
 @@ -31,6 +31,8 @@
  //
  // ISO C++ 14882: 22.1  Locales
@@ -26179,9 +26362,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/config/os/gnu-linux/ctype_base.h gcc-4.2.2.atm
      // NB: Offsets into ctype<char>::_M_table force a particular size
      // on the mask type. Because of this, we don't use an enum.
      typedef unsigned short 	mask;   
-diff -Nrup gcc-4.2.2/libstdc++-v3/include/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc++-v3/include/Makefile.in
---- gcc-4.2.2/libstdc++-v3/include/Makefile.in	2007-07-05 13:46:00.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/include/Makefile.in	2008-11-25 09:42:16.000000000 +0100
+--- a/libstdc++-v3/include/Makefile.in
++++ b/libstdc++-v3/include/Makefile.in
 @@ -36,6 +36,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26190,9 +26372,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/include/Makefile.in gcc-4.2.2.atmel.1.1.2/libs
  DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
  	$(top_srcdir)/fragment.am
  subdir = include
-diff -Nrup gcc-4.2.2/libstdc++-v3/libmath/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc++-v3/libmath/Makefile.in
---- gcc-4.2.2/libstdc++-v3/libmath/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/libmath/Makefile.in	2008-11-25 09:42:10.000000000 +0100
+--- a/libstdc++-v3/libmath/Makefile.in
++++ b/libstdc++-v3/libmath/Makefile.in
 @@ -37,6 +37,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26201,9 +26382,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/libmath/Makefile.in gcc-4.2.2.atmel.1.1.2/libs
  subdir = libmath
  DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
  ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-diff -Nrup gcc-4.2.2/libstdc++-v3/libsupc++/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc++-v3/libsupc++/Makefile.in
---- gcc-4.2.2/libstdc++-v3/libsupc++/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/libsupc++/Makefile.in	2008-11-25 09:42:17.000000000 +0100
+--- a/libstdc++-v3/libsupc++/Makefile.in
++++ b/libstdc++-v3/libsupc++/Makefile.in
 @@ -38,6 +38,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26212,9 +26392,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/libsupc++/Makefile.in gcc-4.2.2.atmel.1.1.2/li
  DIST_COMMON = $(glibcxxinstall_HEADERS) $(srcdir)/Makefile.am \
  	$(srcdir)/Makefile.in $(top_srcdir)/fragment.am
  subdir = libsupc++
-diff -Nrup gcc-4.2.2/libstdc++-v3/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc++-v3/Makefile.in
---- gcc-4.2.2/libstdc++-v3/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/Makefile.in	2008-11-25 09:43:05.000000000 +0100
+--- a/libstdc++-v3/Makefile.in
++++ b/libstdc++-v3/Makefile.in
 @@ -36,6 +36,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26223,9 +26402,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc++-v3
  DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
  	$(srcdir)/../config.sub $(srcdir)/../install-sh \
  	$(srcdir)/../ltmain.sh $(srcdir)/../missing \
-diff -Nrup gcc-4.2.2/libstdc++-v3/po/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc++-v3/po/Makefile.in
---- gcc-4.2.2/libstdc++-v3/po/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/po/Makefile.in	2008-11-25 09:43:05.000000000 +0100
+--- a/libstdc++-v3/po/Makefile.in
++++ b/libstdc++-v3/po/Makefile.in
 @@ -36,6 +36,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26234,9 +26412,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/po/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc++
  DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
  	$(top_srcdir)/fragment.am
  subdir = po
-diff -Nrup gcc-4.2.2/libstdc++-v3/src/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc++-v3/src/Makefile.in
---- gcc-4.2.2/libstdc++-v3/src/Makefile.in	2006-10-16 21:08:22.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/src/Makefile.in	2008-11-25 09:42:17.000000000 +0100
+--- a/libstdc++-v3/src/Makefile.in
++++ b/libstdc++-v3/src/Makefile.in
 @@ -36,6 +36,7 @@ POST_UNINSTALL = :
  build_triplet = @build@
  host_triplet = @host@
@@ -26245,9 +26422,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/src/Makefile.in gcc-4.2.2.atmel.1.1.2/libstdc+
  DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
  	$(top_srcdir)/fragment.am
  subdir = src
-diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc gcc-4.2.2.atmel.1.1.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc
---- gcc-4.2.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc	2007-08-17 11:28:09.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc	1970-01-01 01:00:00.000000000 +0100
+--- a/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc
++++ /dev/null
 @@ -1,48 +0,0 @@
 -// Copyright (C) 2007 Free Software Foundation, Inc.
 -//
@@ -26297,9 +26473,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/26_numerics/valarray/33084.cc gcc-4.
 -  test01();
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc gcc-4.2.2.atmel.1.1.2/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc
---- gcc-4.2.2/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc	2007-08-28 10:48:54.000000000 +0200
-+++ gcc-4.2.2.atmel.1.1.2/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc	1970-01-01 01:00:00.000000000 +0100
+--- a/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/uniform_int/33128.cc
++++ /dev/null
 @@ -1,43 +0,0 @@
 -// Copyright (C) 2007 Free Software Foundation, Inc.
 -//
@@ -26344,9 +26519,8 @@ diff -Nrup gcc-4.2.2/libstdc++-v3/testsuite/tr1/5_numerical_facilities/random/un
 -  test01();
 -  return 0;
 -}
-diff -Nrup gcc-4.2.2/Makefile.def gcc-4.2.2.atmel.1.1.2/Makefile.def
---- gcc-4.2.2/Makefile.def	2006-12-29 18:47:06.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/Makefile.def	2008-11-25 09:44:55.000000000 +0100
+--- a/Makefile.def
++++ b/Makefile.def
 @@ -481,7 +481,7 @@ lang_env_dependencies = { module=rda; };
  lang_env_dependencies = { module=winsup; };
  lang_env_dependencies = { module=qthreads; };
@@ -26356,9 +26530,8 @@ diff -Nrup gcc-4.2.2/Makefile.def gcc-4.2.2.atmel.1.1.2/Makefile.def
  dependencies = { module=all-target-winsup; on=all-target-libiberty; };
  dependencies = { module=all-target-winsup; on=all-target-libtermcap; };
  
-diff -Nrup gcc-4.2.2/Makefile.in gcc-4.2.2.atmel.1.1.2/Makefile.in
---- gcc-4.2.2/Makefile.in	2006-12-29 18:47:06.000000000 +0100
-+++ gcc-4.2.2.atmel.1.1.2/Makefile.in	2008-11-25 09:44:55.000000000 +0100
+--- a/Makefile.in
++++ b/Makefile.in
 @@ -43791,7 +43791,7 @@ all-target-libobjc: maybe-all-target-boe
  all-target-libstdc++-v3: maybe-all-target-libiberty
  install-target-libssp: maybe-install-gcc
@@ -26368,3 +26541,43 @@ diff -Nrup gcc-4.2.2/Makefile.in gcc-4.2.2.atmel.1.1.2/Makefile.in
  all-target-winsup: maybe-all-target-libiberty
  all-target-winsup: maybe-all-target-libtermcap
  
+--- a/gcc/configure.ac
++++ b/gcc/configure.ac
+@@ -2158,7 +2158,7 @@ L2:],
+   as_ver=`$gcc_cv_as --version 2>/dev/null | sed 1q`
+   if echo "$as_ver" | grep GNU > /dev/null; then
+ changequote(,)dnl
+-    as_ver=`echo $as_ver | sed -e 's/GNU assembler \([0-9.][0-9.]*\).*/\1/'`
++    as_ver=`echo $as_ver | sed -e 's/GNU assembler\( (GNU Binutils)\)\? \([0-9.][0-9.]*\).*/\2/'`
+     as_major=`echo $as_ver | sed 's/\..*//'`
+     as_minor=`echo $as_ver | sed 's/[^.]*\.\([0-9]*\).*/\1/'`
+ changequote([,])dnl
+@@ -2971,7 +2971,7 @@ esac
+ case "$target" in
+   i?86*-*-* | mips*-*-* | alpha*-*-* | powerpc*-*-* | sparc*-*-* | m68*-*-* \
+   | x86_64*-*-* | hppa*-*-* | arm*-*-* | strongarm*-*-* | xscale*-*-* \
+-  | xstormy16*-*-* | cris-*-* | xtensa-*-* | bfin-*-* | score*-*-*)
++  | xstormy16*-*-* | cris-*-* | xtensa-*-* | bfin-*-* | score*-*-* | avr32-*-*)
+     insn="nop"
+     ;;
+   ia64*-*-* | s390*-*-*)
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -14023,7 +14023,7 @@ L2:' > conftest.s
+   # arbitrary sections are supported and try the test.
+   as_ver=`$gcc_cv_as --version 2>/dev/null | sed 1q`
+   if echo "$as_ver" | grep GNU > /dev/null; then
+-    as_ver=`echo $as_ver | sed -e 's/GNU assembler \([0-9.][0-9.]*\).*/\1/'`
++    as_ver=`echo $as_ver | sed -e 's/GNU assembler\( (GNU Binutils)\)\? \([0-9.][0-9.]*\).*/\2/'`
+     as_major=`echo $as_ver | sed 's/\..*//'`
+     as_minor=`echo $as_ver | sed 's/[^.]*\.\([0-9]*\).*/\1/'`
+     if test $as_major -eq 2 && test $as_minor -lt 11
+@@ -15610,7 +15610,7 @@ esac
+ case "$target" in
+   i?86*-*-* | mips*-*-* | alpha*-*-* | powerpc*-*-* | sparc*-*-* | m68*-*-* \
+   | x86_64*-*-* | hppa*-*-* | arm*-*-* | strongarm*-*-* | xscale*-*-* \
+-  | xstormy16*-*-* | cris-*-* | xtensa-*-* | bfin-*-* | score*-*-*)
++  | xstormy16*-*-* | cris-*-* | xtensa-*-* | bfin-*-* | score*-*-* | avr32-*-*)
+     insn="nop"
+     ;;
+   ia64*-*-* | s390*-*-*)
