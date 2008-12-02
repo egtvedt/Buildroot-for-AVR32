@@ -17,12 +17,7 @@ else
 MPLAYER_ENDIAN:=--disable-big-endian
 endif
 
-ifeq ($(strip $(BR2_PACKAGE_LIBMAD)),y)
-MPLAYER_DEP_LIBS:=libmad
-MPLAYER_LIB_MAD:=--enable-mad
-endif
 ifeq ($(strip $(BR2_PACKAGE_FAAD2)),y)
-MPLAYER_DEP_LIBS+=faad2
 MPLAYER_LIB_FAAD:=--enable-faad-external --disable-faad-internal
 MPLAYER_FAAD_LDFLAGS:=-lfaad
 else
@@ -57,11 +52,12 @@ $(MPLAYER_DIR)/.configured: $(MPLAYER_DIR)/.unpacked
 		--as=$(TARGET_CROSS)as \
 		--with-extraincdir=$(STAGING_DIR)/usr/include \
 		--with-extralibdir=$(STAGING_DIR)/lib \
-		$(MPLAYER_LIB_MAD) \
+		--enable-mad \
 		$(MPLAYER_LIB_FAAD) \
 		--enable-fbdev \
 		$(MPLAYER_ENDIAN) \
 		--disable-mpdvdkit \
+		--disable-ivtv \
 		--disable-tv \
 		--enable-dynamic-plugins \
 	)
@@ -76,7 +72,7 @@ $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY): $(MPLAYER_DIR)/$(MPLAYER_BINARY)
 	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
 	touch -c $@
 
-mplayer: uclibc $(MPLAYER_DEP_LIBS) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
+mplayer: uclibc $(if $(BR2_PACKAGE_LIBMAD),libmad) $(if $(BR2_PACKAGE_ALSA_LIB),alsa-lib) $(if $(BR2_PACKAGE_FAAD2),faad2) $(TARGET_DIR)/$(MPLAYER_TARGET_BINARY)
 
 mplayer-source: $(DL_DIR)/$(MPLAYER_SOURCE)
 
@@ -93,6 +89,6 @@ mplayer-dirclean:
 # Toplevel Makefile options
 #
 #############################################################
-ifeq ($(strip $(BR2_PACKAGE_MPLAYER)),y)
+ifeq ($(BR2_PACKAGE_MPLAYER),y)
 TARGETS+=mplayer
 endif

@@ -32,8 +32,9 @@ if BR2_KERNEL_LINUX_ADVANCED
 # --- These 'constants' requires regular maintenance, so put them first
 config BR2_KERNEL_PATCH_LEVEL
 	string
-	default "3" if BR2_LINUX_2_6_26 && BR2_KERNEL_ADD_LATEST_MINORPATCH
-	default "10" if BR2_LINUX_2_6_25 && BR2_KERNEL_ADD_LATEST_MINORPATCH
+	default "6" if BR2_LINUX_2_6_27 && BR2_KERNEL_ADD_LATEST_MINORPATCH
+	default "8" if BR2_LINUX_2_6_26 && BR2_KERNEL_ADD_LATEST_MINORPATCH
+	default "9" if BR2_LINUX_2_6_25 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "7" if BR2_LINUX_2_6_24 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "17" if BR2_LINUX_2_6_23 && BR2_KERNEL_ADD_LATEST_MINORPATCH
 	default "19" if BR2_LINUX_2_6_22 && BR2_KERNEL_ADD_LATEST_MINORPATCH
@@ -47,6 +48,7 @@ config BR2_KERNEL_CURRENT_VERSION
 
 config BR2_KERNEL_NEXT_VERSION
 	string
+	default "2.6.29" if BR2_LINUX_2_6_28
 	default "2.6.28" if BR2_LINUX_2_6_27
 	default "2.6.27" if BR2_LINUX_2_6_26
 	default "2.6.26" if BR2_LINUX_2_6_25
@@ -58,6 +60,7 @@ config BR2_KERNEL_NEXT_VERSION
 
 config BR2_KERNEL_THIS_VERSION
 	string
+	default "2.6.29" if BR2_LINUX_2_6_29
 	default "2.6.28" if BR2_LINUX_2_6_28
 	default "2.6.27" if BR2_LINUX_2_6_27
 	default "2.6.26" if BR2_LINUX_2_6_26
@@ -70,15 +73,15 @@ config BR2_KERNEL_THIS_VERSION
 
 config LINUX26_LATEST_RC_VERSION
 	string
-	default "2.6.27-rc4" if BR2_KERNEL_ADD_LATEST_RC_PATCH
+	default "2.6.28-rc6" if BR2_KERNEL_ADD_LATEST_RC_PATCH
 
 config LINUX26_LATEST_GIT_VERSION
 	string
-	default "2.6.27-rc4-git1" if BR2_KERNEL_ADD_LATEST_SNAPSHOT
+	default "2.6.28-rc6-git1" if BR2_KERNEL_ADD_LATEST_SNAPSHOT
 
 config LINUX26_LATEST_MM_VERSION
 	string
-	default "2.6.27-rc1-mm1" if BR2_KERNEL_ADD_LATEST_MM_PATCH
+	default "2.6.28-rc2-mm1" if BR2_KERNEL_ADD_LATEST_MM_PATCH
 
 config BR2_KERNEL_SITE
 	string "kernel site"
@@ -139,12 +142,6 @@ config BR2_LINUX_2_6_STABLE
 	bool "The latest stable Linux kernel (2.6.27.6)"
 	help
 	  Linux 2.6.27.6
-
-config BR2_LINUX_2_6_28
-	bool "Linux 2.6.28"
-	select BR2_KERNEL_BASE
-	help
-	  Linux 2.6.28
 
 config BR2_LINUX_2_6_27
 	bool "Linux 2.6.27"
@@ -218,6 +215,18 @@ config BR2_LINUX_2_6_20
 	select BR2_KERNEL_BASE
 	help
 	  Linux 2.6.20
+
+config BR2_LINUX_2_6_28
+	bool "Linux 2.6.28"
+	select BR2_KERNEL_BASE
+	help
+	  Linux 2.6.28
+
+config BR2_LINUX_2_6_29
+	bool "Linux 2.6.29"
+	select BR2_KERNEL_BASE
+	help
+	  Linux 2.6.29
 
 config BR2_LINUX26_CUSTOM
 	bool "Linux <custom> version"

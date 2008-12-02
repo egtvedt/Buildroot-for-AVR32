@@ -5,7 +5,7 @@ comment "uClibc Options"
 
 choice
 	prompt "uClibc C library Version"
-	default BR2_UCLIBC_VERSION_0_9_29
+	default BR2_UCLIBC_VERSION_0_9_30
 	help
 	  Select the version of uClibc you wish to use.
 
@@ -17,6 +17,10 @@ choice
 	config BR2_UCLIBC_VERSION_0_9_29
 		bool "uClibc 0.9.29"
 		depends on BR2_EXT_UCLIBC_VERSION_0_9_29
+
+	config BR2_UCLIBC_VERSION_0_9_30
+		bool "uClibc 0.9.30"
+		depends on BR2_EXT_UCLIBC_VERSION_0_9_30
 
 	config BR2_UCLIBC_VERSION_SNAPSHOT
 		bool "daily snapshot"
@@ -35,7 +39,7 @@ config BR2_UCLIBC_CONFIG
 	string "uClibc configuration file to use?"
 	default "toolchain/uClibc/uClibc-0.9.28.config" if BR2_UCLIBC_VERSION_0_9_28_3
 	default "toolchain/uClibc/uClibc-0.9.29.config" if BR2_UCLIBC_VERSION_0_9_29
-	default "toolchain/uClibc/uClibc-0.9.29.config" if BR2_UCLIBC_VERSION_0_9_30
+	default "toolchain/uClibc/uClibc-0.9.30.config" if BR2_UCLIBC_VERSION_0_9_30
 	default "toolchain/uClibc/uClibc-snapshot.config" if BR2_UCLIBC_VERSION_SNAPSHOT
 	help
 	  Some people may wish to use their own modified uClibc configuration
