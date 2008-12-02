@@ -1,8 +1,6 @@
-Index: binutils-2.18/bfd/bfd-in2.h
-===================================================================
---- binutils-2.18.orig/bfd/bfd-in2.h	2007-08-06 21:59:15.000000000 +0200
-+++ binutils-2.18/bfd/bfd-in2.h	2008-11-25 13:31:32.000000000 +0100
-@@ -2017,6 +2017,11 @@
+--- a/bfd/bfd-in2.h
++++ b/bfd/bfd-in2.h
+@@ -2017,6 +2017,11 @@ enum bfd_architecture
  #define bfd_mach_avr4          4
  #define bfd_mach_avr5          5
  #define bfd_mach_avr6          6
@@ -14,7 +12,7 @@ Index: binutils-2.18/bfd/bfd-in2.h
    bfd_arch_bfin,        /* ADI Blackfin */
  #define bfd_mach_bfin          1
    bfd_arch_cr16,       /* National Semiconductor CompactRISC (ie CR16). */
-@@ -3758,6 +3763,88 @@
+@@ -3758,6 +3763,88 @@ instructions  */
  instructions  */
    BFD_RELOC_AVR_6_ADIW,
  
@@ -103,10 +101,8 @@ Index: binutils-2.18/bfd/bfd-in2.h
  /* Direct 12 bit.  */
    BFD_RELOC_390_12,
  
-Index: binutils-2.18/bfd/bfd-in3.h
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ binutils-2.18/bfd/bfd-in3.h	2008-11-25 13:31:32.000000000 +0100
+--- /dev/null
++++ b/bfd/bfd-in3.h
 @@ -0,0 +1,5406 @@
 +/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
 +   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
@@ -5514,10 +5510,8 @@ Index: binutils-2.18/bfd/bfd-in3.h
 +}
 +#endif
 +#endif
-Index: binutils-2.18/bfd/bfd_stdint.h
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ binutils-2.18/bfd/bfd_stdint.h	2008-11-25 13:31:32.000000000 +0100
+--- /dev/null
++++ b/bfd/bfd_stdint.h
 @@ -0,0 +1,47 @@
 +/* generated for  gcc (GCC) 4.2.4 (Ubuntu 4.2.4-3ubuntu4) */
 +
@@ -5566,20 +5560,18 @@ Index: binutils-2.18/bfd/bfd_stdint.h
 +#endif
 +
 +#endif /* GCC_GENERATED_STDINT_H */
-Index: binutils-2.18/bfd/configure
-===================================================================
---- binutils-2.18.orig/bfd/configure	2007-08-28 22:19:51.000000000 +0200
-+++ binutils-2.18/bfd/configure	2008-11-25 13:48:42.000000000 +0100
-@@ -2994,7 +2994,7 @@
+--- a/bfd/configure
++++ b/bfd/configure
+@@ -2994,7 +2994,7 @@ fi
  
  # Define the identity of the package.
   PACKAGE=bfd
 - VERSION=2.18
-+ VERSION=2.18.atmel.1.0.0.buildroot.1
++ VERSION=2.18.atmel.1.0.1.buildroot.1
  
  
  cat >>confdefs.h <<_ACEOF
-@@ -19041,6 +19041,7 @@
+@@ -19041,6 +19041,7 @@ do
      bfd_efi_app_ia64_vec)	tb="$tb efi-app-ia64.lo pepigen.lo cofflink.lo"; target_size=64 ;;
      bfd_elf32_am33lin_vec)	tb="$tb elf32-am33lin.lo elf32.lo $elf" ;;
      bfd_elf32_avr_vec)		tb="$tb elf32-avr.lo elf32.lo $elf" ;;
@@ -5587,10 +5579,8 @@ Index: binutils-2.18/bfd/configure
      bfd_elf32_bfin_vec)		tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
      bfd_elf32_bfinfdpic_vec)	tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
      bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.lo elf32.lo $elf" ;;
-Index: binutils-2.18/bfd/doc/bfd.h
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ binutils-2.18/bfd/doc/bfd.h	2008-11-25 13:31:32.000000000 +0100
+--- /dev/null
++++ b/bfd/doc/bfd.h
 @@ -0,0 +1,5493 @@
 +/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
 +   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
@@ -11085,10 +11075,8 @@ Index: binutils-2.18/bfd/doc/bfd.h
 +}
 +#endif
 +#endif
-Index: binutils-2.18/bfd/doc/libbfd.h
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ binutils-2.18/bfd/doc/libbfd.h	2008-11-25 13:31:32.000000000 +0100
+--- /dev/null
++++ b/bfd/doc/libbfd.h
 @@ -0,0 +1,2074 @@
 +/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
 +   generated from "libbfd-in.h", "init.c", "libbfd.c", "bfdio.c", 
@@ -13164,10 +13152,8 @@ Index: binutils-2.18/bfd/doc/libbfd.h
 +/* Extracted from elf.c.  */
 +struct elf_internal_shdr *bfd_elf_find_section (bfd *abfd, char *name);
 +
-Index: binutils-2.18/bfd/doc/libcoff.h
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ binutils-2.18/bfd/doc/libcoff.h	2008-11-25 13:31:32.000000000 +0100
+--- /dev/null
++++ b/bfd/doc/libcoff.h
 @@ -0,0 +1,936 @@
 +/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
 +   generated from "libcoff-in.h" and "coffcode.h".
@@ -14105,11 +14091,9 @@ Index: binutils-2.18/bfd/doc/libcoff.h
 +#define bfd_coff_final_link_postscript(a,p) \
 +  ((coff_backend_info (a)->_bfd_coff_final_link_postscript) (a, p))
 +
-Index: binutils-2.18/bfd/libbfd.h
-===================================================================
---- binutils-2.18.orig/bfd/libbfd.h	2007-08-06 21:59:37.000000000 +0200
-+++ binutils-2.18/bfd/libbfd.h	2008-11-25 13:31:32.000000000 +0100
-@@ -1601,6 +1601,48 @@
+--- a/bfd/libbfd.h
++++ b/bfd/libbfd.h
+@@ -1601,6 +1601,48 @@ static const char *const bfd_reloc_code_
    "BFD_RELOC_AVR_LDI",
    "BFD_RELOC_AVR_6",
    "BFD_RELOC_AVR_6_ADIW",
@@ -14158,15 +14142,13 @@ Index: binutils-2.18/bfd/libbfd.h
    "BFD_RELOC_390_12",
    "BFD_RELOC_390_GOT12",
    "BFD_RELOC_390_PLT32",
-Index: binutils-2.18/bfd/libtool
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ binutils-2.18/bfd/libtool	2008-11-25 13:31:32.000000000 +0100
+--- /dev/null
++++ b/bfd/libtool
 @@ -0,0 +1,7871 @@
 +#! /bin/bash
 +
 +# libtool - Provide generalized library-building support services.
-+# Generated automatically by config.status (bfd) 2.18.atmel.1.0.0
++# Generated automatically by config.status (bfd) 2.18.atmel.1.0.1
 +# Libtool was configured on host hcegtvedt:
 +# NOTE: Changes made to this file will be lost: look at ltmain.sh.
 +#
@@ -22034,11 +22016,9 @@ Index: binutils-2.18/bfd/libtool
 +# sh-indentation:2
 +# End:
 +# vi:sw=2
-Index: binutils-2.18/bfd/Makefile.in
-===================================================================
---- binutils-2.18.orig/bfd/Makefile.in	2007-08-28 22:20:12.000000000 +0200
-+++ binutils-2.18/bfd/Makefile.in	2008-11-25 13:31:32.000000000 +0100
-@@ -312,6 +312,7 @@
+--- a/bfd/Makefile.in
++++ b/bfd/Makefile.in
+@@ -312,6 +312,7 @@ ALL_MACHINES = \
  	cpu-arc.lo \
  	cpu-arm.lo \
  	cpu-avr.lo \
@@ -22046,7 +22026,7 @@ Index: binutils-2.18/bfd/Makefile.in
  	cpu-bfin.lo \
  	cpu-cr16.lo \
  	cpu-cr16c.lo \
-@@ -493,6 +494,7 @@
+@@ -493,6 +494,7 @@ BFD32_BACKENDS = \
  	elf32-arc.lo \
  	elf32-arm.lo \
  	elf32-avr.lo \
@@ -22054,7 +22034,7 @@ Index: binutils-2.18/bfd/Makefile.in
  	elf32-bfin.lo \
  	elf32-cr16.lo \
  	elf32-cr16c.lo \
-@@ -1908,6 +1910,10 @@
+@@ -1908,6 +1910,10 @@ elf32-cr16.lo: elf32-cr16.c $(INCDIR)/fi
    $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h elf-bfd.h \
    $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
    $(INCDIR)/elf/cr16.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
@@ -22065,10 +22045,8 @@ Index: binutils-2.18/bfd/Makefile.in
  elf32-cr16c.lo: elf32-cr16c.c $(INCDIR)/filenames.h \
    $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/cr16c.h \
    $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
-Index: binutils-2.18/bfd/po/Makefile.in
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ binutils-2.18/bfd/po/Makefile.in	2008-11-25 13:31:32.000000000 +0100
+--- /dev/null
++++ b/bfd/po/Makefile.in
 @@ -0,0 +1,297 @@
 +# Makefile for program source directory in GNU NLS utilities package.
 +# Copyright (C) 1995, 1996, 1997 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
@@ -22080,7 +22058,7 @@ Index: binutils-2.18/bfd/po/Makefile.in
 +# Please note that the actual code is *not* freely available.
 +
 +PACKAGE = bfd
-+VERSION = 2.18.atmel.1.0.0.buildroot.1
++VERSION = 2.18.atmel.1.0.1.buildroot.1
 +
 +SHELL = /bin/sh
 +
@@ -22367,11 +22345,9 @@ Index: binutils-2.18/bfd/po/Makefile.in
 +# Tell versions [3.59,3.63) of GNU make not to export all variables.
 +# Otherwise a system limit (for SysV at least) may be exceeded.
 +.NOEXPORT:
-Index: binutils-2.18/binutils/Makefile.in
-===================================================================
---- binutils-2.18.orig/binutils/Makefile.in	2007-08-06 22:29:53.000000000 +0200
-+++ binutils-2.18/binutils/Makefile.in	2008-11-25 13:31:32.000000000 +0100
-@@ -1327,7 +1327,7 @@
+--- a/binutils/Makefile.in
++++ b/binutils/Makefile.in
+@@ -1327,7 +1327,7 @@ readelf.o: readelf.c sysdep.h $(INCDIR)/
    $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h dwarf.h \
    $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
    $(INCDIR)/elf/h8.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/alpha.h \
@@ -22380,11 +22356,9 @@ Index: binutils-2.18/binutils/Makefile.in
    $(INCDIR)/elf/bfin.h $(INCDIR)/elf/cris.h $(INCDIR)/elf/crx.h \
    $(INCDIR)/elf/d10v.h $(INCDIR)/elf/d30v.h $(INCDIR)/elf/dlx.h \
    $(INCDIR)/elf/fr30.h $(INCDIR)/elf/frv.h $(INCDIR)/elf/hppa.h \
-Index: binutils-2.18/ld/Makefile.in
-===================================================================
---- binutils-2.18.orig/ld/Makefile.in	2007-08-06 22:29:54.000000000 +0200
-+++ binutils-2.18/ld/Makefile.in	2008-11-25 13:31:32.000000000 +0100
-@@ -384,7 +384,34 @@
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -384,7 +384,34 @@ ALL_EMULATIONS = \
  	eavr3.o \
  	eavr4.o \
  	eavr5.o \
@@ -22420,7 +22394,7 @@ Index: binutils-2.18/ld/Makefile.in
  	ecoff_i860.o \
  	ecoff_sparc.o \
  	eelf32_spu.o \
-@@ -1448,6 +1475,114 @@
+@@ -1448,6 +1475,114 @@ eavr6.c: $(srcdir)/emulparams/avr6.sh $(
    $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
    ${GEN_DEPENDS}
  	${GENSCRIPTS} avr6 "$(tdir_avr2)"
@@ -22535,7 +22509,7 @@ Index: binutils-2.18/ld/Makefile.in
  ecoff_i860.c: $(srcdir)/emulparams/coff_i860.sh \
    $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i860coff.sc ${GEN_DEPENDS}
  	${GENSCRIPTS} coff_i860 "$(tdir_coff_i860)"
-@@ -2679,7 +2814,9 @@
+@@ -2679,7 +2814,9 @@ install-exec-local: ld-new$(EXEEXT)
  	  || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
  	fi
  
@@ -22546,17 +22520,13 @@ Index: binutils-2.18/ld/Makefile.in
  	$(mkinstalldirs) $(DESTDIR)$(scriptdir)/ldscripts
  	for f in ldscripts/*; do \
  	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
-Index: binutils-2.18/libiberty/required-list
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ binutils-2.18/libiberty/required-list	2008-11-25 13:31:32.000000000 +0100
+--- /dev/null
++++ b/libiberty/required-list
 @@ -0,0 +1 @@
 +./regex.o ./cplus-dem.o ./cp-demangle.o ./md5.o ./alloca.o ./argv.o ./choose-temp.o ./concat.o ./cp-demint.o ./dyn-string.o ./fdmatch.o ./fibheap.o ./filename_cmp.o ./floatformat.o ./fnmatch.o ./fopen_unlocked.o ./getopt.o ./getopt1.o ./getpwd.o ./getruntime.o ./hashtab.o ./hex.o ./lbasename.o ./lrealpath.o ./make-relative-prefix.o ./make-temp-file.o ./objalloc.o ./obstack.o ./partition.o ./pexecute.o ./physmem.o ./pex-common.o ./pex-one.o ./pex-unix.o ./safe-ctype.o ./sort.o ./spaces.o ./splay-tree.o ./strerror.o ./strsignal.o ./unlink-if-ordinary.o ./xatexit.o ./xexit.o ./xmalloc.o ./xmemdup.o ./xstrdup.o ./xstrerror.o ./xstrndup.o
-Index: binutils-2.18/opcodes/configure
-===================================================================
---- binutils-2.18.orig/opcodes/configure	2007-08-06 22:29:45.000000000 +0200
-+++ binutils-2.18/opcodes/configure	2008-11-25 13:52:36.000000000 +0100
-@@ -11418,6 +11418,7 @@
+--- a/opcodes/configure
++++ b/opcodes/configure
+@@ -11418,6 +11418,7 @@ if test x${all_targets} = xfalse ; then
  	bfd_arc_arch)		ta="$ta arc-dis.lo arc-opc.lo arc-ext.lo" ;;
  	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
  	bfd_avr_arch)		ta="$ta avr-dis.lo" ;;
@@ -22564,7 +22534,7 @@ Index: binutils-2.18/opcodes/configure
  	bfd_bfin_arch)		ta="$ta bfin-dis.lo" ;;
  	bfd_cr16_arch)    	ta="$ta cr16-dis.lo cr16-opc.lo" ;;
  	bfd_cris_arch)		ta="$ta cris-dis.lo cris-opc.lo cgen-bitset.lo" ;;
-@@ -11476,7 +11477,7 @@
+@@ -11476,7 +11477,7 @@ if test x${all_targets} = xfalse ; then
  				ta="$ta sh64-dis.lo sh64-opc.lo"
  				archdefs="$archdefs -DINCLUDE_SHMEDIA"
  				break;;
@@ -22573,11 +22543,9 @@ Index: binutils-2.18/opcodes/configure
  	  done
  				ta="$ta sh-dis.lo cgen-bitset.lo" ;;
  	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
-Index: binutils-2.18/opcodes/Makefile.in
-===================================================================
---- binutils-2.18.orig/opcodes/Makefile.in	2007-08-06 22:21:34.000000000 +0200
-+++ binutils-2.18/opcodes/Makefile.in	2008-11-25 13:31:32.000000000 +0100
-@@ -257,6 +257,7 @@
+--- a/opcodes/Makefile.in
++++ b/opcodes/Makefile.in
+@@ -257,6 +257,7 @@ LIBIBERTY = ../libiberty/libiberty.a
  # Header files.
  HFILES = \
  	cgen-ops.h cgen-types.h \
@@ -22585,7 +22553,7 @@ Index: binutils-2.18/opcodes/Makefile.in
  	fr30-desc.h fr30-opc.h \
  	frv-desc.h frv-opc.h \
  	h8500-opc.h \
-@@ -291,6 +292,9 @@
+@@ -291,6 +292,9 @@ CFILES = \
  	arc-ext.c \
  	arm-dis.c \
  	avr-dis.c \
@@ -22595,7 +22563,7 @@ Index: binutils-2.18/opcodes/Makefile.in
  	bfin-dis.c \
  	cgen-asm.c \
  	cgen-bitset.c \
-@@ -445,6 +449,9 @@
+@@ -445,6 +449,9 @@ ALL_MACHINES = \
  	arc-ext.lo \
  	arm-dis.lo \
  	avr-dis.lo \
@@ -22605,7 +22573,7 @@ Index: binutils-2.18/opcodes/Makefile.in
  	bfin-dis.lo \
  	cgen-asm.lo \
  	cgen-bitset.lo \
-@@ -1225,6 +1232,15 @@
+@@ -1225,6 +1232,15 @@ avr-dis.lo: avr-dis.c sysdep.h config.h 
    $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
    opintl.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
    $(INCDIR)/opcode/avr.h

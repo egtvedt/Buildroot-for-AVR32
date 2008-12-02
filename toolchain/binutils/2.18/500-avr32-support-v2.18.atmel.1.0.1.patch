@@ -1,6 +1,5 @@
-diff -Nrup binutils-2.18/bfd/archures.c binutils-2.18.atmel.1.0.0/bfd/archures.c
---- binutils-2.18/bfd/archures.c	2007-08-06 21:59:14.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/bfd/archures.c	2008-11-25 09:35:23.000000000 +0100
+--- a/bfd/archures.c
++++ b/bfd/archures.c
 @@ -346,6 +346,11 @@ DESCRIPTION
  .#define bfd_mach_avr4		4
  .#define bfd_mach_avr5		5
@@ -29,9 +28,8 @@ diff -Nrup binutils-2.18/bfd/archures.c binutils-2.18.atmel.1.0.0/bfd/archures.c
      &bfd_bfin_arch,
      &bfd_cr16_arch,
      &bfd_cr16c_arch,
-diff -Nrup binutils-2.18/bfd/config.bfd binutils-2.18.atmel.1.0.0/bfd/config.bfd
---- binutils-2.18/bfd/config.bfd	2007-08-28 19:19:33.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/bfd/config.bfd	2008-11-25 09:35:23.000000000 +0100
+--- a/bfd/config.bfd
++++ b/bfd/config.bfd
 @@ -335,6 +335,10 @@ case "${targ}" in
      targ_underscore=yes
      ;;
@@ -43,15 +41,14 @@ diff -Nrup binutils-2.18/bfd/config.bfd binutils-2.18.atmel.1.0.0/bfd/config.bfd
    c30-*-*aout* | tic30-*-*aout*)
      targ_defvec=tic30_aout_vec
      ;;
-diff -Nrup binutils-2.18/bfd/configure.in binutils-2.18.atmel.1.0.0/bfd/configure.in
---- binutils-2.18/bfd/configure.in	2007-08-28 22:19:56.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/bfd/configure.in	2008-11-25 09:35:24.000000000 +0100
+--- a/bfd/configure.in
++++ b/bfd/configure.in
 @@ -8,7 +8,7 @@ AC_CONFIG_SRCDIR([libbfd.c])
  AC_CANONICAL_TARGET
  AC_ISC_POSIX
  
 -AM_INIT_AUTOMAKE(bfd, 2.18)
-+AM_INIT_AUTOMAKE(bfd, 2.18.atmel.1.0.0.buildroot.1)
++AM_INIT_AUTOMAKE(bfd, 2.18.atmel.1.0.1.buildroot.1)
  
  dnl These must be called before AM_PROG_LIBTOOL, because it may want
  dnl to call AC_CHECK_PROG.
@@ -63,9 +60,8 @@ diff -Nrup binutils-2.18/bfd/configure.in binutils-2.18.atmel.1.0.0/bfd/configur
      bfd_elf32_bfin_vec)		tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
      bfd_elf32_bfinfdpic_vec)	tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
      bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.lo elf32.lo $elf" ;;
-diff -Nrup binutils-2.18/bfd/cpu-avr32.c binutils-2.18.atmel.1.0.0/bfd/cpu-avr32.c
---- binutils-2.18/bfd/cpu-avr32.c	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/bfd/cpu-avr32.c	2008-11-25 09:35:23.000000000 +0100
+--- /dev/null
++++ b/bfd/cpu-avr32.c
 @@ -0,0 +1,51 @@
 +/* BFD library support routines for AVR32.
 +   Copyright 2003-2006 Atmel Corporation.
@@ -118,9 +114,8 @@ diff -Nrup binutils-2.18/bfd/cpu-avr32.c binutils-2.18.atmel.1.0.0/bfd/cpu-avr32
 +
 +const bfd_arch_info_type bfd_avr32_arch =
 +  N(bfd_mach_avr32_ap, "avr32", TRUE, &cpu_info[0]);
-diff -Nrup binutils-2.18/bfd/elf32-avr32.c binutils-2.18.atmel.1.0.0/bfd/elf32-avr32.c
---- binutils-2.18/bfd/elf32-avr32.c	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/bfd/elf32-avr32.c	2008-11-25 09:35:24.000000000 +0100
+--- /dev/null
++++ b/bfd/elf32-avr32.c
 @@ -0,0 +1,3915 @@
 +/* AVR32-specific support for 32-bit ELF.
 +   Copyright 2003-2006 Atmel Corporation.
@@ -4037,9 +4032,8 @@ diff -Nrup binutils-2.18/bfd/elf32-avr32.c binutils-2.18.atmel.1.0.0/bfd/elf32-a
 +#define elf_backend_got_header_size	AVR32_GOT_HEADER_SIZE
 +
 +#include "elf32-target.h"
-diff -Nrup binutils-2.18/bfd/elf32-avr32.h binutils-2.18.atmel.1.0.0/bfd/elf32-avr32.h
---- binutils-2.18/bfd/elf32-avr32.h	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/bfd/elf32-avr32.h	2008-11-25 09:35:24.000000000 +0100
+--- /dev/null
++++ b/bfd/elf32-avr32.h
 @@ -0,0 +1,23 @@
 +/* AVR32-specific support for 32-bit ELF.
 +   Copyright 2007 Atmel Corporation.
@@ -4064,9 +4058,8 @@ diff -Nrup binutils-2.18/bfd/elf32-avr32.h binutils-2.18.atmel.1.0.0/bfd/elf32-a
 +
 +void bfd_elf32_avr32_set_options(struct bfd_link_info *info,
 +				 int direct_data_refs);
-diff -Nrup binutils-2.18/bfd/elf-bfd.h binutils-2.18.atmel.1.0.0/bfd/elf-bfd.h
---- binutils-2.18/bfd/elf-bfd.h	2007-08-06 21:59:22.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/bfd/elf-bfd.h	2008-11-25 09:35:24.000000000 +0100
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
 @@ -1400,6 +1400,10 @@ struct elf_obj_tdata
       find_nearest_line.  */
    struct mips_elf_find_line *find_line_info;
@@ -4078,9 +4071,8 @@ diff -Nrup binutils-2.18/bfd/elf-bfd.h binutils-2.18.atmel.1.0.0/bfd/elf-bfd.h
    /* A place to stash dwarf1 info for this bfd.  */
    struct dwarf1_debug *dwarf1_find_line_info;
  
-diff -Nrup binutils-2.18/bfd/Makefile.am binutils-2.18.atmel.1.0.0/bfd/Makefile.am
---- binutils-2.18/bfd/Makefile.am	2007-08-28 22:20:14.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/bfd/Makefile.am	2008-11-25 09:35:23.000000000 +0100
+--- a/bfd/Makefile.am
++++ b/bfd/Makefile.am
 @@ -63,6 +63,7 @@ ALL_MACHINES = \
  	cpu-arc.lo \
  	cpu-arm.lo \
@@ -4108,9 +4100,8 @@ diff -Nrup binutils-2.18/bfd/Makefile.am binutils-2.18.atmel.1.0.0/bfd/Makefile.
  elf32-cr16c.lo: elf32-cr16c.c $(INCDIR)/filenames.h \
    $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/cr16c.h \
    $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
-diff -Nrup binutils-2.18/bfd/reloc.c binutils-2.18.atmel.1.0.0/bfd/reloc.c
---- binutils-2.18/bfd/reloc.c	2007-08-06 21:59:40.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/bfd/reloc.c	2008-11-25 09:35:24.000000000 +0100
+--- a/bfd/reloc.c
++++ b/bfd/reloc.c
 @@ -3948,6 +3948,131 @@ ENUMDOC
    instructions
  
@@ -4243,9 +4234,8 @@ diff -Nrup binutils-2.18/bfd/reloc.c binutils-2.18.atmel.1.0.0/bfd/reloc.c
    BFD_RELOC_390_12
  ENUMDOC
     Direct 12 bit.
-diff -Nrup binutils-2.18/bfd/targets.c binutils-2.18.atmel.1.0.0/bfd/targets.c
---- binutils-2.18/bfd/targets.c	2007-08-06 21:59:42.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/bfd/targets.c	2008-11-25 09:35:23.000000000 +0100
+--- a/bfd/targets.c
++++ b/bfd/targets.c
 @@ -564,6 +564,7 @@ extern const bfd_target bfd_efi_app_ia32
  extern const bfd_target bfd_efi_app_x86_64_vec;
  extern const bfd_target bfd_efi_app_ia64_vec;
@@ -4262,9 +4252,8 @@ diff -Nrup binutils-2.18/bfd/targets.c binutils-2.18.atmel.1.0.0/bfd/targets.c
  	&bfd_elf32_bfin_vec,
  	&bfd_elf32_bfinfdpic_vec,
  
-diff -Nrup binutils-2.18/binutils/Makefile.am binutils-2.18.atmel.1.0.0/binutils/Makefile.am
---- binutils-2.18/binutils/Makefile.am	2007-08-06 21:55:08.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/binutils/Makefile.am	2008-11-25 09:35:16.000000000 +0100
+--- a/binutils/Makefile.am
++++ b/binutils/Makefile.am
 @@ -577,7 +577,7 @@ readelf.o: readelf.c sysdep.h $(INCDIR)/
    $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h dwarf.h \
    $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
@@ -4274,9 +4263,8 @@ diff -Nrup binutils-2.18/binutils/Makefile.am binutils-2.18.atmel.1.0.0/binutils
    $(INCDIR)/elf/bfin.h $(INCDIR)/elf/cris.h $(INCDIR)/elf/crx.h \
    $(INCDIR)/elf/d10v.h $(INCDIR)/elf/d30v.h $(INCDIR)/elf/dlx.h \
    $(INCDIR)/elf/fr30.h $(INCDIR)/elf/frv.h $(INCDIR)/elf/hppa.h \
-diff -Nrup binutils-2.18/binutils/readelf.c binutils-2.18.atmel.1.0.0/binutils/readelf.c
---- binutils-2.18/binutils/readelf.c	2007-08-28 19:19:34.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/binutils/readelf.c	2008-11-25 09:35:16.000000000 +0100
+--- a/binutils/readelf.c
++++ b/binutils/readelf.c
 @@ -21,7 +21,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
@@ -4339,9 +4327,8 @@ diff -Nrup binutils-2.18/binutils/readelf.c binutils-2.18.atmel.1.0.0/binutils/r
      case EM_CRIS:		return "Axis Communications 32-bit embedded processor";
      case EM_JAVELIN:		return "Infineon Technologies 32-bit embedded cpu";
      case EM_FIREPATH:		return "Element 14 64-bit DSP processor";
-diff -Nrup binutils-2.18/gas/as.c binutils-2.18.atmel.1.0.0/gas/as.c
---- binutils-2.18/gas/as.c	2007-08-28 19:19:35.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/gas/as.c	2008-11-25 09:35:07.000000000 +0100
+--- a/gas/as.c
++++ b/gas/as.c
 @@ -441,10 +441,10 @@ parse_args (int * pargc, char *** pargv)
         the end of the preceeding line so that it is simpler to
         selectively add and remove lines from this list.  */
@@ -4384,9 +4371,8 @@ diff -Nrup binutils-2.18/gas/as.c binutils-2.18.atmel.1.0.0/gas/as.c
  
    input_scrub_end ();
  
-diff -Nrup binutils-2.18/gas/config/bfin-aux.h binutils-2.18.atmel.1.0.0/gas/config/bfin-aux.h
---- binutils-2.18/gas/config/bfin-aux.h	2007-08-06 21:59:51.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/gas/config/bfin-aux.h	2008-11-25 09:35:06.000000000 +0100
+--- a/gas/config/bfin-aux.h
++++ b/gas/config/bfin-aux.h
 @@ -1,151 +1,151 @@
 -/* bfin-aux.h ADI Blackfin Header file for gas
 -   Copyright 2005, 2007
@@ -4690,10 +4676,9 @@ diff -Nrup binutils-2.18/gas/config/bfin-aux.h binutils-2.18.atmel.1.0.0/gas/con
 +
 +INSTR_T
 +bfin_gen_multi_instr (INSTR_T dsp32, INSTR_T dsp16_grp1, INSTR_T dsp16_grp2);
-diff -Nrup binutils-2.18/gas/config/tc-avr32.c binutils-2.18.atmel.1.0.0/gas/config/tc-avr32.c
---- binutils-2.18/gas/config/tc-avr32.c	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/config/tc-avr32.c	2008-11-25 09:35:06.000000000 +0100
-@@ -0,0 +1,4800 @@
+--- /dev/null
++++ b/gas/config/tc-avr32.c
+@@ -0,0 +1,4806 @@
 +/* Assembler implementation for AVR32.
 +   Copyright 2003-2006 Atmel Corporation.
 +
@@ -8824,6 +8809,12 @@ diff -Nrup binutils-2.18/gas/config/tc-avr32.c binutils-2.18.atmel.1.0.0/gas/con
 +      if (fixP->fx_done)
 +	value += fx_offset;
 +
++      /* For hosts with longs bigger than 32-bits make sure that the top
++         bits of a 32-bit negative value read in by the parser are set,
++         so that the correct comparisons are made.  */
++      if (value & 0x80000000)
++        value |= (-1L << 31);
++
 +      switch (fixP->fx_r_type)
 +	{
 +	case BFD_RELOC_32:
@@ -9494,9 +9485,8 @@ diff -Nrup binutils-2.18/gas/config/tc-avr32.c binutils-2.18.atmel.1.0.0/gas/con
 +
 +/* vim: syntax=c sw=2
 + */
-diff -Nrup binutils-2.18/gas/config/tc-avr32.h binutils-2.18.atmel.1.0.0/gas/config/tc-avr32.h
---- binutils-2.18/gas/config/tc-avr32.h	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/config/tc-avr32.h	2008-11-25 09:35:06.000000000 +0100
+--- /dev/null
++++ b/gas/config/tc-avr32.h
 @@ -0,0 +1,325 @@
 +/* Assembler definitions for AVR32.
 +   Copyright 2003-2006 Atmel Corporation.
@@ -9823,9 +9813,8 @@ diff -Nrup binutils-2.18/gas/config/tc-avr32.h binutils-2.18.atmel.1.0.0/gas/con
 +      (fixP)->tc_fix_data.max = 0;		\
 +    }						\
 +  while (0)
-diff -Nrup binutils-2.18/gas/configure.tgt binutils-2.18.atmel.1.0.0/gas/configure.tgt
---- binutils-2.18/gas/configure.tgt	2007-08-28 19:19:36.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/gas/configure.tgt	2008-11-25 09:35:08.000000000 +0100
+--- a/gas/configure.tgt
++++ b/gas/configure.tgt
 @@ -33,6 +33,7 @@ case ${cpu} in
    am33_2.0)		cpu_type=mn10300 endian=little ;;
    arm*be|arm*b)		cpu_type=arm endian=big ;;
@@ -9844,9 +9833,8 @@ diff -Nrup binutils-2.18/gas/configure.tgt binutils-2.18.atmel.1.0.0/gas/configu
    cris-*-linux-* | crisv32-*-linux-*)
  					fmt=multi em=linux ;;
    cris-*-* | crisv32-*-*)		fmt=multi ;;
-diff -Nrup binutils-2.18/gas/doc/all.texi binutils-2.18.atmel.1.0.0/gas/doc/all.texi
---- binutils-2.18/gas/doc/all.texi	2007-08-06 22:00:07.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/gas/doc/all.texi	2008-11-25 09:34:24.000000000 +0100
+--- a/gas/doc/all.texi
++++ b/gas/doc/all.texi
 @@ -30,6 +30,7 @@
  @set ARC
  @set ARM
@@ -9855,9 +9843,8 @@ diff -Nrup binutils-2.18/gas/doc/all.texi binutils-2.18.atmel.1.0.0/gas/doc/all.
  @set BFIN
  @set CR16
  @set CRIS
-diff -Nrup binutils-2.18/gas/doc/as.texinfo binutils-2.18.atmel.1.0.0/gas/doc/as.texinfo
---- binutils-2.18/gas/doc/as.texinfo	2007-08-28 19:19:37.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/gas/doc/as.texinfo	2008-11-25 09:34:24.000000000 +0100
+--- a/gas/doc/as.texinfo
++++ b/gas/doc/as.texinfo
 @@ -6353,6 +6353,9 @@ subject, see the hardware manufacturer's
  @ifset AVR
  * AVR-Dependent::               AVR Dependent Features
@@ -9879,9 +9866,8 @@ diff -Nrup binutils-2.18/gas/doc/as.texinfo binutils-2.18.atmel.1.0.0/gas/doc/as
  @ifset BFIN
  @include c-bfin.texi
  @end ifset
-diff -Nrup binutils-2.18/gas/doc/c-avr32.texi binutils-2.18.atmel.1.0.0/gas/doc/c-avr32.texi
---- binutils-2.18/gas/doc/c-avr32.texi	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/doc/c-avr32.texi	2008-11-25 09:34:24.000000000 +0100
+--- /dev/null
++++ b/gas/doc/c-avr32.texi
 @@ -0,0 +1,247 @@
 +@c Copyright 2005, 2006
 +@c Atmel Corporation
@@ -10130,9 +10116,8 @@ diff -Nrup binutils-2.18/gas/doc/c-avr32.texi binutils-2.18.atmel.1.0.0/gas/doc/
 +deleting any superfluous constant pool- and GOT-entries.
 +
 +@end table
-diff -Nrup binutils-2.18/gas/doc/Makefile.am binutils-2.18.atmel.1.0.0/gas/doc/Makefile.am
---- binutils-2.18/gas/doc/Makefile.am	2007-08-13 03:51:51.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/gas/doc/Makefile.am	2008-11-25 09:34:24.000000000 +0100
+--- a/gas/doc/Makefile.am
++++ b/gas/doc/Makefile.am
 @@ -33,6 +33,7 @@ CPU_DOCS = \
  	c-arc.texi \
  	c-arm.texi \
@@ -10141,9 +10126,8 @@ diff -Nrup binutils-2.18/gas/doc/Makefile.am binutils-2.18.atmel.1.0.0/gas/doc/M
  	c-bfin.texi \
  	c-cr16.texi \
  	c-d10v.texi \
-diff -Nrup binutils-2.18/gas/Makefile.am binutils-2.18.atmel.1.0.0/gas/Makefile.am
---- binutils-2.18/gas/Makefile.am	2007-08-28 19:19:35.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/gas/Makefile.am	2008-11-25 09:35:08.000000000 +0100
+--- a/gas/Makefile.am
++++ b/gas/Makefile.am
 @@ -47,6 +47,7 @@ CPU_TYPES = \
  	arc \
  	arm \
@@ -10202,9 +10186,8 @@ diff -Nrup binutils-2.18/gas/Makefile.am binutils-2.18.atmel.1.0.0/gas/Makefile.
  DEP_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
    $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
  DEP_cris_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/aliases.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/aliases.d
---- binutils-2.18/gas/testsuite/gas/avr32/aliases.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/aliases.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/aliases.d
 @@ -0,0 +1,19 @@
 +#as:
 +#objdump: -dr
@@ -10225,9 +10208,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/aliases.d binutils-2.18.atmel.1
 +   c:	b8 80      [ \t]+st\.b r12\[0x0\],r0
 +   e:	b8 00      [ \t]+st\.h r12\[0x0\],r0
 +  10:	99 00      [ \t]+st\.w r12\[0x0\],r0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/aliases.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/aliases.s
---- binutils-2.18/gas/testsuite/gas/avr32/aliases.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/aliases.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/aliases.s
 @@ -0,0 +1,14 @@
 +	.text
 +	.global	ld_nodisp
@@ -10243,9 +10225,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/aliases.s binutils-2.18.atmel.1
 +	st.b	r12, r0
 +	st.h	r12, r0
 +	st.w	r12, r0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/allinsn.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/allinsn.d
---- binutils-2.18/gas/testsuite/gas/avr32/allinsn.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/allinsn.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/allinsn.d
 @@ -0,0 +1,2987 @@
 +#as:
 +#objdump: -dr
@@ -13234,18 +13215,16 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/allinsn.d binutils-2.18.atmel.1
 + *[0-9a-f]*:	fc 15 00 01     movh r5,0x1
 + *[0-9a-f]*:	fc 1c 7f ff     movh r12,0x7fff
 +
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/allinsn.exp binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/allinsn.exp
---- binutils-2.18/gas/testsuite/gas/avr32/allinsn.exp	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/allinsn.exp	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/allinsn.exp
 @@ -0,0 +1,5 @@
 +# AVR32 assembler testsuite. -*- Tcl -*-
 +
 +if [istarget avr32-*-*] {
 +    run_dump_test "allinsn"
 +}
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/allinsn.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/allinsn.s
---- binutils-2.18/gas/testsuite/gas/avr32/allinsn.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/allinsn.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/allinsn.s
 @@ -0,0 +1,3330 @@
 + .data
 +foodata: .word 42
@@ -16577,9 +16556,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/allinsn.s binutils-2.18.atmel.1
 +	movh	r12, 32767
 +	
 +		
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/avr32.exp binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/avr32.exp
---- binutils-2.18/gas/testsuite/gas/avr32/avr32.exp	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/avr32.exp	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/avr32.exp
 @@ -0,0 +1,23 @@
 +# AVR32 assembler testsuite. -*- Tcl -*-
 +
@@ -16604,9 +16582,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/avr32.exp binutils-2.18.atmel.1
 +    run_dump_test "symdiff"
 +    run_dump_test "symdiff_linkrelax"
 +}
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call_nopic.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call_nopic.d
---- binutils-2.18/gas/testsuite/gas/avr32/call_nopic.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call_nopic.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/call_nopic.d
 @@ -0,0 +1,36 @@
 +#source: call.s
 +#as:
@@ -16644,9 +16621,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call_nopic.d binutils-2.18.atme
 +
 +00000000 <different_section>:
 +   0:	e2 c0 00 00 	sub r0,r1,0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call_nopic_linkrelax.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call_nopic_linkrelax.d
---- binutils-2.18/gas/testsuite/gas/avr32/call_nopic_linkrelax.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call_nopic_linkrelax.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/call_nopic_linkrelax.d
 @@ -0,0 +1,43 @@
 +#source: call.s
 +#as: --linkrelax
@@ -16691,9 +16667,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call_nopic_linkrelax.d binutils
 +
 +00000000 <different_section>:
 +   0:	e2 c0 00 00 	sub r0,r1,0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call_pic.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call_pic.d
---- binutils-2.18/gas/testsuite/gas/avr32/call_pic.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call_pic.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/call_pic.d
 @@ -0,0 +1,36 @@
 +#source: call.s
 +#as: --pic
@@ -16731,9 +16706,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call_pic.d binutils-2.18.atmel.
 +
 +00000000 <different_section>:
 +   0:	e2 c0 00 00 	sub r0,r1,0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call_pic_linkrelax.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call_pic_linkrelax.d
---- binutils-2.18/gas/testsuite/gas/avr32/call_pic_linkrelax.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call_pic_linkrelax.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/call_pic_linkrelax.d
 @@ -0,0 +1,47 @@
 +#source: call.s
 +#as: --pic --linkrelax
@@ -16782,9 +16756,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call_pic_linkrelax.d binutils-2
 +
 +00000000 <different_section>:
 +   0:	e2 c0 00 00 	sub r0,r1,0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call.s
---- binutils-2.18/gas/testsuite/gas/avr32/call.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/call.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/call.s
 @@ -0,0 +1,30 @@
 +
 +	.text
@@ -16816,9 +16789,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/call.s binutils-2.18.atmel.1.0.
 +	.section .text.init,"ax",@progbits
 +different_section:
 +	sub	r0, r1, 0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/dwarf2.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/dwarf2.d
---- binutils-2.18/gas/testsuite/gas/avr32/dwarf2.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/dwarf2.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/dwarf2.d
 @@ -0,0 +1,42 @@
 +#readelf: -wl
 +#name: dwarf2
@@ -16862,9 +16834,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/dwarf2.d binutils-2.18.atmel.1.
 +  Special opcode .*: advance Address by 10 to 0xe and Line by 1 to 112
 +  Advance PC by 530 to 220
 +  Extended opcode 1: End of Sequence
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/dwarf2.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/dwarf2.s
---- binutils-2.18/gas/testsuite/gas/avr32/dwarf2.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/dwarf2.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/dwarf2.s
 @@ -0,0 +1,67 @@
 +# Source file used to test DWARF2 information for AVR32.
 +
@@ -16933,9 +16904,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/dwarf2.s binutils-2.18.atmel.1.
 +	.uleb128 0, 0
 +
 +	.byte	0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/fpinsn.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/fpinsn.d
---- binutils-2.18/gas/testsuite/gas/avr32/fpinsn.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/fpinsn.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/fpinsn.d
 @@ -0,0 +1,271 @@
 +#as:
 +#objdump: -dr
@@ -17208,9 +17178,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/fpinsn.d binutils-2.18.atmel.1.
 + *[0-9a-f]*:	e1 a8 00 f0 	cop cp0,cr0,cr15,cr0,0x10
 + *[0-9a-f]*:	e1 a8 08 70 	cop cp0,cr8,cr7,cr0,0x10
 + *[0-9a-f]*:	e1 a8 06 80 	cop cp0,cr6,cr8,cr0,0x10
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/fpinsn.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/fpinsn.s
---- binutils-2.18/gas/testsuite/gas/avr32/fpinsn.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/fpinsn.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/fpinsn.s
 @@ -0,0 +1,266 @@
 +
 +	.text
@@ -17478,9 +17447,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/fpinsn.s binutils-2.18.atmel.1.
 +	fcastd.s fr0, fr15
 +	fcastd.s fr8, fr7
 +	fcastd.s fr6, fr8
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/hwrd-lwrd.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/hwrd-lwrd.d
---- binutils-2.18/gas/testsuite/gas/avr32/hwrd-lwrd.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/hwrd-lwrd.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/hwrd-lwrd.d
 @@ -0,0 +1,47 @@
 +#as:
 +#objdump: -dr
@@ -17529,9 +17497,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/hwrd-lwrd.d binutils-2.18.atmel
 +			58: R_AVR32_LO16	\.text\+0x60
 +  5c:	e0 10 00 00 	andl r0,0x0
 +			5c: R_AVR32_LO16	extsym1
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/hwrd-lwrd.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/hwrd-lwrd.s
---- binutils-2.18/gas/testsuite/gas/avr32/hwrd-lwrd.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/hwrd-lwrd.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/hwrd-lwrd.s
 @@ -0,0 +1,39 @@
 +
 +        .equ    sym1, 0x12345678
@@ -17572,9 +17539,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/hwrd-lwrd.s binutils-2.18.atmel
 +        andl	r0, lo(extsym1)
 +
 +sym2:
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/jmptable.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/jmptable.d
---- binutils-2.18/gas/testsuite/gas/avr32/jmptable.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/jmptable.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/jmptable.d
 @@ -0,0 +1,20 @@
 +#source: jmptable.s
 +#as:
@@ -17596,9 +17562,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/jmptable.d binutils-2.18.atmel.
 +  12:	d7 03       	nop
 +  14:	d7 03       	nop
 +  16:	d7 03       	nop
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/jmptable_linkrelax.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/jmptable_linkrelax.d
---- binutils-2.18/gas/testsuite/gas/avr32/jmptable_linkrelax.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/jmptable_linkrelax.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/jmptable_linkrelax.d
 @@ -0,0 +1,25 @@
 +#source: jmptable.s
 +#as: --linkrelax
@@ -17625,9 +17590,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/jmptable_linkrelax.d binutils-2
 +  12:	d7 03       	nop
 +  14:	d7 03       	nop
 +  16:	d7 03       	nop
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/jmptable.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/jmptable.s
---- binutils-2.18/gas/testsuite/gas/avr32/jmptable.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/jmptable.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/jmptable.s
 @@ -0,0 +1,14 @@
 +
 +	.text
@@ -17643,9 +17607,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/jmptable.s binutils-2.18.atmel.
 +1:	nop
 +2:	nop
 +3:	nop
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda_nopic.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda_nopic.d
---- binutils-2.18/gas/testsuite/gas/avr32/lda_nopic.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda_nopic.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/lda_nopic.d
 @@ -0,0 +1,32 @@
 +#source: lda.s
 +#as:
@@ -17679,9 +17642,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda_nopic.d binutils-2.18.atmel
 +	...
 +0001001c <toofar_positive>:
 +   1001c:	fe ce 00 00 	sub lr,pc,0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda_nopic_linkrelax.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda_nopic_linkrelax.d
---- binutils-2.18/gas/testsuite/gas/avr32/lda_nopic_linkrelax.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda_nopic_linkrelax.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/lda_nopic_linkrelax.d
 @@ -0,0 +1,41 @@
 +#source: lda.s
 +#as: --linkrelax
@@ -17724,9 +17686,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda_nopic_linkrelax.d binutils-
 +	\.\.\.
 +00010020 <toofar_positive>:
 +   10020:	fe ce 00 00 	sub lr,pc,0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda_pic.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda_pic.d
---- binutils-2.18/gas/testsuite/gas/avr32/lda_pic.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda_pic.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/lda_pic.d
 @@ -0,0 +1,32 @@
 +#source: lda.s
 +#as: --pic
@@ -17760,9 +17721,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda_pic.d binutils-2.18.atmel.1
 +	...
 +00010014 <toofar_positive>:
 +   10014:	fe ce 00 00 	sub lr,pc,0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda_pic_linkrelax.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda_pic_linkrelax.d
---- binutils-2.18/gas/testsuite/gas/avr32/lda_pic_linkrelax.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda_pic_linkrelax.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/lda_pic_linkrelax.d
 @@ -0,0 +1,40 @@
 +#source: lda.s
 +#as: --pic --linkrelax
@@ -17804,9 +17764,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda_pic_linkrelax.d binutils-2.
 +	...
 +0001002c <toofar_positive>:
 +   1002c:	fe ce 00 00 	sub lr,pc,0
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda.s
---- binutils-2.18/gas/testsuite/gas/avr32/lda.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/lda.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/lda.s
 @@ -0,0 +1,30 @@
 +
 +	.text
@@ -17838,9 +17797,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/lda.s binutils-2.18.atmel.1.0.0
 +	.data
 +different_section:
 +	.long	0x12345678
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pcrel.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pcrel.d
---- binutils-2.18/gas/testsuite/gas/avr32/pcrel.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pcrel.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/pcrel.d
 @@ -0,0 +1,64 @@
 +#as:
 +#objdump: -dr
@@ -17906,9 +17864,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pcrel.d binutils-2.18.atmel.1.0
 +   e:	d7 03       	nop
 +  10:	e0 a0 .. .. 	rcall [0-9a-f]+ <.*>
 +			10: R_AVR32_22H_PCREL	\.text\+0xc
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pcrel.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pcrel.s
---- binutils-2.18/gas/testsuite/gas/avr32/pcrel.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pcrel.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/pcrel.s
 @@ -0,0 +1,57 @@
 +
 +        .text
@@ -17967,9 +17924,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pcrel.s binutils-2.18.atmel.1.0
 +	rcall	test_rcall2
 +	nop
 +	rcall	test_rcall2
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pico.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pico.d
---- binutils-2.18/gas/testsuite/gas/avr32/pico.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pico.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/pico.d
 @@ -0,0 +1,149 @@
 +#as:
 +#objdump: -dr
@@ -18120,9 +18076,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pico.d binutils-2.18.atmel.1.0.
 + *[0-9a-f]*:	ed a0 33 01 	stcm\.w cp1,--r0,cr8
 + *[0-9a-f]*:	ed a7 33 80 	stcm\.w cp1,--r7,cr15
 + *[0-9a-f]*:	ed a8 33 7f 	stcm\.w cp1,--r8,cr8-cr14
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pico.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pico.s
---- binutils-2.18/gas/testsuite/gas/avr32/pico.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pico.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/pico.s
 @@ -0,0 +1,144 @@
 +
 +	.text
@@ -18268,9 +18223,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pico.s binutils-2.18.atmel.1.0.
 +	picostm.w	--r0, coeff1_a
 +	picostm.w	--r7, config
 +	picostm.w	--r8, coeff1_a-vmu2_out
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pic_reloc.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pic_reloc.d
---- binutils-2.18/gas/testsuite/gas/avr32/pic_reloc.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pic_reloc.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/pic_reloc.d
 @@ -0,0 +1,27 @@
 +#as:
 +#objdump: -dr
@@ -18299,9 +18253,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pic_reloc.d binutils-2.18.atmel
 +			18: R_AVR32_GOT16S	\.L4
 +  1c:	ec f0 00 00 	ld.w r0,r6\[0\]
 +			1c: R_AVR32_GOT16S	ldw_got
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pic_reloc.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pic_reloc.s
---- binutils-2.18/gas/testsuite/gas/avr32/pic_reloc.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/pic_reloc.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/pic_reloc.s
 @@ -0,0 +1,18 @@
 +
 +	.text
@@ -18321,9 +18274,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/pic_reloc.s binutils-2.18.atmel
 +	ld.w	r0,r6[.L4@got]
 +	ld.w	r0,r6[ldw_got@got]
 +.L4:
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/symdiff.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/symdiff.d
---- binutils-2.18/gas/testsuite/gas/avr32/symdiff.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/symdiff.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/symdiff.d
 @@ -0,0 +1,24 @@
 +#source: symdiff.s
 +#as:
@@ -18349,9 +18301,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/symdiff.d binutils-2.18.atmel.1
 +   a:	d7 03       	nop
 +   c:	d7 03       	nop
 +   e:	d7 03       	nop
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/symdiff_linkrelax.d binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/symdiff_linkrelax.d
---- binutils-2.18/gas/testsuite/gas/avr32/symdiff_linkrelax.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/symdiff_linkrelax.d	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/symdiff_linkrelax.d
 @@ -0,0 +1,28 @@
 +#source: symdiff.s
 +#as: --linkrelax
@@ -18381,9 +18332,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/symdiff_linkrelax.d binutils-2.
 +   a:	d7 03       	nop
 +   c:	d7 03       	nop
 +   e:	d7 03       	nop
-diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/symdiff.s binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/symdiff.s
---- binutils-2.18/gas/testsuite/gas/avr32/symdiff.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/gas/testsuite/gas/avr32/symdiff.s	2008-11-25 09:34:33.000000000 +0100
+--- /dev/null
++++ b/gas/testsuite/gas/avr32/symdiff.s
 @@ -0,0 +1,19 @@
 +
 +	.text
@@ -18404,9 +18354,8 @@ diff -Nrup binutils-2.18/gas/testsuite/gas/avr32/symdiff.s binutils-2.18.atmel.1
 +.L1:	nop
 +	nop
 +.L2:	nop
-diff -Nrup binutils-2.18/gas/write.c binutils-2.18.atmel.1.0.0/gas/write.c
---- binutils-2.18/gas/write.c	2007-08-06 21:59:51.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/gas/write.c	2008-11-25 09:35:07.000000000 +0100
+--- a/gas/write.c
++++ b/gas/write.c
 @@ -1955,6 +1955,10 @@ relax_frag (segT segment, fragS *fragP, 
  
  #endif /* defined (TC_GENERIC_RELAX_TABLE)  */
@@ -18450,9 +18399,8 @@ diff -Nrup binutils-2.18/gas/write.c binutils-2.18.atmel.1.0.0/gas/write.c
  
  		  if (fragP->fr_subtype != 0)
  		    {
-diff -Nrup binutils-2.18/include/dis-asm.h binutils-2.18.atmel.1.0.0/include/dis-asm.h
---- binutils-2.18/include/dis-asm.h	2007-08-06 21:59:46.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/include/dis-asm.h	2008-11-25 09:35:10.000000000 +0100
+--- a/include/dis-asm.h
++++ b/include/dis-asm.h
 @@ -204,13 +204,14 @@ typedef struct disassemble_info
  
  } disassemble_info;
@@ -18497,9 +18445,8 @@ diff -Nrup binutils-2.18/include/dis-asm.h binutils-2.18.atmel.1.0.0/include/dis
  /* This block of definitions is for particular callers who read instructions
     into a buffer before calling the instruction decoder.  */
  
-diff -Nrup binutils-2.18/include/elf/avr32.h binutils-2.18.atmel.1.0.0/include/elf/avr32.h
---- binutils-2.18/include/elf/avr32.h	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/include/elf/avr32.h	2008-11-25 09:35:08.000000000 +0100
+--- /dev/null
++++ b/include/elf/avr32.h
 @@ -0,0 +1,98 @@
 +/* AVR32 ELF support for BFD.
 +   Copyright 2003-2006 Atmel Corporation.
@@ -18599,9 +18546,8 @@ diff -Nrup binutils-2.18/include/elf/avr32.h binutils-2.18.atmel.1.0.0/include/e
 +
 +/* The total size in bytes of the Global Offset Table */
 +#define DT_AVR32_GOTSZ			0x70000001
-diff -Nrup binutils-2.18/include/elf/common.h binutils-2.18.atmel.1.0.0/include/elf/common.h
---- binutils-2.18/include/elf/common.h	2007-08-28 19:19:40.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/include/elf/common.h	2008-11-25 09:35:08.000000000 +0100
+--- a/include/elf/common.h
++++ b/include/elf/common.h
 @@ -259,6 +259,9 @@
  /* V850 backend magic number.  Written in the absense of an ABI.  */
  #define EM_CYGNUS_V850		0x9080
@@ -18612,9 +18558,8 @@ diff -Nrup binutils-2.18/include/elf/common.h binutils-2.18.atmel.1.0.0/include/
  /* old S/390 backend magic number. Written in the absence of an ABI.  */
  #define EM_S390_OLD		0xa390
  
-diff -Nrup binutils-2.18/ld/configdoc.texi binutils-2.18.atmel.1.0.0/ld/configdoc.texi
---- binutils-2.18/ld/configdoc.texi	2007-08-06 22:39:30.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/ld/configdoc.texi	2008-11-25 09:34:23.000000000 +0100
+--- a/ld/configdoc.texi
++++ b/ld/configdoc.texi
 @@ -7,6 +7,7 @@
  @set H8300
  @set HPPA
@@ -18623,9 +18568,8 @@ diff -Nrup binutils-2.18/ld/configdoc.texi binutils-2.18.atmel.1.0.0/ld/configdo
  @set M68HC11
  @set MMIX
  @set MSP430
-diff -Nrup binutils-2.18/ld/configure.tgt binutils-2.18.atmel.1.0.0/ld/configure.tgt
---- binutils-2.18/ld/configure.tgt	2007-08-28 19:19:42.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/ld/configure.tgt	2008-11-25 09:34:23.000000000 +0100
+--- a/ld/configure.tgt
++++ b/ld/configure.tgt
 @@ -109,6 +109,9 @@ xscale-*-elf)		targ_emul=armelf
  avr-*-*)		targ_emul=avr2
  			targ_extra_emuls="avr1 avr3 avr4 avr5 avr6"
@@ -18636,9 +18580,8 @@ diff -Nrup binutils-2.18/ld/configure.tgt binutils-2.18.atmel.1.0.0/ld/configure
  bfin-*-elf)		targ_emul=elf32bfin;
  			targ_extra_emuls="elf32bfinfd"
  			targ_extra_libpath=$targ_extra_emuls
-diff -Nrup binutils-2.18/ld/emulparams/avr32elf.sh binutils-2.18.atmel.1.0.0/ld/emulparams/avr32elf.sh
---- binutils-2.18/ld/emulparams/avr32elf.sh	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/emulparams/avr32elf.sh	2008-11-25 09:34:21.000000000 +0100
+--- /dev/null
++++ b/ld/emulparams/avr32elf.sh
 @@ -0,0 +1,163 @@
 +# This script is called from ld/genscript.sh 
 +# There is a difference on how 'bash' and POSIX handles 
@@ -18803,9 +18746,8 @@ diff -Nrup binutils-2.18/ld/emulparams/avr32elf.sh binutils-2.18.atmel.1.0.0/ld/
 +    ;;
 +
 +esac
-diff -Nrup binutils-2.18/ld/emulparams/avr32linux.sh binutils-2.18.atmel.1.0.0/ld/emulparams/avr32linux.sh
---- binutils-2.18/ld/emulparams/avr32linux.sh	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/emulparams/avr32linux.sh	2008-11-25 09:34:21.000000000 +0100
+--- /dev/null
++++ b/ld/emulparams/avr32linux.sh
 @@ -0,0 +1,14 @@
 +ARCH=avr32
 +SCRIPT_NAME=elf
@@ -18821,9 +18763,8 @@ diff -Nrup binutils-2.18/ld/emulparams/avr32linux.sh binutils-2.18.atmel.1.0.0/l
 +# essential for uClinux.  We don't use those .s* sections on AVR32
 +# anyway, so it shouldn't hurt for regular Linux either...
 +NO_SMALL_DATA=yes
-diff -Nrup binutils-2.18/ld/emultempl/avr32elf.em binutils-2.18.atmel.1.0.0/ld/emultempl/avr32elf.em
---- binutils-2.18/ld/emultempl/avr32elf.em	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/emultempl/avr32elf.em	2008-11-25 09:33:59.000000000 +0100
+--- /dev/null
++++ b/ld/emultempl/avr32elf.em
 @@ -0,0 +1,133 @@
 +# This shell script emits a C file. -*- C -*-
 +#   Copyright (C) 2007 Atmel Corporation
@@ -18958,9 +18899,8 @@ diff -Nrup binutils-2.18/ld/emultempl/avr32elf.em binutils-2.18.atmel.1.0.0/ld/e
 +#
 +LDEMUL_AFTER_OPEN=avr32_elf_after_open
 +LDEMUL_GET_SCRIPT=avr32_elf_get_script
-diff -Nrup binutils-2.18/ld/ld.info binutils-2.18.atmel.1.0.0/ld/ld.info
---- binutils-2.18/ld/ld.info	2007-08-28 22:24:23.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/ld/ld.info	2008-11-25 09:34:23.000000000 +0100
+--- a/ld/ld.info
++++ b/ld/ld.info
 @@ -4347,6 +4347,8 @@ not listed.
  
  * ARM::				`ld' and the ARM family
@@ -19036,9 +18976,8 @@ diff -Nrup binutils-2.18/ld/ld.info binutils-2.18.atmel.1.0.0/ld/ld.info
  Node: HPPA ELF32193760
  Node: MMIX195383
  Node: MSP430196600
-diff -Nrup binutils-2.18/ld/ld.texinfo binutils-2.18.atmel.1.0.0/ld/ld.texinfo
---- binutils-2.18/ld/ld.texinfo	2007-08-24 16:01:53.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/ld/ld.texinfo	2008-11-25 09:34:23.000000000 +0100
+--- a/ld/ld.texinfo
++++ b/ld/ld.texinfo
 @@ -21,6 +21,7 @@
  @set UsesEnvVars
  @set GENERIC
@@ -19120,9 +19059,8 @@ diff -Nrup binutils-2.18/ld/ld.texinfo binutils-2.18.atmel.1.0.0/ld/ld.texinfo
  @ifset HPPA
  @ifclear GENERIC
  @raisesections
-diff -Nrup binutils-2.18/ld/Makefile.am binutils-2.18.atmel.1.0.0/ld/Makefile.am
---- binutils-2.18/ld/Makefile.am	2007-08-06 22:00:17.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/ld/Makefile.am	2008-11-25 09:34:23.000000000 +0100
+--- a/ld/Makefile.am
++++ b/ld/Makefile.am
 @@ -137,7 +137,34 @@ ALL_EMULATIONS = \
  	eavr3.o \
  	eavr4.o \
@@ -19285,9 +19223,8 @@ diff -Nrup binutils-2.18/ld/Makefile.am binutils-2.18.atmel.1.0.0/ld/Makefile.am
  	$(mkinstalldirs) $(DESTDIR)$(scriptdir)/ldscripts
  	for f in ldscripts/*; do \
  	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
-diff -Nrup binutils-2.18/ld/scripttempl/elf_xip.sc binutils-2.18.atmel.1.0.0/ld/scripttempl/elf_xip.sc
---- binutils-2.18/ld/scripttempl/elf_xip.sc	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/scripttempl/elf_xip.sc	2008-11-25 09:34:22.000000000 +0100
+--- /dev/null
++++ b/ld/scripttempl/elf_xip.sc
 @@ -0,0 +1,456 @@
 +#
 +# Unusual variables checked by this code:
@@ -19745,9 +19682,8 @@ diff -Nrup binutils-2.18/ld/scripttempl/elf_xip.sc binutils-2.18.atmel.1.0.0/ld/
 +  ${RELOCATING+${STACKNOTE}}
 +}
 +EOF
-diff -Nrup binutils-2.18/ld/testsuite/ld-auto-import/client.c binutils-2.18.atmel.1.0.0/ld/testsuite/ld-auto-import/client.c
---- binutils-2.18/ld/testsuite/ld-auto-import/client.c	2002-12-18 17:05:10.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/testsuite/ld-auto-import/client.c	2008-11-25 09:34:18.000000000 +0100
+--- a/ld/testsuite/ld-auto-import/client.c
++++ b/ld/testsuite/ld-auto-import/client.c
 @@ -1,55 +1,55 @@
 -#include <stdio.h>
 -
@@ -19859,9 +19795,8 @@ diff -Nrup binutils-2.18/ld/testsuite/ld-auto-import/client.c binutils-2.18.atme
 +
 +  return 0;
 +}
-diff -Nrup binutils-2.18/ld/testsuite/ld-auto-import/dll.c binutils-2.18.atmel.1.0.0/ld/testsuite/ld-auto-import/dll.c
---- binutils-2.18/ld/testsuite/ld-auto-import/dll.c	2002-12-18 17:05:10.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/testsuite/ld-auto-import/dll.c	2008-11-25 09:34:18.000000000 +0100
+--- a/ld/testsuite/ld-auto-import/dll.c
++++ b/ld/testsuite/ld-auto-import/dll.c
 @@ -1,20 +1,20 @@
 -int var = 123;
 -int foo = 121;
@@ -19903,9 +19838,8 @@ diff -Nrup binutils-2.18/ld/testsuite/ld-auto-import/dll.c binutils-2.18.atmel.1
 +}
 +
 +void (* func_ptr)(void) = print_foo;
-diff -Nrup binutils-2.18/ld/testsuite/ld-avr32/avr32.exp binutils-2.18.atmel.1.0.0/ld/testsuite/ld-avr32/avr32.exp
---- binutils-2.18/ld/testsuite/ld-avr32/avr32.exp	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/testsuite/ld-avr32/avr32.exp	2008-11-25 09:34:10.000000000 +0100
+--- /dev/null
++++ b/ld/testsuite/ld-avr32/avr32.exp
 @@ -0,0 +1,25 @@
 +# Expect script for AVR32 ELF linker tests.
 +#   Copyright 2004-2006 Atmel Corporation.
@@ -19932,9 +19866,8 @@ diff -Nrup binutils-2.18/ld/testsuite/ld-avr32/avr32.exp binutils-2.18.atmel.1.0
 +}
 +
 +run_dump_test "pcrel"
-diff -Nrup binutils-2.18/ld/testsuite/ld-avr32/pcrel.d binutils-2.18.atmel.1.0.0/ld/testsuite/ld-avr32/pcrel.d
---- binutils-2.18/ld/testsuite/ld-avr32/pcrel.d	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/testsuite/ld-avr32/pcrel.d	2008-11-25 09:34:10.000000000 +0100
+--- /dev/null
++++ b/ld/testsuite/ld-avr32/pcrel.d
 @@ -0,0 +1,74 @@
 +#name: AVR32 ELF PC-relative external relocs
 +#source: symbols.s
@@ -20010,9 +19943,8 @@ diff -Nrup binutils-2.18/ld/testsuite/ld-avr32/pcrel.d binutils-2.18.atmel.1.0.0
 +Disassembly of section \.text\.pcrel21:
 +a0200000 <extsym21>:
 +a0200000:	d7 03       	nop
-diff -Nrup binutils-2.18/ld/testsuite/ld-avr32/pcrel.ld binutils-2.18.atmel.1.0.0/ld/testsuite/ld-avr32/pcrel.ld
---- binutils-2.18/ld/testsuite/ld-avr32/pcrel.ld	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/testsuite/ld-avr32/pcrel.ld	2008-11-25 09:34:10.000000000 +0100
+--- /dev/null
++++ b/ld/testsuite/ld-avr32/pcrel.ld
 @@ -0,0 +1,23 @@
 +ENTRY(_start)
 +SECTIONS
@@ -20037,9 +19969,8 @@ diff -Nrup binutils-2.18/ld/testsuite/ld-avr32/pcrel.ld binutils-2.18.atmel.1.0.
 +		*(.text.pcrel21)
 +	}
 +}
-diff -Nrup binutils-2.18/ld/testsuite/ld-avr32/symbols.s binutils-2.18.atmel.1.0.0/ld/testsuite/ld-avr32/symbols.s
---- binutils-2.18/ld/testsuite/ld-avr32/symbols.s	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/ld/testsuite/ld-avr32/symbols.s	2008-11-25 09:34:10.000000000 +0100
+--- /dev/null
++++ b/ld/testsuite/ld-avr32/symbols.s
 @@ -0,0 +1,20 @@
 +	.text
 +	.global _start
@@ -20061,9 +19992,8 @@ diff -Nrup binutils-2.18/ld/testsuite/ld-avr32/symbols.s binutils-2.18.atmel.1.0
 +	.global extsym21
 +extsym21:
 +	nop
-diff -Nrup binutils-2.18/opcodes/avr32-asm.c binutils-2.18.atmel.1.0.0/opcodes/avr32-asm.c
---- binutils-2.18/opcodes/avr32-asm.c	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/opcodes/avr32-asm.c	2008-11-25 09:35:28.000000000 +0100
+--- /dev/null
++++ b/opcodes/avr32-asm.c
 @@ -0,0 +1,264 @@
 +/* Assembler interface for AVR32.
 +   Copyright 2005, 2006 Atmel Corporation.
@@ -20329,9 +20259,8 @@ diff -Nrup binutils-2.18/opcodes/avr32-asm.c binutils-2.18.atmel.1.0.0/opcodes/a
 +    { cr_table,  AVR32_NR_CPREGS,  NULL, N_("coprocessor register expected") },
 +  };
 +#endif
-diff -Nrup binutils-2.18/opcodes/avr32-asm.h binutils-2.18.atmel.1.0.0/opcodes/avr32-asm.h
---- binutils-2.18/opcodes/avr32-asm.h	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/opcodes/avr32-asm.h	2008-11-25 09:35:28.000000000 +0100
+--- /dev/null
++++ b/opcodes/avr32-asm.h
 @@ -0,0 +1,42 @@
 +/* Assembler interface for AVR32.
 +   Copyright 2005, 2006 Atmel Corporation.
@@ -20375,9 +20304,8 @@ diff -Nrup binutils-2.18/opcodes/avr32-asm.h binutils-2.18.atmel.1.0.0/opcodes/a
 +avr32_make_regmask8(unsigned long regmask16, unsigned long *regmask8);
 +
 +#endif /* __OPCODES_AVR32_ASM_H */
-diff -Nrup binutils-2.18/opcodes/avr32-dis.c binutils-2.18.atmel.1.0.0/opcodes/avr32-dis.c
---- binutils-2.18/opcodes/avr32-dis.c	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/opcodes/avr32-dis.c	2008-11-25 09:35:28.000000000 +0100
+--- /dev/null
++++ b/opcodes/avr32-dis.c
 @@ -0,0 +1,891 @@
 +/* Print AVR32 instructions for GDB and objdump.
 +   Copyright 2005, 2006 Atmel Corporation.
@@ -21270,9 +21198,8 @@ diff -Nrup binutils-2.18/opcodes/avr32-dis.c binutils-2.18.atmel.1.0.0/opcodes/a
 +{
 +
 +}
-diff -Nrup binutils-2.18/opcodes/avr32-opc.c binutils-2.18.atmel.1.0.0/opcodes/avr32-opc.c
---- binutils-2.18/opcodes/avr32-opc.c	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/opcodes/avr32-opc.c	2008-11-25 09:35:28.000000000 +0100
+--- /dev/null
++++ b/opcodes/avr32-opc.c
 @@ -0,0 +1,6932 @@
 +/* Opcode tables for AVR32.
 +   Copyright 2005, 2006 Atmel Corporation.
@@ -28206,9 +28133,8 @@ diff -Nrup binutils-2.18/opcodes/avr32-opc.c binutils-2.18.atmel.1.0.0/opcodes/a
 +#undef NORMAL_MNEMONIC
 +#undef ALIAS_MNEMONIC
 +#undef FP_MNEMONIC
-diff -Nrup binutils-2.18/opcodes/avr32-opc.h binutils-2.18.atmel.1.0.0/opcodes/avr32-opc.h
---- binutils-2.18/opcodes/avr32-opc.h	1970-01-01 01:00:00.000000000 +0100
-+++ binutils-2.18.atmel.1.0.0/opcodes/avr32-opc.h	2008-11-25 09:35:28.000000000 +0100
+--- /dev/null
++++ b/opcodes/avr32-opc.h
 @@ -0,0 +1,2370 @@
 +/* Opcode tables for AVR32.
 +   Copyright 2005, 2006 Atmel Corporation.
@@ -30580,9 +30506,8 @@ diff -Nrup binutils-2.18/opcodes/avr32-opc.h binutils-2.18.atmel.1.0.0/opcodes/a
 +    AVR32_PARSER__END_
 +  };
 +#define AVR32_NR_PARSERS AVR32_PARSER__END_
-diff -Nrup binutils-2.18/opcodes/configure.in binutils-2.18.atmel.1.0.0/opcodes/configure.in
---- binutils-2.18/opcodes/configure.in	2007-08-06 21:58:39.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/opcodes/configure.in	2008-11-25 09:35:27.000000000 +0100
+--- a/opcodes/configure.in
++++ b/opcodes/configure.in
 @@ -158,6 +158,7 @@ if test x${all_targets} = xfalse ; then
  	bfd_arc_arch)		ta="$ta arc-dis.lo arc-opc.lo arc-ext.lo" ;;
  	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
@@ -30600,9 +30525,8 @@ diff -Nrup binutils-2.18/opcodes/configure.in binutils-2.18.atmel.1.0.0/opcodes/
  	  done
  				ta="$ta sh-dis.lo cgen-bitset.lo" ;;
  	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
-diff -Nrup binutils-2.18/opcodes/disassemble.c binutils-2.18.atmel.1.0.0/opcodes/disassemble.c
---- binutils-2.18/opcodes/disassemble.c	2007-08-06 21:58:40.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/opcodes/disassemble.c	2008-11-25 09:35:28.000000000 +0100
+--- a/opcodes/disassemble.c
++++ b/opcodes/disassemble.c
 @@ -27,6 +27,7 @@
  #define ARCH_arc
  #define ARCH_arm
@@ -30645,9 +30569,8 @@ diff -Nrup binutils-2.18/opcodes/disassemble.c binutils-2.18.atmel.1.0.0/opcodes
  
    return;
  }
-diff -Nrup binutils-2.18/opcodes/Makefile.am binutils-2.18.atmel.1.0.0/opcodes/Makefile.am
---- binutils-2.18/opcodes/Makefile.am	2007-08-06 21:58:37.000000000 +0200
-+++ binutils-2.18.atmel.1.0.0/opcodes/Makefile.am	2008-11-25 09:35:28.000000000 +0100
+--- a/opcodes/Makefile.am
++++ b/opcodes/Makefile.am
 @@ -30,6 +30,7 @@ LIBIBERTY = ../libiberty/libiberty.a
  # Header files.
  HFILES = \
