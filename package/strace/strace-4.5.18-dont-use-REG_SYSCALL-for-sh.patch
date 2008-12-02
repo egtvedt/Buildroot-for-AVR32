@@ -1,6 +1,8 @@
---- strace/process.c
-+++ strace/process.c
-@@ -2663,7 +2663,6 @@ const struct xlat struct_user_offsets[] 
+Index: strace-4.5.18/process.c
+===================================================================
+--- strace-4.5.18.orig/process.c	2008-11-27 07:59:15.000000000 +0100
++++ strace-4.5.18/process.c	2008-11-27 07:59:16.000000000 +0100
+@@ -2752,7 +2752,6 @@
         { 4*REG_GBR,            "4*REG_GBR"                             },
         { 4*REG_MACH,           "4*REG_MACH"                            },
         { 4*REG_MACL,           "4*REG_MACL"                            },
