@@ -3,7 +3,7 @@
 # alsa-utils
 #
 #############################################################
-ALSA_UTILS_VERSION:=1.0.14
+ALSA_UTILS_VERSION:=1.0.18
 ALSA_UTILS_SOURCE:=alsa-utils-$(ALSA_UTILS_VERSION).tar.bz2
 ALSA_UTILS_SITE:=ftp://ftp.alsa-project.org/pub/utils
 ALSA_UTILS_DIR:=$(BUILD_DIR)/alsa-utils-$(ALSA_UTILS_VERSION)
@@ -71,7 +71,7 @@ $(TARGET_DIR)/$(ALSA_UTILS_TARGET_BINARY): $(ALSA_UTILS_DIR)/$(ALSA_UTILS_BINARY
 	fi
 	touch -c $@
 
-alsa-utils: uclibc alsa-lib ncurses $(TARGET_DIR)/$(ALSA_UTILS_TARGET_BINARY)
+alsa-utils: uclibc alsa-lib ncurses $(if $(BR2_PACKAGE_LIBINTL),libintl) $(TARGET_DIR)/$(ALSA_UTILS_TARGET_BINARY)
 
 alsa-utils-source: $(DL_DIR)/$(ALSA_UTILS_SOURCE)
 

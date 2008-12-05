@@ -17,10 +17,10 @@ tslib-source: $(DL_DIR)/$(TSLIB_SOURCE)
 $(TSLIB_DIR)/.patched: $(DL_DIR)/$(TSLIB_SOURCE)
 	$(TSLIB_CAT) $(DL_DIR)/$(TSLIB_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	toolchain/patch-kernel.sh $(TSLIB_DIR) package/tslib/ tslib\*.patch
-	touch $(TSLIB_DIR)/.patched
+	touch $@
 
 $(TSLIB_DIR)/.configured: $(TSLIB_DIR)/.patched
-	(cd $(TSLIB_DIR); rm -rf config.cache; ./autogen.sh)
+	(cd $(TSLIB_DIR); rm -rf config.cache; PATH=$(TARGET_PATH) ./autogen.sh)
 	$(CONFIG_UPDATE) $(TSLIB_DIR)
 	(cd $(TSLIB_DIR) && \
 	$(TARGET_CONFIGURE_OPTS) \
@@ -47,11 +47,11 @@ $(TSLIB_DIR)/.configured: $(TSLIB_DIR)/.patched
 	--enable-input \
 	)
 	$(SED) 's:rpl\_malloc:malloc:g' $(TSLIB_DIR)/config.h
-	touch $(TSLIB_DIR)/.configured
+	touch $@
 
 $(TSLIB_DIR)/.compiled: $(TSLIB_DIR)/.configured
 	$(MAKE) -C $(TSLIB_DIR)
-	touch $(TSLIB_DIR)/.compiled
+	touch $@
 
 $(STAGING_DIR)/usr/lib/libts.so: $(TSLIB_DIR)/.compiled
 	$(MAKE) -C $(TSLIB_DIR) \
@@ -84,7 +84,7 @@ $(TARGET_DIR)/usr/lib/libts.so: $(STAGING_DIR)/usr/lib/libts.so
 	-$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(TARGET_DIR)/usr/bin/ts_test
 	cp -dpf package/tslib/ts.conf $(TARGET_DIR)/etc/
 
-tslib: uclibc $(TARGET_DIR)/usr/lib/libts.so
+tslib: uclibc host-automake host-autoconf $(TARGET_DIR)/usr/lib/libts.so
 
 tslib-build: uclibc $(TSLIB_DIR)/.configured
 	rm -f $(TSLIB_DIR)/.compiled
