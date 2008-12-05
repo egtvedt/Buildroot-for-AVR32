@@ -52,6 +52,7 @@ $(MPLAYER_DIR)/.configured: $(MPLAYER_DIR)/.unpacked
 		--as=$(TARGET_CROSS)as \
 		--with-extraincdir=$(STAGING_DIR)/usr/include \
 		--with-extralibdir=$(STAGING_DIR)/lib \
+		--charset=US-ASCII \
 		--enable-mad \
 		$(MPLAYER_LIB_FAAD) \
 		--enable-fbdev \
