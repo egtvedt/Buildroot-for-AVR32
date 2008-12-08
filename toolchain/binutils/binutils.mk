@@ -3,12 +3,15 @@
 # build binutils for use on the host system
 #
 #############################################################
-BINUTILS_VERSION:=$(strip $(subst ",, $(BR2_BINUTILS_VERSION)))
-#"))
+BINUTILS_VERSION:=$(subst ",,$(BR2_BINUTILS_VERSION))
+#")
 
 EXTRA_BINUTILS_CONFIG_OPTIONS=$(strip $(subst ",, $(BR2_EXTRA_BINUTILS_CONFIG_OPTIONS)))
 #"))
 BINUTILS_SITE:=$(BR2_KERNEL_MIRROR)/linux/devel/binutils
+ifeq ($(BINUTILS_VERSION),2.19)
+BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
+endif
 ifeq ($(BINUTILS_VERSION),2.18)
 BINUTILS_SITE:=$(BR2_GNU_MIRROR)/binutils/
 endif
@@ -88,7 +91,7 @@ $(BINUTILS_DIR)/.unpacked: $(DL_DIR)/$(BINUTILS_SOURCE)
 	mkdir -p $(TOOL_BUILD_DIR)
 	rm -rf $(BINUTILS_DIR)
 	$(BINUTILS_CAT) $(DL_DIR)/$(BINUTILS_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
-	$(CONFIG_UPDATE) $(BINUTILS_DIR)
+	$(CONFIG_UPDATE) $(@D)
 	touch $@
 
 binutils-patched: $(BINUTILS_DIR)/.patched
@@ -106,6 +109,8 @@ $(BINUTILS_DIR1)/.configured: $(BINUTILS_DIR)/.patched
 		--build=$(GNU_HOST_NAME) \
 		--host=$(GNU_HOST_NAME) \
 		--target=$(REAL_GNU_TARGET_NAME) \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		$(BR2_CONFIGURE_DEVEL_SYSROOT) \
 		$(BR2_CONFIGURE_STAGING_SYSROOT) \
 		$(DISABLE_NLS) \
@@ -132,16 +137,17 @@ binutils: uclibc-configured $(BINUTILS_HOST_PREREQ) $(STAGING_DIR)/usr/bin/$(REA
 binutils-source: $(DL_DIR)/$(BINUTILS_SOURCE)
 
 binutils-clean:
-	rm -rf $(STAGING_DIR)/usr/bin/*{ar,as,ld,nm,objdump,ranlib,strip} \
-		$(STAGING_DIR)/usr/lib/{libiberty*,ldscripts}
 	-$(MAKE) -C $(BINUTILS_DIR1) DESTDIR=$(STAGING_DIR) \
 		tooldir=/usr build_tooldir=/usr uninstall
 	-$(MAKE) -C $(BINUTILS_DIR1) clean
+	rm -rf $(wildcard $(patsubst %,$(STAGING_DIR)/usr/bin/*%,ar as ld nm objdump ranlib strip c++filt)) \
+		$(wildcard $(patsubst %,$(STAGING_DIR)/usr/lib/%*,libiberty ldscripts))
 
 binutils-dirclean:
 	rm -rf $(BINUTILS_DIR1)
 
-
+binutils-src-dirclean:
+	rm -rf $(BINUTILS_DIR)
 
 #############################################################
 #
@@ -159,6 +165,8 @@ $(BINUTILS_DIR2)/.configured: $(BINUTILS_DIR)/.patched
 		--build=$(GNU_HOST_NAME) \
 		--host=$(REAL_GNU_TARGET_NAME) \
 		--target=$(REAL_GNU_TARGET_NAME) \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
 		$(DISABLE_NLS) \
 		$(MULTILIB) \
 		$(BINUTILS_TARGET_CONFIG_OPTIONS) \
@@ -175,20 +183,22 @@ $(TARGET_DIR)/usr/bin/ld: $(BINUTILS_DIR2)/binutils/objdump
 	$(MAKE) DESTDIR=$(TARGET_DIR) \
 		tooldir=/usr build_tooldir=/usr \
 		-C $(BINUTILS_DIR2) install
-	#rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/info \
-	#	$(TARGET_DIR)/usr/man $(TARGET_DIR)/usr/share/doc
+ifneq ($(BR2_HAVE_MANPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/man
+endif
+ifneq ($(BR2_HAVE_INFOPAGES),y)
+	rm -rf $(TARGET_DIR)/usr/info
+endif
+	rm -rf $(TARGET_DIR)/share/locale $(TARGET_DIR)/usr/share/doc
 	-$(STRIPCMD) $(TARGET_DIR)/usr/$(REAL_GNU_TARGET_NAME)/bin/* > /dev/null 2>&1
 	-$(STRIPCMD) $(TARGET_DIR)/usr/bin/* > /dev/null 2>&1
 
 binutils_target: $(BINUTILS_TARGET_PREREQ) $(TARGET_DIR)/usr/bin/ld
 
 binutils_target-clean:
-	(cd $(TARGET_DIR)/usr/bin; \
-		rm -f addr2line ar as gprof ld nm objcopy \
-		      objdump ranlib readelf size strings strip; \
-	)
-	rm -f $(TARGET_DIR)/bin/$(REAL_GNU_TARGET_NAME)*
 	-$(MAKE) -C $(BINUTILS_DIR2) clean
+	rm -f $(TARGET_DIR)/bin/$(REAL_GNU_TARGET_NAME)* \
+		$(addprefix $(TARGET_DIR)/usr/bin/, addr2line ar as gprof ld nm objcopy objdump ranlib readelf size strings strip c++filt)
 
 binutils_target-dirclean:
 	rm -rf $(BINUTILS_DIR2)
