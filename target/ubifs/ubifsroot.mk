@@ -135,7 +135,7 @@ ubifsroot-dirclean:
 # Toplevel Makefile options
 #
 #############################################################
-ifeq ($(strip $(BR2_TARGET_ROOTFS_UBIFS)),y)
+ifeq ($(BR2_TARGET_ROOTFS_UBIFS),y)
 TARGETS+=ubifsroot
 endif
 

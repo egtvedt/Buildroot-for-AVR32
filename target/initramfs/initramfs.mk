@@ -6,11 +6,13 @@
 #
 #############################################################
 
-ifeq ($(strip $(BR2_TARGET_ROOTFS_INITRAMFS)),y)
+ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS),y)
 INITRAMFS_TARGET:=$(IMAGE).initramfs_list
 else
 INITRAMFS_TARGET:= #nothing
 endif
+
+TARGETS+=$(INITRAMFS_TARGET)
 
 $(INITRAMFS_TARGET) initramfs: host-fakeroot makedevs
 	rm -f $(TARGET_DIR)/init
@@ -41,7 +43,7 @@ endif
 initramfs-source:
 
 initramfs-clean:
-ifeq ($(strip $(BR2_TARGET_ROOTFS_INITRAMFS)),y)
+ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS),y)
 	-rm -f $(INITRAMFS_TARGET)
 endif
 initramfs-dirclean:

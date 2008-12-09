@@ -4,7 +4,7 @@
 #
 #############################################################
 
-TAR_OPTS:=$(strip $(BR2_TARGET_ROOTFS_TAR_OPTIONS))
+TAR_OPTS:=$(BR2_TARGET_ROOTFS_TAR_OPTIONS)
 TAR_TARGET:=$(IMAGE).tar
 
 TAR_COMPRESSOR:=
@@ -57,10 +57,6 @@ ifneq ($(ROOTFS_TAR_COPYTO),)
 endif
 	-@rm -f $(PROJECT_BUILD_DIR)/_fakeroot.$(notdir $(TAR_TARGET))
 
-EXT2_COPYTO := $(strip $(subst ",,$(BR2_TARGET_ROOTFS_EXT2_COPYTO)))
-# "))
-
-
 tarroot-source:
 
 tarroot-clean:
@@ -72,6 +68,6 @@ tarroot-dirclean:
 # Toplevel Makefile options
 #
 #############################################################
-ifeq ($(strip $(BR2_TARGET_ROOTFS_TAR)),y)
+ifeq ($(BR2_TARGET_ROOTFS_TAR),y)
 TARGETS+=tarroot
 endif
