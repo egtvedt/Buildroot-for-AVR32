@@ -7,7 +7,7 @@ else
     ifeq ($(strip $(BR2_PACKAGE_MTD_20050122)),y)
       include package/mtd/20050122/mtd.mk
     else
-      ifeq ($(strip $(BR2_PACKAGE_MTD_SNAPSHOT)),y)
+      ifeq ($(strip $(BR2_PACKAGE_MTD_UTILS_GIT)),y)
         include package/mtd/20050122/mtd.mk
       else
         # If we are generating a JFFS2 root file system, we need mtd-utils.

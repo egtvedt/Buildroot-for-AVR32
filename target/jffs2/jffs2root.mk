@@ -4,11 +4,11 @@
 #
 #############################################################
 
-ifneq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP)),y)
+ifneq ($(BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP),y)
 JFFS2_OPTS := -e $(strip $(BR2_TARGET_ROOTFS_JFFS2_EBSIZE))
 SUMTOOL_OPTS := $(JFFS2_OPTS)
 
-ifeq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_PAD)),y)
+ifeq ($(BR2_TARGET_ROOTFS_JFFS2_PAD),y)
 ifneq ($(strip $(BR2_TARGET_ROOTFS_JFFS2_PADSIZE)),0x0)
 JFFS2_OPTS += -p $(strip $(BR2_TARGET_ROOTFS_JFFS2_PADSIZE))
 else
@@ -161,6 +161,6 @@ endif
 # Toplevel Makefile options
 #
 #############################################################
-ifeq ($(strip $(BR2_TARGET_ROOTFS_JFFS2)),y)
+ifeq ($(BR2_TARGET_ROOTFS_JFFS2),y)
 TARGETS+=jffs2root
 endif
