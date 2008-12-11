@@ -5,7 +5,7 @@
 #############################################################
 
 ifneq ($(BR2_TARGET_ROOTFS_JFFS2_READ_PARTITION_SETUP),y)
-JFFS2_OPTS := -e $(strip $(BR2_TARGET_ROOTFS_JFFS2_EBSIZE))
+JFFS2_OPTS := -e $(BR2_TARGET_ROOTFS_JFFS2_EBSIZE)
 SUMTOOL_OPTS := $(JFFS2_OPTS)
 
 ifeq ($(BR2_TARGET_ROOTFS_JFFS2_PAD),y)
