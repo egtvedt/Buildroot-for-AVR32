@@ -419,7 +419,7 @@ fi
 if ! cp -dpfr ${target_dir} ${tmpdir}; then
 	die "Could not copy root directory to temporary directory."
 fi
-if ! ${staging_dir}/bin/ldconfig -r ${tmpdir}/root; then
+if ! ${staging_dir}/sbin/ldconfig -r ${tmpdir}/root; then
 	warn "Could not run ldconfig -r '${tmpdir}/root."
 fi
 
