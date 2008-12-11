@@ -153,7 +153,7 @@ TARGET_OBJDUMP=$(TARGET_CROSS)objdump
 ifeq ($(BR2_TOOLCHAIN_EXTERNAL),y)
 TARGET_LDCONFIG=/sbin/ldconfig
 else
-TARGET_LDCONFIG=$(TARGET_CROSS)ldconfig
+TARGET_LDCONFIG=$(STAGING_DIR)/sbin/$(REAL_GNU_TARGET_NAME)-ldconfig
 endif
 ifeq ($(BR2_STRIP_strip),y)
 STRIP_DISCARD_ALL:=--discard-all
