@@ -418,6 +418,7 @@ ifeq ($(BR2_x86_core2),y)
 endif
 endif
 
+
 $(UCLIBC_DIR)/.config: $(UCLIBC_DIR)/.oldconfig
 	cp -f $(UCLIBC_DIR)/.oldconfig $(UCLIBC_DIR)/.config
 	mkdir -p $(TOOL_BUILD_DIR)/uClibc_dev/usr/include
@@ -429,7 +430,7 @@ $(UCLIBC_DIR)/.config: $(UCLIBC_DIR)/.oldconfig
 		RUNTIME_PREFIX=$(TOOL_BUILD_DIR)/uClibc_dev/ \
 		HOSTCC="$(HOSTCC)" \
 		oldconfig
-	touch $@
+	touch -c $@
 
 $(UCLIBC_DIR)/.configured: $(LINUX_HEADERS_DIR)/.configured $(UCLIBC_DIR)/.config
 	set -x && $(MAKE1) -C $(UCLIBC_DIR) \
@@ -467,7 +468,6 @@ $(UCLIBC_DIR)/lib/libc.a: $(UCLIBC_DIR)/.configured $(gcc_initial) $(LIBFLOAT_TA
 		RUNTIME_PREFIX=/ \
 		HOSTCC="$(HOSTCC)" \
 		all
-	touch -c $@
 
 uclibc-menuconfig: host-sed $(UCLIBC_DIR)/.config
 	$(MAKE1) -C $(UCLIBC_DIR) \
@@ -478,8 +478,7 @@ uclibc-menuconfig: host-sed $(UCLIBC_DIR)/.config
 		menuconfig && \
 	touch -c $(UCLIBC_DIR)/.config
 
-
-$(STAGING_DIR)/usr/lib/libc.a: $(UCLIBC_DIR)/lib/libc.a
+$(STAGING_DIR)/usr/lib/libc.a: | $(UCLIBC_DIR)/lib/libc.a
 ifneq ($(BR2_TOOLCHAIN_SYSROOT),y)
 	$(MAKE1) -C $(UCLIBC_DIR) \
 		PREFIX= \
@@ -516,19 +515,32 @@ endif
 		PREFIX=$(STAGING_DIR) \
 		HOSTCC="$(HOSTCC)" \
 		hostutils
-	if [ -f $(UCLIBC_DIR)/utils/ldd.host ]; then \
-		install -c $(UCLIBC_DIR)/utils/ldd.host $(STAGING_DIR)/usr/bin/ldd; \
-		ln -sf ldd $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-ldd; \
+	# install readelf and eventually other host-utils
+	$(INSTALL) -m0755 -D $(UCLIBC_DIR)/utils/readelf.host $(STAGING_DIR)/usr/bin/readelf
+	ln -sf readelf $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-readelf
+	ln -sf readelf $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-readelf
+	$(INSTALL) -m0755 -D $(UCLIBC_DIR)/utils/ldd.host $(STAGING_DIR)/usr/bin/ldd
+	ln -sf ldd $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-ldd
+	ln -sf ldd $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-ldd
+	$(INSTALL) -m0755 -D $(UCLIBC_DIR)/utils/ldconfig.host $(STAGING_DIR)/usr/sbin/ldconfig
+	ln -sf ldconfig $(STAGING_DIR)/usr/sbin/$(REAL_GNU_TARGET_NAME)-ldconfig
+	ln -sf ldconfig $(STAGING_DIR)/usr/sbin/$(GNU_TARGET_NAME)-ldconfig
+ifeq ($(BR2_ENABLE_LOCALE),y)
+	if [ -r $(UCLIBC_DIR)/utils/iconv.host ]; then \
+	    $(INSTALL) -m0755 -D $(UCLIBC_DIR)/utils/iconv.host $(STAGING_DIR)/usr/bin/iconv; \
+	    ln -sf iconv $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-iconv; \
+	    ln -sf iconv $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-iconv; \
 	fi
-	if [ -f $(UCLIBC_DIR)/utils/ldconfig.host ]; then \
-		install -c $(UCLIBC_DIR)/utils/ldconfig.host $(STAGING_DIR)/usr/bin/ldconfig; \
-		ln -sf ldconfig $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-ldconfig; \
-		ln -sf ldconfig $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-ldconfig; \
+	if [ -r $(UCLIBC_DIR)/utils/locale.host ]; then \
+	    $(INSTALL) -m0755 -D $(UCLIBC_DIR)/utils/locale.host $(STAGING_DIR)/usr/bin/locale; \
+	    ln -sf locale $(STAGING_DIR)/usr/bin/$(REAL_GNU_TARGET_NAME)-locale; \
+	    ln -sf locale $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-locale; \
 	fi
+endif
 	touch -c $@
 
 ifneq ($(TARGET_DIR),)
-$(TARGET_DIR)/lib/libc.so.0: $(STAGING_DIR)/usr/lib/libc.a
+$(TARGET_DIR)/lib/libc.so.0: | $(STAGING_DIR)/usr/lib/libc.a
 	$(MAKE1) -C $(UCLIBC_DIR) \
 		PREFIX=$(TARGET_DIR) \
 		DEVEL_PREFIX=/usr/ \
@@ -541,24 +553,19 @@ endif
 endif
 	touch -c $@
 
-$(TARGET_DIR)/usr/bin/ldd: $(cross_compiler)
+$(TARGET_DIR)/usr/bin/ldd: $(cross_compiler) $(TARGET_DIR)/lib/libc.so.0
 	$(MAKE1) -C $(UCLIBC_DIR) CC=$(TARGET_CROSS)gcc \
 		CPP=$(TARGET_CROSS)cpp LD=$(TARGET_CROSS)ld \
 		PREFIX=$(TARGET_DIR) utils install_utils
 ifeq ($(BR2_CROSS_TOOLCHAIN_TARGET_UTILS),y)
-	mkdir -p $(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/target_utils
-	install -c $(TARGET_DIR)/usr/bin/ldd \
+	$(INSTALL) -m0755 -D $(TARGET_DIR)/usr/bin/ldd \
 		$(STAGING_DIR)/$(REAL_GNU_TARGET_NAME)/target_utils/ldd
 endif
 	touch -c $@
 
-UCLIBC_TARGETS=$(TARGET_DIR)/lib/libc.so.0
-ifeq ($(BR2_UCLIBC_INSTALL_TEST_SUITE),y)
-UCLIBC_TARGETS+=uclibc-test
-endif
 endif
 
-uclibc: $(cross_compiler) $(STAGING_DIR)/usr/lib/libc.a $(UCLIBC_TARGETS)
+uclibc: $(cross_compiler) $(STAGING_DIR)/usr/lib/libc.a
 
 uclibc-source: $(DL_DIR)/$(UCLIBC_SOURCE)
 
@@ -577,13 +584,32 @@ uclibc-configured-source: uclibc-source
 
 uclibc-clean: uclibc-test-clean
 	-$(MAKE1) -C $(UCLIBC_DIR) clean
-	rm -f $(UCLIBC_DIR)/.config
+	$(patsubst %,rm -f %, $(wildcard $(STAGING_DIR)/usr/bin/*readelf \
+		$(STAGING_DIR)/usr/bin/*ldd \
+		$(STAGING_DIR)/usr/bin/*ldconfig \
+		$(STAGING_DIR)/usr/bin/*iconv \
+		$(STAGING_DIR)/usr/bin/*locale \
+		$(STAGING_DIR)/usr/sbin/*readelf \
+		$(STAGING_DIR)/usr/sbin/*ldd \
+		$(STAGING_DIR)/usr/sbin/*ldconfig \
+		$(STAGING_DIR)/usr/sbin/*iconv \
+		$(STAGING_DIR)/usr/sbin/*locale \
+		$(TARGET_DIR)/usr/bin/*readelf \
+		$(TARGET_DIR)/usr/bin/*ldd \
+		$(TARGET_DIR)/usr/bin/*ldconfig \
+		$(TARGET_DIR)/usr/bin/*iconv \
+		$(TARGET_DIR)/usr/bin/*locale \
+		$(TARGET_DIR)/usr/sbin/*readelf \
+		$(TARGET_DIR)/usr/sbin/*ldd \
+		$(TARGET_DIR)/usr/sbin/*ldconfig \
+		$(TARGET_DIR)/usr/sbin/*iconv \
+		$(TARGET_DIR)/usr/sbin/*locale))
+	rm -f $(UCLIBC_DIR)/.config $(UCLIBC_DIR)/.configured
 
 uclibc-dirclean: uclibc-test-dirclean
 	rm -rf $(UCLIBC_DIR)
 
-uclibc-target-utils:
-#$(TARGET_DIR)/usr/bin/ldd
+uclibc-target-utils: $(TARGET_DIR)/usr/bin/ldd
 
 uclibc-target-utils-source: $(DL_DIR)/$(UCLIBC_SOURCE)
 
@@ -611,12 +637,11 @@ uclibc-test-dirclean:
 
 #############################################################
 #
-# uClibc for the target just needs its header files
-# and whatnot installed.
+# uClibc for the target
 #
 #############################################################
 
-$(TARGET_DIR)/usr/lib/libc.a: $(STAGING_DIR)/usr/lib/libc.a
+$(TARGET_DIR)/usr/lib/libc.a: | $(STAGING_DIR)/usr/lib/libc.a
 	$(MAKE1) -C $(UCLIBC_DIR) \
 		PREFIX=$(TARGET_DIR) \
 		DEVEL_PREFIX=/usr/ \
@@ -642,10 +667,21 @@ else
 endif
 	touch -c $@
 
-uclibc_target: cross_compiler uclibc $(TARGET_DIR)/usr/lib/libc.a $(TARGET_DIR)/usr/bin/ldd
+UCLIBC_TARGETS+=$(TARGET_DIR)/lib/libc.so.0
+ifeq ($(BR2_CROSS_TOOLCHAIN_TARGET_UTILS),y)
+UCLIBC_TARGETS+=$(TARGET_DIR)/usr/bin/ldd
+endif
+ifeq ($(BR2_UCLIBC_INSTALL_TEST_SUITE),y)
+UCLIBC_TARGETS+=uclibc-test
+endif
+ifeq ($(BR2_HAVE_INCLUDES),y)
+UCLIBC_TARGETS+=$(TARGET_DIR)/usr/lib/libc.a
+endif
+
+uclibc_target: cross_compiler uclibc $(UCLIBC_TARGETS)
 
 uclibc_target-clean: uclibc-test-clean
-	rm -rf $(TARGET_DIR)/usr/include \
+	rm -rf $(TARGET_DIR)/usr/include $(UCLIBC_TARGETS) \
 		$(TARGET_DIR)/usr/lib/libc.a $(TARGET_DIR)/usr/bin/ldd
 
 uclibc_target-dirclean: uclibc-test-dirclean
