@@ -1,0 +1,5 @@
+# /etc/fstab: static file system information.
+#
+# <file system>	<mount pt>	<type>	<options>	<dump>	<pass>
+ubi0:root	/		ubifs	defaults	0	0
+mtd:root	/boot		jffs2	noauto		0	0

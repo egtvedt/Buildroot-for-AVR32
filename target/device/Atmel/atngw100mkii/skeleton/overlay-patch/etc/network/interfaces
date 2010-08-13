@@ -1,0 +1,25 @@
+# Loopback is enabled early by the startup script, but the external
+# interfaces are set up here.
+
+# eth0 is the WAN port. It's usually hooked up to a network with a DHCP
+# server on it.
+# auto eth0
+iface eth0 inet dhcp
+
+# eth1 is the LAN port. We want to provide DHCP, DNS, NAT and other
+# services on this network, so we need a static IP.
+auto eth1
+iface eth1 inet static
+	address 10.0.0.1
+	netmask 255.255.255.0
+	network 10.0.0.0
+	broadcast 10.0.0.255
+
+# Use the USB port as an additional ethernet interface. This is handy
+# for development, or for computers with no wired ethernet interface.
+auto usb0
+iface usb0 inet static
+	address 10.0.1.1
+	netmask 255.255.255.0
+	network 10.0.1.0
+	broadcast 10.0.1.255

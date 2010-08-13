@@ -1,0 +1,24 @@
+ifeq ($(BR2_TARGET_AVR32_ATNGW100MKII),y)
+UBOOT_BOARD_NAME	:= atngw100mkii
+TARGET_SKELETON_PATCH	:= $(BOARD_PATH)/skeleton
+
+# Do some dynamic modifications to the target image, possibly depending
+# on the configuration.
+.PHONY: atngw100mkii-fixups
+atngw100mkii-fixups: $(BUILD_DIR)/.root linux26
+	# These are all symlinks to /tmp by default, which is a terrible
+	# idea...
+	for d in cache lock log pcmcia run spool; do		\
+		if [ -L $(TARGET_DIR)/var/$$d ]; then		\
+			rm -f $(TARGET_DIR)/var/$$d;		\
+			mkdir $(TARGET_DIR)/var/$$d;		\
+		fi;						\
+	done
+
+ifeq ($(BR2_PACKAGE_DNSMASQ),y)
+	mkdir -p $(TARGET_DIR)/etc/dnsmasq.d
+	$(INSTALL) -m 0644 $(BOARD_PATH)/dnsmasq-board.conf $(TARGET_DIR)/etc/dnsmasq.d/50board.conf
+endif
+
+TARGETS	+= atngw100mkii-fixups
+endif

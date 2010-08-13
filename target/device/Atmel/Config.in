@@ -29,6 +29,7 @@ config BR2_BOARD_NAME
 	default	"atngw100"		if	BR2_TARGET_AVR32_ATNGW100
 	default "atngw100-base"		if	BR2_TARGET_AVR32_ATNGW100_BASE
 	default "atngw100-expanded"	if	BR2_TARGET_AVR32_ATNGW100_EXPANDED
+	default	"atngw100mkii"		if      BR2_TARGET_AVR32_ATNGW100MKII
 
 config BR2_TARGET_AT91_ADVANCED_INFO
 	bool "Remove work in progress"
