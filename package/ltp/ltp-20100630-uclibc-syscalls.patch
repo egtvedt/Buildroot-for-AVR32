@@ -1,0 +1,17 @@
+Index: ltp-20100630/testcases/kernel/syscalls/Makefile
+===================================================================
+--- ltp-20100630.orig/testcases/kernel/syscalls/Makefile	2010-08-18 14:09:48.000000000 +0700
++++ ltp-20100630/testcases/kernel/syscalls/Makefile	2010-08-18 14:18:25.000000000 +0700
+@@ -28,6 +28,12 @@
+ FILTER_OUT_DIRS		:= libevent
+ # pcllib is busted as all heck because of libtool
+ FILTER_OUT_DIRS		+= pcllib
++# uClibc doesn't have these as of 0.9.31
++FILTER_OUT_DIRS		+= clock_nanosleep sched_getaffinity
++# ustat() is deprecated and normally not enabled by uClibc
++FILTER_OUT_DIRS		+= ustat
++# Complains about undefined reference to __getpgid() on uClibc
++FILTER_OUT_DIRS		+= waitid
+ 
+ ifeq ($(wildcard $(abs_srcdir)/libevent/test/Makefile),)
+ $(warning libevent/test/Makefile does not exist; skipping to avoid compile errors)

@@ -1,0 +1,13 @@
+Index: ltp-20100630/testcases/kernel/controllers/Makefile
+===================================================================
+--- ltp-20100630.orig/testcases/kernel/controllers/Makefile	2010-08-18 10:57:54.000000000 +0700
++++ ltp-20100630/testcases/kernel/controllers/Makefile	2010-08-18 10:59:16.000000000 +0700
+@@ -27,7 +27,7 @@
+ INSTALL_TARGETS		:= *.sh
+ LIBDIR			:= libcontrollers
+ LIB			:= $(LIBDIR)/libcontrollers.a
+-FILTER_OUT_DIRS		:= $(LIBDIR)
++FILTER_OUT_DIRS		:= $(LIBDIR) cpuset
+ 
+ $(LIBDIR):
+ 	mkdir -p "$@"

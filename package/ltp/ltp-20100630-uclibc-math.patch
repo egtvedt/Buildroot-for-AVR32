@@ -1,0 +1,12 @@
+Index: ltp-20100630/testcases/misc/math/Makefile
+===================================================================
+--- ltp-20100630.orig/testcases/misc/math/Makefile	2010-08-18 14:22:01.000000000 +0700
++++ ltp-20100630/testcases/misc/math/Makefile	2010-08-18 14:22:29.000000000 +0700
+@@ -24,4 +24,7 @@
+ 
+ include $(top_srcdir)/include/mk/env_pre.mk
+ 
++# Won't compile due to undeclared variables
++FILTER_OUT_DIRS		:= float
++
+ include $(top_srcdir)/include/mk/generic_trunk_target.mk

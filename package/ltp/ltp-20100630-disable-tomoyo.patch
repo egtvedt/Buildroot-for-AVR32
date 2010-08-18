@@ -1,0 +1,14 @@
+Index: ltp-20100630/testcases/kernel/security/Makefile
+===================================================================
+--- ltp-20100630.orig/testcases/kernel/security/Makefile	2010-08-18 11:01:38.000000000 +0700
++++ ltp-20100630/testcases/kernel/security/Makefile	2010-08-18 11:02:31.000000000 +0700
+@@ -51,6 +51,9 @@
+ endif
+ endif
+ 
++# uClibc doesn't have canonicalize_file_name
++FILTER_OUT_DIRS		+= tomoyo
++
+ OPT_CFLAGS		+= -O
+ DEBUG_LDFLAGS		+= -s
+ 
