@@ -5,16 +5,16 @@ comment "GCC Options"
 choice
 	prompt "GCC compiler Version"
 	default BR2_GCC_VERSION_4_3_X if !BR2_avr32
-	default BR2_GCC_VERSION_4_2_2_AVR32_2_1_5 if BR2_avr32
+	default BR2_GCC_VERSION_4_2_4 if BR2_avr32
 	help
 	  Select the version of gcc you wish to use.
 
 	config BR2_GCC_VERSION_4_2_2_AVR32_2_1_5
+	       depends on BR2_DEPRECATED
 	       depends on BR2_avr32
 	       bool "gcc 4.2.2-avr32-2.1.5"
 
 	config BR2_GCC_VERSION_4_2_4
-		depends on !BR2_avr32
 		bool "gcc 4.2.4"
 
 	config BR2_GCC_VERSION_4_3_X
