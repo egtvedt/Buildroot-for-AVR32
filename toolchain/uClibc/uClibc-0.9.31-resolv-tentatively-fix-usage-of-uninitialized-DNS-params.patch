@@ -1,0 +1,40 @@
+From eda86005f81342094c211ba13c8128afcff98f5d Mon Sep 17 00:00:00 2001
+From: Denys Vlasenko <vda.linux@googlemail.com>
+Date: Fri, 9 Apr 2010 23:17:34 +0200
+Subject: [PATCH] resolv: tentatively fix usage of uninitialized DNS parameters
+
+See "Possible regression from timeout commit for resolv.conf" thread.
+Also remove superfluous NULL check.
+
+Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
+---
+ libc/inet/resolv.c |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/libc/inet/resolv.c b/libc/inet/resolv.c
+index 9459199..84289a6 100644
+--- a/libc/inet/resolv.c
++++ b/libc/inet/resolv.c
+@@ -905,8 +905,8 @@ __UCLIBC_MUTEX_INIT(__resolv_lock, PTHREAD_MUTEX_INITIALIZER);
+ /* Protected by __resolv_lock */
+ void (*__res_sync)(void);
+ /*uint32_t __resolv_opts; */
+-uint8_t __resolv_timeout;
+-uint8_t __resolv_attempts;
++uint8_t __resolv_timeout = RES_TIMEOUT;
++uint8_t __resolv_attempts = RES_DFLRETRY;
+ unsigned __nameservers;
+ unsigned __searchdomains;
+ sockaddr46_t *__nameserver;
+@@ -1062,8 +1062,6 @@ void attribute_hidden __open_nameservers(void)
+ 				if (p == NULL || (p1 = strchr(p, ':')) == NULL)
+ 					continue;
+ 				*p1++ = '\0';
+-				if (p1 == NULL)
+-					continue;
+ 				if (strcmp(p, "timeout") == 0)
+ 					what = &__resolv_timeout;
+ 				else if (strcmp(p, "attempts") == 0)
+-- 
+1.7.0.4
+
