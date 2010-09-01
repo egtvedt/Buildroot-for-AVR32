@@ -138,7 +138,7 @@ $(DL_DIR)/$(GCC_SOURCE):
 	mkdir -p $(DL_DIR)
 	$(call DOWNLOAD,$(GCC_SITE),$(GCC_SOURCE))
 
-gcc-unpacked: $(GCC_DIR)/.patched
+gcc-unpacked: $(GCC_DIR)/.unpacked
 $(GCC_DIR)/.unpacked: $(DL_DIR)/$(GCC_SOURCE)
 	mkdir -p $(TOOLCHAIN_DIR)
 	rm -rf $(GCC_DIR)
