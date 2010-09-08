@@ -13,6 +13,7 @@ backup:x:34:
 operator:x:37:
 utmp:x:43:
 staff:x:50:
+dnsmasq:x:52:
 haldaemon:x:68:
 dbus:x:81:
 netdev:x:82:
