@@ -1,5 +1,10 @@
 menu "Target options"
 
+# Boards may select this to remove some features that are only useful on
+# targets that have a virtual console.
+config BR2_BOARD_IS_HEADLESS
+	bool
+
 comment "Preset Devices"
 
 source "target/device/ARMLTD/Config.in"
