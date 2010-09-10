@@ -28,7 +28,7 @@ $(CCACHE_DIR1)/.patched: $(CCACHE_DIR1)/.unpacked
 	#	when using the default cache dir location.
 	$(SED) "s,getenv(\"CCACHE_DIR\"),\"$(BR2_CCACHE_DIR)\",g" \
 		$(CCACHE_DIR1)/ccache.c
-	mkdir -p $(CCACHE_DIR1)/cache
+	mkdir -p $(BR2_CCACHE_DIR)
 	$(CONFIG_UPDATE) $(@D)
 	touch $@
 
