@@ -1,0 +1,14 @@
+diff --git a/arch/avr32/boot/u-boot/head.S b/arch/avr32/boot/u-boot/head.S
+index 4488fa2..90b31b1 100644
+--- a/arch/avr32/boot/u-boot/head.S
++++ b/arch/avr32/boot/u-boot/head.S
+@@ -56,5 +56,8 @@ end_addr:
+ 
+ no_tag_table:
+ 	sub	r12, pc, (. - 2f)
+-	bral	panic
++	lddpc	pc, .Lpanic
+ 2:	.asciz	"Boot loader didn't provide correct magic number\n"
++	.align	2
++.Lpanic:
++	.long	panic

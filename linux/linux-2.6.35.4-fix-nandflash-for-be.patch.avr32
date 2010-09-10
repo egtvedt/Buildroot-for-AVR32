@@ -1,0 +1,39 @@
+From 710912546aa8e6d711effe9ca72fab9d57cfc62d Mon Sep 17 00:00:00 2001
+From: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+Date: Mon, 7 Dec 2009 19:21:07 +0100
+Subject: [PATCH 1/2] nand_base: do not cast cpu_to_le16 when reading from 16-bit devices
+
+The cast cpu_to_le16 on big endian architectures seems to be wrong. A simple
+removal of these casts makes 16-bit NAND flash usable on big endian
+architecture.
+
+Signed-off-by: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+---
+ drivers/mtd/nand/nand_base.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mtd/nand/nand_base.c b/drivers/mtd/nand/nand_base.c
+index 2957cc7..cc7e0f2 100644
+--- a/drivers/mtd/nand/nand_base.c
++++ b/drivers/mtd/nand/nand_base.c
+@@ -151,7 +151,7 @@ static uint8_t nand_read_byte(struct mtd_info *mtd)
+ static uint8_t nand_read_byte16(struct mtd_info *mtd)
+ {
+ 	struct nand_chip *chip = mtd->priv;
+-	return (uint8_t) cpu_to_le16(readw(chip->IO_ADDR_R));
++	return (uint8_t)readw(chip->IO_ADDR_R);
+ }
+ 
+ /**
+@@ -332,7 +332,7 @@ static int nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
+ 	if (chip->options & NAND_BUSWIDTH_16) {
+ 		chip->cmdfunc(mtd, NAND_CMD_READOOB, chip->badblockpos & 0xFE,
+ 			      page);
+-		bad = cpu_to_le16(chip->read_word(mtd));
++		bad = chip->read_word(mtd);
+ 		if (chip->badblockpos & 0x1)
+ 			bad >>= 8;
+ 		if ((bad & 0xFF) != 0xff)
+-- 
+1.6.3.3
+
