@@ -6,12 +6,10 @@ ATMEL_PATH:=target/device/Atmel
 BOARD_NAME:=$(call qstrip,$(BR2_BOARD_NAME))
 BOARD_PATH:=$(call qstrip,$(BR2_BOARD_PATH))
 
+ifneq ($(BR2_avr32),y)
 ATMEL_TARGET:=$(ATMEL_PATH)/root
 TARGET_SKELETON:=$(ATMEL_TARGET)/target_skeleton
 TARGET_SKELETON_LINKS:=$(ATMEL_TARGET)/skel.tar.gz
-
-ifeq ($(BR2_avr32),y)
-KERNEL_HEADERS_PATCH_DIR=target/device/Atmel/arch-avr32/kernel-headers-2.6.28.2
 endif
 
 # Update things in board specific makefiles
