@@ -1,4 +1,18 @@
 ifeq ($(strip $(BR2_TARGET_AVR32_ATSTK1002)),y)
-UBOOT_BOARD_NAME:=atstk1002
-TARGET_SKELETON=$(BOARD_PATH)/target_skeleton
+TARGET_SKELETON_PATCH	:= $(BOARD_PATH)/skeleton
+
+# Do some dynamic modifications to the target image, possibly depending
+# on the configuration.
+.PHONY: atstk1000-fixups
+atstk1000-fixups: $(BUILD_DIR)/.root
+	# These are all symlinks to /tmp by default, which is a terrible
+	# idea...
+	for d in cache lock log pcmcia run spool; do		\
+		if [ -L $(TARGET_DIR)/var/$$d ]; then		\
+			rm -f $(TARGET_DIR)/var/$$d;		\
+			mkdir $(TARGET_DIR)/var/$$d;		\
+		fi;						\
+	done
+
+TARGETS	+= atstk1000-fixups
 endif

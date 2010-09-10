@@ -1,0 +1,5 @@
+# /etc/fstab: static file system information.
+#
+# <file system>		<mount pt>	<type>	<options>	<dump>	<pass>
+mtd:root		/		jffs2	defaults	0	0
+mtd:spi0.0-AT45DB642x	/usr		jffs2	defaults	0	0
