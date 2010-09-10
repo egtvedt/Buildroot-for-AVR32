@@ -59,6 +59,13 @@ config BR2_PACKAGE_BUSYBOX_FULLINSTALL
 
 	  If you wish to just install /bin/busybox, then answer N.
 
+config BR2_PACKAGE_BUSYBOX_HTTPD
+	bool "Enable BusyBox's built-in web server"
+	default n
+	help
+	  If you want to enable BusyBox's own lightweight web server,
+	  answer Y here. It will be launched automatically at startup.
+
 config BR2_PACKAGE_BUSYBOX_CONFIG
 	string "BusyBox configuration file to use?"
 	default "package/busybox/busybox-1.17.x.config" if BR2_PACKAGE_BUSYBOX_SNAPSHOT
