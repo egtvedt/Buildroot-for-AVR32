@@ -1,0 +1,9 @@
+#! /bin/sh
+
+# Just run a hardcoded shutdown sequence for now. Don't bother shutting
+# down networking; it might cause boards running off NFSroot to get
+# stuck when rebooting.
+/usr/bin/killall -TERM klogd
+/usr/bin/killall -TERM syslogd
+/bin/umount -a -r
+/sbin/swapoff -a

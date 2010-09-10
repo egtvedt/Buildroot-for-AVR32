@@ -1,0 +1,4 @@
+#! /bin/sh
+
+echo Enabling USB CDC composite gadget...
+/sbin/modprobe g_cdc dev_addr=a2:9e:e1:56:9c:f4 host_addr=0a:9c:46:a8:42:2d
