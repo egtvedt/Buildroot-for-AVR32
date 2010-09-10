@@ -29,6 +29,7 @@ ifeq ($(BR2_INET_IPV6),y)
 else
 	rm -f $(TARGET_DIR)/usr/lib/libip6tc.*
 endif
+	$(INSTALL) -m 0755 package/iptables/iptables.sysvinit $(TARGET_DIR)/etc/init.d/S46iptables
 	touch $@
 
 $(IPTABLES_TARGET_UNINSTALL):
