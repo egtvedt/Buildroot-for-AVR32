@@ -78,6 +78,7 @@ else
 	toolchain/patch-kernel.sh $(@D) $(dir $(LINUX26_PATCH)) $(notdir $(LINUX26_PATCH))
 endif
 endif
+	toolchain/patch-kernel.sh $(@D) linux linux-$(LINUX26_VERSION)\*.patch linux-$(LINUX26_VERSION)\*.patch.$(ARCH)
 	$(Q)touch $@
 
 
