@@ -5,6 +5,7 @@ comment "AVR32 packages"
 source "package/avr32-bootsplash/Config.in"
 source "package/avr32-web-start/Config.in"
 source "package/avr32-wiki-docs/Config.in"
+source "package/system-upgrade/Config.in"
 # AVR32 Studio exported package
 comment "Packages"
 endif

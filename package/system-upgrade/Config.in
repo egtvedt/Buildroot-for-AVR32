@@ -1,0 +1,13 @@
+config BR2_PACKAGE_SYSTEM_UPGRADE
+	bool "System Upgrade Utility"
+	help
+	  This is a utility for doing automated upgrades of the on-board
+	  flash filesystem.
+
+config BR2_PACKAGE_SYSTEM_UPGRADE_BOARD_NAME
+	depends on BR2_PACKAGE_SYSTEM_UPGRADE
+	string "Board name for system-upgrade"
+	help
+	  The name of the board for which to build the system-upgrade
+	  utility. This affects the image path on the SD card, the
+	  default environment variables, partitioning, etc.

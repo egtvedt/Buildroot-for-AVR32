@@ -1,0 +1,33 @@
+#! /bin/sh
+
+IMAGE_PATH=@IMAGE_PATH@
+UPGRADE_DEV=/dev/mmcblk0p1
+
+# Wait until upgrade medium is available
+if [ ! -b $UPGRADE_DEV ]; then
+	echo Please insert upgrade card into $UPGRADE_DEV
+	while [ ! -b $UPGRADE_DEV ]; do
+		sleep 1
+	done
+fi
+
+# Mount upgrade medium
+mkdir -p /mnt
+mount -tvfat -ocodepage=437 $UPGRADE_DEV /mnt || exit 1
+
+echo Verifying images...
+if [ -r $IMAGE_PATH/md5sums ]; then
+	cd $IMAGE_PATH
+	if md5sum -c $IMAGE_PATH/md5sums; then
+		echo All images are OK, proceeding with upgrade...
+	else
+		echo Image integrity check FAILED, aborting upgrade.
+		exit 1
+	fi
+	cd /
+else
+	echo MD5 sums not available, skipping integrity check
+fi
+
+# Start the upgrade and reboot if successful.
+/sbin/system-upgrade && /bin/umount /mnt && /sbin/reboot
