@@ -1,0 +1,16 @@
+#! /bin/sh
+
+FBV=/usr/bin/fbv
+SPLASHFILE=/etc/finalsplash.jpg
+
+echo -n "Splash image: "
+if [ -x $FBV ] && [ -f $SPLASHFILE ]; then
+	$FBV --enlarge $SPLASHFILE >/dev/null &
+	if [ $? -eq 0 ]; then
+		echo loaded
+	else
+		echo failed
+	fi
+else
+	echo missing
+fi

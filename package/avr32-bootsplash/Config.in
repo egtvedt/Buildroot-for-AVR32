@@ -1,0 +1,7 @@
+config BR2_PACKAGE_AVR32_BOOTSPLASH
+	bool "avr32-bootsplash"
+	select BR2_PACKAGE_FBV
+	help
+	  This package shows a splash image on the LCD screen while
+	  booting, and a different splash image when the target is
+	  ready.
