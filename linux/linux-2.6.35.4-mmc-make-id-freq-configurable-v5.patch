@@ -1,0 +1,64 @@
+From e60f8513415368afa13e47e2db7e761c3e2b6740 Mon Sep 17 00:00:00 2001
+From: Hein_Tibosch <hein_tibosch@yahoo.es>
+Date: Thu, 16 Sep 2010 09:19:55 +0200
+Subject: [PATCH 2/2] mmc: make id freq configurable v5
+
+Matt, Chris,
+
+Thanks both for reviewing.
+
+I never noticed that the host wasn't released because my f_min was low
+enough so that all frequencies would be tried.  But yes, you're both
+right.
+
+Before somebody else makes the remark: "unsigned freqs[]" can be declared as
+const.
+
+Below, I changed the order of the if/else/else, and whenever no more
+frequencies can be tried, it will release the host before branching out.
+
+Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
+Reviewed-and-Tested-by: Chris Ball <cjb@laptop.org>
+Cc: Matt Fleming <matt@console-pimps.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+ drivers/mmc/core/core.c |   13 ++++++++-----
+ 1 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d622a7e..526d53f 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1053,7 +1053,7 @@ void mmc_rescan(struct work_struct *work)
+ 	u32 ocr;
+ 	int err;
+ 	int i;
+-	unsigned freqs[] = { 400000, 300000, 200000, 100000 };
++	const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+ 
+ 	mmc_bus_get(host);
+ 
+@@ -1088,12 +1088,15 @@ void mmc_rescan(struct work_struct *work)
+ 
+ 		if (freqs[i] >= host->f_min)
+ 			host->f_init = freqs[i];
+-		else if (i && freqs[i-1] <= host->f_min)
+-			goto out;
+-		else
++		else if (!i || freqs[i-1] > host->f_min)
+ 			host->f_init = host->f_min;
++		else {
++			mmc_release_host(host);
++			goto out;
++		}
++		pr_info("%s: %s: trying to init card at %u Hz\n",
++			mmc_hostname(host), __func__, host->f_init);
+ 
+-		printk ("mmc_rescan: trying %u Hz\n", host->f_init);
+ 		mmc_power_up(host);
+ 		sdio_reset(host);
+ 		mmc_go_idle(host);
+-- 
+1.7.0.4
+
