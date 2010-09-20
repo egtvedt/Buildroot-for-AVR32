@@ -3,7 +3,7 @@
 # proftpd
 #
 #############################################################
-PROFTPD_VERSION:=1.3.1
+PROFTPD_VERSION:=1.3.3b
 PROFTPD_SOURCE:=proftpd-$(PROFTPD_VERSION).tar.bz2
 PROFTPD_SITE:=ftp://ftp.proftpd.org/distrib/source/
 PROFTPD_DIR:=$(BUILD_DIR)/proftpd-$(PROFTPD_VERSION)
