@@ -26,6 +26,10 @@ else
 	ln -sf ../cgi-bin/gpio.sh $(TARGET_DIR)/www/src/gpio.sh
 	ln -sf ../cgi-bin/gpio-trigger.sh $(TARGET_DIR)/www/src/gpio-trigger.sh
 endif
+ifneq ($(strip $(BR2_PACKAGE_AVR32_WIKI_DOCS)),y)
+	$(SED) 's/\%AVR32_WIKI_DOCS_ENABLED_BEGIN\% -->/AVR32_WIKI_DOCS_DISABLED/' $(TARGET_DIR)/www/$(AVR32_WEB_START_TARGET)
+	$(SED) 's/<!-- \%AVR32_WIKI_DOCS_ENABLED_END\%/AVR32_WIKI_DOCS_DISABLED/' $(TARGET_DIR)/www/$(AVR32_WEB_START_TARGET)
+endif
 # Swat is not enabled as a service out of the box when installed, reinstate
 # enabling/disabling Swat once it is actually running when installed to target.
 	$(SED) 's/\%SWAT_ENABLED_BEGIN\% -->/SWAT_DISABLED/' $(TARGET_DIR)/www/$(AVR32_WEB_START_TARGET)
