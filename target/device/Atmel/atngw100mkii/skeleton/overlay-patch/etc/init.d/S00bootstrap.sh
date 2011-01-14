@@ -35,6 +35,12 @@ fi
 /bin/touch /var/log/messages
 /bin/chmod 0600 /var/log/messages
 
+# Make LEDs accessible for all users
+if [ -d /sys/class/leds ]; then
+	chmod 0666 /sys/class/leds/*/brightness
+	chmod 0666 /sys/class/leds/*/trigger
+fi
+
 # Don't show informational and debug messages on the console. They can
 # still be retrieved with 'dmesg' and found in /var/log
 /bin/dmesg -n6
