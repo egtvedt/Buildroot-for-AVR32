@@ -334,7 +334,11 @@ dirs: $(DL_DIR) $(TOOLCHAIN_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
 $(BASE_TARGETS): dirs
 
 world: dependencies dirs $(BASE_TARGETS) $(TARGETS_ALL)
-
+	@$(call MESSAGE,"Build completed successfully")
+	@echo
+	@echo "Generated root filesystem images, bootloader and Linux kernel are located in"
+	@echo "$(BINARIES_DIR)"
+	@echo
 
 .PHONY: all world dirs clean distclean source \
 	$(BASE_TARGETS) $(TARGETS) $(TARGETS_ALL) \
